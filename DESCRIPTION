@@ -1,0 +1,14 @@
+Package: rbokeh
+Title: R Interface for Bokeh
+Version: 0.1
+Authors@R: "Ryan Hafen <rhafen@gmail.com> [aut, cre]"
+Description: R interface for Bokeh
+Depends:
+    R (>= 3.1.1)
+License: MIT + file LICENSE
+LazyData: true
+Imports:
+    htmlwidgets,
+    methods
+Suggests:
+    testthat
