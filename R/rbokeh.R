@@ -13,25 +13,42 @@ fillPropNames <- c("fill_color", "fill_alpha")
 ## but here's some additional info about each
 ## lp = does this glyph have line properties?
 ## fp = does this glyph have fill properties?
-
+## tp = does this glyph have text properties?
 glyphProps <- list(
   ###### markers ######
-  asterisk = list(lp = TRUE, fp = FALSE),
-  circle = list(lp = TRUE, fp = TRUE ),
-  circle_cross = list(lp = TRUE, fp = TRUE ),
-  circle_x = list(lp = TRUE, fp = TRUE ),
-  cross = list(lp = TRUE, fp = FALSE ),
-  diamond = list(lp = TRUE, fp = TRUE ),
-  diamond_cross = list(lp = TRUE, fp = TRUE ),
-  inverted_triangle = list(lp = TRUE, fp = TRUE),
-  square = list(lp = TRUE, fp = TRUE ),
-  square_cross = list(lp = TRUE, fp = TRUE ),
-  square_x = list(lp = TRUE, fp = TRUE ),
-  triangle = list(lp = TRUE, fp = TRUE ),
-  x = list(lp = TRUE, fp = TRUE ),
+  asterisk = list(lp = TRUE, fp = FALSE, tp = FALSE),
+  circle = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  circle_cross = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  circle_x = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  cross = list(lp = TRUE, fp = FALSE, tp = FALSE),
+  diamond = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  diamond_cross = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  inverted_triangle = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  square = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  square_cross = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  square_x = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  triangle = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  x = list(lp = TRUE, fp = TRUE, tp = FALSE),
   ###### glyphs ######
-  line = list(lp = TRUE, fp = FALSE),
-  arc = list(lp = TRUE, fp = FALSE)
+  annular_wedge = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  annulus = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  arc = list(lp = TRUE, fp = FALSE, tp = FALSE),
+  bezier = list(lp = TRUE, fp = FALSE, tp = FALSE),
+  image = list(lp = FALSE, fp = FALSE, tp = FALSE),
+  image_rgba = list(lp = FALSE, fp = FALSE, tp = FALSE),
+  image_url = list(lp = FALSE, fp = FALSE, tp = FALSE),
+  line = list(lp = TRUE, fp = FALSE, tp = FALSE),
+  multi_line = list(lp = TRUE, fp = FALSE, tp = FALSE),
+  oval = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  patch = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  patches = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  quad = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  quadratic = list(lp = TRUE, fp = FALSE, tp = FALSE),
+  ray = list(lp = TRUE, fp = FALSE, tp = FALSE),
+  rect = list(lp = TRUE, fp = TRUE, tp = FALSE),
+  segment = list(lp = TRUE, fp = FALSE, tp = FALSE),
+  text = list(lp = FALSE, fp = FALSE, tp = TRUE),
+  wedge = list(lp = TRUE, fp = TRUE, tp = FALSE)
 )
 
 markerNames <- c("asterisk", "circle", "circle_cross", "circle_x", "cross", "diamond", "diamond_cross", "inverted_triangle", "square", "square_cross", "square_x", "triangle", "x")
