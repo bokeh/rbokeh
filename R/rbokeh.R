@@ -358,6 +358,11 @@ BokehFigure <- setRefClass("BokehFigure",
       ## add glyph type
       args$type <- type
 
+      ## fix spec for "text" glyph
+      if("text" %in% names(args)) {
+         args$text <- list(field = "text")
+      }
+
       .glyphSpecs[[name]] <<- args
       .glyphData[[name]] <<- data
 
