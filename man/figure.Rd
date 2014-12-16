@@ -3,25 +3,28 @@
 \alias{figure}
 \title{Start a Bokeh Figure}
 \usage{
-figure(dims = c(400, 400), title = character(0), xrange = numeric(0),
-  yrange = numeric(0), plot_width = numeric(0), plot_height = numeric(0),
-  x_axis_type = character(0), y_axis_type = character(0),
-  x_mapper_type = character(0), y_mapper_type = character(0),
-  background_fill = character(0), border_fill = character(0),
-  min_border = numeric(0), min_border_left = numeric(0),
-  min_border_right = numeric(0), min_border_top = numeric(0),
-  min_border_bottom = numeric(0), h_symmetry = logical(0),
-  v_symmetry = logical(0), outline_line_color = character(0),
-  xaxes = "below", yaxes = "left", tools = character(0))
+figure(width = 480, height = 480, title = character(0),
+  xlim = numeric(0), ylim = numeric(0), plot_width = numeric(0),
+  plot_height = numeric(0), x_axis_type = character(0),
+  y_axis_type = character(0), x_mapper_type = character(0),
+  y_mapper_type = character(0), background_fill = character(0),
+  border_fill = character(0), min_border = numeric(0),
+  min_border_left = numeric(0), min_border_right = numeric(0),
+  min_border_top = numeric(0), min_border_bottom = numeric(0),
+  h_symmetry = logical(0), v_symmetry = logical(0),
+  outline_line_color = character(0), xaxes = "below", yaxes = "left",
+  tools = character(0), theme = getOption("bokeh_theme"))
 }
 \arguments{
-\item{dims}{figure dimensions}
+\item{width}{figure width in pixels}
+
+\item{height}{figure width in pixels}
 
 \item{title}{a title to display above the plot. - "title" is also the prefix for a set of Text Properties, so you can set the font for the title with the parameter text_font.}
 
-\item{xrange}{the extent of the plotting area in the x-dimension.}
+\item{xlim}{the extent of the plotting area in the x-dimension (will be computed automatically if not specified).}
 
-\item{yrange}{the extent of the plotting area in the y-dimension.}
+\item{ylim}{the extent of the plotting area in the y-dimension (will be computed automatically if not specified).}
 
 \item{plot_width,plot_height}{width and height of the entire plot in pixels, including border space}
 
@@ -52,6 +55,8 @@ figure(dims = c(400, 400), title = character(0), xrange = numeric(0),
 \item{yaxes}{where to put y axis labels}
 
 \item{tools}{interactivity tools options}
+
+\item{theme}{an rbokeh theme to use (tableau by default)}
 }
 \description{
 Start a Bokeh Figure
