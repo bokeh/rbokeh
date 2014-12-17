@@ -1,6 +1,11 @@
 Version 0.1
 ----------------------------------------------------------------------
 
+- add `data` argument to several glyph functions
+- add `elements` data set for plotting periodic table
+- add checking for spefication of options that are not used
+- fix handling of pch and associated options
+- remove individual marker methods - all accessible through `points()`
 - `hist` method to show example of higher-level stat plots using glyphs
 - Automatic calculation for continuous and categorical scales
 - Basic color theme for adding components to figures

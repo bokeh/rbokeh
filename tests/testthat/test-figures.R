@@ -2,6 +2,155 @@
 ## add more tests for categorical axes
 ## add more tests for adding glyphs with different axis types
 
+SHOW_PLOTS <- FALSE
+# SHOW_PLOTS <- TRUE
+
+getResult <- function(x) {
+  if(SHOW_PLOTS) {
+    x
+  } else {
+    invisible(x)
+  }
+}
+
+test_that("markers", {
+  alpha <- c(6:2) / 10
+  colors <- c("pink", "orange", "red", "blue", "green")
+  xr <- yr <- c(0, 6)
+
+  ### asterisk
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "asterisk",
+    col = colors, size = seq(12, 40, length = 5),
+    lwd = c(2:6) / 2)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### circle (no radius)
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "circle",
+    size = seq(12, 40, length = 5),
+    col = colors, bg = colors, fill_alpha = 0.5)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### circle_cross
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "circle_cross",
+    size = seq(12, 40, length = 5),
+    col = colors, bg = colors, fill_alpha = 0.5)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### circle_x
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "circle_x",
+    size = seq(12, 40, length = 5),
+    col = colors, bg = colors, fill_alpha = 0.5)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### cross
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "cross",
+    size = seq(12, 40, length = 5),
+    lwd = 3, col = colors)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### diamond
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "diamond",
+    size = seq(12, 40, length = 5),
+    col = colors, bg = colors, fill_alpha = 0.5)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### diamond_cross
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "diamond_cross",
+    size = seq(12, 40, length = 5),
+    col = colors, bg = colors, fill_alpha = 0.5)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### inverted_triangle
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "inverted_triangle",
+    size = seq(12, 40, length = 5),
+    col = colors, bg = colors, fill_alpha = 0.5)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### square
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "square",
+    size = seq(12, 40, length = 5),
+    col = colors, bg = colors, fill_alpha = 0.5)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### square_cross
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "square_cross",
+    size = seq(12, 40, length = 5),
+    col = colors,
+    bg = colors, fill_alpha = 0.5)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### square_x
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "square_x",
+    size = seq(12, 40, length = 5),
+    col = colors, bg = colors, fill_alpha = 0.5)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### triangle
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "triangle",
+    size = seq(12, 40, length = 5),
+    col = colors, bg = colors, fill_alpha = 0.5)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+
+  ### x
+  a <- figure(xlim = xr, ylim = yr)
+  a$points(x = 1:5, y = 5:1, type = "x",
+    size = seq(12, 40, length = 5),
+    col = colors, lwd = c(2:6) / 2)
+  getResult(a$show())
+
+  a$xlim <- a$ylim <- NULL
+  getResult(a$show())
+})
+
+
 test_that("glyphs", {
   alpha <- c(6:2) / 10
   colors <- c("pink", "orange", "red", "blue", "green")
@@ -14,10 +163,10 @@ test_that("glyphs", {
     inner_radius = 0.3, outer_radius = 0.7,
     fill_color = colors, fill_alpha = alpha, 
     line_color = colors)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### annulus
   a <- figure(xlim = xr, ylim = yr)
@@ -26,94 +175,30 @@ test_that("glyphs", {
     outer_radius = 0.8,
     fill_color = colors, line_color = colors, 
     fill_alpha = alpha)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### arc
   a <- figure(xlim = xr, ylim = yr)
   a$arc(x = 1:5, y = 5:1, 
     start_angle = 0, end_angle = c(1.5, 2, 2.5, 3.0, 4.5),
     line_color = colors, line_width = 1:5, radius = 0.5)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
-
-  ### asterisk
-  a <- figure(xlim = xr, ylim = yr)
-  a$asterisk(x = 1:5, y = 5:1, 
-    size = seq(12, 40, length = 5),
-    line_width = c(2:6) / 2, line_color = colors)
-  invisible(a$show())
-
-  a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### bezier
   a <- figure(xlim = xr, ylim = yr)
   a$bezier(x0 = 1:5, x1 = 2:6, y0 = 5:1, y1 = 5:1, 
     cx0 = 1:5, cy0 = rep(6, 5), cx1 = 4, cy1 = rep(6, 5), 
     line_width = 2, line_color = colors)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
-
-  ### circle (no radius)
-  a <- figure(xlim = xr, ylim = yr)
-  a$circle(x = 1:5, y = 5:1, 
-    size = seq(12, 40, length = 5),
-    line_color = colors,
-    fill_color = colors, fill_alpha = 0.5)
-  invisible(a$show())
-
-  a$xlim <- a$ylim <- NULL
-  invisible(a$show())
-
-  ### circle_cross
-  a <- figure(xlim = xr, ylim = yr)
-  a$circle_cross(x = 1:5, y = 5:1, 
-    size = seq(12, 40, length = 5),
-    line_color = colors,
-    fill_color = colors, fill_alpha = 0.5)
-  invisible(a$show())
-
-  a$xlim <- a$ylim <- NULL
-  invisible(a$show())
-
-  ### circle_x
-  a <- figure(xlim = xr, ylim = yr)
-  a$circle_x(x = 1:5, y = 5:1, 
-    size = seq(12, 40, length = 5),
-    line_color = colors,
-    fill_color = colors, fill_alpha = 0.5)
-  invisible(a$show())
-
-  a$xlim <- a$ylim <- NULL
-  invisible(a$show())
-
-  ### cross
-  a <- figure(xlim = xr, ylim = yr)
-  a$cross(x = 1:5, y = 5:1, 
-    size = seq(12, 40, length = 5),
-    line_width = 3, line_color = colors)
-  invisible(a$show())
-
-  a$xlim <- a$ylim <- NULL
-  invisible(a$show())
-
-  ### diamond
-  a <- figure(xlim = xr, ylim = yr)
-  a$diamond(x = 1:5, y = 5:1, 
-    size = seq(12, 40, length = 5),
-    line_color = colors,
-    fill_color = colors, fill_alpha = 0.5)
-  invisible(a$show())
-
-  a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### image
   N <- 300
@@ -124,31 +209,20 @@ test_that("glyphs", {
   a$image(x = 0, y = 0, dw = 10, dh = 10,
     image = d, rows = N, cols = N,
     palette = "Spectral-10")
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
-
-  ### inverted_triangle
-  a <- figure(xlim = xr, ylim = yr)
-  a$inverted_triangle(x = 1:5, y = 5:1, 
-    size = seq(12, 40, length = 5),
-    line_color = colors,
-    fill_color = colors, fill_alpha = 0.5)
-  invisible(a$show())
-
-  a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### line
   a <- figure(xlim = xr, ylim = yr)
   a$line(x = 1:5, y = c(4, 5, 3, 5.5, 1), 
     line_color = "#43A2CA",
     line_dash = c(5, 2), line_width = 2)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### multi_line
   a <- figure(xlim = xr, ylim = yr)
@@ -159,10 +233,10 @@ test_that("glyphs", {
     line_width = c(1, 1.5, 2, 2.5, 3),
     line_color = colors,
     line_dash = c(5, 2))
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### oval
   a <- figure(xlim = xr, ylim = yr)
@@ -170,20 +244,20 @@ test_that("glyphs", {
     angle = c(1:5) / 5, width = c(1:5) / 5,
     height = c(5:1) / 5, line_color = colors,
     fill_color = colors, fill_alpha = alpha)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### patch
   a <- figure(xlim = xr, ylim = yr)
   a$patch(x = 1:5, y = c(4, 5, 3, 5.5, 1), 
     line_width = 2, line_dash = c(5, 2, 5, 6),
     line_color = "#2C7FB8", fill_color = "#7FCDBB")
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### patches
   a <- figure(xlim = xr, ylim = yr)
@@ -194,10 +268,10 @@ test_that("glyphs", {
     line_width = 2, line_dash = c(5, 2),
     fill_alpha = alpha, fill_color = colors,
     line_color = colors)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### quad
   a <- figure(xlim = xr, ylim = yr)
@@ -207,30 +281,30 @@ test_that("glyphs", {
     right = c(1.1, 2.4, 3.3, 4.4, 5.7),
     fill_alpha = alpha, fill_color = colors,
     line_color = colors)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### quadratic
   a <- figure(xlim = xr, ylim = yr)
   a$quadratic(x0 = 1:5, x1 = 2:6, y0 = 5:1, y1 = 5:1, 
     cx = 1:5, cy = rep(6, 5), 
     line_width = 2, line_color = colors)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### ray
   a <- figure(xlim = xr, ylim = yr)
   a$ray(x = 1:5, y = 5:1,
     angle = c(1:5) / 2, length = 30,
     line_width = 2, line_color = colors)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### rect
   a <- figure(xlim = xr, ylim = yr)
@@ -239,53 +313,20 @@ test_that("glyphs", {
     width = c(1:5) / 5, height = c(5:1) / 5,
     fill_alpha = alpha, 
     line_color = colors, fill_color = colors)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### segment
   a <- figure(xlim = xr, ylim = yr)
   a$segment(x0 = 1:5, x1 = 2:6, y0 = 5:1, 
     y1 = c(6, 4.8, 3.6, 2.4, 1.2), 
     line_width = 2, line_color = colors)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
-
-  ### square
-  a <- figure(xlim = xr, ylim = yr)
-  a$square(x = 1:5, y = 5:1, 
-    size = seq(12, 40, length = 5),
-    line_color = colors,
-    fill_color = colors, fill_alpha = 0.5)
-  invisible(a$show())
-
-  a$xlim <- a$ylim <- NULL
-  invisible(a$show())
-
-  ### square_cross
-  a <- figure(xlim = xr, ylim = yr)
-  a$square_cross(x = 1:5, y = 5:1, 
-    size = seq(12, 40, length = 5),
-    line_color = colors,
-    fill_color = colors, fill_alpha = 0.5)
-  invisible(a$show())
-
-  a$xlim <- a$ylim <- NULL
-  invisible(a$show())
-
-  ### square_x
-  a <- figure(xlim = xr, ylim = yr)
-  a$square_x(x = 1:5, y = 5:1, 
-    size = seq(12, 40, length = 5),
-    line_color = colors,
-    fill_color = colors, fill_alpha = 0.5)
-  invisible(a$show())
-
-  a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### text
   a <- figure(xlim = xr, ylim = yr)
@@ -293,21 +334,10 @@ test_that("glyphs", {
     text = c("foo", "bar", "baz", "hello", "world"),
     angle = c(1:5) / 10,
     text_color = colors)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
-
-  ### triangle
-  a <- figure(xlim = xr, ylim = yr)
-  a$triangle(x = 1:5, y = 5:1, 
-    size = seq(12, 40, length = 5),
-    line_color = colors,
-    fill_color = colors, fill_alpha = 0.5)
-  invisible(a$show())
-
-  a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 
   ### wedge
   a <- figure(xlim = xr, ylim = yr)
@@ -316,10 +346,10 @@ test_that("glyphs", {
     radius = 0.7,
     fill_color = colors, fill_alpha = alpha, 
     line_color = colors)
-  invisible(a$show())
+  getResult(a$show())
 
   a$xlim <- a$ylim <- NULL
-  invisible(a$show())
+  getResult(a$show())
 })
 
 
@@ -330,7 +360,7 @@ test_that("points with plotting characters", {
   p$points(rnorm(10), rnorm(10), pch = 2)
   p$points(rnorm(10), rnorm(10), pch = 3)
   p$points(rnorm(10), rnorm(10), pch = 4)
-  invisible(p$show())
+  getResult(p$show())
 
   p <- figure()
   p$points(rnorm(10), rnorm(10), pch = 21)
@@ -338,7 +368,7 @@ test_that("points with plotting characters", {
   p$points(rnorm(10), rnorm(10), pch = 23)
   p$points(rnorm(10), rnorm(10), pch = 24)
   p$points(rnorm(10), rnorm(10), pch = 25)
-  invisible(p$show())
+  getResult(p$show())
 })
 
 test_that("points with other options", {
@@ -348,14 +378,14 @@ test_that("points with other options", {
   p$points(rnorm(50), rnorm(50), pch = 23, alpha = 0.3)
   p$points(rnorm(50), rnorm(50), pch = 24, alpha = 0.3)
   p$points(rnorm(50), rnorm(50), pch = 25, alpha = 0.3)
-  invisible(p$show())
+  getResult(p$show())
 })
 
 test_that("points with bg colors", {
   p <- figure(height = 600, width = 600)
   p$points(rnorm(50), rnorm(50), pch = 21, bg = "blue", cex = 1.5)
   p$points(rnorm(50), rnorm(50), pch = 22, bg = "green", cex = 2)
-  invisible(p$show())
+  getResult(p$show())
 
   expect_equal(p$.glyphSpecs[[1]]$fill_color, "blue")
   expect_equal(p$.glyphSpecs[[2]]$fill_color, "green")
@@ -369,7 +399,7 @@ test_that("points with line colors", {
   p <- figure(height = 600, width = 600)
   p$points(rnorm(50), rnorm(50), pch = 21, col = "blue", cex = 1.5)
   p$points(rnorm(50), rnorm(50), pch = 22, col = "green", cex = 2)
-  invisible(p$show())
+  getResult(p$show())
 
   # check outline color (should match what was specified)
   expect_equal(p$.glyphSpecs[[1]]$line_color, "blue")
@@ -385,7 +415,7 @@ test_that("points with pch having no outline", {
   p <- figure(height = 600, width = 600)
   p$points(rnorm(50), rnorm(50), pch = 15, bg = "blue")
   p$points(rnorm(50), rnorm(50), pch = 16, bg = "green")
-  invisible(p$show())
+  getResult(p$show())
 
   expect_equal(p$.glyphSpecs[[1]]$line_color, NULL)
   expect_equal(p$.glyphSpecs[[2]]$line_color, NULL)
@@ -394,20 +424,20 @@ test_that("points with pch having no outline", {
 test_that("points with pch as text", {
   p <- figure(height = 600, width = 600)
   p$points(rnorm(50), rnorm(50), pch = "a")
-  invisible(p$show())
+  getResult(p$show())
 })
 
 test_that("points and lines together", {
   p <- figure()
   p$points(runif(10), runif(10))
   p$lines(c(0, 1), c(0, 1), col = "black", lty = 2)
-  invisible(p$show())
+  getResult(p$show())
 })
 
 test_that("lines with single vector input", {
   p <- figure()
   p$lines(rnorm(100))
-  invisible(p$show())
+  getResult(p$show())
 })
 
 test_that("lines with different lty", {
@@ -419,7 +449,7 @@ test_that("lines with different lty", {
   p$lines(rnorm(10), lty = 4, lwd = 2, alpha = 0.6)
   p$lines(rnorm(10), lty = 5, lwd = 2, alpha = 0.6)
   p$lines(rnorm(10), lty = 6, lwd = 2, alpha = 0.6)
-  invisible(p$show())
+  getResult(p$show())
 })
 
 test_that("lowess example", {
@@ -427,11 +457,11 @@ test_that("lowess example", {
   p <- figure()
   p$points(cars)
   p$lines(cars.lo, col = "black")
-  invisible(p$show())
+  getResult(p$show())
 
   h <- figure()
   h$hist(faithful$eruptions, breaks = 40)
-  invisible(h$show())
+  getResult(h$show())
 })
 
 
@@ -440,7 +470,7 @@ test_that("lowess example", {
 # a$line(x = letters[1:5], y = c(4, 5, 3, 5.5, 1), 
 #   line_color = "#43A2CA",
 #   line_dash = c(5, 2), line_width = 2)
-# invisible(a$show())
+# getResult(a$show())
 
 # # now try to add numeric x (should error)
 # a$points(x = 1:5, y = c(4, 5, 3, 5.5, 1), 
@@ -449,4 +479,4 @@ test_that("lowess example", {
 # # now add new categorical points
 # a$points(x = letters[2:6], y = c(4, 5, 3, 5.5, 1), 
 #   line_color = "#43A2CA")
-# invisible(a$show())
+# getResult(a$show())

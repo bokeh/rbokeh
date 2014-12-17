@@ -22,7 +22,8 @@ genGlyphName <- function(specNames) {
   name
 }
 
-getGlyphTypeRange <- function(x, y, assertX = NULL, assertY = NULL, glyph = "") {
+## get the axis type and range for x and y axes
+getGlyphAxisTypeRange <- function(x, y, assertX = NULL, assertY = NULL, glyph = "") {
   xAxisType <- getGlyphAxisType(x)
   yAxisType <- getGlyphAxisType(y)
 
@@ -85,70 +86,92 @@ getAllGlyphRange <- function(ranges, axisType = "numeric") {
   }
 }
 
+getPointGlyphType <- function(pch, type) {
+  ## pch overrides type
+  if(!is.null(pch) && !is.null(type)) {
+    type <- NULL
+    message("both 'pch' and 'type' were specified - honoring 'pch' over 'type'")
+  }
+  if(is.null(pch) && is.null(type))
+    type <- "circle"
 
-
-handlePch <- function(pch, n, col, bg, alpha, lwd, opts, theme) {
   if(length(pch) > 1) {
     message("'pch' must be a single value... using first element")
     pch <- pch[1]
   }
 
-  optNames <- names(opts)
+  ## if 'type' isn't specified, get type from pch
+  if(is.null(type)) {
+    # translate pch to type
+    if(is.numeric(pch)) {
+      pch <- as.integer(pch)
+      if(!pch %in% setdiff(0:25, c(11, 14)))
+        stop("'pch' must be a value from 0 to 25 (excluding 11 and 14", call. = FALSE)
+      type <- pchDict[[as.character(pch)]]$glyph
+    } else {
+      type <- "text"
+    }
+  }
 
-  if(is.numeric(pch)) {
-    pch <- as.integer(pch)
-    if(!pch %in% setdiff(0:25, c(11, 14)))
-      stop("'pch' must be a value from 0 to 25 (excluding 11 and 14", call. = FALSE)
+  if(!type %in% markerNames)
+    stop("type = '", type, "' is not supported.  Please choose from: ", paste(markerNames, collapse = ", "), call. = FALSE)
+
+  type
+}
+
+getPointOpts <- function(type, pch, n, col, bg, alpha, lwd, opts, theme) {
+
+  curGlyphProps <- glyphProps[[type]]
+
+  ## use line_color, line_width, etc. if specified
+  ## else use specified 'col' and 'bg'
+  ## otherwise turn to theme
+  ## currently, pick color from theme based on 
+  ## how many elements already exist in the plot
+  ## this can surely be given more thought
+  if(curGlyphProps$lp) {
+    if(!is.null(col))
+      opts$line_color <- col
+    if(is.null(opts$line_color))
+      opts$line_color <- theme$glyph[(n + 1) %% length(theme$glyph)]
+    if(!is.null(lwd))
+      opts$line_width <- lwd
+    if(is.null(opts$line_width))
+      opts$line_width <- 1
+    if(!is.null(alpha))
+      opts$line_alpha <- alpha
+  }
+
+  if(curGlyphProps$fp) {
+    if(!is.null(bg))
+      opts$fill_color <- bg
+    if(is.null(opts$fill_color)) {
+      if(curGlyphProps$lp) {
+        opts$fill_color <- reduceSaturation(opts$line_color)
+      } else {
+        opts$fill_color <- theme$glyph[(n + 1) %% length(theme$glyph)]
+      }
+    }
+    if(!is.null(alpha))
+      opts$fill_alpha <- alpha
+  }
+
+  ## if pch is specified, honor whether or not it has fill or line
+  if(!is.null(pch)) {
     pchProps <- pchDict[[as.character(pch)]]
-    type <- pchProps$glyph
-
-    ## use line_color, line_width, etc. if specified
-    ## else use specified 'col' and 'bg'
-    ## otherwise turn to theme
-    ## currently, pick color from theme based on 
-    ## how many elements already exist in the plot
-    ## this can surely be given more thought
-    if(pchProps$line) {
-      if(!is.null(col))
-        opts$line_color <- col
-      if(is.null(opts$line_color))
-        opts$line_color <- theme$glyph[(n + 1) %% length(theme$glyph)]
-      if(!is.null(lwd))
-        opts$line_width <- lwd
-      if(is.null(opts$line_width))
-        opts$line_width <- 1
-      if(!is.null(alpha))
-        opts$line_alpha <- alpha
-    } else {
-      ## remove line props (if any) from opts
-      if("line_color" %in% optNames) {
-        message("'pch' setting is overriding specification of line_color")
+    if(!is.null(pchProps)) {
+      if(!pchProps$line)
+        opts["line_color"] <- list(NULL)
+      if(!pchProps$fill) {
+        opts["fill_color"] <- list(NULL)
       }
-      opts["line_color"] <- list(NULL)
     }
+  }
 
-    if(pchProps$fill) {
-      if(!is.null(bg))
-        opts$fill_color <- bg
-      if(is.null(opts$fill_color)) {
-        if(pchProps$line) {
-          opts$fill_color <- reduceSaturation(opts$line_color)
-        } else {
-          opts$fill_color <- theme$glyph[(n + 1) %% length(theme$glyph)]
-        }
-      }
-      if(!is.null(alpha))
-        opts$fill_alpha <- alpha
-    } else {
-      ## remove fill props (if any) from opts
-      if("fill_color" %in% optNames) {
-        message("'pch' setting is overriding specification of fill_color")
-      }
-      opts["fill_color"] <- list(NULL)
-    }
-  } else if(is.character(pch)) {
-    type <- "text"
 
+  if(curGlyphProps$tp) {
+    if(!is.null(alpha))
+      opts$text_alpha <- alpha
     opts$text_align = "center"
     opts$text_baseline = "middle"
 
@@ -160,10 +183,33 @@ handlePch <- function(pch, n, col, bg, alpha, lwd, opts, theme) {
       opts$text_alpha <- alpha
   }
 
-  list(type = type, opts = opts)
+  opts
 }
 
-handleLty <- function(lty, n, lwd, ljoin, col, alpha, opts, theme) {
+## give a little warning if any options are specified that won't be used
+checkOpts <- function(opts, type) {
+  curGlyphProps <- glyphProps[[type]]
+
+  validOpts <- NULL
+  if(curGlyphProps$lp)
+    validOpts <- c(validOpts, linePropNames)
+  if(curGlyphProps$fp)
+    validOpts <- c(validOpts, fillPropNames)
+  if(curGlyphProps$tp)
+    validOpts <- c(validOpts, textPropNames)
+
+  if(length(opts) > 0) {
+    # only get names of opts that are not NULL
+    idx <- which(sapply(opts, function(x) !is.null(x)))
+    if(length(idx) > 0) {
+      notUsed <- setdiff(names(opts)[idx], validOpts)
+      if(length(notUsed) > 0)
+        message("note - arguments not used: ", paste(notUsed, collapse = ", "))    
+    }    
+  }
+}
+
+getLineOpts <- function(lty, n, lwd, ljoin, col, alpha, opts, theme) {
   lty <- as.character(lty)
   lty <- lty[1]
   if(!lty %in% names(ltyDict))
@@ -193,6 +239,15 @@ reduceSaturation <- function(col, factor = 0.5) {
   col2 <- do.call(rgb2hsv, structure(as.list(col2rgb(col)[,1]), names = c("r", "g", "b")))
   col2['s', ] <- col2['s', ] * factor  
   do.call(hsv, as.list(col2[,1]))
+}
+
+## get variables when specified as names of a data frame
+## and need to be deparsed and extracted
+getVarData <- function(data, var) {
+  tmp <- data[[paste(deparse(var), collapse = "")]]
+  if(is.null(tmp))
+    tmp <- eval(var)
+  tmp
 }
 
 ## handle different x, y input types

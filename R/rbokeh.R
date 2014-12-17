@@ -1,119 +1,3 @@
-# bokeh class
-
-# fields will be all of the options
-# fig$title <- "stuff"
-
-
-optionNames <- c("width", "height", "title","ylim","xlim","plot_width","plot_height","x_axis_type","y_axis_type","x_mapper_type","y_mapper_type","background_fill","border_fill","min_border","min_border_left","min_border_right","min_border_top","min_border_bottom","h_symmetry","v_symmetry","outline_line_color", "xaxes", "yaxes", "tools")
-## width and height map more naturally to R
-## equivalent in bokeh is dims = (width, height)
-## which we convert to just prior to plotting
-## similar for xrange (xlim in R) and yrange (ylim in R)
-
-linePropNames <- c("line_color", "line_width", "line_alpha", "line_join", "line_cap", "line_dash", "line_dash_offset")
-fillPropNames <- c("fill_color", "fill_alpha")
-
-## glyphs are simple enough we can get away with
-## not having formal classes for them
-## but here's some additional info about each
-## lp = does this glyph have line properties?
-## fp = does this glyph have fill properties?
-## tp = does this glyph have text properties?
-glyphProps <- list(
-  ###### markers ######
-  asterisk = list(lp = TRUE, fp = FALSE, tp = FALSE),
-  circle = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  circle_cross = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  circle_x = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  cross = list(lp = TRUE, fp = FALSE, tp = FALSE),
-  diamond = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  diamond_cross = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  inverted_triangle = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  square = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  square_cross = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  square_x = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  triangle = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  x = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  ###### glyphs ######
-  annular_wedge = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  annulus = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  arc = list(lp = TRUE, fp = FALSE, tp = FALSE),
-  bezier = list(lp = TRUE, fp = FALSE, tp = FALSE),
-  image = list(lp = FALSE, fp = FALSE, tp = FALSE),
-  image_rgba = list(lp = FALSE, fp = FALSE, tp = FALSE),
-  image_url = list(lp = FALSE, fp = FALSE, tp = FALSE),
-  line = list(lp = TRUE, fp = FALSE, tp = FALSE),
-  multi_line = list(lp = TRUE, fp = FALSE, tp = FALSE),
-  oval = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  patch = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  patches = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  quad = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  quadratic = list(lp = TRUE, fp = FALSE, tp = FALSE),
-  ray = list(lp = TRUE, fp = FALSE, tp = FALSE),
-  rect = list(lp = TRUE, fp = TRUE, tp = FALSE),
-  segment = list(lp = TRUE, fp = FALSE, tp = FALSE),
-  text = list(lp = FALSE, fp = FALSE, tp = TRUE),
-  wedge = list(lp = TRUE, fp = TRUE, tp = FALSE)
-)
-
-## list of conversions from R's "pch" to glyph / line / fill properties
-pchDict <- list(
-   "0" =  list(glyph = "square",            line = TRUE,  fill = FALSE),
-   "1" =  list(glyph = "circle",            line = TRUE,  fill = FALSE),
-   "2" =  list(glyph = "triangle",          line = TRUE,  fill = FALSE),
-   "3" =  list(glyph = "cross",             line = TRUE,  fill = FALSE),
-   "4" =  list(glyph = "x",                 line = TRUE,  fill = FALSE),
-   "5" =  list(glyph = "diamond",           line = TRUE,  fill = FALSE),
-   "6" =  list(glyph = "inverted_triangle", line = TRUE,  fill = FALSE),
-   "7" =  list(glyph = "square_x",          line = TRUE,  fill = FALSE),
-   "8" =  list(glyph = "asterisk",          line = TRUE,  fill = FALSE),
-   "9" =  list(glyph = "diamond_cross",     line = TRUE,  fill = FALSE),
-   "10" = list(glyph = "circle_cross",      line = TRUE,  fill = FALSE),
-   "12" = list(glyph = "square_cross",      line = TRUE,  fill = FALSE),
-   "13" = list(glyph = "circle_x",          line = TRUE,  fill = FALSE),
-   "15" = list(glyph = "square",            line = FALSE, fill = TRUE ),
-   "16" = list(glyph = "circle",            line = FALSE, fill = TRUE ),
-   "17" = list(glyph = "triangle",          line = FALSE, fill = TRUE ),
-   "18" = list(glyph = "diamond",           line = FALSE, fill = TRUE ),
-   "19" = list(glyph = "circle",            line = FALSE, fill = TRUE ),
-   "20" = list(glyph = "circle",            line = FALSE, fill = TRUE ),
-   "21" = list(glyph = "circle",            line = TRUE,  fill = TRUE ),
-   "22" = list(glyph = "square",            line = TRUE,  fill = TRUE ),
-   "23" = list(glyph = "diamond",           line = TRUE,  fill = TRUE ),
-   "24" = list(glyph = "triangle",          line = TRUE,  fill = TRUE ),
-   "25" = list(glyph = "inverted_triangle", line = TRUE,  fill = TRUE )
-)
-# 16, 19, 20 are the same
-# 11 and 14 are missing
-
-## list of conversions from R's "lty" to line_dash
-ltyDict <- list(
-  "1" = list(line_dash = NULL),
-  "2" = list(line_dash = c(8, 8)),
-  "3" = list(line_dash = c(2, 6)),
-  "4" = list(line_dash = c(2, 6, 8, 6)),
-  "5" = list(line_dash = c(14, 6)),
-  "6" = list(line_dash = c(12, 4, 4, 4)),
-  "solid" = list(line_dash = NULL),
-  "dashed" = list(line_dash = c(8, 8)),
-  "dotted" = list(line_dash = c(2, 6)),
-  "dotdash" = list(line_dash = c(2, 6, 8, 6)),
-  "longdash" = list(line_dash = c(14, 6)),
-  "twodash" = list(line_dash = c(12, 4, 4, 4))
-)
-
-## convert ljoin to line_cap
-ljoinDict <- list(
-  "1" = "round",
-  "2" = "mitre",
-  "3" = "bevel",
-  "round" = "round",
-  "mitre" = "mitre",
-  "bevel" = "bevel"
-)
-
-markerNames <- c("asterisk", "circle", "circle_cross", "circle_x", "cross", "diamond", "diamond_cross", "inverted_triangle", "square", "square_cross", "square_x", "triangle", "x")
-
 #' Start a Bokeh Figure
 #' 
 #' @param width figure width in pixels
@@ -213,60 +97,42 @@ BokehFigure <- setRefClass("BokehFigure",
     theme = "ANY"
   ),
   methods = list(
-    asterisk = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "asterisk", x, y, size, name = NULL, ...)
-    },
-    circle = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "circle", x, y, size, name = NULL, ...)
-    },
-    circle_cross = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "circle_cross", x, y, size, name = NULL, ...)
-    },
-    circle = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "circle", x, y, size, name = NULL, ...)
-    },
-    circle_x = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "circle_x", x, y, size, name = NULL, ...)
-    },
-    cross = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "cross", x, y, size, name = NULL, ...)
-    },
-    diamond = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "diamond_cross", x, y, size, name = NULL, ...)
-    },
-    diamond_cross = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "diamond_cross", x, y, size, name = NULL, ...)
-    },
-    inverted_triangle = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "inverted_triangle", x, y, size, name = NULL, ...)
-    },
-    square = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "square", x, y, size, name = NULL, ...)
-    },
-    square_cross = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "square_cross", x, y, size, name = NULL, ...)
-    },
-    square_x = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "square_x", x, y, size, name = NULL, ...)
-    },
-    triangle = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "triangle", x, y, size, name = NULL, ...)
-    },
-    x = function(x, y = NULL, col = NULL, bg = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, ...) {
-      .makeMarker(type = "x", x, y, size, name = NULL, ...)
-    },
     ## to mimic R's 'points()'
     ## (a single interface to all markers)
-    points = function(x, y = NULL, pch = 1, col = NULL, bg = NULL, alpha = NULL, lwd = 1, cex = 1, size = NULL, name = NULL, type = "circle", ...) {
-      xy <- getXYData(x, y)      
+    ##   - if 'type' is specified, it will override pch
+    ##   - '...' is all line / fill properties
+    ##   - 'col', 'bg', 'alpha', 'lwd' are R-like line / fill properties
+    ##   - but things like line_fill, etc. will override these
+    points = function(x, y = NULL, data = NULL, pch = 1, col = NULL, bg = NULL, alpha = NULL, lwd = NULL, cex = 1, size = NULL, name = NULL, type = NULL, ...) {
 
-      opts <- list(...)
-      if(!is.null(pch)) {
-        pchOpts <- handlePch(pch, n = length(.self$.glyphSpecs), col = col, bg = bg, alpha, lwd = lwd, opts = opts, theme = .self$theme)
-        type <- pchOpts$type
-        opts <- pchOpts$opts
+      if(!is.null(type))
+        pch <- NULL
+
+      ## deal with vector inputs from a data source
+      if(!is.null(data)) {
+        x     <- getVarData(data, substitute(x))
+        y     <- getVarData(data, substitute(y))
+        col   <- getVarData(data, substitute(col))
+        bg    <- getVarData(data, substitute(bg))
+        alpha <- getVarData(data, substitute(alpha))
+        size  <- getVarData(data, substitute(size))
+        cex   <- getVarData(data, substitute(cex))
       }
 
+      ## translate different x, y types to vectors
+      xy <- getXYData(x, y)
+
+      ## figure out what glyph type to use
+      if(is.character(pch)) {
+        type <- "text"
+      } else {
+        type <- getPointGlyphType(pch, type)
+      }
+
+      ## sort out pch, type, and line / fill properties
+      opts <- getPointOpts(type, pch, n = length(.self$.glyphSpecs), col = col, bg = bg, alpha, lwd = lwd, opts = list(...), theme = .self$theme)
+
+      ## handle size
       if(is.null(size))
         size <- 10
       if(!is.null(cex)) {
@@ -277,48 +143,46 @@ BokehFigure <- setRefClass("BokehFigure",
 
       if(type == "text") {
         if(is.null(pch))
-            stop("must specify 'pch' if calling points() with type = 'text'")
-        pch <- substr(pch, 1, 1)
-        if(!is.null(alpha))
-          opts$text_alpha <- alpha
-
-        do.call(.self$text, c(xy, opts, list(text = rep(pch, length(x)))))
+          stop("must specify 'pch' if calling points() with type = 'text'", call. = FALSE)
+        do.call(.self$text, c(xy, opts, list(text = rep(substr(pch, 1, 1), length(x)))))
       } else {
-        if(!type %in% markerNames)
-          stop("type = '", type, "' is not supported.  Please choose from: ", paste(markerNames, collapse = ", "), call. = FALSE)
-        do.call(.self$.makeMarker, c(xy, list(type = type, size = size, name = name), opts))
+        axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y, glyph = type)
+
+        .makeGlyph(type, name, 
+          data = c(xy, list(size = size)),
+          args = opts, axisTypeRange = axisTypeRange)
       }
     },
     annular_wedge = function(x, y, inner_radius = 0.3, outer_radius = 0.7, start_angle = 0, end_angle = 2*pi, direction = "anticlock", name = NULL, ...) {
       checkArcDirection(direction)
-      typeRange <- getGlyphTypeRange(x, y, assertX = "numeric", assertY = "numeric")
+      axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
       .makeGlyph(type = "annular_wedge", name = name,
         data = list(x = x, y = y, inner_radius = inner_radius, outer_radius = outer_radius, start_angle = start_angle, end_angle = end_angle, direction = direction),
-        args = list(...), typeRange = typeRange)
+        args = list(...), axisTypeRange = axisTypeRange)
     },
     annulus = function(x, y, 
       inner_radius = 0.3, outer_radius = 0.7, 
       name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(x, y, assertX = "numeric", assertY = "numeric")
+      axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
       .makeGlyph(type = "annulus", name = name,
         data = list(x = x, y = y, inner_radius = inner_radius, outer_radius = outer_radius),
-        args = list(...), typeRange = typeRange)
+        args = list(...), axisTypeRange = axisTypeRange)
     },
     arc = function(x, y, radius = 0.5, start_angle = 0, end_angle = 2*pi, direction = "anticlock", name = NULL, ...) {
       checkArcDirection(direction)
-      typeRange <- getGlyphTypeRange(x, y, assertX = "numeric", assertY = "numeric")
+      axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
       .makeGlyph(type = "arc", name = name,
         data = list(x = x, y = y, radius = radius, start_angle = start_angle, end_angle = end_angle, direction = direction),
-        args = list(...), typeRange = typeRange)
+        args = list(...), axisTypeRange = axisTypeRange)
     },
     bezier = function(x0, y0, x1, y1, cx0, cy0, cx1, cy1, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(c(x0, x1), c(y0, y1), assertX = "numeric", assertY = "numeric")
+      axisTypeRange <- getGlyphAxisTypeRange(c(x0, x1), c(y0, y1), assertX = "numeric", assertY = "numeric")
       .makeGlyph(type = "bezier", name = name,
         data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, cx0 = cx0, cy0 = cy0, cx1 = cx1, cy1 = cy1),
-        args = list(...), typeRange = typeRange)
+        args = list(...), axisTypeRange = axisTypeRange)
     },
     image = function(image, rows, cols, x = 0, y = 0, dw = 1, dh = 1, palette = "Spectral-10", name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(c(x, dw), c(y, dh), assertX = "numeric", assertY = "numeric")
+      axisTypeRange <- getGlyphAxisTypeRange(c(x, dw), c(y, dh), assertX = "numeric", assertY = "numeric")
 
       if(is.matrix(image)) {
         cols <- nrow(image)
@@ -327,124 +191,158 @@ BokehFigure <- setRefClass("BokehFigure",
       }
       .makeGlyph(type = "image", name = name,
         data = list(image = image, rows = rows, cols = cols, x = x, y = y, dw = dw, dh = dh, palette = palette),
-        args = list(...), typeRange = typeRange)
+        args = list(...), axisTypeRange = axisTypeRange)
     },
     image_rgba = function(image, rows, cols, x, y, dw, dh, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(c(x, dw), c(y, dh), assertX = "numeric", assertY = "numeric")
+      axisTypeRange <- getGlyphAxisTypeRange(c(x, dw), c(y, dh), assertX = "numeric", assertY = "numeric")
       .makeGlyph(type = "image", name = name,
         data = list(image = image, rows = rows, cols = cols, x = x, y = y, dw = dw, dh = dh),
-        args = list(...), typeRange = typeRange)
+        args = list(...), axisTypeRange = axisTypeRange)
     },
     image_url = function(x, y, url, angle = 0, name = NULL, ...) {
       # can this have "categorical" axes?
-      typeRange <- getGlyphTypeRange(x, y)
+      axisTypeRange <- getGlyphAxisTypeRange(x, y)
       .makeGlyph(type = "image_url", name = name,
         data = list(x = x, y = y, url = url, angle = angle),
-        args = list(...), typeRange = typeRange)
+        args = list(...), axisTypeRange = axisTypeRange)
     },
     line = function(x, y, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(x, y)
+      axisTypeRange <- getGlyphAxisTypeRange(x, y)
       .makeGlyph(type = "line", name = name,
-        data = list(x = x, y = y), args = list(...), typeRange = typeRange)
+        data = list(x = x, y = y), args = list(...), axisTypeRange = axisTypeRange)
     },
-    ## to match R
-    lines = function(x, y = NULL, lty = 1, lwd = 1, ljoin = 1, col = NULL, alpha = NULL, name = NULL, ...) {
+    ## to match R's lines
+    lines = function(x, y = NULL, data = NULL, lty = 1, lwd = 1, ljoin = 1, col = NULL, alpha = NULL, name = NULL, ...) {
+
+      if(!is.null(data)) {
+        x   <- getVarData(data, substitute(x))
+        y   <- getVarData(data, substitute(y))
+        col <- getVarData(data, substitute(col))
+      }
+
       xy <- getXYData(x, y)
 
-      opts <- list(...)
-
-      opts <- handleLty(lty, n = length(.self$.glyphSpecs), lwd = lwd, ljoin = ljoin, col = col, alpha = alpha, opts = opts, theme = .self$theme)
+      opts <- getLineOpts(lty, n = length(.self$.glyphSpecs), lwd = lwd, ljoin = ljoin, col = col, alpha = alpha, opts = list(...), theme = .self$theme)
 
       do.call(.self$line, c(xy, list(name = name), opts))
     },
-    abline = function(a = NULL, b = NULL, h = NULL, v = NULL, lty = 1, lwd = 1, ljoin = 1, col = NULL, alpha = NULL, name = NULL, ...) {
+    # abline = function(a = NULL, b = NULL, h = NULL, v = NULL, lty = 1, lwd = 1, ljoin = 1, col = NULL, alpha = NULL, name = NULL, ...) {
 
-    },
+    # },
     multi_line = function(xs, ys, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(unlist(xs), unlist(ys))
+      axisTypeRange <- getGlyphAxisTypeRange(unlist(xs), unlist(ys))
       .makeGlyph(type = "multi_line", name = name,
-        data = list(xs = xs, ys = ys), args = list(...), typeRange = typeRange)
+        data = list(xs = xs, ys = ys), args = list(...), axisTypeRange = axisTypeRange)
     },
     oval = function(x, y, width, height, angle, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(x, y)
+      axisTypeRange <- getGlyphAxisTypeRange(x, y)
       .makeGlyph(type = "oval", name = name,
-        data = list(x = x, y = y, width = width, height = height, angle = angle), args = list(...), typeRange = typeRange)
+        data = list(x = x, y = y, width = width, height = height, angle = angle), args = list(...), axisTypeRange = axisTypeRange)
     },
     patch = function(x, y, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(x, y)
+      axisTypeRange <- getGlyphAxisTypeRange(x, y)
       .makeGlyph(type = "patch", name = name,
-        data = list(x = x, y = y), args = list(...), typeRange = typeRange)
+        data = list(x = x, y = y), args = list(...), axisTypeRange = axisTypeRange)
     },
     patches = function(xs, ys, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(unlist(xs), unlist(ys))
+      axisTypeRange <- getGlyphAxisTypeRange(unlist(xs), unlist(ys))
       .makeGlyph(type = "patches", name = name,
-        data = list(xs = xs, ys = ys), args = list(...), typeRange = typeRange)
+        data = list(xs = xs, ys = ys), args = list(...), axisTypeRange = axisTypeRange)
     },
     quad = function(left, right, top, bottom, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(c(left, right), c(bottom, top))
+      axisTypeRange <- getGlyphAxisTypeRange(c(left, right), c(bottom, top))
       .makeGlyph(type = "quad", name = name,
-        data = list(left = left, right = right, top = top, bottom = bottom), args = list(...), typeRange = typeRange)
+        data = list(left = left, right = right, top = top, bottom = bottom), args = list(...), axisTypeRange = axisTypeRange)
     },
     quadratic = function(x0, y0, x1, y1, cx, cy, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(c(x0, x1), c(y0, y1), assertX = "numeric", assertY = "numeric")
+      axisTypeRange <- getGlyphAxisTypeRange(c(x0, x1), c(y0, y1), assertX = "numeric", assertY = "numeric")
       .makeGlyph(type = "quadratic", name = name,
         data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, cx = cx, cy = cy),
-        args = list(...), typeRange = typeRange)
+        args = list(...), axisTypeRange = axisTypeRange)
     },
     ray = function(x, y, length, angle = 0, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(x, y)
+      axisTypeRange <- getGlyphAxisTypeRange(x, y)
       .makeGlyph(type = "ray", name = name,
         data = list(x = x, y = y, length = length, angle = angle),
-        args = list(...), typeRange = typeRange)
+        args = list(...), axisTypeRange = axisTypeRange)
     },
-    rect = function(x, y, width, height, angle = 0, name = NULL, ...) {
-      if(is.numeric(x)) {
-        typeRange <- getGlyphTypeRange(c(x, x + width), c(y, y + height))
+    rect = function(x, y, data = NULL, width = 1, height = 1, col = NULL, border = NULL, angle = 0, name = NULL, ...) {
+
+      # to avoid warnings with members named 'width' and 'height'
+      if(!is.null(data)) {
+        x      <- getVarData(data, substitute(x))
+        y      <- getVarData(data, substitute(y))
+        col    <- getVarData(data, substitute(col))
+        border <- getVarData(data, substitute(border))
+        angle  <- getVarData(data, substitute(angle))
+        wdth  <- getVarData(data, substitute(width))
+        hght <- getVarData(data, substitute(height))
       } else {
-        typeRange <- getGlyphTypeRange(x, y)
+        wdth <- width
+        hght <- height
+      }
+      xy <- getXYData(x, y)
+
+      opts <- list(...)
+      if(is.null(col))
+        col <- opts$fill_color
+      if(is.null(border))
+        border <- opts$line_color
+      opts$fill_color <- col
+      opts$line_color <- border
+      if(is.numeric(xy$x)) {
+        axisTypeRange <- getGlyphAxisTypeRange(c(xy$x, xy$x + wdth), c(xy$y, xy$y + hght))
+      } else {
+        axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y)
       }
       .makeGlyph(type = "rect", name = name,
-        data = list(x = x, y = y, width = width, height = height, angle = angle),
-        args = list(...), typeRange = typeRange)
+        data = c(xy, list(width = wdth, height = hght, angle = angle)),
+        args = opts, axisTypeRange = axisTypeRange)
     },
     segment = function(x0, y0, x1, y1, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(c(x0, x1), c(y0, y1))
+      axisTypeRange <- getGlyphAxisTypeRange(c(x0, x1), c(y0, y1))
       .makeGlyph(type = "segment", name = name,
         data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1),
-        args = list(...), typeRange = typeRange)
+        args = list(...), axisTypeRange = axisTypeRange)
     },
     # segments = function(x0, y0, x1 = x0, y1 = y0, col = NULL, lty = NULL, lwd = NULL) {},
-    text = function(x, y, text, angle = 0, name = NULL, ...) {
-      typeRange <- getGlyphTypeRange(x, y)
+    text = function(x, y = NULL, text = NULL, data = NULL, col = "black", angle = 0, name = NULL, ...) {
+
+      if(!is.null(data)) {
+        x    <- getVarData(data, substitute(x))
+        y    <- getVarData(data, substitute(y))
+        text <- getVarData(data, substitute(text))
+        col  <- getVarData(data, substitute(col))
+      }
+      xy <- getXYData(x, y)
+
+      opts <- list(...)
+      opts$text_color <- col
+      if(is.null(text))
+        text <- seq_along(xy$x)
+      axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y)
       .makeGlyph(type = "text", name = name,
-        data = list(x = x, y = y, text = text, angle = angle),
-        args = list(...), typeRange = typeRange)
+        data = c(xy, list(text = text, angle = angle)),
+        args = list(...), axisTypeRange = axisTypeRange)
     },
     wedge = function(x, y, radius = 0.7, start_angle = 0, end_angle = 2*pi, direction = "anticlock", name = NULL, ...) {
       checkArcDirection(direction)
-      typeRange <- getGlyphTypeRange(x, y, assertX = "numeric", assertY = "numeric")
+      axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
       .makeGlyph(type = "wedge", name = name,
         data = list(x = x, y = y, radius = radius, start_angle = start_angle, end_angle = end_angle, direction = direction),
-        args = list(...), typeRange = typeRange)
+        args = list(...), axisTypeRange = axisTypeRange)
     },
-    ## get things ready to send to .makeGlyph
-    .makeMarker = function(type, x, y, size, name, ...) {
-      if(is.null(size))
-        size <- 10
+    .makeGlyph = function(type, name, data, args, axisTypeRange) {
+      ## see if any options won't be used
+      checkOpts(args, type)
 
-      typeRange <- getGlyphTypeRange(x, y)
-      .makeGlyph(type, name, 
-        data = list(x = x, y = y, size = size),
-        args = list(...), typeRange = typeRange)
-    },
-    .makeGlyph = function(type, name, data, args, typeRange) {
       ## make sure axis types match anything 
       ## that has already been plotted
-      validateAxisType(figType = .xAxisType, curType = typeRange$xAxisType, which = "x")
-      validateAxisType(figType = .yAxisType, curType = typeRange$yAxisType, which = "y")
+      validateAxisType(figType = .xAxisType, curType = axisTypeRange$xAxisType, which = "x")
+      validateAxisType(figType = .yAxisType, curType = axisTypeRange$yAxisType, which = "y")
 
-      .xAxisType <<- typeRange$xAxisType
-      .yAxisType <<- typeRange$yAxisType
+      .xAxisType <<- axisTypeRange$xAxisType
+      .yAxisType <<- axisTypeRange$yAxisType
 
       ## give it a unique name if not supplied
       if(is.null(name))
@@ -492,8 +390,8 @@ BokehFigure <- setRefClass("BokehFigure",
       .glyphData[[name]] <<- data
 
       ## compute x and y range for this glyph
-      .glyphXRanges[[name]] <<- typeRange$xRange
-      .glyphYRanges[[name]] <<- typeRange$yRange
+      .glyphXRanges[[name]] <<- axisTypeRange$xRange
+      .glyphYRanges[[name]] <<- axisTypeRange$yRange
 
       ## for chaining...
       # invisible(.self)
@@ -550,7 +448,6 @@ BokehFigure <- setRefClass("BokehFigure",
       # xlab = xname, ylab,
       # axes = TRUE, labels = FALSE,
       warn.unused = FALSE,
-      width = 480, height = 480,
       alpha = 1,
       ...) {
 
@@ -564,7 +461,7 @@ BokehFigure <- setRefClass("BokehFigure",
       plot = FALSE)
 
       thm <- getOption("bokeh_theme")
-      
+
       opts <- list(...)
       if(!is.null(border)) {
         opts$line_color <- border
@@ -586,9 +483,7 @@ BokehFigure <- setRefClass("BokehFigure",
       } else {
         hh$density
       }
-      do.call(.self$quad, c(list(left = hh$breaks[-length(hh$breaks)], right = hh$breaks[-1], 
-        top = y, bottom = 0, 
-        height = y), opts))
+      do.call(.self$quad, c(list(left = hh$breaks[-length(hh$breaks)], right = hh$breaks[-1], top = y, bottom = 0), opts))
     }
   )
 )

@@ -6,3 +6,4 @@ CONTRIBUTING\.md
 NEWS\.md
 ^_ignore$
 \.sublime\-
+.Rproj
