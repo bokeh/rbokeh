@@ -1,0 +1,82 @@
+
+
+
+makeGlyph <- function(fig, type, name, data, args, axisTypeRange) {
+
+  ## see if any options won't be used and give a message
+  checkOpts(args, type)
+
+  ## make sure axis types match anything 
+  ## that has already been plotted
+  validateAxisType(figType = fig$xAxisType, 
+    curType = axisTypeRange$xAxisType, which = "x")
+  validateAxisType(figType = fig$yAxisType, 
+    curType = axisTypeRange$yAxisType, which = "y")
+
+  fig$xAxisType <- axisTypeRange$xAxisType
+  fig$yAxisType <- axisTypeRange$yAxisType
+
+  ## make sure specified colors are bokeh-valid hex codes (if they are hex codes)
+  args <- validateColors(args)
+
+  ## give it a unique name if not supplied
+  if(is.null(name))
+    name <- genGlyphName(names(fig$glyphSpecs))
+
+  ## save defer function (if any) and remove from data
+  fig$glyphDefer[[name]] <- data$defer
+  data$defer <- NULL
+
+  if(length(fig$glyphSpecs) > 0)
+    if(name %in% names(fig$glyphSpecs))
+      message("A glyph already exists with name '", name, "' - this is being replaced")
+
+  ## validate the spec args
+  # validateOpts(opts, type)
+
+  ## move all data scalars over to the spec
+  dataLengths <- sapply(data, length)
+  dataIsList <- sapply(data, is.list)
+  dataNames <- names(data)
+  scalarInd <- which(dataLengths == 1 & !dataIsList)
+  for(ii in scalarInd)
+    args[[dataNames[ii]]] <- data[[ii]]
+  data[scalarInd] <- NULL
+
+  ## move all non-scalar args over to data
+  ## except for "line_dash"
+  argLengths <- sapply(args, length)
+  argNames <- names(args)
+  longInd <- which(argLengths > 1 & argNames != "line_dash")
+  for(ii in longInd) {
+    data[[argNames[ii]]] <- args[[ii]]
+  }
+  args[longInd] <- NULL
+
+  ## spec needs to point to corresponding data
+  dataNames <- names(data)
+  for(nm in dataNames)
+    args[[nm]] <- nm
+
+  ## data must have something in it or it won't work
+  if(length(data) == 0)
+    data <- list(dummy = list(1))
+
+  ## add glyph type
+  args$type <- type
+
+  ## fix spec for "text" glyph
+  if("text" %in% names(args)) {
+     args$text <- list(field = "text")
+  }
+
+  fig$glyphSpecs[[name]] <- args
+  fig$glyphData[[name]] <- data
+
+  ## compute x and y range for this glyph
+  fig$glyphXRanges[[name]] <- axisTypeRange$xRange
+  fig$glyphYRanges[[name]] <- axisTypeRange$yRange
+
+  fig
+}
+

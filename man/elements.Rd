@@ -4,7 +4,7 @@
 \alias{elements}
 \title{"Periodic Table" dataset}
 \usage{
-rbokeh
+elements
 }
 \description{
 Periodic table

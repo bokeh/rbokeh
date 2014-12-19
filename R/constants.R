@@ -1,8 +1,4 @@
 optionNames <- c("width", "height", "title","ylim","xlim","plot_width","plot_height","x_axis_type","y_axis_type","x_mapper_type","y_mapper_type","background_fill","border_fill","min_border","min_border_left","min_border_right","min_border_top","min_border_bottom","h_symmetry","v_symmetry","outline_line_color", "xaxes", "yaxes", "tools")
-## width and height map more naturally to R
-## equivalent in bokeh is dims = (width, height)
-## which we convert to just prior to plotting
-## similar for xrange (xlim in R) and yrange (ylim in R)
 
 linePropNames <- c("line_color", "line_width", "line_alpha", "line_join", "line_cap", "line_dash", "line_dash_offset")
 fillPropNames <- c("fill_color", "fill_alpha")
@@ -107,4 +103,5 @@ ljoinDict <- list(
   "bevel" = "bevel"
 )
 
+markerPchTypes <- setdiff(0:25, c(11, 14))
 markerNames <- c("asterisk", "circle", "circle_cross", "circle_x", "cross", "diamond", "diamond_cross", "inverted_triangle", "square", "square_cross", "square_x", "triangle", "x")

@@ -1,4 +1,54 @@
 
+
+updateLineOpts <- function(fig, opts) {
+    if(is.numeric(opts$line_dash)) {
+    if(length(opts$line_dash) == 1) {
+      opts$line_dash <- as.character(opts$line_dash)
+    }
+  }
+  if(is.character(opts$line_dash)) {
+    if(!opts$line_dash %in% names(ltyDict))
+      stop("'line_join' should be one of: ", paste(names(ltyDict), collapse = ", "), call. = FALSE)
+    opts$line_dash <- ltyDict[[opts$line_dash]]$line_dash
+  }
+
+  if(is.numeric(opts$line_cap))
+    opts$line_cap <- ljoinDict[[as.character(opts$line_cap)]]
+
+  if(is.null(opts$line_color))
+    opts$line_color <- getNextColor(fig)
+
+  opts
+}
+
+validateFig <- function(fig, fct) {
+  if(!inherits(fig, "BokehFigure"))
+    stop("Error in ", fct, ": first argument must be of type 'BokehFigure'", call. = FALSE)
+}
+
+## some things like rainbow(), etc., give hex with alpha
+## Bokeh doesn't like alpha, so get rid of it
+validateColors <- function(opts) {
+  colFields <- c("line_color", "fill_color", "text_color")
+
+  for(fld in colFields) {
+    if(!is.null(opts[[fld]])) {
+      ind <- which(grepl("^#", opts[[fld]]) & nchar(opts[[fld]]) == 9)
+      if(length(ind) > 0) {
+        message("note - ", fld, " has hex colors with with alpha information - removing alpha")
+        opts[[fld]][ind] <- substr(opts[[fld]][ind], 1 , 7)
+      }
+    }
+  }
+  opts
+}
+
+getNextColor <- function(fig) {
+  nLayers <- length(fig$glyphSpecs)
+  nextColorIdx <- (nLayers + 1) %% length(fig$theme$glyph)
+  fig$theme$glyph[nextColorIdx]
+}
+
 checkArcDirection <- function(direction) {
   if(!direction %in% c("clock", "anticlock"))
     stop("'direction' must be 'clock' or 'anticlock'", call. = FALSE)
@@ -61,7 +111,8 @@ getGlyphRange <- function(a, axisType = NULL, ...) {
   if(axisType == "numeric") {
     range(a, na.rm = TRUE)
   } else {
-    unique(a)
+    # gsub removes suffixes like ":0.6"
+    unique(gsub("(.*):(-*[0-9]*\\.*)*([0-9]+)*$", "\\1", a))
   }
 }
 
@@ -75,115 +126,18 @@ validateAxisType <- function(figType, curType, which) {
 
 ## take a collection of glyph ranges (x or y axis)
 ## and find the global range across all glyphs
-getAllGlyphRange <- function(ranges, axisType = "numeric") {
+getAllGlyphRange <- function(ranges, padding_factor, axisType = "numeric") {
   if(axisType == "numeric") {
     rangeMat <- do.call(rbind, ranges)
     hardRange <- c(min(rangeMat[,1], na.rm = TRUE), 
       max(rangeMat[,2], na.rm = TRUE))
-    hardRange + c(-1, 1) * 0.07 * diff(hardRange)
+    hardRange <- hardRange + c(-1, 1) * padding_factor * diff(hardRange)
+    if(hardRange[1] == hardRange[2])
+      hardRange <- hardRange + c(-0.5, 0.5)
+    hardRange
   } else {
     sort(unique(do.call(c, ranges)))
   }
-}
-
-getPointGlyphType <- function(pch, type) {
-  ## pch overrides type
-  if(!is.null(pch) && !is.null(type)) {
-    type <- NULL
-    message("both 'pch' and 'type' were specified - honoring 'pch' over 'type'")
-  }
-  if(is.null(pch) && is.null(type))
-    type <- "circle"
-
-  if(length(pch) > 1) {
-    message("'pch' must be a single value... using first element")
-    pch <- pch[1]
-  }
-
-  ## if 'type' isn't specified, get type from pch
-  if(is.null(type)) {
-    # translate pch to type
-    if(is.numeric(pch)) {
-      pch <- as.integer(pch)
-      if(!pch %in% setdiff(0:25, c(11, 14)))
-        stop("'pch' must be a value from 0 to 25 (excluding 11 and 14", call. = FALSE)
-      type <- pchDict[[as.character(pch)]]$glyph
-    } else {
-      type <- "text"
-    }
-  }
-
-  if(!type %in% markerNames)
-    stop("type = '", type, "' is not supported.  Please choose from: ", paste(markerNames, collapse = ", "), call. = FALSE)
-
-  type
-}
-
-getPointOpts <- function(type, pch, n, col, bg, alpha, lwd, opts, theme) {
-
-  curGlyphProps <- glyphProps[[type]]
-
-  ## use line_color, line_width, etc. if specified
-  ## else use specified 'col' and 'bg'
-  ## otherwise turn to theme
-  ## currently, pick color from theme based on 
-  ## how many elements already exist in the plot
-  ## this can surely be given more thought
-  if(curGlyphProps$lp) {
-    if(!is.null(col))
-      opts$line_color <- col
-    if(is.null(opts$line_color))
-      opts$line_color <- theme$glyph[(n + 1) %% length(theme$glyph)]
-    if(!is.null(lwd))
-      opts$line_width <- lwd
-    if(is.null(opts$line_width))
-      opts$line_width <- 1
-    if(!is.null(alpha))
-      opts$line_alpha <- alpha
-  }
-
-  if(curGlyphProps$fp) {
-    if(!is.null(bg))
-      opts$fill_color <- bg
-    if(is.null(opts$fill_color)) {
-      if(curGlyphProps$lp) {
-        opts$fill_color <- reduceSaturation(opts$line_color)
-      } else {
-        opts$fill_color <- theme$glyph[(n + 1) %% length(theme$glyph)]
-      }
-    }
-    if(!is.null(alpha))
-      opts$fill_alpha <- alpha
-  }
-
-  ## if pch is specified, honor whether or not it has fill or line
-  if(!is.null(pch)) {
-    pchProps <- pchDict[[as.character(pch)]]
-    if(!is.null(pchProps)) {
-      if(!pchProps$line)
-        opts["line_color"] <- list(NULL)
-      if(!pchProps$fill) {
-        opts["fill_color"] <- list(NULL)
-      }
-    }
-  }
-
-
-  if(curGlyphProps$tp) {
-    if(!is.null(alpha))
-      opts$text_alpha <- alpha
-    opts$text_align = "center"
-    opts$text_baseline = "middle"
-
-    if(!is.null(col))
-      opts$text_color <- col
-    if(is.null(opts$text_color))
-      opts$text_color <- theme$glyph[(n + 1) %% length(theme$glyph)]
-    if(!is.null(alpha))
-      opts$text_alpha <- alpha
-  }
-
-  opts
 }
 
 ## give a little warning if any options are specified that won't be used
@@ -207,30 +161,6 @@ checkOpts <- function(opts, type) {
         message("note - arguments not used: ", paste(notUsed, collapse = ", "))    
     }    
   }
-}
-
-getLineOpts <- function(lty, n, lwd, ljoin, col, alpha, opts, theme) {
-  lty <- as.character(lty)
-  lty <- lty[1]
-  if(!lty %in% names(ltyDict))
-    stop("'lty' must be one of: ", paste(names(ltyDict), collapse = ", "), call. = FALSE)
-
-  if(is.null(opts$line_cap))
-    opts$line_cap <- "round"
-
-  ljoin <- as.character(ljoin)
-  if(ljoin %in% names(ljoinDict))
-    opts$line_join <- ljoinDict[[ljoin]]
-
-  opts$line_dash <- ltyDict[[lty]]$line_dash
-  opts$line_color <- col
-  if(is.null(opts$line_color))
-    opts$line_color <- theme$glyph[(n + 1) %% length(theme$line)]
-  opts$line_width <- lwd
-  if(!is.null(alpha))
-    opts$line_alpha <- alpha
-
-  opts
 }
 
 ## take a hex color and reduce its saturation by a factor
@@ -262,5 +192,12 @@ getXYData <- function(x, y) {
     }
   }
   list(x = x, y = y)        
+}
+
+## take output of map() and convert it to a data frame
+map2df <- function(a) {
+  dd <- data.frame(lon = a$x, lat = a$y, 
+    group = cumsum(is.na(a$x) & is.na(a$y)) + 1)
+  dd[complete.cases(dd$lon, dd$lat), ]
 }
 

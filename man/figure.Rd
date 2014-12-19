@@ -3,17 +3,15 @@
 \alias{figure}
 \title{Start a Bokeh Figure}
 \usage{
-figure(width = 480, height = 480, title = character(0),
-  xlim = numeric(0), ylim = numeric(0), plot_width = numeric(0),
-  plot_height = numeric(0), x_axis_type = character(0),
-  y_axis_type = character(0), x_mapper_type = character(0),
-  y_mapper_type = character(0), background_fill = character(0),
-  border_fill = character(0), min_border = numeric(0),
-  min_border_left = numeric(0), min_border_right = numeric(0),
-  min_border_top = numeric(0), min_border_bottom = numeric(0),
-  h_symmetry = logical(0), v_symmetry = logical(0),
-  outline_line_color = character(0), xaxes = "below", yaxes = "left",
-  tools = character(0), theme = getOption("bokeh_theme"))
+figure(width = 480, height = 480, title = NULL, xlim = NULL,
+  ylim = NULL, padding_factor = 0.07, plot_width = NULL,
+  plot_height = NULL, x_axis_type = NULL, y_axis_type = NULL,
+  x_mapper_type = NULL, y_mapper_type = NULL, background_fill = NULL,
+  border_fill = NULL, min_border = NULL, min_border_left = NULL,
+  min_border_right = NULL, min_border_top = NULL,
+  min_border_bottom = NULL, h_symmetry = NULL, v_symmetry = NULL,
+  outline_line_color = NULL, xaxes = "below", yaxes = "left",
+  tools = NULL, theme = getOption("bokeh_theme"))
 }
 \arguments{
 \item{width}{figure width in pixels}
@@ -25,6 +23,8 @@ figure(width = 480, height = 480, title = character(0),
 \item{xlim}{the extent of the plotting area in the x-dimension (will be computed automatically if not specified).}
 
 \item{ylim}{the extent of the plotting area in the y-dimension (will be computed automatically if not specified).}
+
+\item{padding_factor}{if limits are not specified, by what factor should the extents of the data be padded}
 
 \item{plot_width,plot_height}{width and height of the entire plot in pixels, including border space}
 

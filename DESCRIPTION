@@ -9,6 +9,8 @@ License: MIT + file LICENSE
 LazyData: true
 Imports:
     htmlwidgets,
-    methods
+    methods,
+    magrittr,
+    maps
 Suggests:
     testthat
