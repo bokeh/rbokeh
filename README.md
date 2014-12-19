@@ -25,15 +25,11 @@ Currently all glyphs are working except `image_rgba` and `image_url`.  Also mech
 
 In rough order of importance / imminence, things to cover next include:
 
-- Affirming current design
-- Default choices for line, fill, and text elements
-- Type checking for these elements
+- Default choices for line, fill, and text attributes
+- Best mechanism for mapping these attributes based on variables in the data
 - R docs
-- All options for fine control of plot
-- Higher-level abstractions?
-- Wrappers for common statistial plots
+- More layers for common statistial plots
 - Tooltips / hover / click event handling specification from R
 - Legends
-- Headless javascript unit tests
 - Investigate server side / streaming options
 
