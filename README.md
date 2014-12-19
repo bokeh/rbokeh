@@ -12,7 +12,7 @@ Using the `devtools` package:
 
 ```
 devtools::install_github("ramnathv/htmlwidgets")
-devtools::install_github("bokeh/rbokeh")
+devtools::install_github("hafen/rbokeh")
 ```
 
 ### Using
