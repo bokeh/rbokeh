@@ -103,16 +103,15 @@ lay_points <- function(fig, x, y = NULL, data = NULL, groups = NULL, type = 1, s
   } else {
     opts["line_color"] <- list(NULL)
   }
-  if(curGlyphProps$fill) {
-    if(is.null(opts$fill_color)) {
+
+  if(is.null(opts$fill_color)) {
+    if(curGlyphProps$fill) {
       if(curGlyphProps$line) {
         opts$fill_color <- reduceSaturation(opts$line_color)
       } else {
         opts$fill_color <- nextColor
       }
     }
-  } else {
-    opts["fill_color"] <- list(NULL)
   }
 
   axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y, glyph = type)

@@ -1,3 +1,9 @@
+Version 0.2
+
+- migrate to standard json model
+- axis labels
+- tools control
+
 Version 0.1
 ----------------------------------------------------------------------
 

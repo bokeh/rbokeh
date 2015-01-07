@@ -51,12 +51,27 @@ plot.BokehFigure <- function(x, y, ...) {
     if(length(options$xrange) == 1)
       options$xrange <- list(options$xrange)
 
+    ######
+    fig <- fig %>% 
+      x_range(options$xrange) %>% 
+      y_range(options$yrange) %>%
+      x_axis(fig$xlab) %>%
+      y_axis(fig$ylab)
+
+    id <- fig$model[[which(sapply(fig$model, function(x) x$type) == "Plot")]]$id
+    ######
+
     ## see if we need to execute any deferred functions
     if(length(fig$glyphDefer) > 0) {
       deferNames <- names(fig$glyphDefer)
       for(dn in deferNames) {
         fig$glyphSpecs[[dn]] <- fig$glyphDefer[[dn]](fig$glyphSpecs[[dn]], options$xrange, options$yrange)      
         fig$glyphData[[dn]] <- fig$glyphDefer[[dn]](fig$glyphData[[dn]], options$xrange, options$yrange)      
+
+        ######
+        fig <- fig %>% addLayer(fig$glyphSpecs[[dn]], fig$glyphData[[dn]], dn)
+
+        ######
       }
     }
     options$dims <- c(options$width, options$height)
@@ -69,7 +84,11 @@ plot.BokehFigure <- function(x, y, ...) {
        list(
           data = unname(fig$glyphData),
           spec = unname(fig$glyphSpecs),
-          options = options
+          options = options,
+          ####
+          all_models = fig$model,
+          elementid = digest(Sys.time()),
+          modelid = id
        ),
        width = options$dims[1] + 50,
        height = options$dims[2] + 50,

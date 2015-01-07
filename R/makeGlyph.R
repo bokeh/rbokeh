@@ -73,7 +73,11 @@ makeGlyph <- function(fig, type, name, data, args, axisTypeRange) {
   fig$glyphSpecs[[name]] <- args
   fig$glyphData[[name]] <- data
 
-  ## compute x and y range for this glyph
+  #####
+  fig <- fig %>% addLayer(args, data, name)
+  #####
+
+  ## add x and y range for this glyph
   fig$glyphXRanges[[name]] <- axisTypeRange$xRange
   fig$glyphYRanges[[name]] <- axisTypeRange$yRange
 

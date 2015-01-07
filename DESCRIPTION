@@ -1,6 +1,6 @@
 Package: rbokeh
 Title: R Interface for Bokeh
-Version: 0.1
+Version: 0.2
 Authors@R: "Ryan Hafen <rhafen@gmail.com> [aut, cre]"
 Description: R interface for Bokeh
 Depends:
@@ -11,6 +11,7 @@ Imports:
     htmlwidgets,
     methods,
     magrittr,
+    digest,
     maps
 Suggests:
     testthat
