@@ -4,17 +4,17 @@ tool_pan <- function(obj, dimensions = c("width", "height")) {
 }
 
 #' @export
-tool_wheelzoom <- function(obj, dimensions = c("width", "height")) {
+tool_wheel_zoom <- function(obj, dimensions = c("width", "height")) {
   updateTool(obj, which = "wheelZoom", args = list(dimensions = dimensions, plotRef = obj$ref))
 }
 
 #' @export
-tool_boxzoom <- function(obj) {
+tool_box_zoom <- function(obj) {
   updateTool(obj, which = "boxZoom", args = list(plotRef = obj$ref))
 }
 
 #' @export
-tool_previewsave <- function(obj) {
+tool_save <- function(obj) {
   updateTool(obj, which = "previewSave", args = list(plotRef = obj$ref))
 }
 
@@ -26,6 +26,19 @@ tool_resize <- function(obj) {
 #' @export
 tool_reset <- function(obj) {
   updateTool(obj, which = "reset", args = list(plotRef = obj$ref))
+}
+
+updateTool <- function(obj, which, args) {
+  id <- genId(obj, which)
+  args$id <- id
+  model <- do.call(toolModels()[[which]], args)
+
+  obj$model$plot$attributes$tools[[model$ref$id]] <- model$ref
+  obj$model[[id]] <- model$model
+
+  obj <- updateToolEvents(obj)
+
+  obj
 }
 
 toolModels <- function() {
@@ -65,42 +78,6 @@ toolModels <- function() {
   )
 }
 
-updateTool <- function(obj, which, args) {
-  id <- genId(obj, which)
-  args$id <- id
-  model <- do.call(toolModels()[[which]], args)
-
-  obj$model$plot$attributes$tools[[model$ref$id]] <- model$ref
-  obj$model[[id]] <- model$model
-
-  obj <- updateToolEvents(obj)
-
-  obj
-}
-
-tool_pan <- function(obj, dimensions = c("width", "height")) {
-  updateTool(obj, which = "pan", args = list(dimensions = dimensions, plotRef = obj$ref))
-}
-
-tool_wheelzoom <- function(obj, dimensions = c("width", "height")) {
-  updateTool(obj, which = "wheelZoom", args = list(dimensions = dimensions, plotRef = obj$ref))
-}
-
-tool_boxzoom <- function(obj) {
-  updateTool(obj, which = "boxZoom", args = list(plotRef = obj$ref))
-}
-
-tool_previewsave <- function(obj) {
-  updateTool(obj, which = "previewSave", args = list(plotRef = obj$ref))
-}
-
-tool_resize <- function(obj) {
-  updateTool(obj, which = "resize", args = list(plotRef = obj$ref))
-}
-
-tool_reset <- function(obj) {
-  updateTool(obj, which = "reset", args = list(plotRef = obj$ref))
-}
 
 toolEvents <- function(id) {
   res <- baseModelObject("ToolEvents", id)

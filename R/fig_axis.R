@@ -1,5 +1,12 @@
 #' @export
 x_axis <- function(obj, label, position = "below", grid = TRUE, num_minor_ticks = 5) {
+  if(is.null(position))
+    position <- "below"
+  if(!position %in% c("below", "above")) {
+    message("x axis position must be either below or above - setting to 'below'")
+    position <- "below"
+  }
+
   if(missing(label))
     label <- obj$xlab
   obj$xlab <- label
@@ -8,6 +15,13 @@ x_axis <- function(obj, label, position = "below", grid = TRUE, num_minor_ticks 
 
 #' @export
 y_axis <- function(obj, label, position = "left", grid = TRUE, num_minor_ticks = 5) {
+  if(is.null(position))
+    position <- "left"
+  if(!position %in% c("left", "right")) {
+    message("y axis position must be either left or right - setting to 'left'")
+    position <- "left"
+  }
+
   if(missing(label))
     label <- obj$ylab
   obj$ylab <- label

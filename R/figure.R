@@ -25,8 +25,8 @@ figure <- function(
   width = 480,
   height = 480,
   title = NULL,
-  xlab = "x",
-  ylab = "y",
+  xlab = NULL,
+  ylab = NULL,
   xlim = NULL,
   ylim = NULL,
   padding_factor = 0.07,
@@ -34,37 +34,56 @@ figure <- function(
   plot_height = NULL,
   xaxes = "below",
   yaxes = "left",
-  tools = NULL,
+  tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save"),
   theme = getOption("bokeh_theme")
 ) {
+  if(is.null(xlab) && !missing(xlab))
+    xlab <- ""
+
+  if(is.null(ylab) && !missing(ylab))
+    ylab <- ""
+
   tt <- Sys.time()
   id <- genId(list(time = tt), "Plot")
-  structure(list(
+
+  fig <- structure(list(
     width = width, height = height, title = title, 
     xlab = xlab, ylab = ylab,
     xlim = xlim, ylim = ylim, padding_factor = padding_factor,
     plot_width = plot_width, plot_height = plot_height,
     xaxes = xaxes, yaxes = yaxes, 
     tools = tools, theme = theme,
-    model = figModelSkeleton(id, title),
+    model = figModelSkeleton(id, title, width, height),
     ref = list(
       type    = "Plot",
       subtype = "Figure",
       id      =  id
     ),
-    ## spec for each glyph
-    glyphSpecs = list(),
+    ## place to store spec, data, and function for deferred glyphs
+    glyphDeferSpecs = list(),
+    glyphDeferData = list(),
+    glyphDefer = list(),
+    glyphLayers = list(),
     ## keep track of x and y range of each glyph
     glyphXRanges = list(),
     glyphYRanges = list(),
-    glyphDefer = list(),
     ## keep track of the axes ('cat' or 'num')
     xAxisType = NULL,
     yAxisType = NULL
   ), class = "BokehFigure")
+
+  ## check and add tools
+  toolList <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save")]
+  notUsed <- setdiff(toolList, tools)
+  if(length(notUsed) > 0)
+    message("Note: tools not used: ", paste(notUsed, collapse = ", "))
+  for(tl in toolList)
+    fig <- eval(parse(text = paste("tool_", tl, "(fig)", sep = "")))
+
+  fig
 }
 
-figModelSkeleton <- function(id, title) {
+figModelSkeleton <- function(id, title, width = 480, height = 480) {
   model <- list(plot = list(
     type       = "Plot",
     subtype    = "Figure",
@@ -72,6 +91,8 @@ figModelSkeleton <- function(id, title) {
     attributes = list(
       title = title,
       id = id,
+      plot_width = width,
+      plot_height = height,
       x_range = list(),
       y_range = list(),
       left = list(),

@@ -1,39 +1,14 @@
-
-
-# pch can be number of vector of characters
-
-# type - like R's pch in plot (see details) 
-# line_color
-# fill_color
-# line_dash - like R's lty
-
-# details:
-# 1, 2, 3, 4
-# 
-# "asterisk", "circle", "circle_cross", "circle_x", "cross", "diamond", "diamond_cross", "inverted_triangle", "square", "square_cross", "square_x", "triangle", "x"
-
-# line_color
-# line_width
-# line_alpha
-# fill_color
-# fill_alpha
-
-# line_join
-# line_cap
-# line_dash
-# line_dash_offset
-# text_font
-# text_font_size
-# text_font_style
-# text_color
-# text_alpha
-# text_align
-# text_baseline
-
 #' @export
 lay_points <- function(fig, x, y = NULL, data = NULL, groups = NULL, type = 1, size = 10, line_color = NULL, line_alpha = 1, line_width = 1, fill_color = NULL, fill_alpha = NULL, name = NULL, ...) {
 
   validateFig(fig, "lay_points")
+
+  xname <- deparse(substitute(x))
+  yname <- deparse(substitute(y))
+  if(length(xname) > 1)
+    xname <- NULL
+  if(length(yname) > 1)
+    yname <- NULL
 
   ## deal with vector inputs from a data source
   if(!is.null(data)) {
@@ -49,6 +24,7 @@ lay_points <- function(fig, x, y = NULL, data = NULL, groups = NULL, type = 1, s
 
   ## translate different x, y types to vectors
   xy <- getXYData(x, y)
+  xyNames <- getXYNames(x, y, xname, yname)
 
   opts <- c(list(line_color = line_color, line_alpha = line_alpha, 
     line_width = line_width, fill_color = fill_color, 
@@ -122,6 +98,7 @@ lay_points <- function(fig, x, y = NULL, data = NULL, groups = NULL, type = 1, s
     xy$y <- list(xy$y)
 
   makeGlyph(fig, type, name, 
-      data = c(xy, list(size = size)),
-      args = opts, axisTypeRange = axisTypeRange)
+    data = c(xy, list(size = size)),
+    args = opts, axisTypeRange = axisTypeRange, 
+    xname = xyNames$x, yname = xyNames$y)
 }

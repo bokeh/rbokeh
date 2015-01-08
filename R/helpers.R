@@ -44,7 +44,7 @@ validateColors <- function(opts) {
 }
 
 getNextColor <- function(fig) {
-  nLayers <- length(fig$glyphSpecs)
+  nLayers <- length(fig$glyphLayers)
   nextColorIdx <- (nLayers + 1) %% length(fig$theme$glyph)
   fig$theme$glyph[nextColorIdx]
 }
@@ -193,6 +193,19 @@ getXYData <- function(x, y) {
   }
   list(x = x, y = y)        
 }
+
+getXYNames <- function(x, y, xname, yname) {
+  if(is.null(y)) {
+    if(is.list(x)) {
+      nms <- names(x)
+      return(list(x = nms[1], y = nms[2]))
+    } else if(is.vector(x)) {
+      return(list(x = "index", y = xname))
+    }
+  }
+  list(x = xname, y = yname)
+}
+
 
 ## take output of map() and convert it to a data frame
 map2df <- function(a) {

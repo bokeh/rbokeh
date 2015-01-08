@@ -92,13 +92,6 @@ lay_image_url <- function(fig, x, y, url, angle = 0, name = NULL, ...) {
 }
 
 #' @export
-lay_line <- function(fig, x, y, name = NULL, ...) {
-  axisTypeRange <- getGlyphAxisTypeRange(x, y)
-  makeGlyph(fig, type = "line", name = name,
-    data = list(x = x, y = y), args = list(...), axisTypeRange = axisTypeRange)
-}
-
-#' @export
 lay_oval <- function(fig, x, y, width, height, angle, name = NULL, ...) {
   axisTypeRange <- getGlyphAxisTypeRange(x, y)
   makeGlyph(fig, type = "oval", name = name,

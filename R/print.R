@@ -19,7 +19,7 @@ plot.BokehFigure <- function(x, y, ...) {
 
   fig <- x
 
-  if(length(fig$glyphSpecs) == 0) {        
+  if(length(fig$glyphLayers) == 0) {        
     message("This figure is empty...")
   } else {
     ## put options together
@@ -54,9 +54,24 @@ plot.BokehFigure <- function(x, y, ...) {
     ######
     fig <- fig %>% 
       x_range(options$xrange) %>% 
-      y_range(options$yrange) %>%
-      x_axis(fig$xlab) %>%
-      y_axis(fig$ylab)
+      y_range(options$yrange)
+
+    # if xlab was set when figure() was called
+    # if(!is.null(fig$xlab))
+    #   fig <- fig %>% x_axis(fig$xlab, position = fig$xaxes)
+    # if(!is.null(fig$ylab))
+    #   fig <- fig %>% y_axis(fig$ylab, position = fig$yaxes)
+
+    if(is.null(fig$xlab)) {
+      fig <- fig %>% x_axis("x", position = fig$xaxes)
+    } else {
+      fig <- fig %>% x_axis(fig$xlab, position = fig$xaxes)
+    }
+    if(is.null(fig$ylab)) {
+      fig <- fig %>% y_axis("y")
+    } else {
+      fig <- fig %>% y_axis(fig$ylab, position = fig$yaxes)
+    }
 
     id <- fig$model[[which(sapply(fig$model, function(x) x$type) == "Plot")]]$id
     ######
@@ -65,13 +80,10 @@ plot.BokehFigure <- function(x, y, ...) {
     if(length(fig$glyphDefer) > 0) {
       deferNames <- names(fig$glyphDefer)
       for(dn in deferNames) {
-        fig$glyphSpecs[[dn]] <- fig$glyphDefer[[dn]](fig$glyphSpecs[[dn]], options$xrange, options$yrange)      
-        fig$glyphData[[dn]] <- fig$glyphDefer[[dn]](fig$glyphData[[dn]], options$xrange, options$yrange)      
+        tmpSpec <- fig$glyphDefer[[dn]](fig$glyphDeferSpecs[[dn]], options$xrange, options$yrange)      
+        tmpData <- fig$glyphDefer[[dn]](fig$glyphDeferData[[dn]], options$xrange, options$yrange)      
 
-        ######
-        fig <- fig %>% addLayer(fig$glyphSpecs[[dn]], fig$glyphData[[dn]], dn)
-
-        ######
+        fig <- fig %>% addLayer(tmpSpec, tmpData, dn)
       }
     }
     options$dims <- c(options$width, options$height)
@@ -86,7 +98,7 @@ plot.BokehFigure <- function(x, y, ...) {
           spec = unname(fig$glyphSpecs),
           options = options,
           ####
-          all_models = fig$model,
+          all_models = getJSON(fig$model),
           elementid = digest(Sys.time()),
           modelid = id
        ),

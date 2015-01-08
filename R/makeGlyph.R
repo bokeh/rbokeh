@@ -1,7 +1,4 @@
-
-
-
-makeGlyph <- function(fig, type, name, data, args, axisTypeRange) {
+makeGlyph <- function(fig, type, name, data, args, axisTypeRange, xname = NULL, yname = NULL) {
 
   ## see if any options won't be used and give a message
   checkOpts(args, type)
@@ -21,14 +18,14 @@ makeGlyph <- function(fig, type, name, data, args, axisTypeRange) {
 
   ## give it a unique name if not supplied
   if(is.null(name))
-    name <- genGlyphName(names(fig$glyphSpecs))
+    name <- genGlyphName(names(fig$glyphLayers))
 
   ## save defer function (if any) and remove from data
   fig$glyphDefer[[name]] <- data$defer
   data$defer <- NULL
 
-  if(length(fig$glyphSpecs) > 0)
-    if(name %in% names(fig$glyphSpecs))
+  if(length(fig$glyphLayers) > 0)
+    if(name %in% names(fig$glyphLayers))
       message("A glyph already exists with name '", name, "' - this is being replaced")
 
   ## validate the spec args
@@ -70,16 +67,25 @@ makeGlyph <- function(fig, type, name, data, args, axisTypeRange) {
      args$text <- list(field = "text")
   }
 
-  fig$glyphSpecs[[name]] <- args
-  fig$glyphData[[name]] <- data
+  if(!is.null(fig$glyphDefer[[name]])) {
+    fig$glyphDeferSpecs[[name]] <- args
+    fig$glyphDeferData[[name]] <- data    
+  }
 
-  #####
+  fig$glyphLayers[[name]] <- list(id = genId(fig, c("glyphRenderer", name)))
+
   fig <- fig %>% addLayer(args, data, name)
-  #####
 
   ## add x and y range for this glyph
   fig$glyphXRanges[[name]] <- axisTypeRange$xRange
   fig$glyphYRanges[[name]] <- axisTypeRange$yRange
+
+  ## add x and y labels if missing
+  if(is.null(fig$xlab) && length(xname) > 0)
+    fig$xlab <- xname
+
+  if(is.null(fig$ylab) && length(yname) > 0)
+    fig$ylab <- yname
 
   fig
 }

@@ -3,7 +3,7 @@
 point_types <- function(width = 800, height = 600, size = 25, col = "blue") {
   types <- c(as.list(markerPchTypes), as.list(markerNames))
 
-  f <- figure(ylim = as.character(5:1), width = width, height = height)
+  f <- figure(ylim = as.character(5:1), width = width, height = height, xlab = NULL, ylab = NULL)
   grid <- expand.grid(1:8, 1:5)
   for(ii in seq_along(types)) {
     curGrid <- as.character(grid[ii,])

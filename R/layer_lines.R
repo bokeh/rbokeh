@@ -1,16 +1,14 @@
-# line_color
-# line_alpha
-# line_width
-# line_dash
-# line_join
-# line_cap
-
-# line_dash_offset
-
 #' @export
 lay_lines <- function(fig, x, y = NULL, data = NULL, line_color = NULL, line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", name = NULL, ...) {
 
   validateFig(fig, "lay_lines")
+
+  xname <- deparse(substitute(x))
+  yname <- deparse(substitute(y))
+  if(length(xname) > 1)
+    xname <- NULL
+  if(length(yname) > 1)
+    yname <- NULL
 
   if(!is.null(data)) {
     x          <- getVarData(data, substitute(x))
@@ -20,6 +18,7 @@ lay_lines <- function(fig, x, y = NULL, data = NULL, line_color = NULL, line_alp
   }
 
   xy <- getXYData(x, y)
+  xyNames <- getXYNames(x, y, xname, yname)
 
   opts <- c(list(line_color = line_color, 
     line_alpha = line_alpha, line_width = line_width, 
@@ -28,7 +27,12 @@ lay_lines <- function(fig, x, y = NULL, data = NULL, line_color = NULL, line_alp
 
   opts <- updateLineOpts(fig, opts)
 
-  do.call(lay_line, c(list(fig = fig, name = name), xy, opts))
+  axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y)
+
+  makeGlyph(fig, type = "line", name = name, 
+    data = xy,
+    args = opts, axisTypeRange = axisTypeRange, 
+    xname = xyNames$x, yname = xyNames$y)
 }
 
 #' @export
@@ -176,7 +180,7 @@ lay_curve <- function(fig, expr, from = NULL, to = NULL, n = 101, xname = "x", l
 
   opts <- updateLineOpts(fig, opts)
 
-  do.call(lay_line, c(list(fig = fig, x = x, y = y, name = name), opts))
+  do.call(lay_lines, c(list(fig = fig, x = x, y = y, name = name), opts))
 }
 
 #' @export

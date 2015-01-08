@@ -50,7 +50,7 @@ lay_density <- function(fig, x, bw = "nrd0", adjust = 1, kernel = c("gaussian", 
 
   dd <- stats::density.default(x = x, bw = bw, adjust = adjust, kernel = kernel, n = n, cut = 3, na.rm = na.rm)
 
-  do.call(lay_line, c(list(fig = fig, x = dd$x, y = dd$y), opts))
+  do.call(lay_lines, c(list(fig = fig, x = dd$x, y = dd$y), opts))
 }
 
 # lay_rug

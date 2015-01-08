@@ -3,15 +3,11 @@
 \alias{figure}
 \title{Start a Bokeh Figure}
 \usage{
-figure(width = 480, height = 480, title = NULL, xlim = NULL,
-  ylim = NULL, padding_factor = 0.07, plot_width = NULL,
-  plot_height = NULL, x_axis_type = NULL, y_axis_type = NULL,
-  x_mapper_type = NULL, y_mapper_type = NULL, background_fill = NULL,
-  border_fill = NULL, min_border = NULL, min_border_left = NULL,
-  min_border_right = NULL, min_border_top = NULL,
-  min_border_bottom = NULL, h_symmetry = NULL, v_symmetry = NULL,
-  outline_line_color = NULL, xaxes = "below", yaxes = "left",
-  tools = NULL, theme = getOption("bokeh_theme"))
+figure(width = 480, height = 480, title = NULL, xlab = NULL,
+  ylab = NULL, xlim = NULL, ylim = NULL, padding_factor = 0.07,
+  plot_width = NULL, plot_height = NULL, xaxes = "below",
+  yaxes = "left", tools = c("pan", "wheel_zoom", "box_zoom", "resize",
+  "reset", "save"), theme = getOption("bokeh_theme"))
 }
 \arguments{
 \item{width}{figure width in pixels}
@@ -20,6 +16,10 @@ figure(width = 480, height = 480, title = NULL, xlim = NULL,
 
 \item{title}{a title to display above the plot. - "title" is also the prefix for a set of Text Properties, so you can set the font for the title with the parameter text_font.}
 
+\item{xlab}{label for x axis}
+
+\item{ylab}{label for y axis}
+
 \item{xlim}{the extent of the plotting area in the x-dimension (will be computed automatically if not specified).}
 
 \item{ylim}{the extent of the plotting area in the y-dimension (will be computed automatically if not specified).}
@@ -27,28 +27,6 @@ figure(width = 480, height = 480, title = NULL, xlim = NULL,
 \item{padding_factor}{if limits are not specified, by what factor should the extents of the data be padded}
 
 \item{plot_width,plot_height}{width and height of the entire plot in pixels, including border space}
-
-\item{x_axis_type,y_axis_type}{can be set to "datetime" to create datetime axis}
-
-\item{x_mapper_type,y_mapper_type}{can be set to "log" to specifically set the mapper used for the axis}
-
-\item{background_fill}{a color to fill the inner plot area with}
-
-\item{border_fill}{a color to fill the border region around the plot area with.}
-
-\item{min_border}{a minimum size in pixels for the border. This applies to all sides of the plot.}
-
-\item{min_border_left}{set left border individually}
-
-\item{min_border_right}{set right border individually}
-
-\item{min_border_top}{set top border individually}
-
-\item{min_border_bottom}{set bottom border individually}
-
-\item{h_symmetry,v_symmetry}{whether to symmetrize plot borders on opposite horizontal or vertical sides of the plot.}
-
-\item{outline_line_color}{Line Properties that controls the appearance of an outline around the plot, for instance you can set the color of the outline with this}
 
 \item{xaxes}{where to put x axis labels}
 
