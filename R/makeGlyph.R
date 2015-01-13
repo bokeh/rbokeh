@@ -1,4 +1,4 @@
-makeGlyph <- function(fig, type, name, data, args, axisTypeRange, xname = NULL, yname = NULL) {
+makeGlyph <- function(fig, type, lname, lgroup, data, args, axisTypeRange, xname = NULL, yname = NULL) {
 
   ## see if any options won't be used and give a message
   checkOpts(args, type)
@@ -16,17 +16,17 @@ makeGlyph <- function(fig, type, name, data, args, axisTypeRange, xname = NULL, 
   ## make sure specified colors are bokeh-valid hex codes (if they are hex codes)
   args <- validateColors(args)
 
-  ## give it a unique name if not supplied
-  if(is.null(name))
-    name <- genGlyphName(names(fig$glyphLayers))
+  ## give it a unique layer name if not supplied
+  if(is.null(lname))
+    lname <- genGlyphName(names(fig$glyphLayers))
 
   ## save defer function (if any) and remove from data
-  fig$glyphDefer[[name]] <- data$defer
+  fig$glyphDefer[[lname]] <- data$defer
   data$defer <- NULL
 
   if(length(fig$glyphLayers) > 0)
-    if(name %in% names(fig$glyphLayers))
-      message("A glyph already exists with name '", name, "' - this is being replaced")
+    if(lname %in% names(fig$glyphLayers))
+      message("A glyph layer already exists with name '", lname, "' - this is being replaced")
 
   ## validate the spec args
   # validateOpts(opts, type)
@@ -67,18 +67,18 @@ makeGlyph <- function(fig, type, name, data, args, axisTypeRange, xname = NULL, 
      args$text <- list(field = "text")
   }
 
-  if(!is.null(fig$glyphDefer[[name]])) {
-    fig$glyphDeferSpecs[[name]] <- args
-    fig$glyphDeferData[[name]] <- data    
+  if(!is.null(fig$glyphDefer[[lname]])) {
+    fig$glyphDeferSpecs[[lname]] <- args
+    fig$glyphDeferData[[lname]] <- data    
   }
 
-  fig$glyphLayers[[name]] <- list(id = genId(fig, c("glyphRenderer", name)))
+  fig$glyphLayers[[lname]] <- list(id = genId(fig, c("glyphRenderer", lname)))
 
-  fig <- fig %>% addLayer(args, data, name)
+  fig <- fig %>% addLayer(args, data, lname)
 
   ## add x and y range for this glyph
-  fig$glyphXRanges[[name]] <- axisTypeRange$xRange
-  fig$glyphYRanges[[name]] <- axisTypeRange$yRange
+  fig$glyphXRanges[[lname]] <- axisTypeRange$xRange
+  fig$glyphYRanges[[lname]] <- axisTypeRange$yRange
 
   ## add x and y labels if missing
   if(is.null(fig$xlab) && length(xname) > 0)

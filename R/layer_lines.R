@@ -1,24 +1,20 @@
 #' @export
-lay_lines <- function(fig, x, y = NULL, data = NULL, line_color = NULL, line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", name = NULL, ...) {
+lay_lines <- function(fig, x, y = NULL, data = NULL, line_color = NULL, line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_lines")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
-  if(length(xname) > 1)
-    xname <- NULL
-  if(length(yname) > 1)
-    yname <- NULL
 
   if(!is.null(data)) {
-    x          <- getVarData(data, substitute(x))
-    y          <- getVarData(data, substitute(y))
-    line_color <- getVarData(data, substitute(line_color))
-    line_alpha <- getVarData(data, substitute(line_alpha))
+    x          <- eval(substitute(x), data)
+    y          <- eval(substitute(y), data)
+    line_color <- eval(substitute(line_color), data)
+    line_alpha <- eval(substitute(line_alpha), data)
   }
 
   xy <- getXYData(x, y)
-  xyNames <- getXYNames(x, y, xname, yname)
+  xyNames <- getXYNames(x, y, xname, yname, list(...))
 
   opts <- c(list(line_color = line_color, 
     line_alpha = line_alpha, line_width = line_width, 
@@ -29,31 +25,31 @@ lay_lines <- function(fig, x, y = NULL, data = NULL, line_color = NULL, line_alp
 
   axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y)
 
-  makeGlyph(fig, type = "line", name = name, 
+  makeGlyph(fig, type = "line", lname = lname, lgroup = lgroup, 
     data = xy,
     args = opts, axisTypeRange = axisTypeRange, 
     xname = xyNames$x, yname = xyNames$y)
 }
 
 #' @export
-lay_multi_line <- function(fig, xs, ys, name = NULL, ...) {
+lay_multi_line <- function(fig, xs, ys, lname = NULL, lgroup = NULL, ...) {
   axisTypeRange <- getGlyphAxisTypeRange(unlist(xs), unlist(ys))
-  makeGlyph(fig, type = "multi_line", name = name,
+  makeGlyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
     data = list(xs = xs, ys = ys), args = list(...), axisTypeRange = axisTypeRange)
 }
 
 #' @export
-lay_segments <- function(fig, x0, y0, x1, y1, data = NULL, line_color = NULL, line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", name = NULL, ...) {
+lay_segments <- function(fig, x0, y0, x1, y1, data = NULL, line_color = NULL, line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_segments")
 
   if(!is.null(data)) {
-    x0         <- getVarData(data, substitute(x0))
-    y0         <- getVarData(data, substitute(y0))
-    x1         <- getVarData(data, substitute(x1))
-    y1         <- getVarData(data, substitute(y1))
-    line_color <- getVarData(data, substitute(line_color))
-    line_alpha <- getVarData(data, substitute(line_alpha))
+    x0         <- eval(substitute(x0), data)
+    y0         <- eval(substitute(y0), data)
+    x1         <- eval(substitute(x1), data)
+    y1         <- eval(substitute(y1), data)
+    line_color <- eval(substitute(line_color), data)
+    line_alpha <- eval(substitute(line_alpha), data)
   }
 
   opts <- c(list(line_color = line_color, 
@@ -64,13 +60,13 @@ lay_segments <- function(fig, x0, y0, x1, y1, data = NULL, line_color = NULL, li
   opts <- updateLineOpts(fig, opts)
 
   axisTypeRange <- getGlyphAxisTypeRange(c(x0, x1), c(y0, y1))
-  makeGlyph(fig, type = "segment", name = name,
+  makeGlyph(fig, type = "segment", lname = lname, lgroup = lgroup,
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1),
     args = opts, axisTypeRange = axisTypeRange)
 }
 
 #' @export 
-lay_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL, line_color = "black", line_alpha = NULL, line_width = 1, line_dash = 1, name = NULL, ...) {
+lay_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL, line_color = "black", line_alpha = NULL, line_width = 1, line_dash = 1, lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_abline")
 
@@ -146,25 +142,27 @@ lay_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     xAxisType = "numeric", yAxisType = "numeric",
     xRange = NULL, yRange = NULL)
 
-  makeGlyph(fig, type = "segment", name = name,
+  makeGlyph(fig, type = "segment", lname = lname, lgroup = lgroup,
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, defer = deferFn),
     args = opts, axisTypeRange = axisTypeRange)
 }
 
 #' @export
-lay_curve <- function(fig, expr, from = NULL, to = NULL, n = 101, xname = "x", line_color = "black", line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", name = NULL, ...) {
+lay_curve <- function(fig, expr, from = NULL, to = NULL, n = 101, xname = "x", line_color = "black", line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", lname = NULL, lgroup = NULL, ...) {
+
+  xname <- "x"
 
   validateFig(fig, "lay_lines")
 
   sexpr <- substitute(expr)
   if (is.name(sexpr)) {
+    yname <- paste(deparse(sexpr), "(x)", sep = "")
     expr <- call(as.character(sexpr), as.name(xname))
-  }
-  else {
+  } else {
+    yname <- deparse(sexpr)
     if (!((is.call(sexpr) || is.expression(sexpr)) && xname %in% 
       all.vars(sexpr))) 
-      stop(gettextf("'expr' must be a function, or a call or an expression containing '%s'", 
-          xname), domain = NA)
+      stop(gettextf("'expr' must be a function, or a call or an expression containing '%s'", xname), domain = NA)
     expr <- sexpr
   }
 
@@ -180,11 +178,11 @@ lay_curve <- function(fig, expr, from = NULL, to = NULL, n = 101, xname = "x", l
 
   opts <- updateLineOpts(fig, opts)
 
-  do.call(lay_lines, c(list(fig = fig, x = x, y = y, name = name), opts))
+  do.call(lay_lines, c(list(fig = fig, x = x, y = y, lname = lname, lgroup = lgroup, xlab = xname, ylab = yname), opts))
 }
 
 #' @export
-lay_contour <- function(fig, image, x = seq(0, 1, length.out = nrow(image)), y = seq(0, 1, length.out = ncol(image)), nlevels = 10, levels = pretty(range(image, na.rm = TRUE), nlevels), line_color = "black", line_alpha = 0.75, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", name = NULL, ...) {
+lay_contour <- function(fig, image, x = seq(0, 1, length.out = nrow(image)), y = seq(0, 1, length.out = ncol(image)), nlevels = 10, levels = pretty(range(image, na.rm = TRUE), nlevels), line_color = "black", line_alpha = 0.75, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_contour")
 
@@ -202,7 +200,15 @@ lay_contour <- function(fig, image, x = seq(0, 1, length.out = nrow(image)), y =
 
   axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
 
-  makeGlyph(fig, type = "multi_line", name = name,
+  makeGlyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
     data = list(xs = xs, ys = ys),
     args = opts, axisTypeRange = axisTypeRange)
 }
+
+# lay_pointline
+
+# lay_hline
+# lay_vline
+
+
+

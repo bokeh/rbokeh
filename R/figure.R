@@ -1,8 +1,3 @@
-## width and height map more naturally to R
-## equivalent in bokeh is dims = (width, height)
-## which we convert to just prior to plotting
-## similar for xrange (xlim in R) and yrange (ylim in R)
-
 #' Start a Bokeh Figure
 #' 
 #' @param width figure width in pixels
@@ -109,24 +104,3 @@ figModelSkeleton <- function(id, title, width = 480, height = 480) {
     )
   ))
 }
-
-
-# #' @param x_axis_type,y_axis_type can be set to "datetime" to create datetime axis
-# #' @param x_mapper_type,y_mapper_type can be set to "log" to specifically set the mapper used for the axis
-# #' @param background_fill a color to fill the inner plot area with
-# #' @param border_fill a color to fill the border region around the plot area with.
-# #' @param min_border a minimum size in pixels for the border. This applies to all sides of the plot.
-# #' @param min_border_left set left border individually
-# #' @param min_border_right set right border individually
-# #' @param min_border_top set top border individually
-# #' @param min_border_bottom set bottom border individually
-# #' @param h_symmetry,v_symmetry whether to symmetrize plot borders on opposite horizontal or vertical sides of the plot.
-# #' @param outline_line_color Line Properties that controls the appearance of an outline around the plot, for instance you can set the color of the outline with this
-
-# x_axis_type = x_axis_type, y_axis_type = y_axis_type, 
-# x_mapper_type = x_mapper_type, y_mapper_type = y_mapper_type, 
-# background_fill = background_fill, border_fill = border_fill, 
-# min_border = min_border, min_border_left = min_border_left, 
-# min_border_right = min_border_right, min_border_top = min_border_top, 
-# min_border_bottom = min_border_bottom, h_symmetry = h_symmetry, 
-# v_symmetry = v_symmetry, outline_line_color = outline_line_color, 

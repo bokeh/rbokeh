@@ -27,7 +27,7 @@ validateFig <- function(fig, fct) {
 }
 
 ## some things like rainbow(), etc., give hex with alpha
-## Bokeh doesn't like alpha, so get rid of it
+## Bokeh doesn't like hex alpha, so get rid of it
 validateColors <- function(opts) {
   colFields <- c("line_color", "fill_color", "text_color")
 
@@ -35,7 +35,7 @@ validateColors <- function(opts) {
     if(!is.null(opts[[fld]])) {
       ind <- which(grepl("^#", opts[[fld]]) & nchar(opts[[fld]]) == 9)
       if(length(ind) > 0) {
-        message("note - ", fld, " has hex colors with with alpha information - removing alpha")
+        message("note - ", fld, " has hex colors with with alpha information - removing alpha - please specify that through fill_alpha or line_alpha")
         opts[[fld]][ind] <- substr(opts[[fld]][ind], 1 , 7)
       }
     }
@@ -144,7 +144,7 @@ getAllGlyphRange <- function(ranges, padding_factor, axisType = "numeric") {
 checkOpts <- function(opts, type) {
   curGlyphProps <- glyphProps[[type]]
 
-  validOpts <- NULL
+  validOpts <- c("xlab", "ylab")
   if(curGlyphProps$lp)
     validOpts <- c(validOpts, linePropNames)
   if(curGlyphProps$fp)
@@ -171,21 +171,14 @@ reduceSaturation <- function(col, factor = 0.5) {
   do.call(hsv, as.list(col2[,1]))
 }
 
-## get variables when specified as names of a data frame
-## and need to be deparsed and extracted
-getVarData <- function(data, var) {
-  tmp <- data[[paste(deparse(var), collapse = "")]]
-  if(is.null(tmp))
-    tmp <- eval(var)
-  tmp
-}
-
 ## handle different x, y input types
 ## this should be more "class"-y
 ## but this will suffice
 getXYData <- function(x, y) {
   if(is.null(y)) {
-    if(is.list(x)) {
+    if(is.ts(x)) {
+      return(list(x = as.vector(time(x)), y = as.vector(x)))
+    } else if(is.list(x)) {
       return(list(x = x[[1]], y = x[[2]]))
     } else if(is.vector(x)) {
       return(list(x = seq_along(x), y = x))
@@ -194,16 +187,33 @@ getXYData <- function(x, y) {
   list(x = x, y = y)        
 }
 
-getXYNames <- function(x, y, xname, yname) {
+getXYNames <- function(x, y, xname, yname, dots) {
+
+  if(length(xname) > 1)
+    xname <- NULL
+  if(length(yname) > 1)
+    yname <- NULL
+
   if(is.null(y)) {
-    if(is.list(x)) {
+    if(is.ts(x)) {
+      res <- list(x = "time", y = xname)
+    } else if(is.list(x)) {
       nms <- names(x)
-      return(list(x = nms[1], y = nms[2]))
+      res <- list(x = nms[1], y = nms[2])
     } else if(is.vector(x)) {
-      return(list(x = "index", y = xname))
+      res <- list(x = "index", y = xname)
     }
+  } else {
+    res <- list(x = xname, y = yname)    
   }
-  list(x = xname, y = yname)
+
+  # manual specification trumps
+  if("xlab" %in% names(dots))
+    res$x <- dots$xlab
+  if("ylab" %in% names(dots))
+    res$y <- dots$ylab
+
+  res
 }
 
 

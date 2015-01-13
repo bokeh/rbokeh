@@ -1,16 +1,16 @@
 
 #' @export
-lay_polygon <- function(fig, x, y, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, name = NULL, ...) {
+lay_polygon <- function(fig, x, y, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_polygon")
 
   if(!is.null(data)) {
-    x          <- getVarData(data, substitute(x))
-    y          <- getVarData(data, substitute(y))
-    fill_color <- getVarData(data, substitute(fill_color))
-    line_color <- getVarData(data, substitute(line_color))
-    fill_alpha <- getVarData(data, substitute(fill_alpha))
-    line_alpha <- getVarData(data, substitute(line_alpha))
+    x          <- eval(substitute(x), data)
+    y          <- eval(substitute(y), data)
+    fill_color <- eval(substitute(fill_color), data)
+    line_color <- eval(substitute(line_color), data)
+    fill_alpha <- eval(substitute(fill_alpha), data)
+    line_alpha <- eval(substitute(line_alpha), data)
   }
 
   opts <- c(list(fill_color = fill_color, line_color = line_color, fill_alpha = fill_alpha, line_alpha = line_alpha), list(...))
@@ -23,25 +23,25 @@ lay_polygon <- function(fig, x, y, data = NULL, fill_color = NULL, line_color = 
     opts$fill_color <- reduceSaturation(opts$line_color)
 
   axisTypeRange <- getGlyphAxisTypeRange(x, y)
-  makeGlyph(fig, type = "patch", name = name,
+  makeGlyph(fig, type = "patch", lname = lname, lgroup = lgroup,
     data = list(x = x, y = y), args = opts, axisTypeRange = axisTypeRange)
 }
 
 #' @export
-lay_polygons <- function(fig, xs, ys, group = NULL, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, name = NULL, ...) {
+lay_polygons <- function(fig, xs, ys, group = NULL, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_polygons")
 
   ## xs and ys can be a list
   ## or obtained from a data frame with a group variable
   if(!is.null(data)) {
-    xs         <- getVarData(data, substitute(xs))
-    ys         <- getVarData(data, substitute(ys))
-    group      <- getVarData(data, substitute(group))
-    # fill_color <- getVarData(data, substitute(fill_color))
-    # line_color <- getVarData(data, substitute(line_color))
-    # fill_alpha <- getVarData(data, substitute(fill_alpha))
-    # line_alpha <- getVarData(data, substitute(line_alpha))
+    xs         <- eval(substitute(xs), data)
+    ys         <- eval(substitute(ys), data)
+    group      <- eval(substitute(group), data)
+    # fill_color <- eval(substitute(fill_color), data)
+    # line_color <- eval(substitute(line_color), data)
+    # fill_alpha <- eval(substitute(fill_alpha), data)
+    # line_alpha <- eval(substitute(line_alpha), data)
 
     xs <- unname(split(xs, group))
     ys <- unname(split(ys, group))
@@ -62,24 +62,32 @@ lay_polygons <- function(fig, xs, ys, group = NULL, data = NULL, fill_color = NU
   }
 
   axisTypeRange <- getGlyphAxisTypeRange(unlist(xs), unlist(ys))
-  makeGlyph(fig, type = "patches", name = name,
+  makeGlyph(fig, type = "patches", lname = lname, lgroup = lgroup,
     data = list(xs = unname(xs), ys = unname(ys)), args = opts, axisTypeRange = axisTypeRange)
 }
 
 #' @export
-lay_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, name = NULL, ...) {
+lay_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_rect")
 
+  xname <- NULL
+  yname <- NULL
+  dots <- list(...)
+  if("xlab" %in% names(dots))
+    xname <- dots$xlab
+  if("ylab" %in% names(dots))
+    yname <- dots$ylab
+
   if(!is.null(data)) {
-    xleft      <- getVarData(data, substitute(xleft))
-    ybottom    <- getVarData(data, substitute(ybottom))
-    xright     <- getVarData(data, substitute(xright))
-    ytop       <- getVarData(data, substitute(ytop))
-    fill_color <- getVarData(data, substitute(fill_color))
-    line_color <- getVarData(data, substitute(line_color))
-    fill_alpha <- getVarData(data, substitute(fill_alpha))
-    line_alpha <- getVarData(data, substitute(line_alpha))
+    xleft      <- eval(substitute(xleft), data)
+    ybottom    <- eval(substitute(ybottom), data)
+    xright     <- eval(substitute(xright), data)
+    ytop       <- eval(substitute(ytop), data)
+    fill_color <- eval(substitute(fill_color), data)
+    line_color <- eval(substitute(line_color), data)
+    fill_alpha <- eval(substitute(fill_alpha), data)
+    line_alpha <- eval(substitute(line_alpha), data)
   }
 
   opts <- c(list(fill_color = fill_color, line_color = line_color, fill_alpha = fill_alpha, line_alpha = line_alpha), list(...))
@@ -93,27 +101,33 @@ lay_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL, fill_color 
   }
 
   axisTypeRange <- getGlyphAxisTypeRange(c(xleft, xright), c(ybottom, ytop))
-  makeGlyph(fig, type = "quad", name = name,
+  makeGlyph(fig, type = "quad", lname = lname, lgroup = lgroup,
+    xname = xname, yname = yname,
     data = list(left = xleft, right = xright, top = ytop, bottom = ybottom), args = opts, axisTypeRange = axisTypeRange)
 }
 
 #' @export
-lay_crect <- function(fig, x, y, width = 1, height = 1, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, angle = 0, name = NULL, ...) {
+lay_crect <- function(fig, x, y = NULL, width = 1, height = 1, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, angle = 0, lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_crect")
 
+  xname <- deparse(substitute(x))
+  yname <- deparse(substitute(y))
+
   if(!is.null(data)) {
-    x          <- getVarData(data, substitute(x))
-    y          <- getVarData(data, substitute(y))
-    fill_color <- getVarData(data, substitute(fill_color))
-    line_color <- getVarData(data, substitute(line_color))
-    fill_alpha <- getVarData(data, substitute(fill_alpha))
-    line_alpha <- getVarData(data, substitute(line_alpha))
-    angle      <- getVarData(data, substitute(angle))
-    width      <- getVarData(data, substitute(width))
-    height     <- getVarData(data, substitute(height))
+    x          <- eval(substitute(x), data)
+    y          <- eval(substitute(y), data)
+    fill_color <- eval(substitute(fill_color), data)
+    line_color <- eval(substitute(line_color), data)
+    fill_alpha <- eval(substitute(fill_alpha), data)
+    line_alpha <- eval(substitute(line_alpha), data)
+    angle      <- eval(substitute(angle), data)
+    width      <- eval(substitute(width), data)
+    height     <- eval(substitute(height), data)
   }
+
   xy <- getXYData(x, y)
+  xyNames <- getXYNames(x, y, xname, yname, list(...))
 
   opts <- c(list(fill_color = fill_color, line_color = line_color, fill_alpha = fill_alpha, line_alpha = line_alpha), list(...))
 
@@ -134,7 +148,8 @@ lay_crect <- function(fig, x, y, width = 1, height = 1, data = NULL, fill_color 
     yr <- c(xy$y - height / 2, xy$y + height / 2)
   }
   axisTypeRange <- getGlyphAxisTypeRange(xr, yr)
-  makeGlyph(fig, type = "rect", name = name,
+  makeGlyph(fig, type = "rect", lname = lname, lgroup = lgroup,
+    xname = xyNames$x, yname = xyNames$y,
     data = c(xy, list(width = width, height = height, angle = angle)),
     args = opts, axisTypeRange = axisTypeRange)
 }

@@ -1,30 +1,47 @@
+
+
+# major aesthetic specification:
+# type: what type of glyph to plot at each point
+# color: the color
+#   when using a type that has only an outline, this will be the color of the outline
+#   when using a type that has outline and fill, this will be the color of the outline and the fill will be a slightly less-saturated value of the same color
+# alpha: the alpha of both the line and the fill
+# size: the size of the glyph
+# type can be any of the following:
+# 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25
+# these matche R's pch setting (see point_types())
+# except 11 and 14 are missing, and 16, 19, 20 are the same
+# or asterisk, circle, circle_cross, circle_x, cross, diamond, diamond_cross, inverted_triangle, square, square_cross, square_x, triangle, x
+# the integer-based types simply map to any of these named types but with different line and/or fill properties
+
+# in addition, lower-level control can be specified over 
+
+# grouping:
+# any of the following properties can be specified as a "grouping" variable, with length as long as x and y, for which colors from the specified theme will be assigned to groups based on the unique values provided.  either a vector of valid values for that field can be given (e.g. for colors, a vector of valid css color names or hex codes) or a vector of factor levels which will be used to assign attributes based on the theme
+# grouping variables: type, color, line_color, fill_color
+
 #' @export
-lay_points <- function(fig, x, y = NULL, data = NULL, groups = NULL, type = 1, size = 10, line_color = NULL, line_alpha = 1, line_width = 1, fill_color = NULL, fill_alpha = NULL, name = NULL, ...) {
+lay_points <- function(fig, x, y = NULL, data = NULL, type = 1, color = "blue", size = 10, line_color = NULL, line_alpha = 1, line_width = 1, fill_color = NULL, fill_alpha = NULL, lname = NULL, lgroup = NULL, lsubgroup = NULL, ...) {
 
   validateFig(fig, "lay_points")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
-  if(length(xname) > 1)
-    xname <- NULL
-  if(length(yname) > 1)
-    yname <- NULL
 
   ## deal with vector inputs from a data source
   if(!is.null(data)) {
-    x          <- getVarData(data, substitute(x))
-    y          <- getVarData(data, substitute(y))
-    groups     <- getVarData(data, substitute(groups))
-    line_color <- getVarData(data, substitute(line_color))
-    line_alpha <- getVarData(data, substitute(line_alpha))
-    line_width <- getVarData(data, substitute(line_width))
-    fill_color <- getVarData(data, substitute(fill_color))
-    fill_alpha <- getVarData(data, substitute(fill_alpha))
+    x          <- eval(substitute(x), data)
+    y          <- eval(substitute(y), data)
+    line_color <- eval(substitute(line_color), data)
+    line_alpha <- eval(substitute(line_alpha), data)
+    line_width <- eval(substitute(line_width), data)
+    fill_color <- eval(substitute(fill_color), data)
+    fill_alpha <- eval(substitute(fill_alpha), data)    
   }
 
   ## translate different x, y types to vectors
   xy <- getXYData(x, y)
-  xyNames <- getXYNames(x, y, xname, yname)
+  xyNames <- getXYNames(x, y, xname, yname, list(...))
 
   opts <- c(list(line_color = line_color, line_alpha = line_alpha, 
     line_width = line_width, fill_color = fill_color, 
@@ -97,7 +114,7 @@ lay_points <- function(fig, x, y = NULL, data = NULL, groups = NULL, type = 1, s
   if(length(xy$y) == 1)
     xy$y <- list(xy$y)
 
-  makeGlyph(fig, type, name, 
+  makeGlyph(fig, type, lname, 
     data = c(xy, list(size = size)),
     args = opts, axisTypeRange = axisTypeRange, 
     xname = xyNames$x, yname = xyNames$y)
