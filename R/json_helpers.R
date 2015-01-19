@@ -28,6 +28,7 @@ getJSON <- function(obj) {
   obj
 }
 
+#' @export
 printJSON <- function(obj) {
   cat(toJSON(getJSON(obj$model), pretty = TRUE))
 }

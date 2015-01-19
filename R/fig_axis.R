@@ -10,7 +10,7 @@ x_axis <- function(obj, label, position = "below", grid = TRUE, num_minor_ticks 
   if(missing(label))
     label <- obj$xlab
   obj$xlab <- label
-  updateAxis(obj, position, label, num_minor_ticks)
+  updateAxis(obj, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks)
 }
 
 #' @export
@@ -25,7 +25,7 @@ y_axis <- function(obj, label, position = "left", grid = TRUE, num_minor_ticks =
   if(missing(label))
     label <- obj$ylab
   obj$ylab <- label
-  updateAxis(obj, position, label, num_minor_ticks)
+  updateAxis(obj, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks)
 }
 
 # axis ref needs to be added to plot attributes as "above", "below", "left", or "right"

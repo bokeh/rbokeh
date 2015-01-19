@@ -1,6 +1,6 @@
 #' @export
 lay_hist <- function(fig, x, data = NULL, breaks = "Sturges", freq = TRUE,
-  include.lowest = TRUE, right = TRUE, 
+  include.lowest = TRUE, right = TRUE,
   density = NULL, angle = 45, warn.unused = FALSE,
   line_color = NULL, line_width = 1, line_alpha = 1,
   fill_color = NULL, fill_alpha = 1,
@@ -14,20 +14,21 @@ lay_hist <- function(fig, x, data = NULL, breaks = "Sturges", freq = TRUE,
 
   validateFig(fig, "lay_hist")
 
-  hh <- graphics::hist.default(x = x, breaks = breaks, 
+  hh <- graphics::hist.default(x = x, breaks = breaks,
     freq = freq, include.lowest = include.lowest, right = right,
     density = density, angle = angle, col = col,
     warn.unused = warn.unused, plot = FALSE)
 
-  opts <- c(list(line_color = line_color, 
+  args <- list(line_color = line_color,
     line_width = line_width, line_alpha = line_alpha,
-    fill_color = fill_color, fill_alpha = fill_alpha), 
-    list(...))
+    fill_color = fill_color, fill_alpha = fill_alpha, ...)
 
   if(is.null(line_color))
-    opts$line_color <- getNextColor(fig)
-  if(is.null(fill_color))
-    opts$fill_color <- reduceSaturation(opts$line_color)
+    args$line_color <- "blue"
+  if(is.null(fill_color)) {
+    args$fill_color <- "blue"
+    args$fill_alpha <- 0.4
+  }
 
   y <- if(freq) {
     hh$counts
@@ -35,7 +36,7 @@ lay_hist <- function(fig, x, data = NULL, breaks = "Sturges", freq = TRUE,
     hh$density
   }
 
-  do.call(lay_rect, c(list(fig = fig, xleft = hh$breaks[-length(hh$breaks)], xright = hh$breaks[-1], ytop = y, ybottom = 0, xlab = xname, ylab = yname), opts))
+  do.call(lay_rect, c(list(fig = fig, xleft = hh$breaks[-length(hh$breaks)], xright = hh$breaks[-1], ytop = y, ybottom = 0, xlab = xname, ylab = yname), args))
 }
 
 #' @export
@@ -50,9 +51,9 @@ lay_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1, kernel = c
   if(!is.null(data))
     x <- eval(substitute(x), data)
 
-  opts <- c(list(line_color = line_color, 
-    line_alpha = line_alpha, line_width = line_width, 
-    line_dash = line_dash, line_join = line_join, 
+  opts <- c(list(line_color = line_color,
+    line_alpha = line_alpha, line_width = line_width,
+    line_dash = line_dash, line_join = line_join,
     line_cap = line_cap), list(...))
 
   opts <- updateLineOpts(fig, opts)
@@ -70,8 +71,8 @@ lay_quantile <- function(fig, x, groups = NULL, data = NULL,
 
   validateFig(fig, "lay_quantile")
 
-  opts <- c(list(line_color = line_color, line_alpha = line_alpha, 
-    line_width = line_width, fill_color = fill_color, 
+  opts <- c(list(line_color = line_color, line_alpha = line_alpha,
+    line_width = line_width, fill_color = fill_color,
     fill_alpha = fill_alpha), list(...))
 
   if(!is.null(data)) {
@@ -87,7 +88,7 @@ lay_quantile <- function(fig, x, groups = NULL, data = NULL,
       ## if the vector is too long, perhaps should default
       ## to some length, like 1000
       curProbs <- ppoints(length(x[ii]))
-      qq <- sort(x[ii])      
+      qq <- sort(x[ii])
     } else {
       curProbs <- probs
       qq <- quantile(x[ii], curProbs, names = FALSE)
@@ -117,8 +118,8 @@ lay_boxplot <- function(fig, x, y = NULL, data = NULL, coef = 1.5, line_color = 
       y <- as.character(y)
   }
 
-  opts <- c(list(line_color = line_color, line_alpha = line_alpha, 
-    line_width = line_width, fill_color = fill_color, 
+  opts <- c(list(line_color = line_color, line_alpha = line_alpha,
+    line_width = line_width, fill_color = fill_color,
     fill_alpha = fill_alpha), list(...))
 
   fill_ind <- grepl("^fill_", names(opts))

@@ -10,10 +10,10 @@
 # - add GlyphRenderer reference to "renderers"
 # - add GlyphRenderer model to object
 
-addLayer <- function(obj, spec, dat, name) {
-  type <- spec$type
-  type <- underscore2camel(type)
-  spec$type <- NULL
+addLayer <- function(obj, spec, dat, lname, lgroup) {
+  glyph <- spec$glyph
+  glyph <- underscore2camel(glyph)
+  spec$glyph <- NULL
 
   specInData <- names(spec) %in% names(dat)
 
@@ -24,6 +24,7 @@ addLayer <- function(obj, spec, dat, name) {
       list(units = "data", value = spec[[ii]])
     }
   })
+
   names(glyphAttrs) <- names(spec)
   if(!is.null(glyphAttrs$size))
     glyphAttrs$size$units <- "screen"
@@ -34,20 +35,20 @@ addLayer <- function(obj, spec, dat, name) {
   if(!is.null(glyphAttrs$text))
     glyphAttrs$text$field <- glyphAttrs$text$field$field
 
-  if(type == "Image") {
+  if(glyph == "Image") {
     cId <- genId(obj, "ColorMapper")
     cmap <- colorMapperModel(cId)
     glyphAttrs$color_mapper <- cmap$ref
     obj$model[[cId]] <- cmap$model
   }
 
-  glId <- genId(obj, c(type, name))
-  glyph <- glyphModel(glId, type, glyphAttrs)
+  glId <- genId(obj, c(glyph, lgroup, lname))
+  glyph <- glyphModel(glId, glyph, glyphAttrs)
 
   dId <- genId(obj, digest(dat))
   datMod <- dataModel(dat, dId)
 
-  glrId <- genId(obj, c("glyphRenderer", name))
+  glrId <- genId(obj, c("glyphRenderer", lgroup, lname))
   glyphRend <- glyphRendererModel(glrId, datMod$ref, glyph$ref)
 
   obj$model$plot$attributes$renderers[[glrId]] <- glyphRend$ref
@@ -71,8 +72,8 @@ dataModel <- function(dd, id = NULL) {
   res
 }
 
-glyphModel <- function(id, type = "Circle", attrs) {
-  res <- baseModelObject(type, id)
+glyphModel <- function(id, glyph = "Circle", attrs) {
+  res <- baseModelObject(glyph, id)
   res$model$attributes <- c(
     res$model$attributes, attrs)
   res
@@ -80,10 +81,10 @@ glyphModel <- function(id, type = "Circle", attrs) {
 
 glyphRendererModel <- function(id, dataRef, glyphRef) {
   res <- baseModelObject("GlyphRenderer", id)
-  res$model$attributes["selection_glyph"] <- list(NULL) 
-  res$model$attributes["nonselection_glyph"] <- list(NULL) 
-  res$model$attributes["server_data_source"] <- list(NULL) 
-  res$model$attributes["name"] <- list(NULL) 
+  res$model$attributes["selection_glyph"] <- list(NULL)
+  res$model$attributes["nonselection_glyph"] <- list(NULL)
+  res$model$attributes["server_data_source"] <- list(NULL)
+  res$model$attributes["name"] <- list(NULL)
   res$model$attributes$data_source <- dataRef
   res$model$attributes$glyph <- glyphRef
   res

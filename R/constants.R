@@ -93,6 +93,8 @@ ltyDict <- list(
   "twodash" = list(line_dash = c(12, 4, 4, 4))
 )
 
+ltyNames <- names(ltyDict)
+
 ## convert ljoin to line_cap
 ljoinDict <- list(
   "1" = "round",

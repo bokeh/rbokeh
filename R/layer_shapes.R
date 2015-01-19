@@ -47,7 +47,7 @@ lay_polygons <- function(fig, xs, ys, group = NULL, data = NULL, fill_color = NU
     ys <- unname(split(ys, group))
   } else if(!is.null(group)) {
     xs <- unname(split(xs, group))
-    ys <- unname(split(ys, group))    
+    ys <- unname(split(ys, group))
   }
   if(!(is.list(xs) && is.list(ys)))
     stop("For lay_polygon, xs and ys must be lists or specified through a data frame through 'data' argument.")
@@ -80,30 +80,30 @@ lay_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL, fill_color 
     yname <- dots$ylab
 
   if(!is.null(data)) {
-    xleft      <- eval(substitute(xleft), data)
-    ybottom    <- eval(substitute(ybottom), data)
-    xright     <- eval(substitute(xright), data)
-    ytop       <- eval(substitute(ytop), data)
-    fill_color <- eval(substitute(fill_color), data)
-    line_color <- eval(substitute(line_color), data)
-    fill_alpha <- eval(substitute(fill_alpha), data)
-    line_alpha <- eval(substitute(line_alpha), data)
+    xleft      <- v_eval(substitute(xleft), data)
+    ybottom    <- v_eval(substitute(ybottom), data)
+    xright     <- v_eval(substitute(xright), data)
+    ytop       <- v_eval(substitute(ytop), data)
+    fill_color <- v_eval(substitute(fill_color), data)
+    line_color <- v_eval(substitute(line_color), data)
+    fill_alpha <- v_eval(substitute(fill_alpha), data)
+    line_alpha <- v_eval(substitute(line_alpha), data)
   }
 
-  opts <- c(list(fill_color = fill_color, line_color = line_color, fill_alpha = fill_alpha, line_alpha = line_alpha), list(...))
+  args <- list(fill_color = fill_color, line_color = line_color, fill_alpha = fill_alpha, line_alpha = line_alpha, ...)
 
   nextColor <- getNextColor(fig)
 
   ## defaults if nothing is specified
-  if(is.null(opts$line_color) && is.null(opts$fill_color)) {
-    opts$line_color <- nextColor
-    opts$fill_color <- reduceSaturation(opts$line_color)
+  if(is.null(args$line_color) && is.null(args$fill_color)) {
+    args$line_color <- nextColor
+    args$fill_color <- reduceSaturation(args$line_color)
   }
 
   axisTypeRange <- getGlyphAxisTypeRange(c(xleft, xright), c(ybottom, ytop))
   makeGlyph(fig, type = "quad", lname = lname, lgroup = lgroup,
     xname = xname, yname = yname,
-    data = list(left = xleft, right = xright, top = ytop, bottom = ybottom), args = opts, axisTypeRange = axisTypeRange)
+    data = list(left = xleft, right = xright, top = ytop, bottom = ybottom), args = args, axisTypeRange = axisTypeRange)
 }
 
 #' @export

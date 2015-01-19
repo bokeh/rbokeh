@@ -44,7 +44,7 @@ validateColors <- function(opts) {
 }
 
 getNextColor <- function(fig) {
-  nLayers <- length(fig$glyphLayers)
+  nLayers <- length(fig$layers)
   nextColorIdx <- (nLayers + 1) %% length(fig$theme$glyph)
   fig$theme$glyph[nextColorIdx]
 }
@@ -54,19 +54,19 @@ checkArcDirection <- function(direction) {
     stop("'direction' must be 'clock' or 'anticlock'", call. = FALSE)
 }
 
-## take a set of glyph specification names
-## and come up with the next increment of 'glyph[int]'
-genGlyphName <- function(specNames) {
-  # specNames <- c("asdf", "glyph1", "glyph23", "qwert", "aglyph7", "glyph12b")
+## take a set of layer groups
+## and come up with the next increment of 'layer[int]'
+genLayerGroup <- function(specNames) {
+  # specNames <- c("asdf", "layer1", "layer23", "qwert", "alayer7", "layer12b")
   if(length(specNames) == 0) {
-    name <- "glyph1"
+    name <- "layer1"
   } else {
-    glyphNames <- specNames[grepl("^glyph([0-9]+)$", specNames)]
-    if(length(glyphNames) == 0) {
-      name <- "glyph1"
+    layerGroupNames <- specNames[grepl("^layer([0-9]+)$", specNames)]
+    if(length(layerGroupNames) == 0) {
+      name <- "layer1"
     } else {
-      nn <- as.integer(gsub("glyph", "", glyphNames))
-      name <- paste("glyph", max(nn) + 1, sep = "")
+      nn <- as.integer(gsub("layer", "", layerGroupNames))
+      name <- paste("layer", max(nn) + 1, sep = "")
     }
   }
   name
@@ -129,7 +129,7 @@ validateAxisType <- function(figType, curType, which) {
 getAllGlyphRange <- function(ranges, padding_factor, axisType = "numeric") {
   if(axisType == "numeric") {
     rangeMat <- do.call(rbind, ranges)
-    hardRange <- c(min(rangeMat[,1], na.rm = TRUE), 
+    hardRange <- c(min(rangeMat[,1], na.rm = TRUE),
       max(rangeMat[,2], na.rm = TRUE))
     hardRange <- hardRange + c(-1, 1) * padding_factor * diff(hardRange)
     if(hardRange[1] == hardRange[2])
@@ -158,8 +158,8 @@ checkOpts <- function(opts, type) {
     if(length(idx) > 0) {
       notUsed <- setdiff(names(opts)[idx], validOpts)
       if(length(notUsed) > 0)
-        message("note - arguments not used: ", paste(notUsed, collapse = ", "))    
-    }    
+        message("note - arguments not used: ", paste(notUsed, collapse = ", "))
+    }
   }
 }
 
@@ -167,7 +167,7 @@ checkOpts <- function(opts, type) {
 ## (used to get fill for pch=21:25)
 reduceSaturation <- function(col, factor = 0.5) {
   col2 <- do.call(rgb2hsv, structure(as.list(col2rgb(col)[,1]), names = c("r", "g", "b")))
-  col2['s', ] <- col2['s', ] * factor  
+  col2['s', ] <- col2['s', ] * factor
   do.call(hsv, as.list(col2[,1]))
 }
 
@@ -184,7 +184,7 @@ getXYData <- function(x, y) {
       return(list(x = seq_along(x), y = x))
     }
   }
-  list(x = x, y = y)        
+  list(x = x, y = y)
 }
 
 getXYNames <- function(x, y, xname, yname, dots) {
@@ -204,7 +204,7 @@ getXYNames <- function(x, y, xname, yname, dots) {
       res <- list(x = "index", y = xname)
     }
   } else {
-    res <- list(x = xname, y = yname)    
+    res <- list(x = xname, y = yname)
   }
 
   # manual specification trumps
@@ -216,10 +216,127 @@ getXYNames <- function(x, y, xname, yname, dots) {
   res
 }
 
+# get the "hover" argument and turn it into data and dict
+# if a data frame was provided, the arg sould be a
+# list of column names
+# otherwise it should be a named list or data frame
+getHover <- function(hn, data) {
+  if(deparse(hn) == "NULL")
+    return(NULL)
+  if(is.null(data)) {
+    hover <- eval(hn)
+    hn <- names(hover)
+    data <- hover
+  } else {
+    hn <- deparse(hn)[1]
+    hn <- gsub("c\\(|list\\(|\\)| +", "", hn)
+    hn <- strsplit(hn, ",")[[1]]
+    if(all(! hn %in% names(data))) {
+      message("There were no columns: ", paste(hn, collapse = ", "), " in the data for the hover tool - hover not added")
+      return(NULL)
+    }
+    data <- data[hn]
+  }
+  # hn <- setdiff(hn, c("x", "y", "size", "glyph", "color", "line_color", "fill_color"))
+  hn2 <- gsub("\\.", "_", hn)
+  names(data) <- hn2
+
+  hdict <- lapply(seq_along(hn), function(ii) list(hn[ii], paste("@", hn2[ii], sep = "")))
+
+  return(structure(list(
+    data = data,
+    dict = hdict
+  ), class = "hoverSpec"))
+}
+
+v_eval <- function(x, data) {
+  res <- eval(x, data)
+  if(is.null(res))
+    return(res)
+  attr(res, "nseName") <- deparse(x)
+  res
+}
+
+fixArgs <- function(args, n) {
+  lns <- sapply(args, length)
+  nms <- names(args)
+  idx <- which(!lns %in% c(0, 1, n))
+
+  if(length(idx) > 0)
+    stop("Arguments do not have correct length: ", paste(nms[idx], " (", lns[idx],")", sep = "", collapse = ", "))
+
+  # sclIdx <- which(lns == 1)
+  # splitIdx <- which(lns == n)
+  nullIdx <- which(lns == 0)
+  if(length(nullIdx) > 0)
+    args[nullIdx] <- NULL
+
+  args
+}
+
+getAesMaps <- function(args, glrId) {
+
+  nms <- names(args)
+  ## get an index of arguments that need a map and have an nseName
+  ## nseName is used in the legend so we know what variable created the map
+  mappable <- sapply(seq_along(args), function(ii) {
+    if(!is.null(attr(args[[ii]], "nseName"))) {
+      if(!is.null(needsMapFns[[nms[ii]]])) {
+        if(needsMapFns[[nms[ii]]](args[[ii]]))
+          return(TRUE)
+      }
+    }
+    return(FALSE)
+  })
+
+  if(length(which(mappable)) == 0)
+    return(NULL)
+
+  # build an aesMap object with an entry for each unique nseName
+  # entry has the name, domain
+  nseNames <- as.character(sapply(args[mappable], function(x) attr(x, "nseName")))
+  uNseNames <- unique(nseNames)
+
+  lapply(uNseNames, function(x) {
+    ## args we need to compute domain for
+    margs <- args[mappable[nseNames == x]]
+    ## args we need to maintain for legend glyphs
+    gargs <- lapply(args[!mappable], function(x) x[1])
+    list(name = x,
+      glrId = glrId,
+      domain = getDomain(do.call(c, lapply(margs, getDomain))),
+      glyphAttrs = gargs,
+      range = structure(replicate(length(margs), list()), names = names(margs))
+    )
+  })
+}
+
+mergeAesMaps <- function(d1, d2) {
+  if(is.null(d1))
+    return(d2)
+  if(is.null(d2))
+    return(d1)
+
+  if(is.character(d1)) {
+    return(unique(c(d1, d2)))
+  } else {
+    return(range(c(d1, d2), na.rm = TRUE))
+  }
+}
+
+getDomain <- function(x) {
+  if(is.factor(x)) {
+    return(levels(x))
+  } else if(is.character(x)) {
+    return(sort(unique(x)))
+  } else {
+    return(range(x, na.rm = TRUE))
+  }
+}
 
 ## take output of map() and convert it to a data frame
 map2df <- function(a) {
-  dd <- data.frame(lon = a$x, lat = a$y, 
+  dd <- data.frame(lon = a$x, lat = a$y,
     group = cumsum(is.na(a$x) & is.na(a$y)) + 1)
   dd[complete.cases(dd$lon, dd$lat), ]
 }

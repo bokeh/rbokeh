@@ -1,14 +1,16 @@
 #' Start a Bokeh Figure
-#' 
+#'
 #' @param width figure width in pixels
 #' @param height figure width in pixels
 #' @param title a title to display above the plot. - "title" is also the prefix for a set of Text Properties, so you can set the font for the title with the parameter text_font.
 #' @param xlab label for x axis
 #' @param ylab label for y axis
-#' @param xlim the extent of the plotting area in the x-dimension (will be computed automatically if not specified). 
+#' @param xlim the extent of the plotting area in the x-dimension (will be computed automatically if not specified).
 #' @param ylim the extent of the plotting area in the y-dimension (will be computed automatically if not specified).
 #' @param padding_factor if limits are not specified, by what factor should the extents of the data be padded
 #' @param plot_width,plot_height width and height of the entire plot in pixels, including border space
+#' @param xgrid whether to draw x axis grid lines
+#' @param ygrid whether to draw y axis grid lines
 #' @param xaxes where to put x axis labels
 #' @param yaxes where to put y axis labels
 #' @param tools interactivity tools options
@@ -27,6 +29,8 @@ figure <- function(
   padding_factor = 0.07,
   plot_width = NULL,
   plot_height = NULL,
+  xgrid = TRUE,
+  ygrid = TRUE,
   xaxes = "below",
   yaxes = "left",
   tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save"),
@@ -42,11 +46,11 @@ figure <- function(
   id <- genId(list(time = tt), "Plot")
 
   fig <- structure(list(
-    width = width, height = height, title = title, 
+    width = width, height = height, title = title,
     xlab = xlab, ylab = ylab,
     xlim = xlim, ylim = ylim, padding_factor = padding_factor,
     plot_width = plot_width, plot_height = plot_height,
-    xaxes = xaxes, yaxes = yaxes, 
+    xgrid = xgrid, ygrid = ygrid, xaxes = xaxes, yaxes = yaxes,
     tools = tools, theme = theme,
     model = figModelSkeleton(id, title, width, height),
     ref = list(
@@ -58,7 +62,7 @@ figure <- function(
     glyphDeferSpecs = list(),
     glyphDeferData = list(),
     glyphDefer = list(),
-    glyphLayers = list(),
+    layers = list(),
     ## keep track of x and y range of each glyph
     glyphXRanges = list(),
     glyphYRanges = list(),

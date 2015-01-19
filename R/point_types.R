@@ -1,6 +1,6 @@
 
 #' @export
-point_types <- function(width = 1100, height = 600, size = 25, col = "blue") {
+glyphTypes <- function(width = 1100, height = 600, size = 25, col = "blue") {
 
   types <- c(as.list(markerPchTypes), as.list(markerNames))
 

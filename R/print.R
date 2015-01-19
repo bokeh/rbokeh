@@ -1,10 +1,10 @@
 #' Print a Bokeh Figure
-#' 
+#'
 #' @param x Bokeh figure
-#' @param \ldots further arguments - most importantly \code{debug = TRUE} 
-#' will print information about the figure in the javascript console in the 
+#' @param \ldots further arguments - most importantly \code{debug = TRUE}
+#' will print information about the figure in the javascript console in the
 #' web browser
-#' 
+#'
 #' @export
 print.BokehFigure <- function(x, ...) {
   print(plot(x, y = NULL, ...))
@@ -19,7 +19,7 @@ plot.BokehFigure <- function(x, y, ...) {
 
   fig <- x
 
-  if(length(fig$glyphLayers) == 0) {        
+  if(length(fig$layers) == 0) {
     message("This figure is empty...")
   } else {
     ## put options together
@@ -30,6 +30,33 @@ plot.BokehFigure <- function(x, y, ...) {
         options[[opt]] <- fld
     }
     options$r_debug <- debug
+
+    ## resolve aesthetic mappings
+    for(ly in fig$layers) {
+      legend <- list()
+      if(!is.null(ly$maps)) {
+        for(mapItem in ly$maps) {
+          legend[[mapItem$name]] <- list()
+          did <- fig$model[[mapItem$glrId]]$attributes$data_source$id
+          for(nn in names(mapItem$range)) {
+            idx <- match(fig$model[[did]]$attributes$data[[nn]], mapItem$domain)
+            mapItem$range[[nn]] <- tableauColors$Tableau10[seq_along(mapItem$domain)]
+            fig$model[[did]]$attributes$data[[nn]] <- mapItem$range[[nn]][idx]
+          }
+          # create dummy glyphRenderers for legend
+          for(ii in seq_along(mapItem$domain)) {
+            rangeVals <- lapply(mapItem$range, function(x) x[ii])
+            spec <- c(mapItem$glyphAttrs, rangeVals, list(x = "x", y = "y"))
+            lgroup <- paste("legend_", mapItem$name, sep = "")
+            lname <- mapItem$domain[ii]
+            glrId <- genId(obj, c("glyphRenderer", lgroup, lname))
+            legend[[mapItem$name]][[ii]] <- list(lname, list(list(type = "GlyphRenderer", id = glrId)))
+            fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(NA, NA), y = c(NA, NA)), lname = lname, lgroup = lgroup)
+          }
+        }
+        fig <- fig %>% addLegend(unname(unlist(legend, recursive = FALSE)))
+      }
+    }
 
     ## set xlim and ylim if not set
     if(length(fig$xlim) == 0) {
@@ -52,25 +79,19 @@ plot.BokehFigure <- function(x, y, ...) {
       options$xrange <- list(options$xrange)
 
     ######
-    fig <- fig %>% 
-      x_range(options$xrange) %>% 
+    fig <- fig %>%
+      x_range(options$xrange) %>%
       y_range(options$yrange)
 
-    # if xlab was set when figure() was called
-    # if(!is.null(fig$xlab))
-    #   fig <- fig %>% x_axis(fig$xlab, position = fig$xaxes)
-    # if(!is.null(fig$ylab))
-    #   fig <- fig %>% y_axis(fig$ylab, position = fig$yaxes)
-
     if(is.null(fig$xlab)) {
-      fig <- fig %>% x_axis("x", position = fig$xaxes)
+      fig <- fig %>% x_axis("x", grid = fig$xgrid, position = fig$xaxes)
     } else {
-      fig <- fig %>% x_axis(fig$xlab, position = fig$xaxes)
+      fig <- fig %>% x_axis(fig$xlab, grid = fig$xgrid, position = fig$xaxes)
     }
     if(is.null(fig$ylab)) {
-      fig <- fig %>% y_axis("y")
+      fig <- fig %>% y_axis("y", grid = fig$ygrid, position = fig$yaxes)
     } else {
-      fig <- fig %>% y_axis(fig$ylab, position = fig$yaxes)
+      fig <- fig %>% y_axis(fig$ylab, grid = fig$ygrid, position = fig$yaxes)
     }
 
     id <- fig$model[[which(sapply(fig$model, function(x) x$type) == "Plot")]]$id
@@ -78,12 +99,10 @@ plot.BokehFigure <- function(x, y, ...) {
 
     ## see if we need to execute any deferred functions
     if(length(fig$glyphDefer) > 0) {
-      deferNames <- names(fig$glyphDefer)
-      for(dn in deferNames) {
-        tmpSpec <- fig$glyphDefer[[dn]](fig$glyphDeferSpecs[[dn]], options$xrange, options$yrange)      
-        tmpData <- fig$glyphDefer[[dn]](fig$glyphDeferData[[dn]], options$xrange, options$yrange)      
-
-        fig <- fig %>% addLayer(tmpSpec, tmpData, dn)
+      for(dfr in fig$glyphDefer) {
+        tmpSpec <- dfr$fn(dfr$spec, options$xrange, options$yrange)
+        tmpData <- dfr$fn(dfr$data, options$xrange, options$yrange)
+        fig <- fig %>% addLayer(tmpSpec, tmpData, dfr$lname, dfr$lgroup)
       }
     }
     options$dims <- c(options$width, options$height)

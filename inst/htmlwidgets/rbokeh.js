@@ -21,7 +21,9 @@ HTMLWidgets.widget({
     dv.id = x.elementid;
     dv.setAttribute("class", "plotdiv");
     el.appendChild(dv);
-    console.log(x.all_models)
+
+    // console.log(x.all_models)
+
     Bokeh.load_models(x.all_models);
     var model = Bokeh.Collections(modeltype).get(x.modelid);
     var view = new model.default_view({model: model, el: '#' + x.elementid});
