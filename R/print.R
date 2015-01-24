@@ -29,34 +29,88 @@ plot.BokehFigure <- function(x, y, ...) {
       if(length(fld) > 0)
         options[[opt]] <- fld
     }
-    options$r_debug <- debug
+
+    legend <- list()
 
     ## resolve aesthetic mappings
     for(ly in fig$layers) {
-      legend <- list()
       if(!is.null(ly$maps)) {
-        for(mapItem in ly$maps) {
-          legend[[mapItem$name]] <- list()
-          did <- fig$model[[mapItem$glrId]]$attributes$data_source$id
-          for(nn in names(mapItem$range)) {
-            idx <- match(fig$model[[did]]$attributes$data[[nn]], mapItem$domain)
-            mapItem$range[[nn]] <- tableauColors$Tableau10[seq_along(mapItem$domain)]
-            fig$model[[did]]$attributes$data[[nn]] <- mapItem$range[[nn]][idx]
+        for(nm in names(ly$maps)) {
+          mapItem <- ly$maps[[nm]]
+          if(is.numeric(mapItem$domain)) {
+            intervals <- pretty(mapItem$domain, 6)
+            nl <- length(intervals) - 1
+            mapItem$domain <- intervals
+            mapItem$labels <- levels(cut(mapItem$domain, intervals, include.lowest = TRUE))
+            mapItem$values <- (head(intervals, nl) + tail(intervals, nl)) / 2
+          } else {
+            mapItem$labels <- mapItem$domain
+            mapItem$values <- mapItem$domain
           }
-          # create dummy glyphRenderers for legend
-          for(ii in seq_along(mapItem$domain)) {
-            rangeVals <- lapply(mapItem$range, function(x) x[ii])
-            spec <- c(mapItem$glyphAttrs, rangeVals, list(x = "x", y = "y"))
-            lgroup <- paste("legend_", mapItem$name, sep = "")
-            lname <- mapItem$domain[ii]
-            glrId <- genId(obj, c("glyphRenderer", lgroup, lname))
-            legend[[mapItem$name]][[ii]] <- list(lname, list(list(type = "GlyphRenderer", id = glrId)))
-            fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(NA, NA), y = c(NA, NA)), lname = lname, lgroup = lgroup)
+          ## map the glyphs attributes
+          for(entry in mapItem$mapEntries) {
+            did <- fig$model[[entry$id]]$attributes$data_source$id
+            for(attr in entry$mapArgs) {
+              ## handle glyph type
+              if(attr == "glyph") {
+                gl <- fig$model[[entry$id]]$attributes$glyph
+                newType <- underscore2camel(getThemeValue(underscore2camel(mapItem$domain), gl$type, attr))
+                fig$model[[entry$id]]$attributes$glyph$type <- newType
+                fig$model[[gl$id]]$type <- newType
+              } else {
+                curDat <- fig$model[[did]]$attributes$data[[attr]]
+                fig$model[[did]]$attributes$data[[attr]] <- getThemeValue(mapItem$domain, curDat, attr)
+              }
+            }
+          }
+
+          ## add legend glyphs and build legend element
+          for(ii in seq_along(mapItem$labels)) {
+            curVal <- mapItem$values[[ii]]
+            curLab <- mapItem$labels[[ii]]
+            lgndId <- paste(nm, curLab, sep = "_")
+            legend[[lgndId]] <- list(list(curLab, list()))
+
+            for(glph in mapItem$legendGlyphs) {
+              for(mrg in glph$mapArgs)
+                glph$args[[mrg]] <- getThemeValue(mapItem$domain, curVal, mrg)
+
+              # render legend glyph
+              spec <- c(glph$args, list(x = "x", y = "y"))
+              lgroup <- paste("legend_", nm, "_", curLab, sep = "")
+              lname <- glph$args$glyph
+              glrId <- genId(fig, c("glyphRenderer", lgroup, lname))
+              fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(NA, NA), y = c(NA, NA)), lname = lname, lgroup = lgroup)
+
+              # add reference to glyph to legend object
+              nn <- length(legend[[lgndId]][[1]][[2]]) + 1
+              legend[[lgndId]][[1]][[2]][[nn]] <- list(type = "GlyphRenderer", id = glrId)
+            }
           }
         }
-        fig <- fig %>% addLegend(unname(unlist(legend, recursive = FALSE)))
       }
     }
+
+    ## deal with common legend, if any
+    if(length(fig$commonLegend) > 0) {
+      for(lg in fig$commonLegend) {
+        lgroup <- paste("common_legend", lg$name, sep = "_")
+        legend[[lgroup]] <- list(list(lg$name, list()))
+        for(lgArgs in lg$args) {
+          spec <- c(lgArgs, list(x = "x", y = "y"))
+          lname <- lgArgs$glyph
+          glrId <- genId(fig, c("glyphRenderer", lgroup, lname))
+          fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(NA, NA), y = c(NA, NA)), lname = lname, lgroup = lgroup)
+
+          # add reference to glyph to legend object
+          nn <- length(legend[[lgroup]][[1]][[2]]) + 1
+          legend[[lgroup]][[1]][[2]][[nn]] <- list(type = "GlyphRenderer", id = glrId)
+        }
+      }
+    }
+
+    if(length(legend) > 0)
+      fig <- fig %>% addLegend(unname(unlist(legend, recursive = FALSE)))
 
     ## set xlim and ylim if not set
     if(length(fig$xlim) == 0) {
@@ -113,11 +167,8 @@ plot.BokehFigure <- function(x, y, ...) {
     htmlwidgets::createWidget(
        name = 'rbokeh',
        list(
-          data = unname(fig$glyphData),
-          spec = unname(fig$glyphSpecs),
-          options = options,
-          ####
-          all_models = getJSON(fig$model),
+          r_debug = debug,
+          all_models = get_json(fig$model),
           elementid = digest(Sys.time()),
           modelid = id
        ),

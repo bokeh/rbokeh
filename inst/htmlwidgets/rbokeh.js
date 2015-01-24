@@ -17,12 +17,15 @@ HTMLWidgets.widget({
     Bokeh.logger.info(" - modelid: " + x.modelid);
     Bokeh.logger.info(" - elementid: " + x.elementid);
 
+    if(x.r_debug == true) {
+      console.log(x.all_models);
+      console.log(JSON.stringify(x.all_models));
+    }
+
     var dv = document.createElement('div');
     dv.id = x.elementid;
     dv.setAttribute("class", "plotdiv");
     el.appendChild(dv);
-
-    // console.log(x.all_models)
 
     Bokeh.load_models(x.all_models);
     var model = Bokeh.Collections(modeltype).get(x.modelid);

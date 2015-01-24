@@ -23,7 +23,7 @@ lay_polygon <- function(fig, x, y, data = NULL, fill_color = NULL, line_color = 
     opts$fill_color <- reduceSaturation(opts$line_color)
 
   axisTypeRange <- getGlyphAxisTypeRange(x, y)
-  makeGlyph(fig, type = "patch", lname = lname, lgroup = lgroup,
+  make_glyph(fig, type = "patch", lname = lname, lgroup = lgroup,
     data = list(x = x, y = y), args = opts, axisTypeRange = axisTypeRange)
 }
 
@@ -62,7 +62,7 @@ lay_polygons <- function(fig, xs, ys, group = NULL, data = NULL, fill_color = NU
   }
 
   axisTypeRange <- getGlyphAxisTypeRange(unlist(xs), unlist(ys))
-  makeGlyph(fig, type = "patches", lname = lname, lgroup = lgroup,
+  make_glyph(fig, type = "patches", lname = lname, lgroup = lgroup,
     data = list(xs = unname(xs), ys = unname(ys)), args = opts, axisTypeRange = axisTypeRange)
 }
 
@@ -101,13 +101,13 @@ lay_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL, fill_color 
   }
 
   axisTypeRange <- getGlyphAxisTypeRange(c(xleft, xright), c(ybottom, ytop))
-  makeGlyph(fig, type = "quad", lname = lname, lgroup = lgroup,
+  make_glyph(fig, type = "quad", lname = lname, lgroup = lgroup,
     xname = xname, yname = yname,
     data = list(left = xleft, right = xright, top = ytop, bottom = ybottom), args = args, axisTypeRange = axisTypeRange)
 }
 
 #' @export
-lay_crect <- function(fig, x, y = NULL, width = 1, height = 1, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, angle = 0, lname = NULL, lgroup = NULL, ...) {
+lay_crect <- function(fig, x, y = NULL, width = 1, height = 1, data = NULL, color = NULL, hover = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, angle = 0, lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_crect")
 
@@ -126,6 +126,7 @@ lay_crect <- function(fig, x, y = NULL, width = 1, height = 1, data = NULL, fill
     height     <- eval(substitute(height), data)
   }
 
+  hover <- getHover(substitute(hover), data)
   xy <- getXYData(x, y)
   xyNames <- getXYNames(x, y, xname, yname, list(...))
 
@@ -148,8 +149,9 @@ lay_crect <- function(fig, x, y = NULL, width = 1, height = 1, data = NULL, fill
     yr <- c(xy$y - height / 2, xy$y + height / 2)
   }
   axisTypeRange <- getGlyphAxisTypeRange(xr, yr)
-  makeGlyph(fig, type = "rect", lname = lname, lgroup = lgroup,
+  make_glyph(fig, type = "rect", lname = lname, lgroup = lgroup,
     xname = xyNames$x, yname = xyNames$y,
+    hover = hover,
     data = c(xy, list(width = width, height = height, angle = angle)),
     args = opts, axisTypeRange = axisTypeRange)
 }

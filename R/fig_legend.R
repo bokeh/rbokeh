@@ -23,7 +23,7 @@ addLegend <- function(obj, legends) {
 }
 
 legendModel <- function(id, plotRef, legends) {
-  res <- baseModelObject("Legend", id)
+  res <- base_model_object("Legend", id)
   res$model$attributes$plot <- plotRef
   res$model$attributes$legends <- legends
   res

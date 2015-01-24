@@ -21,7 +21,7 @@
 # grouping variables: type, color, line_color, fill_color
 
 #' @export
-lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = "blue", alpha = NULL, size = 10, hover = NULL, line_color = NULL, line_alpha = 1, line_width = 1, fill_color = NULL, fill_alpha = NULL, lname = NULL, lgroup = 1, lsubgroup = NULL, ...) {
+lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = NULL, alpha = NULL, size = 10, hover = NULL, legend = NULL, line_color = NULL, line_alpha = 1, line_width = 1, fill_color = NULL, fill_alpha = NULL, lname = NULL, lgroup = NULL, lsubgroup = NULL, ...) {
 
   validateFig(fig, "lay_points")
 
@@ -48,35 +48,51 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = "blue"
     glyph <- "circle"
 
   if(is.null(lgroup))
-    lgroup <- genLayerGroup(names(fig$layers))
+    lgroup <- genLayerName(names(fig$layers))
 
   args <- list(glyph = glyph, color = color, size = size, line_color = line_color, line_alpha = line_alpha,  line_width = line_width, fill_color = fill_color, fill_alpha = fill_alpha, ...)
 
   # if glyph is not unique, we need to split the data
-  # and call makeGlyph several times
+  # and call make_glyph several times
   # otherwise we can just vary the values of things
-  # and call makeGlyph just once...
+  # and call make_glyph just once...
   if(length(unique(glyph)) > 1) {
     gl <- args$glyph
     args$glyph <- NULL
     lns <- sapply(args, length)
     idx <- which(lns == length(xy$x))
 
-    dfArgs <- data.frame(args[idx])
+    dfArgs <- args[idx]
+
+    subset_with_attributes <- function(x, ...) {
+      res <- x[...]
+      attr.names <- names(attributes(x))
+      attr.names <- attr.names[attr.names != 'names']
+      attributes(res)[attr.names] <- attributes(x)[attr.names]
+      res
+    }
+
+    if(is.character(gl))
+      gl <- factor(gl)
 
     dfSplit <- split(seq_along(gl), gl)
     for(ii in seq_along(dfSplit)) {
       curIdx <- dfSplit[[ii]]
+      curGlyph <- paste("glyph_")
 
       fig <- do.call(lay_points,
-        c(as.list(dfArgs[curIdx, , drop = FALSE]), args[-idx],
-          list(fig = fig, x = xy$x[curIdx], y = xy$y[curIdx], glyph = ii, lgroup = lgroup, lname = ii,
-            hover = hover$data[curIdx, , drop = FALSE])))
+        c(lapply(dfArgs, function(x) subset_with_attributes(x, curIdx)), args[-idx],
+          list(fig = fig, x = xy$x[curIdx], y = xy$y[curIdx],
+            glyph = subset_with_attributes(gl, curIdx[1]), lgroup = lgroup,
+            lname = ii, hover = hover$data[curIdx, , drop = FALSE])))
     }
     return(fig)
   }
 
   args$color <- NULL
+
+  if(is.null(color) && is.null(fill_color) && is.null(line_color))
+    color <- "blue"
 
   if(!is.null(color)) {
     if(!is.null(line_color)) {
@@ -104,17 +120,18 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = "blue"
     }
   }
 
-  if(glyph %in% markerPchTypes) {
-    curGlyphProps <- pchDict[[as.character(glyph)]]
+  if(glyph %in% names(markerDict)) {
+    curGlyphProps <- markerDict[[as.character(glyph)]]
     args$glyph <- curGlyphProps$glyph
 
     if(curGlyphProps$fill) {
-      if(is.null(args$fill_color))
+      if(is.null(args$fill_color)) {
         if(!is.null(args$line_color)) {
           args$fill_color <- args$line_color
         } else {
           args$fill_color <- lgroup
         }
+      }
       if(curGlyphProps$line) {
         if(is.null(args$fill_alpha)) {
           args$fill_alpha <- 0.5
@@ -123,8 +140,8 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = "blue"
         }
       }
     } else {
-      args$fill_color <- NULL
-      args$fill_alpha <- NULL
+      args$fill_color <- NA
+      args$fill_alpha <- NA
     }
 
     if(curGlyphProps$line) {
@@ -147,9 +164,9 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = "blue"
   args <- fixArgs(args, length(xy$x))
   axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y, glyph = glyph)
 
-  makeGlyph(fig, args$glyph, lname = lname, lgroup = lgroup,
+  make_glyph(fig, args$glyph, lname = lname, lgroup = lgroup,
     data = c(xy, list(size = size)),
     args = args, axisTypeRange = axisTypeRange,
-    hover = hover,
+    hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)
 }

@@ -1,3 +1,5 @@
+# http://bokeh.pydata.org/en/latest/docs/reference/models.html
+
 #' @export
 tool_pan <- function(obj, dimensions = c("width", "height")) {
   updateTool(obj, which = "pan", args = list(dimensions = dimensions, plotRef = obj$ref))
@@ -5,17 +7,27 @@ tool_pan <- function(obj, dimensions = c("width", "height")) {
 
 #' @export
 tool_wheel_zoom <- function(obj, dimensions = c("width", "height")) {
-  updateTool(obj, which = "wheelZoom", args = list(dimensions = dimensions, plotRef = obj$ref))
+  updateTool(obj, which = "wheel_zoom", args = list(dimensions = dimensions, plotRef = obj$ref))
 }
 
 #' @export
 tool_box_zoom <- function(obj) {
-  updateTool(obj, which = "boxZoom", args = list(plotRef = obj$ref))
+  updateTool(obj, which = "box_zoom", args = list(plotRef = obj$ref))
 }
 
 #' @export
 tool_save <- function(obj) {
-  updateTool(obj, which = "previewSave", args = list(plotRef = obj$ref))
+  updateTool(obj, which = "preview_save", args = list(plotRef = obj$ref))
+}
+
+#' @export
+tool_crosshair <- function(obj) {
+  updateTool(obj, which = "crosshair", args = list(plotRef = obj$ref))
+}
+
+#' @export
+tool_tap <- function(obj) {
+  updateTool(obj, which = "tap", args = list(plotRef = obj$ref))
 }
 
 #' @export
@@ -28,10 +40,17 @@ tool_reset <- function(obj) {
   updateTool(obj, which = "reset", args = list(plotRef = obj$ref))
 }
 
+#' @export
+tool_lasso_select <- function(obj, select_every_mousemove = TRUE) {
+  updateTool(obj, which = "lasso_select", args = list(plotRef = obj$ref,
+    select_every_mousemove = select_every_mousemove))
+}
+
 updateTool <- function(obj, which, args) {
   id <- genId(obj, which)
   args$id <- id
-  model <- do.call(toolModels()[[which]], args)
+  args$toolName <- getToolName(which)
+  model <- do.call(toolModel, args)
 
   obj$model$plot$attributes$tools[[model$ref$id]] <- model$ref
   obj$model[[id]] <- model$model
@@ -41,46 +60,24 @@ updateTool <- function(obj, which, args) {
   obj
 }
 
-toolModels <- function() {
-  list(
-    pan = function(id, dimensions, plotRef) {
-      res <- baseModelObject("PanTool", id)
-      res$model$attributes$plot <- plotRef
-      res$model$attributes$dimensions <- I(dimensions)
-      res
-    },
-    wheelZoom = function(id, dimensions, plotRef) {
-      res <- baseModelObject("WheelZoomTool", id)
-      res$model$attributes$plot <- plotRef
-      res$model$attributes$dimensions <- I(dimensions)
-      res
-    },
-    boxZoom = function(id, dimensions, plotRef) {
-      res <- baseModelObject("BoxZoomTool", id)
-      res$model$attributes$plot <- plotRef
-      res
-    },
-    previewSave = function(id, dimensions, plotRef) {
-      res <- baseModelObject("PreviewSaveTool", id)
-      res$model$attributes$plot <- plotRef
-      res
-    },
-    resize = function(id, dimensions, plotRef) {
-      res <- baseModelObject("ResizeTool", id)
-      res$model$attributes$plot <- plotRef
-      res
-    },
-    reset = function(id, dimensions, plotRef) {
-      res <- baseModelObject("ResetTool", id)
-      res$model$attributes$plot <- plotRef
-      res
-    }
-  )
+getToolName <- function(x) {
+  paste(underscore2camel(x), "Tool", sep = "")
 }
 
+toolModel <- function(id, toolName, plotRef, ...) {
+  res <- base_model_object(toolName, id)
+  res$model$attributes$plot <- plotRef
+  dots <- list(...)
+  dotnms <- names(dots)
+  for(nm in dotnms) {
+    res$model$attributes[[nm]] <- I(dots[[nm]])
+  }
+
+  res
+}
 
 toolEvents <- function(id) {
-  res <- baseModelObject("ToolEvents", id)
+  res <- base_model_object("ToolEvents", id)
   res$model$geometries <- I(NULL)
   res
 }

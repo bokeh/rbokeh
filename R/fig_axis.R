@@ -50,6 +50,8 @@ updateAxis <- function(obj, position, label, grid = TRUE, num_minor_ticks = 5) {
   axisType <- ifelse(isY, obj$yAxisType, obj$xAxisType)
   if(axisType == "numeric") {
     typeList <- list(format = "BasicTickFormatter", tick = "BasicTicker", axis = "LinearAxis")
+  } else if(axisType == "datetime") {
+    typeList <- list(format = "DatetimeTickFormatter", tick = "DatetimeTicker", axis = "DatetimeAxis")
   } else {
     typeList <- list(format = "CategoricalTickFormatter", tick = "CategoricalTicker", axis = "CategoricalAxis")
   }
@@ -77,7 +79,7 @@ updateAxis <- function(obj, position, label, grid = TRUE, num_minor_ticks = 5) {
 
 axisModel <- function(type = "LinearAxis", label = NULL, id, plotRef, formatterRef, tickerRef) {
 
-  res <- baseModelObject(type, id)
+  res <- base_model_object(type, id)
   res$model$attributes$plot <- plotRef
   res$model$attributes$axis_label <- label
   res$model$attributes$formatter <- formatterRef
@@ -87,17 +89,17 @@ axisModel <- function(type = "LinearAxis", label = NULL, id, plotRef, formatterR
 }
 
 formatterModel <- function(type = "BasicTickFormatter", id) {
-  baseModelObject(type, id)
+  base_model_object(type, id)
 }
 
 tickerModel <- function(type = "BasicTicker", id, num_minor_ticks = 5) {
-  res <- baseModelObject(type, id)
+  res <- base_model_object(type, id)
   res$model$attributes$num_minor_ticks = num_minor_ticks
   res
 }
 
 gridModel <- function(id, dimension = 0, plotRef, tickerRef) {
-  res <- baseModelObject("Grid", id)
+  res <- base_model_object("Grid", id)
   res$model$attributes$dimension = dimension
   res$model$attributes$plot = plotRef
   res$model$attributes$ticker = tickerRef

@@ -31,7 +31,7 @@ glyphProps <- list(
   arc = list(lp = TRUE, fp = FALSE, tp = FALSE),
   bezier = list(lp = TRUE, fp = FALSE, tp = FALSE),
   image = list(lp = FALSE, fp = FALSE, tp = FALSE),
-  image_rgba = list(lp = FALSE, fp = FALSE, tp = FALSE),
+  image_RGBA = list(lp = FALSE, fp = FALSE, tp = FALSE),
   image_url = list(lp = FALSE, fp = FALSE, tp = FALSE),
   line = list(lp = TRUE, fp = FALSE, tp = FALSE),
   multi_line = list(lp = TRUE, fp = FALSE, tp = FALSE),
@@ -48,7 +48,7 @@ glyphProps <- list(
 )
 
 ## list of conversions from R's "pch" to glyph / line / fill properties
-pchDict <- list(
+markerDict <- list(
    "0" =  list(glyph = "square",            line = TRUE,  fill = FALSE),
    "1" =  list(glyph = "circle",            line = TRUE,  fill = FALSE),
    "2" =  list(glyph = "triangle",          line = TRUE,  fill = FALSE),
@@ -72,8 +72,22 @@ pchDict <- list(
    "22" = list(glyph = "square",            line = TRUE,  fill = TRUE ),
    "23" = list(glyph = "diamond",           line = TRUE,  fill = TRUE ),
    "24" = list(glyph = "triangle",          line = TRUE,  fill = TRUE ),
-   "25" = list(glyph = "inverted_triangle", line = TRUE,  fill = TRUE )
+   "25" = list(glyph = "inverted_triangle", line = TRUE,  fill = TRUE ),
+   asterisk          = list(glyph = "asterisk", line = TRUE, fill = FALSE),
+   circle            = list(glyph = "circle", line = TRUE, fill = TRUE ),
+   circle_cross      = list(glyph = "circle_cross", line = TRUE, fill = TRUE ),
+   circle_x          = list(glyph = "circle_x", line = TRUE, fill = TRUE ),
+   cross             = list(glyph = "cross", line = TRUE, fill = FALSE),
+   diamond           = list(glyph = "diamond", line = TRUE, fill = TRUE ),
+   diamond_cross     = list(glyph = "diamond_cross", line = TRUE, fill = TRUE ),
+   inverted_triangle = list(glyph = "inverted_triangle", line = TRUE, fill = TRUE ),
+   square            = list(glyph = "square", line = TRUE, fill = TRUE ),
+   square_cross      = list(glyph = "square_cross", line = TRUE, fill = TRUE ),
+   square_x          = list(glyph = "square_x", line = TRUE, fill = TRUE ),
+   triangle          = list(glyph = "triangle", line = TRUE, fill = TRUE ),
+   x                 = list(glyph = "x", line = TRUE, fill = TRUE )
 )
+
 # 16, 19, 20 are the same
 # 11 and 14 are missing
 

@@ -21,15 +21,16 @@ Please see [here](http://hafen.github.io/bokeh/rbokeh_examples.html) for several
 
 ### Status / Plans
 
-Currently all glyphs are working except `image_rgba` and `image_url`.  Also mechanisms are in place to deal ensure consistency with numerical / categorical axes within a figure as well as keeping track of axis ranges.
+Currently all glyphs are working except `image_rgba` and `image_url`.  Also mechanisms are in place to ensure consistency with numerical / categorical axes within a figure as well as keeping track of axis ranges.
 
 In rough order of importance / imminence, things to cover next include:
 
-- Default choices for line, fill, and text attributes
-- Best mechanism for mapping these attributes based on variables in the data
+- Add datetime axis
+- Mapping aesthetics for continuous variables
+- Fig image and friends
+- Mapping aesthetics for other layer types
+- Linking / brushing example
 - R docs
 - More layers for common statistial plots
-- Tooltips / hover / click event handling specification from R
-- Legends
 - Investigate server side / streaming options
 

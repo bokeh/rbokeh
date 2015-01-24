@@ -5,9 +5,9 @@
 \usage{
 figure(width = 480, height = 480, title = NULL, xlab = NULL,
   ylab = NULL, xlim = NULL, ylim = NULL, padding_factor = 0.07,
-  plot_width = NULL, plot_height = NULL, xaxes = "below",
-  yaxes = "left", tools = c("pan", "wheel_zoom", "box_zoom", "resize",
-  "reset", "save"), theme = getOption("bokeh_theme"))
+  plot_width = NULL, plot_height = NULL, xgrid = TRUE, ygrid = TRUE,
+  xaxes = "below", yaxes = "left", tools = c("pan", "wheel_zoom",
+  "box_zoom", "resize", "reset", "save"), theme = getOption("bokeh_theme"))
 }
 \arguments{
 \item{width}{figure width in pixels}
@@ -27,6 +27,10 @@ figure(width = 480, height = 480, title = NULL, xlab = NULL,
 \item{padding_factor}{if limits are not specified, by what factor should the extents of the data be padded}
 
 \item{plot_width,plot_height}{width and height of the entire plot in pixels, including border space}
+
+\item{xgrid}{whether to draw x axis grid lines}
+
+\item{ygrid}{whether to draw y axis grid lines}
 
 \item{xaxes}{where to put x axis labels}
 

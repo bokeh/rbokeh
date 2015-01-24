@@ -61,7 +61,7 @@ addLayer <- function(obj, spec, dat, lname, lgroup) {
 }
 
 dataModel <- function(dd, id = NULL) {
-  res <- baseModelObject("ColumnDataSource", id)
+  res <- base_model_object("ColumnDataSource", id)
 
   res$model$attributes$column_names <- I(names(dd))
   res$model$attributes$selected <- I(NULL)
@@ -73,14 +73,14 @@ dataModel <- function(dd, id = NULL) {
 }
 
 glyphModel <- function(id, glyph = "Circle", attrs) {
-  res <- baseModelObject(glyph, id)
+  res <- base_model_object(glyph, id)
   res$model$attributes <- c(
     res$model$attributes, attrs)
   res
 }
 
 glyphRendererModel <- function(id, dataRef, glyphRef) {
-  res <- baseModelObject("GlyphRenderer", id)
+  res <- base_model_object("GlyphRenderer", id)
   res$model$attributes["selection_glyph"] <- list(NULL)
   res$model$attributes["nonselection_glyph"] <- list(NULL)
   res$model$attributes["server_data_source"] <- list(NULL)
@@ -91,7 +91,7 @@ glyphRendererModel <- function(id, dataRef, glyphRef) {
 }
 
 colorMapperModel <- function(id) {
-  res <- baseModelObject("LinearColorMapper", id)
+  res <- base_model_object("LinearColorMapper", id)
   res$model$attributes$palette <- c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2")
   res
 }

@@ -1,4 +1,4 @@
-baseModelObject <- function(type, id) {
+base_model_object <- function(type, id) {
   list(
     model = list(
       type = type,
@@ -21,16 +21,16 @@ genId <- function(obj, name = NULL) {
   digest(c(name, obj$time))
 }
 
-getJSON <- function(obj) {
+get_json <- function(obj) {
   names(obj$plot$attributes$tools) <- NULL
-  names(obj$plot$attributes$renderers) <- NULL  
+  names(obj$plot$attributes$renderers) <- NULL
   names(obj) <- NULL
   obj
 }
 
 #' @export
-printJSON <- function(obj) {
-  cat(toJSON(getJSON(obj$model), pretty = TRUE))
+print_model_json <- function(obj, pretty = TRUE) {
+  cat(toJSON(get_json(obj$model), digits = 50, pretty = pretty))
 }
 
 underscore2camel <- function(x) {

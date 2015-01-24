@@ -56,17 +56,17 @@ checkArcDirection <- function(direction) {
 
 ## take a set of layer groups
 ## and come up with the next increment of 'layer[int]'
-genLayerGroup <- function(specNames) {
-  # specNames <- c("asdf", "layer1", "layer23", "qwert", "alayer7", "layer12b")
-  if(length(specNames) == 0) {
-    name <- "layer1"
+genLayerName <- function(curNames, prefix = "group") {
+  # curNames <- c("asdf", "layer1", "layer23", "qwert", "alayer7", "layer12b")
+  if(length(curNames) == 0) {
+    name <- paste0(prefix, "1")
   } else {
-    layerGroupNames <- specNames[grepl("^layer([0-9]+)$", specNames)]
-    if(length(layerGroupNames) == 0) {
-      name <- "layer1"
+    namesWithPrefix <- curNames[grepl(paste0("^", prefix, "([0-9]+)$"), curNames)]
+    if(length(namesWithPrefix) == 0) {
+      name <- paste0(prefix, "1")
     } else {
-      nn <- as.integer(gsub("layer", "", layerGroupNames))
-      name <- paste("layer", max(nn) + 1, sep = "")
+      nn <- as.integer(gsub(prefix, "", namesWithPrefix))
+      name <- paste(prefix, max(nn) + 1, sep = "")
     }
   }
   name
@@ -100,7 +100,13 @@ getGlyphAxisTypeRange <- function(x, y, assertX = NULL, assertY = NULL, glyph = 
 ## determine whether axis is "numeric" or "categorical"
 getGlyphAxisType <- function(a) {
   # this will surely get more complex...
-  ifelse(is.character(a), "categorical", "numeric")
+  if(is.character(a)) {
+    return("categorical")
+  } else if(inherits(a, c("Date", "POSIXct"))) {
+    return("datetime")
+  } else {
+    return("numeric")
+  }
 }
 
 ## determine the range of an axis for a glyph
@@ -108,7 +114,7 @@ getGlyphRange <- function(a, axisType = NULL, ...) {
   if(is.null(axisType))
     axisType <- getGlyphAxisType(a)
   ## ... can be size, etc. attributes
-  if(axisType == "numeric") {
+  if(axisType %in% c("numeric", "datetime")) {
     range(a, na.rm = TRUE)
   } else {
     # gsub removes suffixes like ":0.6"
@@ -144,7 +150,7 @@ getAllGlyphRange <- function(ranges, padding_factor, axisType = "numeric") {
 checkOpts <- function(opts, type) {
   curGlyphProps <- glyphProps[[type]]
 
-  validOpts <- c("xlab", "ylab")
+  validOpts <- c("xlab", "ylab", "glyph", "size")
   if(curGlyphProps$lp)
     validOpts <- c(validOpts, linePropNames)
   if(curGlyphProps$fp)
@@ -221,12 +227,11 @@ getXYNames <- function(x, y, xname, yname, dots) {
 # list of column names
 # otherwise it should be a named list or data frame
 getHover <- function(hn, data) {
-  if(deparse(hn) == "NULL")
+  if(deparse(hn)[1] == "NULL")
     return(NULL)
   if(is.null(data)) {
-    hover <- eval(hn)
-    hn <- names(hover)
-    data <- hover
+    data <- hn
+    hn <- names(data)
   } else {
     hn <- deparse(hn)[1]
     hn <- gsub("c\\(|list\\(|\\)| +", "", hn)
@@ -253,7 +258,9 @@ v_eval <- function(x, data) {
   res <- eval(x, data)
   if(is.null(res))
     return(res)
-  attr(res, "nseName") <- deparse(x)
+  dp <- deparse(x)[1]
+  if(dp %in% names(data))
+    attr(res, "nseName") <- dp
   res
 }
 
@@ -274,66 +281,6 @@ fixArgs <- function(args, n) {
   args
 }
 
-getAesMaps <- function(args, glrId) {
-
-  nms <- names(args)
-  ## get an index of arguments that need a map and have an nseName
-  ## nseName is used in the legend so we know what variable created the map
-  mappable <- sapply(seq_along(args), function(ii) {
-    if(!is.null(attr(args[[ii]], "nseName"))) {
-      if(!is.null(needsMapFns[[nms[ii]]])) {
-        if(needsMapFns[[nms[ii]]](args[[ii]]))
-          return(TRUE)
-      }
-    }
-    return(FALSE)
-  })
-
-  if(length(which(mappable)) == 0)
-    return(NULL)
-
-  # build an aesMap object with an entry for each unique nseName
-  # entry has the name, domain
-  nseNames <- as.character(sapply(args[mappable], function(x) attr(x, "nseName")))
-  uNseNames <- unique(nseNames)
-
-  lapply(uNseNames, function(x) {
-    ## args we need to compute domain for
-    margs <- args[mappable[nseNames == x]]
-    ## args we need to maintain for legend glyphs
-    gargs <- lapply(args[!mappable], function(x) x[1])
-    list(name = x,
-      glrId = glrId,
-      domain = getDomain(do.call(c, lapply(margs, getDomain))),
-      glyphAttrs = gargs,
-      range = structure(replicate(length(margs), list()), names = names(margs))
-    )
-  })
-}
-
-mergeAesMaps <- function(d1, d2) {
-  if(is.null(d1))
-    return(d2)
-  if(is.null(d2))
-    return(d1)
-
-  if(is.character(d1)) {
-    return(unique(c(d1, d2)))
-  } else {
-    return(range(c(d1, d2), na.rm = TRUE))
-  }
-}
-
-getDomain <- function(x) {
-  if(is.factor(x)) {
-    return(levels(x))
-  } else if(is.character(x)) {
-    return(sort(unique(x)))
-  } else {
-    return(range(x, na.rm = TRUE))
-  }
-}
-
 ## take output of map() and convert it to a data frame
 map2df <- function(a) {
   dd <- data.frame(lon = a$x, lat = a$y,
@@ -341,3 +288,21 @@ map2df <- function(a) {
   dd[complete.cases(dd$lon, dd$lat), ]
 }
 
+
+#' @importFrom bitops bitShiftL bitOr
+#' @export
+to_uint32 <- function(x) {
+  if(is.vector(x))
+    x <- matrix(x, nrow = 1)
+  bitOr(bitOr(bitOr(bitShiftL(x[,4], 24), bitShiftL(x[,3], 16)),
+    bitShiftL(x[,2], 8)), bitShiftL(x[,1], 0))
+}
+
+toEpoch <- function(x) {
+  if(inherits(x, "Date")) {
+    return(as.numeric(x) * 86400000)
+  } else if(inherits(x, "POSIXct")) {
+    return(as.numeric(x) * 1000)
+  }
+  x
+}

@@ -9,7 +9,7 @@ y_range <- function(obj, dat) {
 }
 
 rangeModel <- function(type = "Range1d", id, dat) {
-  res <- baseModelObject(type, id)
+  res <- base_model_object(type, id)
 
   if(type == "Range1d") {
     res$model$attributes$start <- dat[1]
@@ -28,7 +28,7 @@ updateRange <- function(obj, axis = "x", dat) {
     type <- "Range1d"
     dat <- range(dat, na.rm = TRUE)
   } else {
-    type <- "FactorRange"    
+    type <- "FactorRange"
   }
 
   rangeName <- paste(axis, "_range", sep = "")

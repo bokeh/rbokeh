@@ -1,5 +1,5 @@
 #' @export
-lay_lines <- function(fig, x, y = NULL, data = NULL, lty = NULL, line_color = NULL, line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", lname = NULL, lgroup = NULL, ...) {
+lay_lines <- function(fig, x, y = NULL, data = NULL, lty = NULL, line_color = NULL, line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_lines")
 
@@ -25,8 +25,8 @@ lay_lines <- function(fig, x, y = NULL, data = NULL, lty = NULL, line_color = NU
 
   axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y)
 
-  makeGlyph(fig, type = "line", lname = lname, lgroup = lgroup,
-    data = xy,
+  make_glyph(fig, type = "line", lname = lname, lgroup = lgroup,
+    data = xy, legend = legend,
     args = args, axisTypeRange = axisTypeRange,
     xname = xyNames$x, yname = xyNames$y)
 }
@@ -34,7 +34,7 @@ lay_lines <- function(fig, x, y = NULL, data = NULL, lty = NULL, line_color = NU
 #' @export
 lay_multi_line <- function(fig, xs, ys, lname = NULL, lgroup = NULL, ...) {
   axisTypeRange <- getGlyphAxisTypeRange(unlist(xs), unlist(ys))
-  makeGlyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
+  make_glyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
     data = list(xs = xs, ys = ys), args = list(...), axisTypeRange = axisTypeRange)
 }
 
@@ -60,7 +60,7 @@ lay_segments <- function(fig, x0, y0, x1, y1, data = NULL, line_color = NULL, li
   args <- updateLineOpts(fig, args)
 
   axisTypeRange <- getGlyphAxisTypeRange(c(x0, x1), c(y0, y1))
-  makeGlyph(fig, type = "segment", lname = lname, lgroup = lgroup,
+  make_glyph(fig, type = "segment", lname = lname, lgroup = lgroup,
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1),
     args = args, axisTypeRange = axisTypeRange)
 }
@@ -142,7 +142,7 @@ lay_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     xAxisType = "numeric", yAxisType = "numeric",
     xRange = NULL, yRange = NULL)
 
-  makeGlyph(fig, type = "segment", lname = lname, lgroup = lgroup,
+  make_glyph(fig, type = "segment", lname = lname, lgroup = lgroup,
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, defer = deferFn),
     args = args, axisTypeRange = axisTypeRange)
 }
@@ -200,7 +200,7 @@ lay_contour <- function(fig, image, x = seq(0, 1, length.out = nrow(image)), y =
 
   axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
 
-  makeGlyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
+  make_glyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
     data = list(xs = xs, ys = ys),
     args = opts, axisTypeRange = axisTypeRange)
 }

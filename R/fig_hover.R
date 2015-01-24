@@ -19,7 +19,7 @@ addHover <- function(obj, tooltips, rendererRef) {
 }
 
 hoverModel <- function(id, plotRef, rendererRef, tooltips) {
-  res <- baseModelObject("HoverTool", id)
+  res <- base_model_object("HoverTool", id)
   res$model$attributes$plot <- plotRef
   res$model$attributes$renderers <- list(rendererRef)
   res$model$attributes$names <- list()
