@@ -6,6 +6,8 @@ R interface to Bokeh.
 
 This is a work in progress, but covers quite a bit of ground.  Major changes in the design could happen.
 
+**Note: major changes are happening in the `json` branch.  What you see here is out-of-date and will be replaced soon with what is in the `json` branch with new docs / examples.**
+
 ### Install
 
 Using the `devtools` package:
