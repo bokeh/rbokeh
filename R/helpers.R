@@ -43,10 +43,12 @@ validateColors <- function(opts) {
   opts
 }
 
-getNextColor <- function(fig) {
-  nLayers <- length(fig$layers)
-  nextColorIdx <- (nLayers + 1) %% length(fig$theme$glyph)
-  fig$theme$glyph[nextColorIdx]
+## should make this return something that will be evaluated at render time
+getNextColor <- function(lgroupobj, which = "fill_color", type = "discrete") {
+  curTheme <- bk_theme[[which]][[type]](10)
+  nLayers <- length(lgroupobj) + 1
+  nextColorIdx <- (nLayers - 1) %% length(curTheme) + 1
+  curTheme[nextColorIdx]
 }
 
 checkArcDirection <- function(direction) {
@@ -132,15 +134,25 @@ validateAxisType <- function(figType, curType, which) {
 
 ## take a collection of glyph ranges (x or y axis)
 ## and find the global range across all glyphs
-getAllGlyphRange <- function(ranges, padding_factor, axisType = "numeric") {
+getAllGlyphRange <- function(ranges, padding_factor, axisType = "numeric", log = FALSE) {
   if(axisType == "numeric") {
     rangeMat <- do.call(rbind, ranges)
     hardRange <- c(min(rangeMat[,1], na.rm = TRUE),
       max(rangeMat[,2], na.rm = TRUE))
-    hardRange <- hardRange + c(-1, 1) * padding_factor * diff(hardRange)
+    ## if log, we need to make padding multiplicative
+    if(log) {
+      hardRange <- hardRange * c(padding_factor * 10, 2 - (padding_factor * 10))
+    } else {
+      hardRange <- hardRange + c(-1, 1) * padding_factor * diff(hardRange)
+    }
     if(hardRange[1] == hardRange[2])
       hardRange <- hardRange + c(-0.5, 0.5)
     hardRange
+  } else if(axisType == "datetime") {
+    rangeMat <- do.call(rbind, ranges)
+    hardRange <- c(min(rangeMat[,1], na.rm = TRUE),
+      max(rangeMat[,2], na.rm = TRUE))
+    hardRange <- hardRange + c(-1, 1) * padding_factor / 2 * diff(hardRange)
   } else {
     sort(unique(do.call(c, ranges)))
   }
@@ -150,7 +162,7 @@ getAllGlyphRange <- function(ranges, padding_factor, axisType = "numeric") {
 checkOpts <- function(opts, type) {
   curGlyphProps <- glyphProps[[type]]
 
-  validOpts <- c("xlab", "ylab", "glyph", "size")
+  validOpts <- c("xlab", "ylab")
   if(curGlyphProps$lp)
     validOpts <- c(validOpts, linePropNames)
   if(curGlyphProps$fp)
@@ -186,7 +198,7 @@ getXYData <- function(x, y) {
       return(list(x = as.vector(time(x)), y = as.vector(x)))
     } else if(is.list(x)) {
       return(list(x = x[[1]], y = x[[2]]))
-    } else if(is.vector(x)) {
+    } else {
       return(list(x = seq_along(x), y = x))
     }
   }
@@ -206,7 +218,7 @@ getXYNames <- function(x, y, xname, yname, dots) {
     } else if(is.list(x)) {
       nms <- names(x)
       res <- list(x = nms[1], y = nms[2])
-    } else if(is.vector(x)) {
+    } else {
       res <- list(x = "index", y = xname)
     }
   } else {
@@ -220,6 +232,93 @@ getXYNames <- function(x, y, xname, yname, dots) {
     res$y <- dots$ylab
 
   res
+}
+
+## take args color and alpha and translate them to f
+resolveColorAlpha <- function(args, hasLine = TRUE, hasFill = TRUE, ly) {
+
+  ## if no color at all is specified, choose from the theme
+  if(is.null(args$color) && is.null(args$fill_color) && is.null(args$line_color))
+    args$color <- getNextColor(ly)
+
+  if(!is.null(args$color)) {
+    if(!is.null(args$line_color)) {
+      message("both color and line_color specified - honoring line_color")
+    } else {
+      args$line_color <- args$color
+    }
+    if(!is.null(args$fill_color)) {
+      message("both color and fill_color specified - honoring fill_color")
+    } else {
+      args$fill_color <- args$color
+    }
+  }
+
+  if(!is.null(args$alpha)) {
+    if(!is.null(args$line_alpha)) {
+      message("both alpha and line_alpha specified - honoring line_alpha")
+    } else {
+      args$line_alpha <- args$alpha
+    }
+    if(!is.null(args$fill_alpha)) {
+      message("both alpha and fill_alpha specified - honoring fill_alpha")
+    } else {
+      args$fill_alpha <- args$alpha
+    }
+  }
+
+  args$color <- NULL
+  args$alpha <- NULL
+
+  args
+}
+
+## make sure marker fill and line properties are correct for marker glyphs
+## (for example, some, such as glyph = 1, must not have fill)
+resolveGlyphProps <- function(glyph, args, lgroup) {
+  if(glyph %in% names(markerDict)) {
+    curGlyphProps <- markerDict[[as.character(glyph)]]
+    args$glyph <- curGlyphProps$glyph
+    if(curGlyphProps$fill) {
+      if(is.null(args$fill_color)) {
+        if(!is.null(args$line_color)) {
+          args$fill_color <- args$line_color
+        } else {
+          args$fill_color <- lgroup
+        }
+      }
+      if(curGlyphProps$line) {
+        if(is.null(args$fill_alpha)) {
+          args$fill_alpha <- 0.5
+        } else {
+          args$fill_alpha <- args$fill_alpha * 0.5
+        }
+      }
+    } else {
+      args$fill_color <- NA
+      args$fill_alpha <- NA
+    }
+
+    if(curGlyphProps$line) {
+      if(is.null(args$line_color))
+        if(!is.null(args$fill_color)) {
+          args$line_color <- args$fill_color
+        } else {
+          args$line_color <- lgroup
+        }
+    } else {
+      args$line_color <- NULL
+      args$line_width <- NULL
+      args$line_alpha <- NULL
+    }
+  }
+  args
+}
+
+getLgroup <- function(lgroup, fig) {
+  if(is.null(lgroup))
+    lgroup <- genLayerName(names(fig$layers))
+  lgroup <- as.character(lgroup)
 }
 
 # get the "hover" argument and turn it into data and dict
@@ -306,3 +405,12 @@ toEpoch <- function(x) {
   }
   x
 }
+
+subset_with_attributes <- function(x, ...) {
+  res <- x[...]
+  attr.names <- names(attributes(x))
+  attr.names <- attr.names[attr.names != 'names']
+  attributes(res)[attr.names] <- attributes(x)[attr.names]
+  res
+}
+

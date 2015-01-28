@@ -1,5 +1,5 @@
 #' @export
-x_axis <- function(obj, label, position = "below", grid = TRUE, num_minor_ticks = 5) {
+x_axis <- function(obj, label, position = "below", log = FALSE, grid = TRUE, num_minor_ticks = 5) {
   if(is.null(position))
     position <- "below"
   if(!position %in% c("below", "above")) {
@@ -10,11 +10,11 @@ x_axis <- function(obj, label, position = "below", grid = TRUE, num_minor_ticks 
   if(missing(label))
     label <- obj$xlab
   obj$xlab <- label
-  updateAxis(obj, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks)
+  updateAxis(obj, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, log = log)
 }
 
 #' @export
-y_axis <- function(obj, label, position = "left", grid = TRUE, num_minor_ticks = 5) {
+y_axis <- function(obj, label, position = "left", log = FALSE, grid = TRUE, num_minor_ticks = 5) {
   if(is.null(position))
     position <- "left"
   if(!position %in% c("left", "right")) {
@@ -25,7 +25,7 @@ y_axis <- function(obj, label, position = "left", grid = TRUE, num_minor_ticks =
   if(missing(label))
     label <- obj$ylab
   obj$ylab <- label
-  updateAxis(obj, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks)
+  updateAxis(obj, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, log = log)
 }
 
 # axis ref needs to be added to plot attributes as "above", "below", "left", or "right"
@@ -40,7 +40,7 @@ y_axis <- function(obj, label, position = "left", grid = TRUE, num_minor_ticks =
 # ticker model added to object, also referred to in grid
 # also create grid
 
-updateAxis <- function(obj, position, label, grid = TRUE, num_minor_ticks = 5) {
+updateAxis <- function(obj, position, label, grid = TRUE, num_minor_ticks = 5, log = FALSE) {
   fId <- genId(obj, c(position, "formatter"))
   tId <- genId(obj, c(position, "ticker"))
   aId <- genId(obj, position)
@@ -49,7 +49,16 @@ updateAxis <- function(obj, position, label, grid = TRUE, num_minor_ticks = 5) {
 
   axisType <- ifelse(isY, obj$yAxisType, obj$xAxisType)
   if(axisType == "numeric") {
-    typeList <- list(format = "BasicTickFormatter", tick = "BasicTicker", axis = "LinearAxis")
+    if(log) {
+      typeList <- list(format = "LogTickFormatter", tick = "LogTicker", axis = "LogAxis")
+      if(isY) {
+        obj$model$plot$attributes$y_mapper_type <- "log"
+      } else {
+        obj$model$plot$attributes$x_mapper_type <- "log"
+      }
+    } else {
+      typeList <- list(format = "BasicTickFormatter", tick = "BasicTicker", axis = "LinearAxis")
+    }
   } else if(axisType == "datetime") {
     typeList <- list(format = "DatetimeTickFormatter", tick = "DatetimeTicker", axis = "DatetimeAxis")
   } else {
@@ -57,7 +66,7 @@ updateAxis <- function(obj, position, label, grid = TRUE, num_minor_ticks = 5) {
   }
 
   formatter <- formatterModel(typeList$format, fId)
-  ticker <- tickerModel(typeList$tick, tId, num_minor_ticks)
+  ticker <- tickerModel(typeList$tick, tId, num_minor_ticks, log)
   axis <- axisModel(type = typeList$axis, label = label, id = aId, plotRef = obj$ref, formatterRef = formatter$ref, tickerRef = ticker$ref)
 
   obj$model$plot$attributes[[position]][[1]] <- axis$ref
@@ -72,6 +81,12 @@ updateAxis <- function(obj, position, label, grid = TRUE, num_minor_ticks = 5) {
     grid <- gridModel(gId, plotRef = obj$ref, tickerRef = ticker$ref, dimension = as.integer(isY))
     obj$model$plot$attributes$renderers[[grid$ref$id]] <- grid$ref
     obj$model[[gId]] <- grid$model
+  }
+
+  if(isY) {
+    obj$hasYaxis <- TRUE
+  } else {
+    obj$hasXaxis <- TRUE
   }
 
   obj
@@ -92,11 +107,13 @@ formatterModel <- function(type = "BasicTickFormatter", id) {
   base_model_object(type, id)
 }
 
-tickerModel <- function(type = "BasicTicker", id, num_minor_ticks = 5) {
+tickerModel <- function(type = "BasicTicker", id, num_minor_ticks = 5, log = FALSE) {
   res <- base_model_object(type, id)
   res$model$attributes$num_minor_ticks = num_minor_ticks
+
   res
 }
+
 
 gridModel <- function(id, dimension = 0, plotRef, tickerRef) {
   res <- base_model_object("Grid", id)

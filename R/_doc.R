@@ -34,3 +34,16 @@ NULL
 #' @param lhs a Bokeh figure
 #' @param rhs a layer to add to the figure
 NULL
+
+
+#### line_cap
+#### The line cap values for the annular wedges.
+#### line_dash
+#### The line dash values for the annular wedges.
+#### line_dash_offset
+#### The line dash offset values for the annular wedges.
+#### line_join
+#### property type: Enum(‘miter’, ‘round’, ‘bevel’)
+#### The line join values for the annular wedges.
+#### line_width
+#### The line width values for the annular wedges.

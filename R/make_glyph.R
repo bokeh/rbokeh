@@ -28,12 +28,6 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axisTypeRange, hove
   ## used to keep track of how many layers are in the group
   fig$layers[[lgroup]]$glyphIds[lname] <- list(glrId)
 
-  ## see if any options won't be used and give a message
-  ## but glyph can be a mapping (not a real type)
-  ## so only check if it's not to be mapped
-  if(is.null(attr(args$glyph, "nseName")))
-    checkOpts(args, type)
-
   ## make sure axis types match anything
   ## that has already been plotted
   validateAxisType(figType = fig$xAxisType,

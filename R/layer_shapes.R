@@ -1,8 +1,32 @@
 
 #' @export
-lay_polygon <- function(fig, x, y, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, lname = NULL, lgroup = NULL, ...) {
+lay_polygon <- function(fig, x, y, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_polygon")
+
+  ##### boilerplate
+  validateFig(fig, "lay_points")
+
+  xname <- deparse(substitute(x))
+  yname <- deparse(substitute(y))
+
+  ## deal with possible named inputs from a data source
+  if(!is.null(data)) {
+    x          <- v_eval(substitute(x), data)
+    y          <- v_eval(substitute(y), data)
+    size       <- v_eval(substitute(size), data)
+    glyph      <- v_eval(substitute(glyph), data)
+    color      <- v_eval(substitute(color), data)
+    line_color <- v_eval(substitute(line_color), data)
+    fill_color <- v_eval(substitute(fill_color), data)
+  }
+
+  hover <- getHover(substitute(hover), data)
+  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  ## translate different x, y types to vectors
+  xy <- getXYData(x, y)
+  lgroup <- getLgroup(lgroup, fig)
+  ##### boilerplate
 
   if(!is.null(data)) {
     x          <- eval(substitute(x), data)
@@ -28,9 +52,33 @@ lay_polygon <- function(fig, x, y, data = NULL, fill_color = NULL, line_color = 
 }
 
 #' @export
-lay_polygons <- function(fig, xs, ys, group = NULL, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, lname = NULL, lgroup = NULL, ...) {
+lay_polygons <- function(fig, xs, ys, group = NULL, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_polygons")
+
+  ##### boilerplate
+  validateFig(fig, "lay_points")
+
+  xname <- deparse(substitute(x))
+  yname <- deparse(substitute(y))
+
+  ## deal with possible named inputs from a data source
+  if(!is.null(data)) {
+    x          <- v_eval(substitute(x), data)
+    y          <- v_eval(substitute(y), data)
+    size       <- v_eval(substitute(size), data)
+    glyph      <- v_eval(substitute(glyph), data)
+    color      <- v_eval(substitute(color), data)
+    line_color <- v_eval(substitute(line_color), data)
+    fill_color <- v_eval(substitute(fill_color), data)
+  }
+
+  hover <- getHover(substitute(hover), data)
+  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  ## translate different x, y types to vectors
+  xy <- getXYData(x, y)
+  lgroup <- getLgroup(lgroup, fig)
+  ##### boilerplate
 
   ## xs and ys can be a list
   ## or obtained from a data frame with a group variable
@@ -67,9 +115,33 @@ lay_polygons <- function(fig, xs, ys, group = NULL, data = NULL, fill_color = NU
 }
 
 #' @export
-lay_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, lname = NULL, lgroup = NULL, ...) {
+lay_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_rect")
+
+  ##### boilerplate
+  validateFig(fig, "lay_points")
+
+  xname <- deparse(substitute(x))
+  yname <- deparse(substitute(y))
+
+  ## deal with possible named inputs from a data source
+  if(!is.null(data)) {
+    x          <- v_eval(substitute(x), data)
+    y          <- v_eval(substitute(y), data)
+    size       <- v_eval(substitute(size), data)
+    glyph      <- v_eval(substitute(glyph), data)
+    color      <- v_eval(substitute(color), data)
+    line_color <- v_eval(substitute(line_color), data)
+    fill_color <- v_eval(substitute(fill_color), data)
+  }
+
+  hover <- getHover(substitute(hover), data)
+  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  ## translate different x, y types to vectors
+  xy <- getXYData(x, y)
+  lgroup <- getLgroup(lgroup, fig)
+  ##### boilerplate
 
   xname <- NULL
   yname <- NULL
@@ -107,9 +179,33 @@ lay_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL, fill_color 
 }
 
 #' @export
-lay_crect <- function(fig, x, y = NULL, width = 1, height = 1, data = NULL, color = NULL, hover = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, angle = 0, lname = NULL, lgroup = NULL, ...) {
+lay_crect <- function(fig, x, y = NULL, data = NULL, width = 1, height = 1, color = NULL, fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1, angle = 0, hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "lay_crect")
+
+  # ##### boilerplate
+  # validateFig(fig, "lay_crect")
+
+  # xname <- deparse(substitute(x))
+  # yname <- deparse(substitute(y))
+
+  # ## deal with possible named inputs from a data source
+  # if(!is.null(data)) {
+  #   x          <- v_eval(substitute(x), data)
+  #   y          <- v_eval(substitute(y), data)
+  #   size       <- v_eval(substitute(size), data)
+  #   glyph      <- v_eval(substitute(glyph), data)
+  #   color      <- v_eval(substitute(color), data)
+  #   line_color <- v_eval(substitute(line_color), data)
+  #   fill_color <- v_eval(substitute(fill_color), data)
+  # }
+
+  # hover <- getHover(substitute(hover), data)
+  # xyNames <- getXYNames(x, y, xname, yname, list(...))
+  # ## translate different x, y types to vectors
+  # xy <- getXYData(x, y)
+  # lgroup <- getLgroup(lgroup, fig)
+  # ##### boilerplate
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -129,6 +225,7 @@ lay_crect <- function(fig, x, y = NULL, width = 1, height = 1, data = NULL, colo
   hover <- getHover(substitute(hover), data)
   xy <- getXYData(x, y)
   xyNames <- getXYNames(x, y, xname, yname, list(...))
+  lgroup <- getLgroup(lgroup, fig)
 
   opts <- c(list(fill_color = fill_color, line_color = line_color, fill_alpha = fill_alpha, line_alpha = line_alpha), list(...))
 

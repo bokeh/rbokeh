@@ -60,6 +60,7 @@ bk_theme <- list(
   glyph = list(discrete = glyph_scale(), continuous = glyph_scale()),
   line_color = list(discrete = tableau_pal("Tableau10"), continuous = continuous_pal()),
   fill_color = list(discrete = tableau_pal("Tableau10"), continuous = continuous_pal()),
+  text_color = list(discrete = tableau_pal("Tableau10"), continuous = continuous_pal()),
   size = list(discrete = size_scale(), continuous = size_scale())
   # line_type =
 )

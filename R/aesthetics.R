@@ -49,6 +49,9 @@ getAesMaps <- function(args, glrId) {
       ## -- but should relax this by using idx when building "entries" below
       gargs <- lapply(args[!mappable], function(x) x[1])
 
+      ## some args need to be overridden based on the glyph type
+      gargs <- overrideLegendGlyphArgs(gargs)
+
       dmn <- getDomain(do.call(c, lapply(margs, getDomain)))
       layerAesMap[[nm]]$domain <- dmn
 
@@ -164,6 +167,8 @@ needsMapFns <- list(
     !validColor(dd),
   fill_color = function(dd)
     !validColor(dd),
+  text_color = function(dd)
+    !validColor(dd),
   lty = function(dd)
     !validLine(dd),
   size = function(dd)
@@ -172,3 +177,10 @@ needsMapFns <- list(
     !validLine(dd)
 )
 
+overrideLegendGlyphArgs <- function(args) {
+  if(!is.null(args$end_angle))
+    args$end_angle <- 2*pi
+  if(!is.null(args$start_angle))
+    args$start_angle <- 0
+  args
+}

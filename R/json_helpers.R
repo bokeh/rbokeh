@@ -28,8 +28,11 @@ get_json <- function(obj) {
   obj
 }
 
+#' @importFrom RJSONIO toJSON
 #' @export
-print_model_json <- function(obj, pretty = TRUE) {
+print_model_json <- function(obj, prepare = TRUE, pretty = TRUE) {
+  if(prepare)
+    obj <- prepare_figure(obj)
   cat(toJSON(get_json(obj$model), digits = 50, pretty = pretty))
 }
 

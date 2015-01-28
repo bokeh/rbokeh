@@ -53,6 +53,7 @@ figure <- function(
     xgrid = xgrid, ygrid = ygrid, xaxes = xaxes, yaxes = yaxes,
     tools = tools, theme = theme,
     model = figModelSkeleton(id, title, width, height),
+    modeltype = "Plot",
     ref = list(
       type    = "Plot",
       subtype = "Figure",
@@ -68,7 +69,9 @@ figure <- function(
     glyphYRanges = list(),
     ## keep track of the axes ('cat' or 'num')
     xAxisType = NULL,
-    yAxisType = NULL
+    yAxisType = NULL,
+    hasXaxis = FALSE,
+    hasYaxis = FALSE
   ), class = "BokehFigure")
 
   ## check and add tools

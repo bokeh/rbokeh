@@ -6,11 +6,13 @@ Version 0.2
 - add automatic generation of legends for aesthetic mappings
 - add generic legend support
 - hover tool support
+- add datetime axis
+- add log axis
 - migrate to standard json model
 - several "stats" layers - hist, density, quantile, boxplot, etc.
 - axis labels
 - tools control
-- move to s3 + pipes for adding layers
+- move to s3 methods + pipes for adding layers
 
 Version 0.1
 ----------------------------------------------------------------------

@@ -43,12 +43,10 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = NULL, 
   xyNames <- getXYNames(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
   xy <- getXYData(x, y)
+  lgroup <- getLgroup(lgroup, fig)
 
   if(is.null(glyph))
     glyph <- "circle"
-
-  if(is.null(lgroup))
-    lgroup <- genLayerName(names(fig$layers))
 
   args <- list(glyph = glyph, color = color, size = size, line_color = line_color, line_alpha = line_alpha,  line_width = line_width, fill_color = fill_color, fill_alpha = fill_alpha, ...)
 
@@ -59,18 +57,17 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = NULL, 
   if(length(unique(glyph)) > 1) {
     gl <- args$glyph
     args$glyph <- NULL
+
+    ## for now, handle fill alpha here (assumes theme will always have line and fill)
+    ## otherwise, need to handle this in print() when we find new glyph from theme
+    if(is.null(args$fill_alpha)) {
+      args$fill_alpha <- 0.5
+    }
+
     lns <- sapply(args, length)
     idx <- which(lns == length(xy$x))
 
     dfArgs <- args[idx]
-
-    subset_with_attributes <- function(x, ...) {
-      res <- x[...]
-      attr.names <- names(attributes(x))
-      attr.names <- attr.names[attr.names != 'names']
-      attributes(res)[attr.names] <- attributes(x)[attr.names]
-      res
-    }
 
     if(is.character(gl))
       gl <- factor(gl)
@@ -89,79 +86,15 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = NULL, 
     return(fig)
   }
 
-  args$color <- NULL
+  args <- resolveColorAlpha(args, hasLine = TRUE, hasFill = TRUE, fig$layers[[lgroup]])
 
-  if(is.null(color) && is.null(fill_color) && is.null(line_color))
-    color <- "blue"
+  ## see if any options won't be used and give a message
+  if(glyph %in% names(markerDict))
+    checkOpts(list(...), glyph)
 
-  if(!is.null(color)) {
-    if(!is.null(line_color)) {
-      message("both color and line_color specified - honoring line_color")
-    } else {
-      args$line_color <- color
-    }
-    if(!is.null(fill_color)) {
-      message("both color and line_color specified - honoring line_color")
-    } else {
-      args$fill_color <- color
-    }
-  }
-
-  if(!is.null(alpha)) {
-    if(!is.null(line_alpha)) {
-      message("both alpha and line_alpha specified - honoring line_alpha")
-    } else {
-      args$line_alpha <- alpha
-    }
-    if(!is.null(fill_alpha)) {
-      message("both alpha and line_alpha specified - honoring line_alpha")
-    } else {
-      args$fill_alpha <- alpha
-    }
-  }
-
-  if(glyph %in% names(markerDict)) {
-    curGlyphProps <- markerDict[[as.character(glyph)]]
-    args$glyph <- curGlyphProps$glyph
-
-    if(curGlyphProps$fill) {
-      if(is.null(args$fill_color)) {
-        if(!is.null(args$line_color)) {
-          args$fill_color <- args$line_color
-        } else {
-          args$fill_color <- lgroup
-        }
-      }
-      if(curGlyphProps$line) {
-        if(is.null(args$fill_alpha)) {
-          args$fill_alpha <- 0.5
-        } else {
-          args$fill_alpha <- args$fill_alpha * 0.5
-        }
-      }
-    } else {
-      args$fill_color <- NA
-      args$fill_alpha <- NA
-    }
-
-    if(curGlyphProps$line) {
-      if(is.null(args$line_color))
-        if(!is.null(args$fill_color)) {
-          args$line_color <- args$fill_color
-        } else {
-          args$line_color <- lgroup
-        }
-    } else {
-      args$line_color <- NULL
-      args$line_width <- NULL
-      args$line_alpha <- NULL
-    }
-  }
-  # else {
-  #   stop("Glyph: ", glyph, " does not have a valid value.  See glyphTypes() for an example of what is valid.", call. = FALSE)
-  # }
-
+  args <- resolveGlyphProps(glyph, args, lgroup)
   args <- fixArgs(args, length(xy$x))
+
   axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y, glyph = glyph)
 
   make_glyph(fig, args$glyph, lname = lname, lgroup = lgroup,

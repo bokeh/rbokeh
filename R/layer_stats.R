@@ -1,5 +1,5 @@
 #' @export
-lay_hist <- function(fig, x, data = NULL, breaks = "Sturges", freq = TRUE,
+lay_hist <- function(fig, x, group = NULL, data = NULL, breaks = "Sturges", freq = TRUE,
   include.lowest = TRUE, right = TRUE,
   density = NULL, angle = 45, warn.unused = FALSE,
   line_color = NULL, line_width = 1, line_alpha = 1,
@@ -13,6 +13,30 @@ lay_hist <- function(fig, x, data = NULL, breaks = "Sturges", freq = TRUE,
     x <- eval(substitute(x), data)
 
   validateFig(fig, "lay_hist")
+
+  ##### boilerplate
+  validateFig(fig, "lay_points")
+
+  xname <- deparse(substitute(x))
+  yname <- deparse(substitute(y))
+
+  ## deal with possible named inputs from a data source
+  if(!is.null(data)) {
+    x          <- v_eval(substitute(x), data)
+    y          <- v_eval(substitute(y), data)
+    size       <- v_eval(substitute(size), data)
+    glyph      <- v_eval(substitute(glyph), data)
+    color      <- v_eval(substitute(color), data)
+    line_color <- v_eval(substitute(line_color), data)
+    fill_color <- v_eval(substitute(fill_color), data)
+  }
+
+  hover <- getHover(substitute(hover), data)
+  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  ## translate different x, y types to vectors
+  xy <- getXYData(x, y)
+  lgroup <- getLgroup(lgroup, fig)
+  ##### boilerplate
 
   hh <- graphics::hist.default(x = x, breaks = breaks,
     freq = freq, include.lowest = include.lowest, right = right,
@@ -48,6 +72,30 @@ lay_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1, kernel = c
   xname <- deparse(substitute(x))
   yname <- "Density"
 
+  ##### boilerplate
+  validateFig(fig, "lay_points")
+
+  xname <- deparse(substitute(x))
+  yname <- deparse(substitute(y))
+
+  ## deal with possible named inputs from a data source
+  if(!is.null(data)) {
+    x          <- v_eval(substitute(x), data)
+    y          <- v_eval(substitute(y), data)
+    size       <- v_eval(substitute(size), data)
+    glyph      <- v_eval(substitute(glyph), data)
+    color      <- v_eval(substitute(color), data)
+    line_color <- v_eval(substitute(line_color), data)
+    fill_color <- v_eval(substitute(fill_color), data)
+  }
+
+  hover <- getHover(substitute(hover), data)
+  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  ## translate different x, y types to vectors
+  xy <- getXYData(x, y)
+  lgroup <- getLgroup(lgroup, fig)
+  ##### boilerplate
+
   if(!is.null(data))
     x <- eval(substitute(x), data)
 
@@ -70,6 +118,30 @@ lay_quantile <- function(fig, x, groups = NULL, data = NULL,
   probs = NULL, distn = qunif, line_color = NULL, line_alpha = 1, line_width = 1, fill_color = NULL, fill_alpha = NULL, ...) {
 
   validateFig(fig, "lay_quantile")
+
+  ##### boilerplate
+  validateFig(fig, "lay_points")
+
+  xname <- deparse(substitute(x))
+  yname <- deparse(substitute(y))
+
+  ## deal with possible named inputs from a data source
+  if(!is.null(data)) {
+    x          <- v_eval(substitute(x), data)
+    y          <- v_eval(substitute(y), data)
+    size       <- v_eval(substitute(size), data)
+    glyph      <- v_eval(substitute(glyph), data)
+    color      <- v_eval(substitute(color), data)
+    line_color <- v_eval(substitute(line_color), data)
+    fill_color <- v_eval(substitute(fill_color), data)
+  }
+
+  hover <- getHover(substitute(hover), data)
+  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  ## translate different x, y types to vectors
+  xy <- getXYData(x, y)
+  lgroup <- getLgroup(lgroup, fig)
+  ##### boilerplate
 
   opts <- c(list(line_color = line_color, line_alpha = line_alpha,
     line_width = line_width, fill_color = fill_color,
@@ -107,6 +179,30 @@ lay_boxplot <- function(fig, x, y = NULL, data = NULL, coef = 1.5, line_color = 
 
   xnm <- deparse(substitute(x))
   ynm <- deparse(substitute(y))
+
+  ##### boilerplate
+  validateFig(fig, "lay_points")
+
+  xname <- deparse(substitute(x))
+  yname <- deparse(substitute(y))
+
+  ## deal with possible named inputs from a data source
+  if(!is.null(data)) {
+    x          <- v_eval(substitute(x), data)
+    y          <- v_eval(substitute(y), data)
+    size       <- v_eval(substitute(size), data)
+    glyph      <- v_eval(substitute(glyph), data)
+    color      <- v_eval(substitute(color), data)
+    line_color <- v_eval(substitute(line_color), data)
+    fill_color <- v_eval(substitute(fill_color), data)
+  }
+
+  hover <- getHover(substitute(hover), data)
+  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  ## translate different x, y types to vectors
+  xy <- getXYData(x, y)
+  lgroup <- getLgroup(lgroup, fig)
+  ##### boilerplate
 
   ## deal with vector inputs from a data source
   if(!is.null(data)) {
@@ -189,5 +285,6 @@ lay_boxplot <- function(fig, x, y = NULL, data = NULL, coef = 1.5, line_color = 
 # lay_rug
 
 # lay_hexbin <- function(fig, x, y, data = NULL, shape = 1, xbins = 30) {
+## use hexbin() and then extract centroids, etc. and use lay_polygons to draw
 # }
 
