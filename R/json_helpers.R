@@ -30,10 +30,14 @@ get_json <- function(obj) {
 
 #' @importFrom RJSONIO toJSON
 #' @export
-print_model_json <- function(obj, prepare = TRUE, pretty = TRUE) {
+print_model_json <- function(obj, prepare = TRUE, pretty = TRUE, pbcopy = FALSE) {
   if(prepare)
     obj <- prepare_figure(obj)
-  cat(toJSON(get_json(obj$model), digits = 50, pretty = pretty))
+
+  file <- ""
+  if(pbcopy)
+    file <- pipe("pbcopy")
+  cat(toJSON(get_json(obj$model), digits = 50, pretty = pretty), file = file)
 }
 
 underscore2camel <- function(x) {
