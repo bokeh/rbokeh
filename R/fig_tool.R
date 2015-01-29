@@ -41,6 +41,12 @@ tool_reset <- function(obj) {
 }
 
 #' @export
+tool_box_select <- function(obj, select_every_mousemove = TRUE) {
+  updateTool(obj, which = "box_select", args = list(plotRef = obj$ref,
+    select_every_mousemove = select_every_mousemove))
+}
+
+#' @export
 tool_lasso_select <- function(obj, select_every_mousemove = TRUE) {
   updateTool(obj, which = "lasso_select", args = list(plotRef = obj$ref,
     select_every_mousemove = select_every_mousemove))

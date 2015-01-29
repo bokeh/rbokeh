@@ -1,5 +1,6 @@
 Version 0.2
 
+- add default nonselection glyph properties for box/lasso select
 - add basic theme support
 - add non-standard evaluation specification of parameters
 - add aesthetic mapping

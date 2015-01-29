@@ -43,18 +43,31 @@ addLayer <- function(obj, spec, dat, lname, lgroup) {
   }
 
   glId <- genId(obj, c(glyph, lgroup, lname))
-  glyph <- glyphModel(glId, glyph, glyphAttrs)
+  glyphObj <- glyphModel(glId, glyph, glyphAttrs)
+
+  # nonselection glyph
+  nsGlyphAttrs <- glyphAttrs
+  colorInd <- which(grepl("_color", names(nsGlyphAttrs)))
+
+  for(ii in colorInd) {
+    names(nsGlyphAttrs[[ii]])[names(nsGlyphAttrs[[ii]]) == "field"] <- "value"
+    if(!is.na(nsGlyphAttrs[[ii]]$value))
+      nsGlyphAttrs[[ii]]$value <- "#e1e1e1"
+  }
+  nsglId <- genId(obj, c("ns", glyph, lgroup, lname))
+  nsGlyphObj <- glyphModel(nsglId, glyph, nsGlyphAttrs)
 
   dId <- genId(obj, digest(dat))
   datMod <- dataModel(dat, dId)
 
   glrId <- genId(obj, c("glyphRenderer", lgroup, lname))
-  glyphRend <- glyphRendererModel(glrId, datMod$ref, glyph$ref)
+  glyphRend <- glyphRendererModel(glrId, datMod$ref, glyphObj$ref, nsGlyphObj$ref)
 
   obj$model$plot$attributes$renderers[[glrId]] <- glyphRend$ref
 
   obj$model[[dId]] <- datMod$model
-  obj$model[[glId]] <- glyph$model
+  obj$model[[glId]] <- glyphObj$model
+  obj$model[[nsglId]] <- nsGlyphObj$model
   obj$model[[glrId]] <- glyphRend$model
 
   obj
@@ -79,10 +92,10 @@ glyphModel <- function(id, glyph = "Circle", attrs) {
   res
 }
 
-glyphRendererModel <- function(id, dataRef, glyphRef) {
+glyphRendererModel <- function(id, dataRef, glyphRef, nsGlyphRef) {
   res <- base_model_object("GlyphRenderer", id)
   res$model$attributes["selection_glyph"] <- list(NULL)
-  res$model$attributes["nonselection_glyph"] <- list(NULL)
+  res$model$attributes$nonselection_glyph <- nsGlyphRef
   res$model$attributes["server_data_source"] <- list(NULL)
   res$model$attributes["name"] <- list(NULL)
   res$model$attributes$data_source <- dataRef

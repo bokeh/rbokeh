@@ -75,7 +75,7 @@ figure <- function(
   ), class = "BokehFigure")
 
   ## check and add tools
-  toolList <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "tap", "lasso_select", "reset", "save")]
+  toolList <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "tap", "box_select", "lasso_select", "reset", "save")]
   notUsed <- setdiff(toolList, tools)
   if(length(notUsed) > 0)
     message("Note: tools not used: ", paste(notUsed, collapse = ", "))
