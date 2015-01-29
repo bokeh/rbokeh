@@ -48,7 +48,10 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = NULL, 
   if(is.null(glyph))
     glyph <- "circle"
 
-  args <- list(glyph = glyph, color = color, size = size, line_color = line_color, line_alpha = line_alpha,  line_width = line_width, fill_color = fill_color, fill_alpha = fill_alpha, ...)
+  args <- list(glyph = glyph, color = color, size = size,
+    line_color = line_color, line_alpha = line_alpha,
+    line_width = line_width, fill_color = fill_color,
+    fill_alpha = fill_alpha, ...)
 
   # if glyph is not unique, we need to split the data
   # and call make_glyph several times
@@ -98,7 +101,7 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = NULL, 
   axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y, glyph = glyph)
 
   make_glyph(fig, args$glyph, lname = lname, lgroup = lgroup,
-    data = c(xy, list(size = size)),
+    data = xy,
     args = args, axisTypeRange = axisTypeRange,
     hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)

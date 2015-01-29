@@ -109,7 +109,7 @@ lay_annulus <- function(fig, x, y = NULL, data = NULL,
   axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
 
   make_glyph(fig, type = "annulus", lname = lname, lgroup = lgroup,
-    data = list(x = x, y = y, inner_radius = inner_radius, outer_radius = outer_radius),
+    data = xy,
     args = args, axisTypeRange = axisTypeRange,
     hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)
@@ -148,6 +148,8 @@ lay_arc <- function(fig, x, y = NULL, data = NULL,
   lgroup <- getLgroup(lgroup, fig)
 
   args <- list(glyph = "arc", color = color, alpha = alpha,
+    radius = radius, start_angle = start_angle, end_angle = end_angle,
+    direction = direction,
     line_width = line_width, start_angle = start_angle,
     end_angle = end_angle, ...)
 
@@ -158,14 +160,13 @@ lay_arc <- function(fig, x, y = NULL, data = NULL,
   axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
 
   make_glyph(fig, type = "arc", lname = lname, lgroup = lgroup,
-    data = list(x = x, y = y, radius = radius,
-      start_angle = start_angle, end_angle = end_angle, direction = direction),
+    data = xy,
     args = args, axisTypeRange = axisTypeRange,
     hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)
 }
 
-
+# doesn't seem to have hover...
 #' @export
 lay_oval <- function(fig, x, y = NULL, data = NULL,
   width = 0.1, height = 0.1, angle = 0,
@@ -199,6 +200,7 @@ lay_oval <- function(fig, x, y = NULL, data = NULL,
   lgroup <- getLgroup(lgroup, fig)
 
   args <- list(glyph = "oval", color = color, alpha = alpha,
+    width = width, height = height, angle = angle,
     fill_color = fill_color, fill_alpha = fill_alpha,
     line_color = line_color, line_alpha = line_alpha, ...)
 
@@ -207,7 +209,7 @@ lay_oval <- function(fig, x, y = NULL, data = NULL,
   axisTypeRange <- getGlyphAxisTypeRange(x, y)
 
   make_glyph(fig, type = "oval", lname = lname, lgroup = lgroup,
-    data = list(x = x, y = y, width = width, height = height, angle = angle),
+    data = xy,
     args = args, axisTypeRange = axisTypeRange,
     hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)
@@ -246,6 +248,8 @@ lay_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
   lgroup <- getLgroup(lgroup, fig)
 
   args <- list(glyph = "wedge", color = color, alpha = alpha,
+    radius = radius, start_angle = start_angle, end_angle = end_angle,
+    direction = direction,
     fill_color = fill_color, fill_alpha = fill_alpha, line_color = line_color,
     line_alpha = line_alpha, radius = radius, start_angle = start_angle,
     end_angle = end_angle, direction = direction, ...)
@@ -257,8 +261,7 @@ lay_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
   axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
 
   make_glyph(fig, type = "wedge", lname = lname, lgroup = lgroup,
-    data = list(x = x, y = y, radius = radius,
-      start_angle = start_angle, end_angle = end_angle, direction = direction),
+    data = xy,
     args = args, axisTypeRange = axisTypeRange,
     hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)
