@@ -49,6 +49,24 @@ size_scale <- function(min = 2, max = 20) {
   }
 }
 
+line_dash_scale <- function() {
+  function(n) {
+    dashes <- as.character(1:6)
+    if(n > 6)
+      message("There are more levels for line dash than there are available line dash styles in this theme... repeating line dash")
+    ltyDict[dashes[(seq_len(n) - 1) %% length(dashes) + 1]]
+  }
+}
+
+line_width_scale <- function() {
+  function(n) {
+    dashes <- as.character(1:6)
+    if(n > 6)
+      message("There are more levels for line dash than there are available line dash styles in this theme... repeating line dash")
+    dashes[(seq_len(n) - 1) %% length(dashes) + 1]
+  }
+}
+
 ## theme
 tableau_theme <- list(
   line = tableauColors$Tableau10,
@@ -61,8 +79,9 @@ bk_theme <- list(
   line_color = list(discrete = tableau_pal("Tableau10"), continuous = continuous_pal()),
   fill_color = list(discrete = tableau_pal("Tableau10"), continuous = continuous_pal()),
   text_color = list(discrete = tableau_pal("Tableau10"), continuous = continuous_pal()),
-  size = list(discrete = size_scale(), continuous = size_scale())
-  # line_type =
+  size = list(discrete = size_scale(), continuous = size_scale()),
+  line_dash = list(discrete = line_dash_scale(), continuous = line_dash_scale()),
+  line_width = list(discrete = line_width_scale(), continuous = line_width_scale())
 )
 
 

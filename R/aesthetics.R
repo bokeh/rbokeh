@@ -100,14 +100,14 @@ mergeAesLegendGlyphs <- function(gly1, gly2) {
   if(length(newVar) > 0) {
     gly1[newVar] <- gly2[newVar]
   }
-  if(length(sameVar) > 0) {
-    if(any(sameVar == "mappedGlyph")) {
-      if(!identical(gly1[[sameVar]], gly2[[sameVar]]))
-        message("A layer added to an existing layer group has the same glyph mapped to a same attribute... it will be ignored.")
-    } else {
-      message("A layer added to an existing layer group has the same glyph mapped to a same attribute... it will be ignored.")
-    }
-  }
+  # if(length(sameVar) > 0) {
+  #   if(any(sameVar == "mappedGlyph")) {
+  #     if(!identical(gly1[[sameVar]], gly2[[sameVar]]))
+  #       message("A layer added to an existing layer group has the same glyph mapped to a same attribute... it will be ignored.")
+  #   } else {
+  #     message("A layer added to an existing layer group has the same glyph mapped to a same attribute... it will be ignored.")
+  #   }
+  # }
   gly1
 }
 
@@ -140,11 +140,15 @@ getThemeValue <- function(domain, values, type) {
   if(isDiscrete) {
     idx <- match(values, domain)
     vals <- bk_theme[[type]][[subtype]](length(domain))
-    return(vals[idx])
   } else {
     ct <- cut(values, domain, include.lowest = TRUE)
     vals <- bk_theme[[type]][[subtype]](length(levels(ct)))
-    return(vals[as.integer(ct)])
+    idx <- as.integer(ct)
+  }
+  if(length(idx) == 1) {
+    return(vals[[idx]])
+  } else {
+    return(vals[idx])
   }
 }
 

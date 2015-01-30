@@ -93,18 +93,18 @@ markerDict <- list(
 
 ## list of conversions from R's "lty" to line_dash
 ltyDict <- list(
-  "1" = list(line_dash = NULL),
-  "2" = list(line_dash = c(8, 8)),
-  "3" = list(line_dash = c(2, 6)),
-  "4" = list(line_dash = c(2, 6, 8, 6)),
-  "5" = list(line_dash = c(14, 6)),
-  "6" = list(line_dash = c(12, 4, 4, 4)),
-  "solid" = list(line_dash = NULL),
-  "dashed" = list(line_dash = c(8, 8)),
-  "dotted" = list(line_dash = c(2, 6)),
-  "dotdash" = list(line_dash = c(2, 6, 8, 6)),
-  "longdash" = list(line_dash = c(14, 6)),
-  "twodash" = list(line_dash = c(12, 4, 4, 4))
+  "1" = NULL,
+  "2" = c(8, 8),
+  "3" = c(2, 6),
+  "4" = c(2, 6, 8, 6),
+  "5" = c(14, 6),
+  "6" = c(12, 4, 4, 4),
+  "solid" = NULL,
+  "dashed" = c(8, 8),
+  "dotted" = c(2, 6),
+  "dotdash" = c(2, 6, 8, 6),
+  "longdash" = c(14, 6),
+  "twodash" = c(12, 4, 4, 4)
 )
 
 ltyNames <- names(ltyDict)

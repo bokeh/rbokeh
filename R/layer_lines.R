@@ -1,7 +1,11 @@
-#' @export
-lay_lines <- function(fig, x, y = NULL, group = NULL, data = NULL, type = 1, width = 1, color = NULL, alpha = NULL, line_join = 1, line_cap = "round", legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "lay_lines")
+#' @export
+ly_line <- function(fig, x, y = NULL, data = NULL, group = NULL,
+  color = "black", type = 1, width = 1, alpha = NULL,
+  line_join = 1, line_cap = "round",
+  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+
+  validateFig(fig, "ly_line")
   ## see if any options won't be used and give a message
   checkOpts(list(...), "line")
 
@@ -10,12 +14,12 @@ lay_lines <- function(fig, x, y = NULL, group = NULL, data = NULL, type = 1, wid
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    group      <- v_eval(substitute(group), data)
-    type       <- v_eval(substitute(type), data)
-    width      <- v_eval(substitute(width), data)
-    color      <- v_eval(substitute(color), data)
+    x     <- v_eval(substitute(x), data)
+    y     <- v_eval(substitute(y), data)
+    group <- v_eval(substitute(group), data)
+    color <- v_eval(substitute(color), data)
+    type  <- v_eval(substitute(type), data)
+    width <- v_eval(substitute(width), data)
   }
 
   xyNames <- getXYNames(x, y, xname, yname, list(...))
@@ -23,42 +27,42 @@ lay_lines <- function(fig, x, y = NULL, group = NULL, data = NULL, type = 1, wid
   xy <- getXYData(x, y)
   lgroup <- getLgroup(lgroup, fig)
 
-  args <- list(glyph = "line", group = group, line_color = color,
-    line_alpha = alpha, line_width = width,
-    line_dash = type, line_join = line_join,
+  args <- list(glyph = "line", group = group, color = color,
+    width = width, type = type, line_join = line_join,
     line_cap = line_cap, ...)
+
+  args$alpha <- alpha
 
   # if any of group, type, width, or color are not unique, we need to split the data
   # and call make_glyph several times
   # otherwise we can just vary the values of things
   # and call make_glyph just once...
-  groupVars <- c("group", "line_dash", "line_width", "line_color")
-  groupable <- which(sapply(args[groupVars], function(x) length(unique(x)) > 1))
+  groupVars <- c("group", "type", "width", "color")
+  groupable <- which(names(args) %in% groupVars &
+    sapply(args, function(x) length(unique(x)) > 1))
   if(length(groupable) > 0) {
-    browser()
 
-    # split(seq_along())
+    gArgs <- args[groupable]
+    ngArgs <- args[-groupable]
 
-    gl <- args$glyph
-    args$glyph <- NULL
-    lns <- sapply(args, length)
+    lns <- sapply(ngArgs, length)
     idx <- which(lns == length(xy$x))
 
     dfArgs <- args[idx]
 
-    if(is.character(gl))
-      gl <- factor(gl)
+    ## much more efficient way to do this but would probably require more dependencies...
+    lvls <- apply(as.matrix(data.frame(gArgs)), 1,
+      function(x) paste(x, collapse = ""))
+    dfSplit <- split(seq_along(lvls), lvls)
 
-    dfSplit <- split(seq_along(gl), gl)
     for(ii in seq_along(dfSplit)) {
       curIdx <- dfSplit[[ii]]
-      curGlyph <- paste("glyph_")
 
-      fig <- do.call(lay_lines,
-        c(lapply(dfArgs, function(x) subset_with_attributes(x, curIdx)), args[-idx],
-          list(fig = fig, x = xy$x[curIdx], y = xy$y[curIdx],
-            glyph = subset_with_attributes(gl, curIdx[1]), lgroup = lgroup,
-            lname = ii, hover = hover$data[curIdx, , drop = FALSE])))
+      fig <- do.call(ly_line,
+        c(lapply(dfArgs, function(x) subset_with_attributes(x, curIdx)),
+          lapply(gArgs, function(x) subset_with_attributes(x, curIdx[1])),
+          ngArgs[-idx], list(fig = fig, x = xy$x[curIdx], y = xy$y[curIdx],
+            lgroup = lgroup, lname = ii, xlab = xyNames$x, ylab = xyNames$y)))
     }
     return(fig)
   }
@@ -74,124 +78,64 @@ lay_lines <- function(fig, x, y = NULL, group = NULL, data = NULL, type = 1, wid
 }
 
 #' @export
-lay_multi_line <- function(fig, xs, ys, lname = NULL, lgroup = NULL, ...) {
+ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
+  color = NULL, alpha = NULL, width = 1, type = 1,
+  line_join = 1, line_cap = "round",
+  legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  ##### boilerplate
-  validateFig(fig, "lay_multi_line")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "multi_line")
+  checkOpts(list(...), "segment")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  validateFig(fig, "ly_segments")
+
+  xname <- deparse(substitute(x0))
+  yname <- deparse(substitute(y0))
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
+    x0    <- v_eval(substitute(x0), data)
+    y0    <- v_eval(substitute(y0), data)
+    x1    <- v_eval(substitute(x1), data)
+    y1    <- v_eval(substitute(y1), data)
+    color <- v_eval(substitute(color), data)
+    type  <- v_eval(substitute(type), data)
+    width <- v_eval(substitute(width), data)
   }
 
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
+  xyNames <- getXYNames(x0, y0, xname, yname, list(...))
+
   lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
 
-  axisTypeRange <- getGlyphAxisTypeRange(unlist(xs), unlist(ys))
-  make_glyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
-    data = list(xs = xs, ys = ys), args = list(...), axisTypeRange = axisTypeRange)
-}
-
-#' @export
-lay_segments <- function(fig, x0, y0, x1, y1, data = NULL, line_color = NULL, line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", lname = NULL, lgroup = NULL, ...) {
-
-  validateFig(fig, "lay_segments")
-  ## see if any options won't be used and give a message
-  checkOpts(list(...), "segments")
-
-  ##### boilerplate
-  validateFig(fig, "lay_points")
-
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
-  }
-
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
-
-  if(!is.null(data)) {
-    x0         <- v_eval(substitute(x0), data)
-    y0         <- v_eval(substitute(y0), data)
-    x1         <- v_eval(substitute(x1), data)
-    y1         <- v_eval(substitute(y1), data)
-    line_color <- v_eval(substitute(line_color), data)
-    line_alpha <- v_eval(substitute(line_alpha), data)
-  }
-
-  args <- list(glyph = "segment", line_color = line_color,
-    line_alpha = line_alpha, line_width = line_width,
-    line_dash = line_dash, line_join = line_join,
+  args <- list(glyph = "segment", color = color,
+    alpha = alpha, width = width,
+    type = type, line_join = line_join,
     line_cap = line_cap, ...)
 
   args <- updateLineOpts(fig, args)
 
   axisTypeRange <- getGlyphAxisTypeRange(c(x0, x1), c(y0, y1))
-  make_glyph(fig, type = "segment", lname = lname, lgroup = lgroup,
+  make_glyph(fig, type = "segment",
+    legend = legend, lname = lname, lgroup = lgroup,
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1),
     args = args, axisTypeRange = axisTypeRange)
 }
 
 #' @export
-lay_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL, line_color = "black", line_alpha = NULL, line_width = 1, line_dash = 1, lname = NULL, lgroup = NULL, ...) {
+ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
+  color = "black", alpha = NULL, width = 1, type = 1,
+  legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  ##### boilerplate
-  validateFig(fig, "lay_abline")
+  validateFig(fig, "ly_abline")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "abline")
+  checkOpts(list(...), "segment")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  xyNames <- getXYNames(NULL, NULL, "x", "y", list(...))
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
-  }
-
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
   lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
 
-  args <- list(glyph = "segment", line_color = line_color,
-    line_alpha = line_alpha, line_width = line_width,
-    line_dash = line_dash, ...)
+  args <- list(glyph = "segment", color = color,
+    alpha = alpha, width = width,
+    type = type, ...)
 
   args <- updateLineOpts(fig, args)
 
@@ -205,6 +149,9 @@ lay_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     b <- coef[2]
   }
 
+  xAxisType <- "numeric"
+  yAxisType <- "numeric"
+
   if(!is.null(a) && !is.null(b)) {
     nn <- max(c(length(a), length(b)))
     if(length(a) < nn)
@@ -216,12 +163,20 @@ lay_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     x1 <- rep(1, nn)
     y1 <- b * x1 + a
   } else if(!is.null(h)) {
+    if(inherits(h, c("Date", "POSIXct"))) {
+      yAxisType <- "datetime"
+      h <- toEpoch(h)
+    }
     nn <- length(h)
     x0 <- rep(0, nn)
     y0 <- h
     x1 <- rep(1, nn)
     y1 <- h
   } else if(!is.null(v)) {
+    if(inherits(v, c("Date", "POSIXct"))) {
+      xAxisType <- "datetime"
+      v <- toEpoch(v)
+    }
     nn <- length(v)
     x0 <- v
     y0 <- rep(0, nn)
@@ -258,44 +213,29 @@ lay_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   }
 
   axisTypeRange <- list(
-    xAxisType = "numeric", yAxisType = "numeric",
+    xAxisType = xAxisType, yAxisType = yAxisType,
     xRange = NULL, yRange = NULL)
 
-  make_glyph(fig, type = "segment", lname = lname, lgroup = lgroup,
+  make_glyph(fig, type = "segment", legend = legend,
+    lname = lname, lgroup = lgroup,
+    xname = xyNames$x, yname = xyNames$y,
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, defer = deferFn),
     args = args, axisTypeRange = axisTypeRange)
 }
 
 #' @export
-lay_curve <- function(fig, expr, from = NULL, to = NULL, n = 101, xname = "x", line_color = "black", line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", lname = NULL, lgroup = NULL, ...) {
+ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
+  color = "black", alpha = NULL, width = 1, type = 1,
+  line_join = 1, line_cap = "round",
+  legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  xname <- "x"
-
-  ##### boilerplate
-  validateFig(fig, "lay_curve")
+  validateFig(fig, "ly_curve")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "curve")
+  checkOpts(list(...), "line")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  xyNames <- getXYNames(NULL, NULL, "x", "f(x)", list(...))
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
-  }
-
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
   lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
 
   sexpr <- substitute(expr)
   if (is.name(sexpr)) {
@@ -314,51 +254,38 @@ lay_curve <- function(fig, expr, from = NULL, to = NULL, n = 101, xname = "x", l
   names(ll) <- xname
   y <- eval(expr, envir = ll, enclos = parent.frame())
 
-  opts <- c(list(line_color = line_color,
-    line_alpha = line_alpha, line_width = line_width,
-    line_dash = line_dash, line_join = line_join,
-    line_cap = line_cap), list(...))
+  args <- list(color = color,
+    alpha = alpha, width = width,
+    type = type, line_join = line_join,
+    line_cap = line_cap, ...)
 
-  opts <- updateLineOpts(fig, opts)
+  args <- updateLineOpts(fig, args)
 
-  do.call(lay_lines, c(list(fig = fig, x = x, y = y, lname = lname, lgroup = lgroup, xlab = xname, ylab = yname), opts))
+  do.call(ly_line, c(list(fig = fig, x = x, y = y, legend = legend, lname = lname, lgroup = lgroup, xlab = xname, ylab = yname), args))
 }
 
 #' @export
-lay_contour <- function(fig, image, x = seq(0, 1, length.out = nrow(image)), y = seq(0, 1, length.out = ncol(image)), nlevels = 10, levels = pretty(range(image, na.rm = TRUE), nlevels), line_color = "black", line_alpha = 0.75, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", lname = NULL, lgroup = NULL, ...) {
+ly_contour <- function(fig, image,
+  x = seq(0, 1, length.out = nrow(image)), y = seq(0, 1, length.out = ncol(image)),
+  nlevels = 10, levels = pretty(range(image, na.rm = TRUE), nlevels),
+  color = "black", alpha = 0.75, width = 1,
+  type = 1, line_join = 1, line_cap = "round",
+  lname = NULL, lgroup = NULL, ...) {
 
-  ##### boilerplate
-  validateFig(fig, "lay_contour")
+  validateFig(fig, "ly_contour")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "contour")
+  checkOpts(list(...), "multi_line")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  xyNames <- getXYNames(NULL, NULL, "x", "y", list(...))
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
-  }
-
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
   lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
 
-  opts <- c(list(line_color = line_color,
-    line_alpha = line_alpha, line_width = line_width,
-    line_dash = line_dash, line_join = line_join,
-    line_cap = line_cap), list(...))
+  args <- list(color = color,
+    alpha = alpha, width = width,
+    type = type, line_join = line_join,
+    line_cap = line_cap, ...)
 
-  opts <- updateLineOpts(fig, opts)
+  args <- updateLineOpts(fig, args)
 
   contr <- do.call(contourLines, list(x = x, y = y, z = image, nlevels = nlevels, levels = levels))
 
@@ -369,88 +296,20 @@ lay_contour <- function(fig, image, x = seq(0, 1, length.out = nrow(image)), y =
 
   make_glyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
     data = list(xs = xs, ys = ys),
-    args = opts, axisTypeRange = axisTypeRange)
+    args = args, axisTypeRange = axisTypeRange)
 }
 
-# lay_pointline
+# ly_pointline
+## a common thing to do is make a layer with both points and lines (type = "b")
+## so why not make it a special layer function
 
 #' @export
-lay_bezier <- function(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = NULL, hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+ly_ray <- function(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
+  color = "black", type = 1, width = 1, alpha = NULL,
+  line_join = NULL, line_cap = NULL,
+  legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  ##### boilerplate
-  validateFig(fig, "lay_bezier")
-  ## see if any options won't be used and give a message
-  checkOpts(list(...), "bezier")
-
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
-  }
-
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
-
-  axisTypeRange <- getGlyphAxisTypeRange(c(x0, x1), c(y0, y1), assertX = "numeric", assertY = "numeric")
-  make_glyph(fig, type = "bezier", lname = lname, lgroup = lgroup,
-    data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, cx0 = cx0, cy0 = cy0, cx1 = cx1, cy1 = cy1),
-    args = list(...), axisTypeRange = axisTypeRange)
-}
-
-
-#' @export
-lay_quadratic <- function(fig, x0, y0, x1, y1, cx, cy, data = NULL, hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
-
-  ##### boilerplate
-  validateFig(fig, "lay_quadratic")
-  ## see if any options won't be used and give a message
-  checkOpts(list(...), "quadratic")
-
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
-  }
-
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
-
-  axisTypeRange <- getGlyphAxisTypeRange(c(x0, x1), c(y0, y1), assertX = "numeric", assertY = "numeric")
-
-  make_glyph(fig, type = "quadratic", lname = lname, lgroup = lgroup,
-    data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, cx = cx, cy = cy),
-    args = list(...), axisTypeRange = axisTypeRange)
-}
-
-#' @export
-lay_ray <- function(fig, x, y = NULL, data = NULL, length, angle = 0, hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
-
-  ##### boilerplate
-  validateFig(fig, "lay_ray")
+  validateFig(fig, "ly_ray")
   ## see if any options won't be used and give a message
   checkOpts(list(...), "ray")
 
@@ -459,24 +318,28 @@ lay_ray <- function(fig, x, y = NULL, data = NULL, length, angle = 0, hover = NU
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
+    x     <- v_eval(substitute(x), data)
+    y     <- v_eval(substitute(y), data)
+    color <- v_eval(substitute(color), data)
+    type  <- v_eval(substitute(type), data)
+    width <- v_eval(substitute(width), data)
   }
 
-  hover <- getHover(substitute(hover), data)
   xyNames <- getXYNames(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
   xy <- getXYData(x, y)
   lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
+
+  args <- list(glyph = "ray", color = color,
+    alpha = alpha, width = width, type = type,
+    length = length, angle = angle,
+    line_join = line_join, line_cap = line_cap, ...)
+
+  args <- updateLineOpts(fig, args)
 
   axisTypeRange <- getGlyphAxisTypeRange(x, y)
+
   make_glyph(fig, type = "ray", lname = lname, lgroup = lgroup,
-    data = list(x = x, y = y, length = length, angle = angle),
-    args = list(...), axisTypeRange = axisTypeRange)
+    data = xy, legend = legend,
+    args = args, axisTypeRange = axisTypeRange)
 }

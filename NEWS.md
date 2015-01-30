@@ -11,6 +11,7 @@ Version 0.2
 - add log axis
 - migrate to standard json model
 - several "stats" layers - hist, density, quantile, boxplot, etc.
+- image_url working
 - axis labels
 - tools control
 - move to s3 methods + pipes for adding layers

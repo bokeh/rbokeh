@@ -54,6 +54,7 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axisTypeRange, hove
 
   ## deal with manual legend
   if(!is.null(legend)) {
+    legend <- as.character(legend)
     if(!is.null(aesMaps)) {
       message("Ignoring custom legend because an aesthetic is being mapped and therefore the legend is being taken care of automatically.")
     } else {
@@ -95,6 +96,8 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axisTypeRange, hove
     data[[argNames[ii]]] <- args[[ii]]
   }
   args[longInd] <- NULL
+
+  ## remove NAs in data at this point?
 
   ## spec needs to point to corresponding data
   dataNames <- names(data)

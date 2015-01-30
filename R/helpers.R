@@ -1,15 +1,29 @@
 
 
 updateLineOpts <- function(fig, opts) {
-    if(is.numeric(opts$line_dash)) {
+
+  ## map to what bokeh expects
+  opts$line_dash <- opts$type
+  opts$type <- NULL
+
+  opts$line_color <- opts$color
+  opts$color <- NULL
+
+  opts$line_width <- opts$width
+  opts$width <- NULL
+
+  opts$line_alpha <- opts$alpha
+  opts$alpha <- NULL
+
+  if(is.numeric(opts$line_dash)) {
     if(length(opts$line_dash) == 1) {
       opts$line_dash <- as.character(opts$line_dash)
     }
   }
   if(is.character(opts$line_dash)) {
     if(!opts$line_dash %in% names(ltyDict))
-      stop("'line_join' should be one of: ", paste(names(ltyDict), collapse = ", "), call. = FALSE)
-    opts$line_dash <- ltyDict[[opts$line_dash]]$line_dash
+      stop("'line_dash' should be one of: ", paste(names(ltyDict), collapse = ", "), call. = FALSE)
+    opts$line_dash <- ltyDict[[opts$line_dash]]
   }
 
   if(is.numeric(opts$line_cap))
@@ -46,7 +60,7 @@ validateColors <- function(opts) {
 ## should make this return something that will be evaluated at render time
 getNextColor <- function(lgroupobj, which = "fill_color", type = "discrete") {
   curTheme <- bk_theme[[which]][[type]](10)
-  nLayers <- length(lgroupobj) + 1
+  nLayers <- length(lgroupobj$glyphIds) + 1
   nextColorIdx <- (nLayers - 1) %% length(curTheme) + 1
   curTheme[nextColorIdx]
 }
@@ -102,7 +116,7 @@ getGlyphAxisTypeRange <- function(x, y, assertX = NULL, assertY = NULL, glyph = 
 ## determine whether axis is "numeric" or "categorical"
 getGlyphAxisType <- function(a) {
   # this will surely get more complex...
-  if(is.character(a)) {
+  if(is.character(a) || is.factor(a)) {
     return("categorical")
   } else if(inherits(a, c("Date", "POSIXct"))) {
     return("datetime")
@@ -120,12 +134,14 @@ getGlyphRange <- function(a, axisType = NULL, ...) {
     range(a, na.rm = TRUE)
   } else {
     # gsub removes suffixes like ":0.6"
+    if(is.factor(a))
+      a <- levels(a)
     unique(gsub("(.*):(-*[0-9]*\\.*)*([0-9]+)*$", "\\1", a))
   }
 }
 
 validateAxisType <- function(figType, curType, which) {
-  if(length(figType) > 0) {
+  if(length(figType) > 0 && length(curType) > 0) {
     # make this more informative...
     if(figType != curType)
       stop(which, " axis type (numerical / categorical) does not match that of other elements in this figure", call. = FALSE)
@@ -326,20 +342,31 @@ getLgroup <- function(lgroup, fig) {
 # list of column names
 # otherwise it should be a named list or data frame
 getHover <- function(hn, data) {
-  if(deparse(hn)[1] == "NULL")
-    return(NULL)
-  if(is.null(data)) {
-    data <- hn
+  tmp <- try(eval(hn), silent = TRUE)
+  if(is.data.frame(tmp)) {
+    data <- tmp
     hn <- names(data)
   } else {
-    hn <- deparse(hn)[1]
-    hn <- gsub("c\\(|list\\(|\\)| +", "", hn)
-    hn <- strsplit(hn, ",")[[1]]
-    if(all(! hn %in% names(data))) {
-      message("There were no columns: ", paste(hn, collapse = ", "), " in the data for the hover tool - hover not added")
+    if(deparse(hn)[1] == "NULL")
       return(NULL)
+    if(is.null(data)) {
+      if(!is.data.frame(hn)) {
+        message("hover tool not added - 'hover' must be a data frame or list of variables present in the data frame supplied as the 'data' argument")
+        return(NULL)
+      } else {
+        data <- hn
+        hn <- names(data)
+      }
+    } else {
+      hn <- deparse(hn)[1]
+      hn <- gsub("c\\(|list\\(|\\)| +", "", hn)
+      hn <- strsplit(hn, ",")[[1]]
+      if(all(! hn %in% names(data))) {
+        message("There were no columns: ", paste(hn, collapse = ", "), " in the data for the hover tool - hover not added")
+        return(NULL)
+      }
+      data <- data[hn]
     }
-    data <- data[hn]
   }
   # hn <- setdiff(hn, c("x", "y", "size", "glyph", "color", "line_color", "fill_color"))
   hn2 <- gsub("\\.", "_", hn)

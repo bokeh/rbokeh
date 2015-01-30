@@ -14,14 +14,14 @@
 # y_offset Offset values to apply to the y-coordinates.
 
 #' @export
-lay_text <- function(fig, x, y = NULL, text = NULL, data = NULL,
+ly_text <- function(fig, x, y = NULL, text = NULL, data = NULL,
   color = "black", alpha = NULL,
   angle = 0, align = NULL, baseline = NULL,
   font = NULL, font_size = NULL, font_style = NULL,
   x_offset = NULL, y_offset = NULL,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "lay_text")
+  validateFig(fig, "ly_text")
   ## see if any options won't be used and give a message
   checkOpts(list(...), "text")
 

@@ -32,6 +32,12 @@ addLayer <- function(obj, spec, dat, lname, lgroup) {
   if(!is.null(glyphAttrs$line_dash))
     glyphAttrs$line_dash <- glyphAttrs$line_dash$value
 
+  if(!is.null(glyphAttrs$anchor))
+    glyphAttrs$anchor <- glyphAttrs$anchor$value
+
+  if(!is.null(glyphAttrs$dilate))
+    glyphAttrs$dilate <- glyphAttrs$dilate$value
+
   if(!is.null(glyphAttrs$text))
     glyphAttrs$text$field <- glyphAttrs$text$field$field
 
@@ -51,8 +57,9 @@ addLayer <- function(obj, spec, dat, lname, lgroup) {
 
   for(ii in colorInd) {
     names(nsGlyphAttrs[[ii]])[names(nsGlyphAttrs[[ii]]) == "field"] <- "value"
-    if(!is.na(nsGlyphAttrs[[ii]]$value))
-      nsGlyphAttrs[[ii]]$value <- "#e1e1e1"
+    if(!is.null(nsGlyphAttrs[[ii]]$value))
+      if(!is.na(nsGlyphAttrs[[ii]]$value))
+        nsGlyphAttrs[[ii]]$value <- "#e1e1e1"
   }
   nsglId <- genId(obj, c("ns", glyph, lgroup, lname))
   nsGlyphObj <- glyphModel(nsglId, glyph, nsGlyphAttrs)

@@ -1,58 +1,37 @@
 #' @export
-lay_hist <- function(fig, x, group = NULL, data = NULL, breaks = "Sturges", freq = TRUE,
-  include.lowest = TRUE, right = TRUE,
+ly_hist <- function(fig, x, group = NULL, data = NULL,
+  breaks = "Sturges", freq = TRUE, include.lowest = TRUE, right = TRUE,
   density = NULL, angle = 45, warn.unused = FALSE,
+  color = NULL, alpha = NULL,
   line_color = NULL, line_width = 1, line_alpha = 1,
-  fill_color = NULL, fill_alpha = 1,
-  ...) {
+  fill_color = NULL, fill_alpha = NULL,
+  lname = NULL, lgroup = NULL, ...) {
 
   xname <- deparse(substitute(x))
   yname <- ifelse(freq, "Frequency", "Density")
 
-  if(!is.null(data))
-    x <- eval(substitute(x), data)
-
-  validateFig(fig, "lay_hist")
-
-  ##### boilerplate
-  validateFig(fig, "lay_points")
-
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  validateFig(fig, "ly_hist")
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
+    x     <- v_eval(substitute(x), data)
+    # group <- v_eval(substitute(group), data)
   }
 
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
+  xyNames <- getXYNames(NULL, NULL, xname, yname, list(...))
+
   lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
 
   hh <- graphics::hist.default(x = x, breaks = breaks,
     freq = freq, include.lowest = include.lowest, right = right,
     density = density, angle = angle, col = col,
     warn.unused = warn.unused, plot = FALSE)
 
-  args <- list(line_color = line_color,
+  args <- list(color = color, alpha = alpha, line_color = line_color,
     line_width = line_width, line_alpha = line_alpha,
     fill_color = fill_color, fill_alpha = fill_alpha, ...)
 
-  if(is.null(line_color))
-    args$line_color <- "blue"
-  if(is.null(fill_color)) {
-    args$fill_color <- "blue"
-    args$fill_alpha <- 0.4
-  }
+  args <- resolveColorAlpha(args, hasLine = TRUE, hasFill = TRUE, fig$layers[[lgroup]])
 
   y <- if(freq) {
     hh$counts
@@ -60,149 +39,141 @@ lay_hist <- function(fig, x, group = NULL, data = NULL, breaks = "Sturges", freq
     hh$density
   }
 
-  do.call(lay_rect, c(list(fig = fig, xleft = hh$breaks[-length(hh$breaks)], xright = hh$breaks[-1], ytop = y, ybottom = 0, xlab = xname, ylab = yname), args))
+  do.call(ly_rect, c(list(fig = fig,
+    xleft = hh$breaks[-length(hh$breaks)],
+    xright = hh$breaks[-1], ytop = y, ybottom = 0,
+    xlab = xyNames$x, ylab = xyNames$y,
+    lname = lname, lgroup = lgroup), args))
 }
 
 #' @export
-lay_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1, kernel = c("gaussian", "epanechnikov", "rectangular", "triangular", "biweight", "cosine", "optcosine"), weights = NULL, window = kernel, n = 512, cut = 3, na.rm = FALSE,
-  line_color = "black", line_alpha = NULL, line_width = 1, line_dash = 1, line_join = 1, line_cap = "round", ...) {
+ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
+  kernel = c("gaussian", "epanechnikov", "rectangular", "triangular",
+    "biweight", "cosine", "optcosine"),
+  weights = NULL, window = kernel, n = 512, cut = 3, na.rm = FALSE,
+  color = "black", alpha = NULL, width = 1, type = 1,
+  line_join = 1, line_cap = "round",
+  legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "lay_density")
+  validateFig(fig, "ly_density")
 
   xname <- deparse(substitute(x))
   yname <- "Density"
 
-  ##### boilerplate
-  validateFig(fig, "lay_points")
-
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
+    x     <- v_eval(substitute(x), data)
+    # group <- v_eval(substitute(group), data)
   }
 
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
+  xyNames <- getXYNames(NULL, NULL, xname, yname, list(...))
+
   lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
 
   if(!is.null(data))
     x <- eval(substitute(x), data)
 
-  opts <- c(list(line_color = line_color,
-    line_alpha = line_alpha, line_width = line_width,
-    line_dash = line_dash, line_join = line_join,
-    line_cap = line_cap), list(...))
+  args <- list(color = color, alpha = alpha, width = width,
+    type = type, line_join = line_join, line_cap = line_cap, ...)
 
-  opts <- updateLineOpts(fig, opts)
+  args <- updateLineOpts(fig, args)
 
   dd <- stats::density.default(x = x, bw = bw, adjust = adjust, kernel = kernel, n = n, cut = 3, na.rm = na.rm)
 
-  do.call(lay_lines, c(list(fig = fig, x = dd$x, y = dd$y, xlab = xname, ylab = yname), opts))
+  do.call(ly_line, c(list(fig = fig, x = dd$x, y = dd$y, xlab = xname, ylab = yname), args))
 }
 
-# lay_rug
+# ly_rug
 
 #' @export
-lay_quantile <- function(fig, x, groups = NULL, data = NULL,
-  probs = NULL, distn = qunif, line_color = NULL, line_alpha = 1, line_width = 1, fill_color = NULL, fill_alpha = NULL, ...) {
+ly_quantile <- function(fig, x, group = NULL, data = NULL,
+  probs = NULL, distn = qunif,
+  color = NULL, alpha = NULL,
+  line_color = NULL, line_alpha = 1, line_width = 1,
+  fill_color = NULL, fill_alpha = NULL,
+  legend = TRUE,
+  lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "lay_quantile")
+  validateFig(fig, "ly_quantile")
 
-  ##### boilerplate
-  validateFig(fig, "lay_points")
-
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  xname <- "f-value"
+  yname <- deparse(substitute(x))
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
+    x     <- v_eval(substitute(x), data)
+    group <- v_eval(substitute(group), data)
   }
 
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
   lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
 
-  opts <- c(list(line_color = line_color, line_alpha = line_alpha,
+  args <- list(color = color, alpha = alpha,
+    line_color = line_color, line_alpha = line_alpha,
     line_width = line_width, fill_color = fill_color,
-    fill_alpha = fill_alpha), list(...))
+    fill_alpha = fill_alpha, ...)
 
-  if(!is.null(data)) {
-    x      <- eval(substitute(x), data)
-    groups <- eval(substitute(groups), data)
+  if(is.null(group))
+    group <- rep(1, length(x))
+
+  idx <- split(seq_along(x), group)
+  if(length(idx) == 1) {
+    if(is.logical(legend))
+      legend <- NULL
   }
-  if(is.null(groups))
-    groups <- rep(1, length(x))
 
-  idx <- split(seq_along(x), groups)
   for(ii in idx) {
-    if(is.null(probs)) {
-      ## if the vector is too long, perhaps should default
-      ## to some length, like 1000
-      curProbs <- ppoints(length(x[ii]))
-      qq <- sort(x[ii])
-    } else {
-      curProbs <- probs
-      qq <- quantile(x[ii], curProbs, names = FALSE)
-    }
-    ff <- distn(curProbs)
+    if(length(ii) > 0) {
+      if(is.null(probs)) {
+        ## if the vector is too long, perhaps should default
+        ## to some length, like 1000
+        curProbs <- ppoints(length(x[ii]))
+        qq <- sort(x[ii])
+      } else {
+        curProbs <- probs
+        qq <- quantile(x[ii], curProbs, names = FALSE, na.rm = TRUE)
+      }
+      ff <- distn(curProbs)
 
-    fig <- do.call(lay_points, c(list(fig = fig, x = ff, y = qq), opts))
+      curLegend <- NULL
+      if(is.logical(legend)) {
+        if(legend)
+          curLegend <- group[[ii[1]]]
+      } else {
+        curLegend <- legend
+      }
+
+      fig <- do.call(ly_point, c(list(fig = fig, x = ff, y = qq,
+        xlab = xname, ylab = yname,
+        lgroup = lgroup, legend = curLegend), args))
+    }
   }
   fig
 }
 
 #' @export
-lay_boxplot <- function(fig, x, y = NULL, data = NULL, coef = 1.5, line_color = "black", line_alpha = 1, line_width = 2, fill_color = "lightblue", fill_alpha = 0.5, ...) {
+ly_boxplot <- function(fig, x, y = NULL, data = NULL,
+  coef = 1.5, line_color = "black",
+  line_alpha = 1, line_width = 2,
+  fill_color = "lightblue", fill_alpha = 0.5,
+  lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "lay_boxplot")
+  validateFig(fig, "ly_boxplot")
 
   xnm <- deparse(substitute(x))
   ynm <- deparse(substitute(y))
 
-  ##### boilerplate
-  validateFig(fig, "lay_points")
-
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
+    x <- v_eval(substitute(x), data)
+    y <- v_eval(substitute(y), data)
+    if(is.factor(x))
+      x <- as.character(x)
+    if(is.factor(y))
+      y <- as.character(y)
   }
 
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
   lgroup <- getLgroup(lgroup, fig)
-  ##### boilerplate
 
   ## deal with vector inputs from a data source
   if(!is.null(data)) {
@@ -214,11 +185,11 @@ lay_boxplot <- function(fig, x, y = NULL, data = NULL, coef = 1.5, line_color = 
       y <- as.character(y)
   }
 
-  opts <- c(list(line_color = line_color, line_alpha = line_alpha,
+  args <- list(line_color = line_color, line_alpha = line_alpha,
     line_width = line_width, fill_color = fill_color,
-    fill_alpha = fill_alpha), list(...))
+    fill_alpha = fill_alpha, ...)
 
-  fill_ind <- grepl("^fill_", names(opts))
+  fill_ind <- grepl("^fill_", names(args))
 
   if(is.null(y)) {
     xname <- ""
@@ -248,7 +219,7 @@ lay_boxplot <- function(fig, x, y = NULL, data = NULL, coef = 1.5, line_color = 
       group <- x
       x <- y
     } else {
-      stop("At least one of 'x' or 'y' should be numeric for lay_boxplot.")
+      stop("At least one of 'x' or 'y' should be numeric for ly_boxplot.")
     }
   }
 
@@ -265,26 +236,26 @@ lay_boxplot <- function(fig, x, y = NULL, data = NULL, coef = 1.5, line_color = 
     hgt2 <- bp$stats[4] - bp$stats[3]
     md2 <- hgt2 / 2 + bp$stats[3]
 
-    fig <- do.call(lay_crect, c(list(fig = fig, x = rep(gp, 2), y = c(md1, md2), width = 0.9, height = c(hgt1, hgt2), xlab = xname, ylab = yname), opts))
-    fig <- do.call(lay_segments, c(list(fig = fig, x0 = c(gp, gp, gpr, gpr), y0 = c(bp$stats[1], bp$stats[4], bp$stats[1], bp$stats[5]), x1 = c(gp, gp, gpl, gpl), y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5])), opts[!fill_ind]))
+    fig <- do.call(ly_crect, c(list(fig = fig, x = rep(gp, 2), y = c(md1, md2), width = 0.9, height = c(hgt1, hgt2), xlab = xname, ylab = yname), args))
+    fig <- do.call(ly_segments, c(list(fig = fig, x0 = c(gp, gp, gpr, gpr), y0 = c(bp$stats[1], bp$stats[4], bp$stats[1], bp$stats[5]), x1 = c(gp, gp, gpl, gpl), y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5])), args[!fill_ind]))
 
     if(length(bp$out) > 0) {
-      fig <- do.call(lay_points, c(list(fig = fig, x = rep(gp, length(bp$out)), y = bp$out, type = 1), opts))
+      fig <- do.call(ly_point, c(list(fig = fig, x = rep(gp, length(bp$out)), y = bp$out, type = 1), args))
     }
   }
 
   fig
 }
 
-# lay_violin
+# ly_violin
 
-# lay_bar
+# ly_bar
 
-# lay_dotplot
+# ly_dotplot
 
-# lay_rug
+# ly_rug
 
-# lay_hexbin <- function(fig, x, y, data = NULL, shape = 1, xbins = 30) {
-## use hexbin() and then extract centroids, etc. and use lay_polygons to draw
+# ly_hexbin <- function(fig, x, y, data = NULL, shape = 1, xbins = 30) {
+## use hexbin() and then extract centroids, etc. and use ly_polygon to draw
 # }
 

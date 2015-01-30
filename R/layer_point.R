@@ -21,9 +21,14 @@
 # grouping variables: type, color, line_color, fill_color
 
 #' @export
-lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = NULL, alpha = NULL, size = 10, hover = NULL, legend = NULL, line_color = NULL, line_alpha = 1, line_width = 1, fill_color = NULL, fill_alpha = NULL, lname = NULL, lgroup = NULL, lsubgroup = NULL, ...) {
+ly_point <- function(fig, x, y = NULL, data = NULL,
+  glyph = 21, color = NULL, alpha = NULL, size = 10,
+  hover = NULL, legend = NULL,
+  line_color = NULL, line_alpha = 1, line_width = 1,
+  fill_color = NULL, fill_alpha = NULL,
+  lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "lay_points")
+  validateFig(fig, "ly_point")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -40,6 +45,7 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = NULL, 
   }
 
   hover <- getHover(substitute(hover), data)
+
   xyNames <- getXYNames(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
   xy <- getXYData(x, y)
@@ -80,7 +86,7 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = NULL, 
       curIdx <- dfSplit[[ii]]
       curGlyph <- paste("glyph_")
 
-      fig <- do.call(lay_points,
+      fig <- do.call(ly_point,
         c(lapply(dfArgs, function(x) subset_with_attributes(x, curIdx)), args[-idx],
           list(fig = fig, x = xy$x[curIdx], y = xy$y[curIdx],
             glyph = subset_with_attributes(gl, curIdx[1]), lgroup = lgroup,
@@ -91,12 +97,12 @@ lay_points <- function(fig, x, y = NULL, data = NULL, glyph = 21, color = NULL, 
 
   args <- resolveColorAlpha(args, hasLine = TRUE, hasFill = TRUE, fig$layers[[lgroup]])
 
-  ## see if any options won't be used and give a message
-  if(glyph %in% names(markerDict))
-    checkOpts(list(...), glyph)
-
   args <- resolveGlyphProps(glyph, args, lgroup)
   args <- fixArgs(args, length(xy$x))
+
+  ## see if any options won't be used and give a message
+  if(args$glyph %in% names(markerDict))
+    checkOpts(list(...), args$glyph)
 
   axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y, glyph = glyph)
 

@@ -13,14 +13,14 @@
 # addiional parameters \code{line_cap}, \code{line_dash}, \code{line_dash_offset}, \code{line_join}, \code{line_width}
 
 #' @export
-lay_annular_wedge <- function(fig, x, y = NULL, data = NULL,
+ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
   inner_radius = 0.1, outer_radius = 0.3,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   color = NULL, alpha = NULL, fill_color = NULL, fill_alpha = 0.75,
   line_color = NULL, line_alpha = NULL,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "lay_annular_wedge")
+  validateFig(fig, "ly_annular_wedge")
   ## see if any options won't be used and give a message
   checkOpts(list(...), "annular_wedge")
 
@@ -67,7 +67,7 @@ lay_annular_wedge <- function(fig, x, y = NULL, data = NULL,
 }
 
 #' @export
-lay_annulus <- function(fig, x, y = NULL, data = NULL,
+ly_annulus <- function(fig, x, y = NULL, data = NULL,
   inner_radius = 0.1, outer_radius = 0.2,
   color = NULL, alpha = NULL,
   line_color = NULL, line_alpha = NULL,
@@ -75,7 +75,7 @@ lay_annulus <- function(fig, x, y = NULL, data = NULL,
   hover = NULL, legend = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "lay_annulus")
+  validateFig(fig, "ly_annulus")
   ## see if any options won't be used and give a message
   checkOpts(list(...), "annulus")
 
@@ -117,13 +117,13 @@ lay_annulus <- function(fig, x, y = NULL, data = NULL,
 
 # doesn't seem to have hover...
 #' @export
-lay_arc <- function(fig, x, y = NULL, data = NULL,
+ly_arc <- function(fig, x, y = NULL, data = NULL,
   color = NULL, alpha = NULL, line_width = 2,
   radius = 0.2,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "lay_arc")
+  validateFig(fig, "ly_arc")
   ## see if any options won't be used and give a message
   checkOpts(list(...), "arc")
 
@@ -168,13 +168,13 @@ lay_arc <- function(fig, x, y = NULL, data = NULL,
 
 # doesn't seem to have hover...
 #' @export
-lay_oval <- function(fig, x, y = NULL, data = NULL,
+ly_oval <- function(fig, x, y = NULL, data = NULL,
   width = 0.1, height = 0.1, angle = 0,
   color = NULL, alpha = NULL, fill_color = NULL, fill_alpha = 0.75,
   line_color = NULL, line_alpha = NULL,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "lay_oval")
+  validateFig(fig, "ly_oval")
   ## see if any options won't be used and give a message
   checkOpts(list(...), "oval")
 
@@ -216,13 +216,13 @@ lay_oval <- function(fig, x, y = NULL, data = NULL,
 }
 
 #' @export
-lay_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
+ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   color = NULL, alpha = NULL, fill_color = NULL, fill_alpha = 0.75,
   line_color = NULL, line_alpha = NULL,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "lay_wedge")
+  validateFig(fig, "ly_wedge")
   ## see if any options won't be used and give a message
   checkOpts(list(...), "wedge")
 

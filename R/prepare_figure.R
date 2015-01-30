@@ -1,3 +1,9 @@
+## get a figure ready to print
+## this includes adding any elements that have not yet been explicitly added
+## such as axes and ranges
+## also, all deferred glyphs are resolved
+##   (glyphs that need to know the final bounds of the figure)
+## also, all aesthetic mappings are resolved and automatic legend entries are added
 prepare_figure <- function(fig) {
   legend <- list()
 
@@ -19,17 +25,35 @@ prepare_figure <- function(fig) {
         ## map the glyphs attributes
         for(entry in mapItem$mapEntries) {
           did <- fig$model[[entry$id]]$attributes$data_source$id
+          gl <- fig$model[[entry$id]]$attributes$glyph
+          nsglid <- fig$model[[entry$id]]$attributes$nonselection_glyph$id
+          dataAttrNames <- names(fig$model[[did]]$attributes$data)
+          glyphAttrNames <- names(fig$model[[gl$id]]$attributes)
           for(attr in entry$mapArgs) {
             ## handle glyph type
             if(attr == "glyph") {
-              gl <- fig$model[[entry$id]]$attributes$glyph
               newType <- underscore2camel(getThemeValue(underscore2camel(mapItem$domain), gl$type, attr))
               ## should check things in resolveGlyphProps() with new glyph
               fig$model[[entry$id]]$attributes$glyph$type <- newType
               fig$model[[gl$id]]$type <- newType
+              ## fix it in the non-selection glyph too
+              if(!is.null(nsglid)) {
+                fig$model[[entry$id]]$attributes$nonselection_glyph$type <- newType
+                fig$model[[nsglid]]$type <- newType
+              }
             } else {
-              curDat <- fig$model[[did]]$attributes$data[[attr]]
-              fig$model[[did]]$attributes$data[[attr]] <- getThemeValue(mapItem$domain, curDat, attr)
+              if(attr %in% dataAttrNames) {
+                curDat <- fig$model[[did]]$attributes$data[[attr]]
+                fig$model[[did]]$attributes$data[[attr]] <- getThemeValue(mapItem$domain, curDat, attr)
+              } else if(attr %in% glyphAttrNames) {
+                if(attr == "line_dash") {
+                  curDat <- fig$model[[gl$id]]$attributes[[attr]]
+                  fig$model[[gl$id]]$attributes[[attr]] <- getThemeValue(mapItem$domain, curDat, attr)
+                } else {
+                  curDat <- fig$model[[gl$id]]$attributes[[attr]]$value
+                  fig$model[[gl$id]]$attributes[[attr]]$value <- getThemeValue(mapItem$domain, curDat, attr)
+                }
+              }
             }
           }
         }
@@ -49,7 +73,8 @@ prepare_figure <- function(fig) {
             lgroup <- paste("legend_", nm, "_", curLab, sep = "")
             lname <- glph$args$glyph
             glrId <- genId(fig, c("glyphRenderer", lgroup, lname))
-            fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(NA, NA), y = c(NA, NA)), lname = lname, lgroup = lgroup)
+            oo <- -99999999999
+            fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
 
             # add reference to glyph to legend object
             nn <- length(legend[[lgndId]][[1]][[2]]) + 1
@@ -69,7 +94,8 @@ prepare_figure <- function(fig) {
         spec <- c(lgArgs, list(x = "x", y = "y"))
         lname <- lgArgs$glyph
         glrId <- genId(fig, c("glyphRenderer", lgroup, lname))
-        fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(NA, NA), y = c(NA, NA)), lname = lname, lgroup = lgroup)
+        oo <- -99999999999
+        fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
 
         # add reference to glyph to legend object
         nn <- length(legend[[lgroup]][[1]][[2]]) + 1
