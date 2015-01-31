@@ -128,7 +128,7 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axisTypeRange, hove
     )
 
     fig <- fig %>% addHover(hover$dict, rendererRef)
-    data <- cbind(data, data.frame(lapply(hover$data, as.character), stringsAsFactors = FALSE))
+    data <- c(data, lapply(hover$data, as.character))
   }
 
   args$glyph <- type

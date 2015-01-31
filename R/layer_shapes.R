@@ -5,7 +5,7 @@
 ly_polygon <- function(fig, xs, ys, group = NULL, data = NULL,
   color = NULL, alpha = NULL,
   fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1,
-  # hover = NULL, legend = NULL,
+  hover = NULL, # legend = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
   validateFig(fig, "ly_polygon")
@@ -58,8 +58,10 @@ ly_polygon <- function(fig, xs, ys, group = NULL, data = NULL,
   if(is.null(args$fill_alpha))
     args$fill_alpha <- 0.5
 
+  hover <- getHover(hover)
+
   axisTypeRange <- getGlyphAxisTypeRange(unlist(xs), unlist(ys))
-  make_glyph(fig, type = "patches", lname = lname, lgroup = lgroup,
+  make_glyph(fig, type = "patches", lname = lname, lgroup = lgroup, hover = hover,
     data = list(xs = unname(xs), ys = unname(ys)), args = args, axisTypeRange = axisTypeRange)
 }
 

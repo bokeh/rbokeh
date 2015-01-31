@@ -441,3 +441,69 @@ subset_with_attributes <- function(x, ...) {
   res
 }
 
+getHexbinData <- function(x, y, xbins = 30, shape = 1, xbnds = range(x), ybnds = range(y),
+  style = "lattice", minarea = 0.04, maxarea = 0.8, mincnt = 1, maxcnt = NULL, trans = NULL, inv = NULL) {
+
+  if(is.null(xbnds))
+    xbnds <- range(x, na.rm = TRUE)
+
+  if(is.null(ybnds))
+    ybnds <- range(y, na.rm = TRUE)
+
+  dat <- hexbin(x, y, shape = shape, xbins = xbins, xbnds = xbnds, ybnds = ybnds)
+
+  cnt <- dat@count
+  xbins <- dat@xbins
+  shape <- dat@shape
+  tmp <- hcell2xy(dat)
+  if(is.null(maxcnt))
+    maxcnt <- max(dat@count)
+
+  good <- mincnt <= cnt & cnt <= maxcnt
+
+  xnew <- tmp$x[good]
+  ynew <- tmp$y[good]
+  cnt <- cnt[good]
+
+  sx <- xbins / diff(dat@xbnds)
+  sy <- (xbins * shape) / diff(dat@ybnds)
+
+  if (is.null(trans)) {
+     if (min(cnt, na.rm = TRUE) < 0) {
+        pcnt <- cnt + min(cnt)
+        rcnt <- {
+           if (maxcnt == mincnt) rep.int(1, length(cnt)) else (pcnt - mincnt)/(maxcnt - mincnt)
+        }
+     } else rcnt <- {
+        if (maxcnt == mincnt) rep.int(1, length(cnt)) else (cnt - mincnt)/(maxcnt - mincnt)
+     }
+  } else {
+     rcnt <- (trans(cnt) - trans(mincnt))/(trans(maxcnt) - trans(mincnt))
+     if (any(is.na(rcnt))) stop("bad count transformation")
+  }
+
+  if(style == "lattice") {
+    area <- minarea + rcnt * (maxarea - minarea)
+    area <- pmin(area, maxarea)
+    radius <- sqrt(area)
+  } else {
+    radius <- rep(1, length(xnew))
+  }
+
+  inner <- 0.5
+  outer <- (2 * inner) / sqrt(3)
+  dx <- inner / sx
+  dy <- outer / (2 * sy)
+  # rad <- sqrt(dx^2 + dy^2)
+  hexC <- hexcoords(dx, dy, sep = NULL)
+
+  xs <- lapply(seq_along(xnew), function(i)
+    hexC$x * radius[i] + xnew[i])
+  ys <- lapply(seq_along(xnew), function(i)
+    hexC$y * radius[i] + ynew[i])
+
+  list(xs = xs, ys = ys, data = data.frame(x = xnew, y = ynew, rcnt = rcnt, cnt = cnt))
+}
+
+
+

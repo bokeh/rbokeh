@@ -9,6 +9,7 @@ Version 0.2
 - hover tool support
 - add datetime axis
 - add log axis
+- add ly_hexbin
 - migrate to standard json model
 - several "stats" layers - hist, density, quantile, boxplot, etc.
 - image_url working

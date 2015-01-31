@@ -87,7 +87,7 @@ ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
 
 #' @export
 ly_quantile <- function(fig, x, group = NULL, data = NULL,
-  probs = NULL, distn = qunif,
+  probs = NULL, distn = qunif, ncutoff = 200,
   color = NULL, alpha = NULL,
   line_color = NULL, line_alpha = 1, line_width = 1,
   fill_color = NULL, fill_alpha = NULL,
@@ -115,7 +115,15 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
   if(is.null(group))
     group <- rep(1, length(x))
 
+  naIdx <- which(is.na(x))
+  x <- x[-naIdx]
+  group <- group[-naIdx]
+
   idx <- split(seq_along(x), group)
+
+  ## quantile plot with no groups needs explicit legend
+  ## but with groups, legend can simply be "TRUE" in which case
+  ## an entry is automatically added for each group
   if(length(idx) == 1) {
     if(is.logical(legend))
       legend <- NULL
@@ -126,8 +134,13 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
       if(is.null(probs)) {
         ## if the vector is too long, perhaps should default
         ## to some length, like 1000
-        curProbs <- ppoints(length(x[ii]))
-        qq <- sort(x[ii])
+        if(length(ii) > ncutoff) {
+          curProbs <- ppoints(ncutoff)
+          qq <- quantile(x[ii], curProbs, names = FALSE, na.rm = TRUE)
+        } else {
+          curProbs <- ppoints(length(x[ii]))
+          qq <- sort(x[ii])
+        }
       } else {
         curProbs <- probs
         qq <- quantile(x[ii], curProbs, names = FALSE, na.rm = TRUE)
@@ -255,7 +268,32 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
 
 # ly_rug
 
-# ly_hexbin <- function(fig, x, y, data = NULL, shape = 1, xbins = 30) {
-## use hexbin() and then extract centroids, etc. and use ly_polygon to draw
-# }
+#' @export
+ly_hexbin <- function(fig, x, y, xbins = 30, shape = 1,
+  xbnds = range(x), ybnds = range(y), style = "colorramp",
+  minarea = 0.04, maxarea = 0.8, mincnt = 1, maxcnt = NULL,
+  trans = NULL, inv = NULL,
+  palette = "RdYlGn11", fill = TRUE, line = FALSE, hover = TRUE) {
+
+  hbd <- getHexbinData(x = x, y = y, xbins = xbins, shape = shape,
+    xbnds = xbnds, ybnds = ybnds, style = style,
+    minarea = minarea, maxarea = maxarea, mincnt = mincnt,
+    maxcnt = maxcnt, trans = trans, inv = inv)
+
+  if(!palette %in% bkPaletteNames)
+    stop("'palette' specified in ly_hexbin is not a valid palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
+
+  colramp <- colorRampPalette(bkPalettes[[palette]])
+
+  colorcut <- seq(0, 1, length = 10)
+  nc <- length(colorcut)
+  colgrp <- cut(hbd$data$rcnt, colorcut, labels = FALSE, include.lowest = TRUE)
+  clrs <- colramp(length(colorcut) - 1)
+  pen <- clrs[colgrp]
+
+  fig %>% ly_polygon(xs = hbd$xs, ys = hbd$ys, color = pen, hover = hbd$data)
+}
+# figure() %>% ly_hexbin(rnorm(1000), rnorm(1000), style = "lattice")
+
+
 
