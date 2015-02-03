@@ -61,8 +61,9 @@ ly_polygon <- function(fig, xs, ys, group = NULL, data = NULL,
   hover <- getHover(hover)
 
   axisTypeRange <- getGlyphAxisTypeRange(unlist(xs), unlist(ys))
-  make_glyph(fig, type = "patches", lname = lname, lgroup = lgroup, hover = hover,
-    data = list(xs = unname(xs), ys = unname(ys)), args = args, axisTypeRange = axisTypeRange)
+  make_glyph(fig, type = "patches", data = list(xs = unname(xs), ys = unname(ys)),
+    args = args, axisTypeRange = axisTypeRange, xname = xyNames$x, yname = xyNames$y,
+    lname = lname, lgroup = lgroup, hover = hover)
 }
 
 #' @export

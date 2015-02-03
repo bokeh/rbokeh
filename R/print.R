@@ -20,26 +20,46 @@ plot.BokehFigure <- function(x, y, ...) {
   if(length(x$layers) == 0) {
     message("This figure is empty...")
   } else {
-
     fig <- prepare_figure(x)
-
-    id <- fig$model[[which(sapply(fig$model, function(x) x$type) == "Plot")]]$id
-
-    ## create widget
-    htmlwidgets::createWidget(
-       name = 'rbokeh',
-       list(
-          r_debug = debug,
-          all_models = get_json(fig$model),
-          elementid = digest(Sys.time()),
-          modeltype = fig$modeltype,
-          modelid = id
-       ),
-       width = fig$width + 50,
-       height = fig$height + 50,
-       package = 'rbokeh'
-    )
+    fig$height <- fig$height + 50
+    fig$width <- fig$width + 50
+browser()
+    makeBokehWidget(fig, type = "Plot", debug)
   }
+}
+
+#'@export
+print.BokehGridPlot <- function(x, ...) {
+  print(plot(x, y = NULL, ...))
+}
+
+#'@export
+plot.BokehGridPlot <- function(x, y, ...) {
+  dots <- list(...)
+  debug <- dots$debug
+  if(is.null(debug))
+    debug <- FALSE
+
+  fig <- prepare_gridplot(x)
+browser()
+  makeBokehWidget(fig, type = "GridPlot", debug)
+}
+
+makeBokehWidget <- function(fig, type, debug = FALSE) {
+  ## create widget
+  htmlwidgets::createWidget(
+     name = 'rbokeh',
+     list(
+        r_debug = debug,
+        all_models = fig$model,
+        elementid = digest(Sys.time()),
+        modeltype = type,
+        modelid = fig$id
+     ),
+     width = fig$width,
+     height = fig$height,
+     package = 'rbokeh'
+  )
 }
 
 # Reusable function for registering a set of methods with S3 manually. The
@@ -67,3 +87,6 @@ knit_print.BokehFigure <- function(x, ..., options = NULL) {
   knitr::knit_print(htmlwidgets:::toHTML(plot(x), standalone = FALSE, knitrOptions = options), options = options,  ...)
 }
 
+knit_print.BokehGridPlot <- function(x, ..., options = NULL) {
+  knitr::knit_print(htmlwidgets:::toHTML(plot(x), standalone = FALSE, knitrOptions = options), options = options,  ...)
+}

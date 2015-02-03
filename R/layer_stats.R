@@ -268,32 +268,3 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
 
 # ly_rug
 
-#' @export
-ly_hexbin <- function(fig, x, y, xbins = 30, shape = 1,
-  xbnds = range(x), ybnds = range(y), style = "colorramp",
-  minarea = 0.04, maxarea = 0.8, mincnt = 1, maxcnt = NULL,
-  trans = NULL, inv = NULL,
-  palette = "RdYlGn11", fill = TRUE, line = FALSE, hover = TRUE) {
-
-  hbd <- getHexbinData(x = x, y = y, xbins = xbins, shape = shape,
-    xbnds = xbnds, ybnds = ybnds, style = style,
-    minarea = minarea, maxarea = maxarea, mincnt = mincnt,
-    maxcnt = maxcnt, trans = trans, inv = inv)
-
-  if(!palette %in% bkPaletteNames)
-    stop("'palette' specified in ly_hexbin is not a valid palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
-
-  colramp <- colorRampPalette(bkPalettes[[palette]])
-
-  colorcut <- seq(0, 1, length = 10)
-  nc <- length(colorcut)
-  colgrp <- cut(hbd$data$rcnt, colorcut, labels = FALSE, include.lowest = TRUE)
-  clrs <- colramp(length(colorcut) - 1)
-  pen <- clrs[colgrp]
-
-  fig %>% ly_polygon(xs = hbd$xs, ys = hbd$ys, color = pen, hover = hbd$data)
-}
-# figure() %>% ly_hexbin(rnorm(1000), rnorm(1000), style = "lattice")
-
-
-

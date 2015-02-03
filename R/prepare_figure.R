@@ -73,7 +73,12 @@ prepare_figure <- function(fig) {
             lgroup <- paste("legend_", nm, "_", curLab, sep = "")
             lname <- glph$args$glyph
             glrId <- genId(fig, c("glyphRenderer", lgroup, lname))
-            oo <- -99999999999
+            # make it so legend glyph doesn't show up on page
+            oo <- NA
+            if(!is.null(spec$size))
+              spec$size <- NA
+            if(!is.null(spec$radius))
+              spec$radius <- NA
             fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
 
             # add reference to glyph to legend object
@@ -94,7 +99,12 @@ prepare_figure <- function(fig) {
         spec <- c(lgArgs, list(x = "x", y = "y"))
         lname <- lgArgs$glyph
         glrId <- genId(fig, c("glyphRenderer", lgroup, lname))
-        oo <- -99999999999
+        # make it so legend glyph doesn't show up on page
+        oo <- NA
+        if(!is.null(spec$size))
+          spec$size <- NA
+        if(!is.null(spec$radius))
+          spec$radius <- NA
         fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
 
         # add reference to glyph to legend object
@@ -159,6 +169,14 @@ prepare_figure <- function(fig) {
       fig <- fig %>% addLayer(tmpSpec, tmpData, dfr$lname, dfr$lgroup)
     }
   }
+
+  fig$width <- fig$model$plot$attributes$plot_width
+  fig$height <- fig$model$plot$attributes$plot_height
+  fig$id <- fig$model$plot$id
+
+  names(fig$model$plot$attributes$tools) <- NULL
+  names(fig$model$plot$attributes$renderers) <- NULL
+  names(fig$model) <- NULL
 
   fig
 }

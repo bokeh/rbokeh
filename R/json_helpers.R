@@ -21,7 +21,7 @@ genId <- function(obj, name = NULL) {
   digest(c(name, obj$time))
 }
 
-get_json <- function(obj) {
+remove_model_names <- function(obj) {
   names(obj$plot$attributes$tools) <- NULL
   names(obj$plot$attributes$renderers) <- NULL
   names(obj) <- NULL
@@ -31,13 +31,18 @@ get_json <- function(obj) {
 #' @importFrom RJSONIO toJSON
 #' @export
 print_model_json <- function(obj, prepare = TRUE, pretty = TRUE, pbcopy = FALSE) {
-  if(prepare)
-    obj <- prepare_figure(obj)
+  if(prepare) {
+    if(inherits(obj, "BokehFigure")) {
+      obj <- prepare_figure(obj)
+    } else if(inherits(obj, "BokehGridPlot")) {
+      obj <- prepare_gridplot(obj)
+    }
+  }
 
   file <- ""
   if(pbcopy)
     file <- pipe("pbcopy")
-  cat(toJSON(get_json(obj$model), digits = 50, pretty = pretty), file = file)
+  cat(toJSON(remove_model_names(obj$model), digits = 50, pretty = pretty), file = file)
 }
 
 underscore2camel <- function(x) {

@@ -59,6 +59,7 @@ figure <- function(
       subtype = "Figure",
       id      =  id
     ),
+    time = tt,
     ## place to store spec, data, and function for deferred glyphs
     glyphDeferSpecs = list(),
     glyphDeferData = list(),
