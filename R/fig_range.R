@@ -31,13 +31,14 @@ updateRange <- function(obj, axis = "x", dat) {
     type <- "FactorRange"
   }
 
-  rangeName <- paste(axis, "_range", sep = "")
+  rangeName <- paste0(axis, "_range")
 
   id <- genId(obj, rangeName)
   model <- rangeModel(type, id, dat)
 
   obj$model$plot$attributes[[rangeName]] <- model$ref
   obj$model[[id]] <- model$model
+  obj[[paste0("has_", axis, "_range")]] <- TRUE
 
   obj
 }

@@ -60,7 +60,7 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
   axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
 
   make_glyph(fig, type = "annular_wedge", lname = lname, lgroup = lgroup,
-    data = xy,
+    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
     args = args, axisTypeRange = axisTypeRange,
     hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)
@@ -109,7 +109,7 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
   axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
 
   make_glyph(fig, type = "annulus", lname = lname, lgroup = lgroup,
-    data = xy,
+    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
     args = args, axisTypeRange = axisTypeRange,
     hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)
@@ -160,7 +160,7 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
   axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
 
   make_glyph(fig, type = "arc", lname = lname, lgroup = lgroup,
-    data = xy,
+    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
     args = args, axisTypeRange = axisTypeRange,
     hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)
@@ -209,7 +209,7 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
   axisTypeRange <- getGlyphAxisTypeRange(x, y)
 
   make_glyph(fig, type = "oval", lname = lname, lgroup = lgroup,
-    data = xy,
+    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
     args = args, axisTypeRange = axisTypeRange,
     hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)
@@ -261,7 +261,7 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
   axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
 
   make_glyph(fig, type = "wedge", lname = lname, lgroup = lgroup,
-    data = xy,
+    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
     args = args, axisTypeRange = axisTypeRange,
     hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)

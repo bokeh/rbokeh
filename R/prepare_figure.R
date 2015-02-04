@@ -141,9 +141,11 @@ prepare_figure <- function(fig) {
     yrange <- fig$ylim
   }
 
-  fig <- fig %>%
-    x_range(xrange) %>%
-    y_range(yrange)
+  if(!fig$has_x_range)
+    fig <- fig %>% x_range(xrange)
+
+  if(!fig$has_y_range)
+    fig <- fig %>% y_range(yrange)
 
   if(!fig$hasXaxis) {
     if(is.null(fig$xlab)) {
@@ -173,10 +175,6 @@ prepare_figure <- function(fig) {
   fig$width <- fig$model$plot$attributes$plot_width
   fig$height <- fig$model$plot$attributes$plot_height
   fig$id <- fig$model$plot$id
-
-  names(fig$model$plot$attributes$tools) <- NULL
-  names(fig$model$plot$attributes$renderers) <- NULL
-  names(fig$model) <- NULL
 
   fig
 }

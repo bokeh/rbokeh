@@ -3,7 +3,7 @@
 # you can add new layers to an existing layer group
 # which will ensure that aesthetics are mapped to glyphs within the layer
 
-make_glyph <- function(fig, type, lname, lgroup, data, args, axisTypeRange, hover = NULL, legend = NULL, xname = NULL, yname = NULL) {
+make_glyph <- function(fig, type, lname, lgroup, data, args, axisTypeRange, hover = NULL, legend = NULL, xname = NULL, yname = NULL, dataSig = NULL) {
 
   ## give it a unique layer group name if not provided
   if(is.null(lgroup))
@@ -27,6 +27,9 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axisTypeRange, hove
 
   ## used to keep track of how many layers are in the group
   fig$layers[[lgroup]]$glyphIds[lname] <- list(glrId)
+
+  ## keep track of data sources
+  fig$dataSigs[[glrId]] <- list(glrId = glrId, sig = dataSig)
 
   ## make sure axis types match anything
   ## that has already been plotted
@@ -168,4 +171,3 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axisTypeRange, hove
 
   fig
 }
-

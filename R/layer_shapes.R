@@ -108,6 +108,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
     xname = xyNames$x, yname = xyNames$y,
     legend = legend, hover = hover,
     data = list(left = xleft, right = xright, top = ytop, bottom = ybottom),
+    dataSig = ifelse(is.null(data), NULL, digest(data)),
     args = args, axisTypeRange = axisTypeRange)
 }
 
@@ -164,6 +165,7 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
   make_glyph(fig, type = "rect", lname = lname, lgroup = lgroup,
     xname = xyNames$x, yname = xyNames$y,
     legend = legend, hover = hover,
+    dataSig = ifelse(is.null(data), NULL, digest(data)),
     data = xy, args = args, axisTypeRange = axisTypeRange)
 }
 

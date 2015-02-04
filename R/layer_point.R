@@ -107,7 +107,7 @@ ly_point <- function(fig, x, y = NULL, data = NULL,
   axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y, glyph = glyph)
 
   make_glyph(fig, args$glyph, lname = lname, lgroup = lgroup,
-    data = xy,
+    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
     args = args, axisTypeRange = axisTypeRange,
     hover = hover, legend = legend,
     xname = xyNames$x, yname = xyNames$y)

@@ -23,7 +23,9 @@ plot.BokehFigure <- function(x, y, ...) {
     fig <- prepare_figure(x)
     fig$height <- fig$height + 50
     fig$width <- fig$width + 50
-browser()
+
+    fig$model <- remove_model_names(fig$model)
+
     makeBokehWidget(fig, type = "Plot", debug)
   }
 }
@@ -41,7 +43,7 @@ plot.BokehGridPlot <- function(x, y, ...) {
     debug <- FALSE
 
   fig <- prepare_gridplot(x)
-browser()
+
   makeBokehWidget(fig, type = "GridPlot", debug)
 }
 

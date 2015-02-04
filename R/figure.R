@@ -65,6 +65,7 @@ figure <- function(
     glyphDeferData = list(),
     glyphDefer = list(),
     layers = list(),
+    dataSigs = list(),
     ## keep track of x and y range of each glyph
     glyphXRanges = list(),
     glyphYRanges = list(),
@@ -72,7 +73,9 @@ figure <- function(
     xAxisType = NULL,
     yAxisType = NULL,
     hasXaxis = FALSE,
-    hasYaxis = FALSE
+    hasYaxis = FALSE,
+    has_x_range = FALSE,
+    has_y_range = FALSE
   ), class = "BokehFigure")
 
   ## check and add tools
