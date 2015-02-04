@@ -150,7 +150,6 @@ prepare_gridplot <- function(obj) {
   dataMods <- list()
   ## deal with linked data
   if(obj$link_data) {
-    browser()
     ## find data signatures that match
     sigs <- do.call(c, lapply(figs, function(x)
       unique(do.call(c, lapply(x$dataSigs, function(y) y$sig)))))
