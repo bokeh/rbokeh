@@ -1,18 +1,18 @@
 #' @export
 ly_image <- function(fig, image, rows, cols, x = 0, y = 0, dw = 1, dh = 1, palette = "Spectral-10", hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_image")
+  validate_fig(fig, "ly_image")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "image")
+  check_opts(list(...), "image")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
 
-  xyNames <- getXYNames(NULL, NULL, "x", "y", list(...))
+  xy_names <- get_xy_names(NULL, NULL, "x", "y", list(...))
   ## translate different x, y types to vectors
-  lgroup <- getLgroup(lgroup, fig)
+  lgroup <- get_lgroup(lgroup, fig)
 
-  axisTypeRange <- getGlyphAxisTypeRange(c(x, dw), c(y, dh), assertX = "numeric", assertY = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(c(x, dw), c(y, dh), assert_x = "numeric", assert_y = "numeric")
 
   if(is.matrix(image)) {
     cols <- nrow(image)
@@ -22,7 +22,7 @@ ly_image <- function(fig, image, rows, cols, x = 0, y = 0, dw = 1, dh = 1, palet
 
   make_glyph(fig, type = "image", lname = lname, lgroup = lgroup,
     data = list(image = list(image), rows = rows, cols = cols, x = x, y = y, dw = dw, dh = dh, palette = palette),
-    args = list(...), axisTypeRange = axisTypeRange)
+    args = list(...), axis_type_range = axis_type_range)
 }
 
 #' @export
@@ -30,12 +30,12 @@ ly_image_url <- function(fig, x = 0, y = 0, data = NULL, w = 10, h = 10,
   url, dilate = TRUE, anchor = "top_left", angle = 0,
   lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_image_url")
+  validate_fig(fig, "ly_image_url")
 
-  anchorOpts <- c("top_left", "top_center", "top_right", "right_center",
+  anchor_opts <- c("top_left", "top_center", "top_right", "right_center",
     "bottom_right", "bottom_center", "bottom_left", "left_center", "center")
-  if(! anchor %in% anchorOpts)
-    stop("anchor must be one of: ", paste(anchorOpts, collapse = ", "), call. = FALSE)
+  if(! anchor %in% anchor_opts)
+    stop("anchor must be one of: ", paste(anchor_opts, collapse = ", "), call. = FALSE)
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -51,11 +51,11 @@ ly_image_url <- function(fig, x = 0, y = 0, data = NULL, w = 10, h = 10,
     angle  <- v_eval(substitute(angle), data)
   }
 
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  hover <- get_hover(substitute(hover), data)
+  xy_names <- get_xy_names(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
+  xy <- get_xy_data(x, y)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(url = url, w = w, h = h, anchor = anchor,
     angle = angle, dilate = dilate, ...)
@@ -76,17 +76,17 @@ ly_image_url <- function(fig, x = 0, y = 0, data = NULL, w = 10, h = 10,
     y2 <- range(y + c(-1, 1) * h / 2)
   }
   # can this have "categorical" axes?
-  axisTypeRange <- getGlyphAxisTypeRange(c(x, x2), c(y, y2))
+  axis_type_range <- get_glyph_axis_type_range(c(x, x2), c(y, y2))
 
   make_glyph(fig, type = "image_URL",
     lname = lname, lgroup = lgroup,
     data = xy, args = args,
-    axisTypeRange = axisTypeRange)
+    axis_type_range = axis_type_range)
 }
 
 
 # ly_image_rgba <- function(fig, image, rows, cols, x = 0, y = 0, dw = 1, dh = 1, lname = NULL, lgroup = NULL, ...) {
-#   axisTypeRange <- getGlyphAxisTypeRange(c(x, dw), c(y, dh), assertX = "numeric", assertY = "numeric")
+#   axis_type_range <- get_glyph_axis_type_range(c(x, dw), c(y, dh), assert_x = "numeric", assert_y = "numeric")
 
 #   if(is.matrix(image)) {
 #     cols <- nrow(image)
@@ -96,6 +96,6 @@ ly_image_url <- function(fig, x = 0, y = 0, data = NULL, w = 10, h = 10,
 
 #   make_glyph(fig, type = "image_RGBA", lname = lname, lgroup = lgroup,
 #     data = list(image = list(image), rows = rows, cols = cols, x = x, y = y, dw = dw, dh = dh),
-#     args = list(...), axisTypeRange = axisTypeRange)
+#     args = list(...), axis_type_range = axis_type_range)
 # }
 

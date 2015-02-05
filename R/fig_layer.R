@@ -10,77 +10,77 @@
 # - add GlyphRenderer reference to "renderers"
 # - add GlyphRenderer model to object
 
-addLayer <- function(obj, spec, dat, lname, lgroup) {
+add_layer <- function(obj, spec, dat, lname, lgroup) {
   glyph <- spec$glyph
   glyph <- underscore2camel(glyph)
   spec$glyph <- NULL
 
-  specInData <- names(spec) %in% names(dat)
+  spec_in_data <- names(spec) %in% names(dat)
 
-  glyphAttrs <- lapply(seq_along(specInData), function(ii) {
-    if(specInData[ii]) {
+  glyph_attrs <- lapply(seq_along(spec_in_data), function(ii) {
+    if(spec_in_data[ii]) {
       list(units = "data", field = spec[[ii]])
     } else {
       list(units = "data", value = spec[[ii]])
     }
   })
 
-  names(glyphAttrs) <- names(spec)
-  if(!is.null(glyphAttrs$size))
-    glyphAttrs$size$units <- "screen"
+  names(glyph_attrs) <- names(spec)
+  if(!is.null(glyph_attrs$size))
+    glyph_attrs$size$units <- "screen"
 
-  if(!is.null(glyphAttrs$line_dash))
-    glyphAttrs$line_dash <- glyphAttrs$line_dash$value
+  if(!is.null(glyph_attrs$line_dash))
+    glyph_attrs$line_dash <- glyph_attrs$line_dash$value
 
-  if(!is.null(glyphAttrs$anchor))
-    glyphAttrs$anchor <- glyphAttrs$anchor$value
+  if(!is.null(glyph_attrs$anchor))
+    glyph_attrs$anchor <- glyph_attrs$anchor$value
 
-  if(!is.null(glyphAttrs$dilate))
-    glyphAttrs$dilate <- glyphAttrs$dilate$value
+  if(!is.null(glyph_attrs$dilate))
+    glyph_attrs$dilate <- glyph_attrs$dilate$value
 
-  if(!is.null(glyphAttrs$text))
-    glyphAttrs$text$field <- glyphAttrs$text$field$field
+  if(!is.null(glyph_attrs$text))
+    glyph_attrs$text$field <- glyph_attrs$text$field$field
 
   if(glyph == "Image") {
-    cId <- genId(obj, "ColorMapper")
-    cmap <- colorMapperModel(cId)
-    glyphAttrs$color_mapper <- cmap$ref
-    obj$model[[cId]] <- cmap$model
+    c_id <- gen_id(obj, "ColorMapper")
+    cmap <- color_mapper_model(c_id)
+    glyph_attrs$color_mapper <- cmap$ref
+    obj$model[[c_id]] <- cmap$model
   }
 
-  glId <- genId(obj, c(glyph, lgroup, lname))
-  glyphObj <- glyphModel(glId, glyph, glyphAttrs)
+  gl_id <- gen_id(obj, c(glyph, lgroup, lname))
+  glyph_obj <- glyph_model(gl_id, glyph, glyph_attrs)
 
   # nonselection glyph
-  nsGlyphAttrs <- glyphAttrs
-  colorInd <- which(grepl("_color", names(nsGlyphAttrs)))
+  ns_glyph_attrs <- glyph_attrs
+  color_ind <- which(grepl("_color", names(ns_glyph_attrs)))
 
-  for(ii in colorInd) {
-    names(nsGlyphAttrs[[ii]])[names(nsGlyphAttrs[[ii]]) == "field"] <- "value"
-    if(!is.null(nsGlyphAttrs[[ii]]$value))
-      if(!is.na(nsGlyphAttrs[[ii]]$value))
-        nsGlyphAttrs[[ii]]$value <- "#e1e1e1"
+  for(ii in color_ind) {
+    names(ns_glyph_attrs[[ii]])[names(ns_glyph_attrs[[ii]]) == "field"] <- "value"
+    if(!is.null(ns_glyph_attrs[[ii]]$value))
+      if(!is.na(ns_glyph_attrs[[ii]]$value))
+        ns_glyph_attrs[[ii]]$value <- "#e1e1e1"
   }
-  nsglId <- genId(obj, c("ns", glyph, lgroup, lname))
-  nsGlyphObj <- glyphModel(nsglId, glyph, nsGlyphAttrs)
+  nsgl_id <- gen_id(obj, c("ns", glyph, lgroup, lname))
+  ns_glyph_obj <- glyph_model(nsgl_id, glyph, ns_glyph_attrs)
 
-  dId <- genId(obj, digest(dat))
-  datMod <- dataModel(dat, dId)
+  d_id <- gen_id(obj, digest(dat))
+  dat_mod <- data_model(dat, d_id)
 
-  glrId <- genId(obj, c("glyphRenderer", lgroup, lname))
-  glyphRend <- glyphRendererModel(glrId, datMod$ref, glyphObj$ref, nsGlyphObj$ref)
+  glr_id <- gen_id(obj, c("glyph_renderer", lgroup, lname))
+  glyph_rend <- glyph_renderer_model(glr_id, dat_mod$ref, glyph_obj$ref, ns_glyph_obj$ref)
 
-  obj$model$plot$attributes$renderers[[glrId]] <- glyphRend$ref
+  obj$model$plot$attributes$renderers[[glr_id]] <- glyph_rend$ref
 
-  obj$model[[dId]] <- datMod$model
-  obj$model[[glId]] <- glyphObj$model
-  obj$model[[nsglId]] <- nsGlyphObj$model
-  obj$model[[glrId]] <- glyphRend$model
+  obj$model[[d_id]] <- dat_mod$model
+  obj$model[[gl_id]] <- glyph_obj$model
+  obj$model[[nsgl_id]] <- ns_glyph_obj$model
+  obj$model[[glr_id]] <- glyph_rend$model
 
   obj
 }
 
-dataModel <- function(dd, id = NULL) {
+data_model <- function(dd, id = NULL) {
   res <- base_model_object("ColumnDataSource", id)
 
   res$model$attributes$column_names <- I(names(dd))
@@ -92,25 +92,25 @@ dataModel <- function(dd, id = NULL) {
   res
 }
 
-glyphModel <- function(id, glyph = "Circle", attrs) {
+glyph_model <- function(id, glyph = "Circle", attrs) {
   res <- base_model_object(glyph, id)
   res$model$attributes <- c(
     res$model$attributes, attrs)
   res
 }
 
-glyphRendererModel <- function(id, dataRef, glyphRef, nsGlyphRef) {
+glyph_renderer_model <- function(id, data_ref, glyph_ref, ns_glyph_ref) {
   res <- base_model_object("GlyphRenderer", id)
   res$model$attributes["selection_glyph"] <- list(NULL)
-  res$model$attributes$nonselection_glyph <- nsGlyphRef
+  res$model$attributes$nonselection_glyph <- ns_glyph_ref
   res$model$attributes["server_data_source"] <- list(NULL)
   res$model$attributes["name"] <- list(NULL)
-  res$model$attributes$data_source <- dataRef
-  res$model$attributes$glyph <- glyphRef
+  res$model$attributes$data_source <- data_ref
+  res$model$attributes$glyph <- glyph_ref
   res
 }
 
-colorMapperModel <- function(id) {
+color_mapper_model <- function(id) {
   res <- base_model_object("LinearColorMapper", id)
   res$model$attributes$palette <- c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2")
   res

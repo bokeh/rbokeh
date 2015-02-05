@@ -5,9 +5,9 @@ ly_line <- function(fig, x, y = NULL, data = NULL, group = NULL,
   line_join = 1, line_cap = "round",
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_line")
+  validate_fig(fig, "ly_line")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "line")
+  check_opts(list(...), "line")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -22,10 +22,10 @@ ly_line <- function(fig, x, y = NULL, data = NULL, group = NULL,
     width <- v_eval(substitute(width), data)
   }
 
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  xy_names <- get_xy_names(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
+  xy <- get_xy_data(x, y)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(glyph = "line", group = group, color = color,
     width = width, type = type, line_join = line_join,
@@ -37,44 +37,44 @@ ly_line <- function(fig, x, y = NULL, data = NULL, group = NULL,
   # and call make_glyph several times
   # otherwise we can just vary the values of things
   # and call make_glyph just once...
-  groupVars <- c("group", "type", "width", "color")
-  groupable <- which(names(args) %in% groupVars &
+  group_vars <- c("group", "type", "width", "color")
+  groupable <- which(names(args) %in% group_vars &
     sapply(args, function(x) length(unique(x)) > 1))
   if(length(groupable) > 0) {
 
-    gArgs <- args[groupable]
-    ngArgs <- args[-groupable]
+    g_args <- args[groupable]
+    ng_args <- args[-groupable]
 
-    lns <- sapply(ngArgs, length)
+    lns <- sapply(ng_args, length)
     idx <- which(lns == length(xy$x))
 
-    dfArgs <- args[idx]
+    df_args <- args[idx]
 
     ## much more efficient way to do this but would probably require more dependencies...
-    lvls <- apply(as.matrix(data.frame(gArgs)), 1,
+    lvls <- apply(as.matrix(data.frame(g_args)), 1,
       function(x) paste(x, collapse = ""))
-    dfSplit <- split(seq_along(lvls), lvls)
+    df_split <- split(seq_along(lvls), lvls)
 
-    for(ii in seq_along(dfSplit)) {
-      curIdx <- dfSplit[[ii]]
+    for(ii in seq_along(df_split)) {
+      cur_idx <- df_split[[ii]]
 
       fig <- do.call(ly_line,
-        c(lapply(dfArgs, function(x) subset_with_attributes(x, curIdx)),
-          lapply(gArgs, function(x) subset_with_attributes(x, curIdx[1])),
-          ngArgs[-idx], list(fig = fig, x = xy$x[curIdx], y = xy$y[curIdx],
-            lgroup = lgroup, lname = ii, xlab = xyNames$x, ylab = xyNames$y)))
+        c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)),
+          lapply(g_args, function(x) subset_with_attributes(x, cur_idx[1])),
+          ng_args[-idx], list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
+            lgroup = lgroup, lname = ii, xlab = xy_names$x, ylab = xy_names$y)))
     }
     return(fig)
   }
 
-  args <- updateLineOpts(fig, args)
+  args <- update_line_opts(fig, args)
 
-  axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y)
+  axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y)
 
   make_glyph(fig, type = "line", lname = lname, lgroup = lgroup,
     data = xy, legend = legend,
-    args = args, axisTypeRange = axisTypeRange,
-    xname = xyNames$x, yname = xyNames$y)
+    args = args, axis_type_range = axis_type_range,
+    xname = xy_names$x, yname = xy_names$y)
 }
 
 #' @export
@@ -84,9 +84,9 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "segment")
+  check_opts(list(...), "segment")
 
-  validateFig(fig, "ly_segments")
+  validate_fig(fig, "ly_segments")
 
   xname <- deparse(substitute(x0))
   yname <- deparse(substitute(y0))
@@ -102,22 +102,22 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
     width <- v_eval(substitute(width), data)
   }
 
-  xyNames <- getXYNames(x0, y0, xname, yname, list(...))
+  xy_names <- get_xy_names(x0, y0, xname, yname, list(...))
 
-  lgroup <- getLgroup(lgroup, fig)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(glyph = "segment", color = color,
     alpha = alpha, width = width,
     type = type, line_join = line_join,
     line_cap = line_cap, ...)
 
-  args <- updateLineOpts(fig, args)
+  args <- update_line_opts(fig, args)
 
-  axisTypeRange <- getGlyphAxisTypeRange(c(x0, x1), c(y0, y1))
+  axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1))
   make_glyph(fig, type = "segment",
     legend = legend, lname = lname, lgroup = lgroup,
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1),
-    args = args, axisTypeRange = axisTypeRange)
+    args = args, axis_type_range = axis_type_range)
 }
 
 #' @export
@@ -125,19 +125,19 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   color = "black", alpha = NULL, width = 1, type = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_abline")
+  validate_fig(fig, "ly_abline")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "segment")
+  check_opts(list(...), "segment")
 
-  xyNames <- getXYNames(NULL, NULL, "x", "y", list(...))
+  xy_names <- get_xy_names(NULL, NULL, "x", "y", list(...))
 
-  lgroup <- getLgroup(lgroup, fig)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(glyph = "segment", color = color,
     alpha = alpha, width = width,
     type = type, ...)
 
-  args <- updateLineOpts(fig, args)
+  args <- update_line_opts(fig, args)
 
   if(!is.null(coef) || inherits(a, "lm")) {
     if(is.null(coef))
@@ -149,8 +149,8 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     b <- coef[2]
   }
 
-  xAxisType <- "numeric"
-  yAxisType <- "numeric"
+  x_axis_type <- "numeric"
+  y_axis_type <- "numeric"
 
   if(!is.null(a) && !is.null(b)) {
     nn <- max(c(length(a), length(b)))
@@ -164,8 +164,8 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     y1 <- b * x1 + a
   } else if(!is.null(h)) {
     if(inherits(h, c("Date", "POSIXct"))) {
-      yAxisType <- "datetime"
-      h <- toEpoch(h)
+      y_axis_type <- "datetime"
+      h <- to_epoch(h)
     }
     nn <- length(h)
     x0 <- rep(0, nn)
@@ -174,8 +174,8 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     y1 <- h
   } else if(!is.null(v)) {
     if(inherits(v, c("Date", "POSIXct"))) {
-      xAxisType <- "datetime"
-      v <- toEpoch(v)
+      x_axis_type <- "datetime"
+      v <- to_epoch(v)
     }
     nn <- length(v)
     x0 <- v
@@ -184,7 +184,7 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     y1 <- rep(1, nn)
   }
 
-  deferFn <- function(data, xlim, ylim) {
+  defer_fn <- function(data, xlim, ylim) {
     if(length(data$x0) == 1) {
       if(data$x0 == "x0")
         return(data)
@@ -212,15 +212,15 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     data
   }
 
-  axisTypeRange <- list(
-    xAxisType = xAxisType, yAxisType = yAxisType,
-    xRange = NULL, yRange = NULL)
+  axis_type_range <- list(
+    x_axis_type = x_axis_type, y_axis_type = y_axis_type,
+    x_range = NULL, y_range = NULL)
 
   make_glyph(fig, type = "segment", legend = legend,
     lname = lname, lgroup = lgroup,
-    xname = xyNames$x, yname = xyNames$y,
-    data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, defer = deferFn),
-    args = args, axisTypeRange = axisTypeRange)
+    xname = xy_names$x, yname = xy_names$y,
+    data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, defer = defer_fn),
+    args = args, axis_type_range = axis_type_range)
 }
 
 #' @export
@@ -229,13 +229,13 @@ ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
   line_join = 1, line_cap = "round",
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_curve")
+  validate_fig(fig, "ly_curve")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "line")
+  check_opts(list(...), "line")
 
-  xyNames <- getXYNames(NULL, NULL, "x", "f(x)", list(...))
+  xy_names <- get_xy_names(NULL, NULL, "x", "f(x)", list(...))
 
-  lgroup <- getLgroup(lgroup, fig)
+  lgroup <- get_lgroup(lgroup, fig)
 
   sexpr <- substitute(expr)
   if (is.name(sexpr)) {
@@ -259,7 +259,7 @@ ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
     type = type, line_join = line_join,
     line_cap = line_cap, ...)
 
-  args <- updateLineOpts(fig, args)
+  args <- update_line_opts(fig, args)
 
   do.call(ly_line, c(list(fig = fig, x = x, y = y, legend = legend, lname = lname, lgroup = lgroup, xlab = xname, ylab = yname), args))
 }
@@ -272,31 +272,31 @@ ly_contour <- function(fig, image,
   type = 1, line_join = 1, line_cap = "round",
   lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_contour")
+  validate_fig(fig, "ly_contour")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "multi_line")
+  check_opts(list(...), "multi_line")
 
-  xyNames <- getXYNames(NULL, NULL, "x", "y", list(...))
+  xy_names <- get_xy_names(NULL, NULL, "x", "y", list(...))
 
-  lgroup <- getLgroup(lgroup, fig)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(color = color,
     alpha = alpha, width = width,
     type = type, line_join = line_join,
     line_cap = line_cap, ...)
 
-  args <- updateLineOpts(fig, args)
+  args <- update_line_opts(fig, args)
 
   contr <- do.call(contourLines, list(x = x, y = y, z = image, nlevels = nlevels, levels = levels))
 
   xs <- lapply(contr, "[[", 2)
   ys <- lapply(contr, "[[", 3)
 
-  axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
   make_glyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
     data = list(xs = xs, ys = ys),
-    args = args, axisTypeRange = axisTypeRange)
+    args = args, axis_type_range = axis_type_range)
 }
 
 # ly_pointline
@@ -309,9 +309,9 @@ ly_ray <- function(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
   line_join = NULL, line_cap = NULL,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_ray")
+  validate_fig(fig, "ly_ray")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "ray")
+  check_opts(list(...), "ray")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -325,21 +325,21 @@ ly_ray <- function(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
     width <- v_eval(substitute(width), data)
   }
 
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  xy_names <- get_xy_names(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
+  xy <- get_xy_data(x, y)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(glyph = "ray", color = color,
     alpha = alpha, width = width, type = type,
     length = length, angle = angle,
     line_join = line_join, line_cap = line_cap, ...)
 
-  args <- updateLineOpts(fig, args)
+  args <- update_line_opts(fig, args)
 
-  axisTypeRange <- getGlyphAxisTypeRange(x, y)
+  axis_type_range <- get_glyph_axis_type_range(x, y)
 
   make_glyph(fig, type = "ray", lname = lname, lgroup = lgroup,
     data = xy, legend = legend,
-    args = args, axisTypeRange = axisTypeRange)
+    args = args, axis_type_range = axis_type_range)
 }

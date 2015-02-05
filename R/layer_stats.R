@@ -10,7 +10,7 @@ ly_hist <- function(fig, x, group = NULL, data = NULL,
   xname <- deparse(substitute(x))
   yname <- ifelse(freq, "Frequency", "Density")
 
-  validateFig(fig, "ly_hist")
+  validate_fig(fig, "ly_hist")
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
@@ -18,9 +18,9 @@ ly_hist <- function(fig, x, group = NULL, data = NULL,
     # group <- v_eval(substitute(group), data)
   }
 
-  xyNames <- getXYNames(NULL, NULL, xname, yname, list(...))
+  xy_names <- get_xy_names(NULL, NULL, xname, yname, list(...))
 
-  lgroup <- getLgroup(lgroup, fig)
+  lgroup <- get_lgroup(lgroup, fig)
 
   hh <- graphics::hist.default(x = x, breaks = breaks,
     freq = freq, include.lowest = include.lowest, right = right,
@@ -31,7 +31,7 @@ ly_hist <- function(fig, x, group = NULL, data = NULL,
     line_width = line_width, line_alpha = line_alpha,
     fill_color = fill_color, fill_alpha = fill_alpha, ...)
 
-  args <- resolveColorAlpha(args, hasLine = TRUE, hasFill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
   y <- if(freq) {
     hh$counts
@@ -42,7 +42,7 @@ ly_hist <- function(fig, x, group = NULL, data = NULL,
   do.call(ly_rect, c(list(fig = fig,
     xleft = hh$breaks[-length(hh$breaks)],
     xright = hh$breaks[-1], ytop = y, ybottom = 0,
-    xlab = xyNames$x, ylab = xyNames$y,
+    xlab = xy_names$x, ylab = xy_names$y,
     lname = lname, lgroup = lgroup), args))
 }
 
@@ -55,7 +55,7 @@ ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
   line_join = 1, line_cap = "round",
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_density")
+  validate_fig(fig, "ly_density")
 
   xname <- deparse(substitute(x))
   yname <- "Density"
@@ -66,9 +66,9 @@ ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
     # group <- v_eval(substitute(group), data)
   }
 
-  xyNames <- getXYNames(NULL, NULL, xname, yname, list(...))
+  xy_names <- get_xy_names(NULL, NULL, xname, yname, list(...))
 
-  lgroup <- getLgroup(lgroup, fig)
+  lgroup <- get_lgroup(lgroup, fig)
 
   if(!is.null(data))
     x <- eval(substitute(x), data)
@@ -76,7 +76,7 @@ ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
   args <- list(color = color, alpha = alpha, width = width,
     type = type, line_join = line_join, line_cap = line_cap, ...)
 
-  args <- updateLineOpts(fig, args)
+  args <- update_line_opts(fig, args)
 
   dd <- stats::density.default(x = x, bw = bw, adjust = adjust, kernel = kernel, n = n, cut = 3, na.rm = na.rm)
 
@@ -94,7 +94,7 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
   legend = TRUE,
   lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_quantile")
+  validate_fig(fig, "ly_quantile")
 
   xname <- "f-value"
   yname <- deparse(substitute(x))
@@ -105,7 +105,7 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
     group <- v_eval(substitute(group), data)
   }
 
-  lgroup <- getLgroup(lgroup, fig)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(color = color, alpha = alpha,
     line_color = line_color, line_alpha = line_alpha,
@@ -115,9 +115,9 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
   if(is.null(group))
     group <- rep(1, length(x))
 
-  naIdx <- which(is.na(x))
-  x <- x[-naIdx]
-  group <- group[-naIdx]
+  na_idx <- which(is.na(x))
+  x <- x[-na_idx]
+  group <- group[-na_idx]
 
   idx <- split(seq_along(x), group)
 
@@ -135,29 +135,29 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
         ## if the vector is too long, perhaps should default
         ## to some length, like 1000
         if(length(ii) > ncutoff) {
-          curProbs <- ppoints(ncutoff)
-          qq <- quantile(x[ii], curProbs, names = FALSE, na.rm = TRUE)
+          cur_probs <- ppoints(ncutoff)
+          qq <- quantile(x[ii], cur_probs, names = FALSE, na.rm = TRUE)
         } else {
-          curProbs <- ppoints(length(x[ii]))
+          cur_probs <- ppoints(length(x[ii]))
           qq <- sort(x[ii])
         }
       } else {
-        curProbs <- probs
-        qq <- quantile(x[ii], curProbs, names = FALSE, na.rm = TRUE)
+        cur_probs <- probs
+        qq <- quantile(x[ii], cur_probs, names = FALSE, na.rm = TRUE)
       }
-      ff <- distn(curProbs)
+      ff <- distn(cur_probs)
 
-      curLegend <- NULL
+      cur_legend <- NULL
       if(is.logical(legend)) {
         if(legend)
-          curLegend <- group[[ii[1]]]
+          cur_legend <- group[[ii[1]]]
       } else {
-        curLegend <- legend
+        cur_legend <- legend
       }
 
       fig <- do.call(ly_point, c(list(fig = fig, x = ff, y = qq,
         xlab = xname, ylab = yname,
-        lgroup = lgroup, legend = curLegend), args))
+        lgroup = lgroup, legend = cur_legend), args))
     }
   }
   fig
@@ -170,7 +170,7 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
   fill_color = "lightblue", fill_alpha = 0.5,
   lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_boxplot")
+  validate_fig(fig, "ly_boxplot")
 
   xnm <- deparse(substitute(x))
   ynm <- deparse(substitute(y))
@@ -186,7 +186,7 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
   }
 
   ## translate different x, y types to vectors
-  lgroup <- getLgroup(lgroup, fig)
+  lgroup <- get_lgroup(lgroup, fig)
 
   ## deal with vector inputs from a data source
   if(!is.null(data)) {
@@ -209,8 +209,8 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
     yname <- xnm
     group <- rep(xname, length(x))
   } else {
-    numInd <- c(is.numeric(x), is.numeric(y))
-    if(all(numInd)) {
+    num_ind <- c(is.numeric(x), is.numeric(y))
+    if(all(num_ind)) {
       message("both x and y are numeric -- choosing numeric variable based on which has the most unique values")
       if(length(unique(x)) > length(unique(y))) {
         xname <- ynm
@@ -222,11 +222,11 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
         group <- x
         x <- y
       }
-    } else if(numInd[1]) {
+    } else if(num_ind[1]) {
       xname <- ynm
       yname <- xnm
       group <- y
-    } else if(numInd[2]) {
+    } else if(num_ind[2]) {
       xname <- xnm
       yname <- ynm
       group <- x

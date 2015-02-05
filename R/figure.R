@@ -43,7 +43,7 @@ figure <- function(
     ylab <- ""
 
   tt <- Sys.time()
-  id <- genId(list(time = tt), "Plot")
+  id <- gen_id(list(time = tt), "Plot")
 
   fig <- structure(list(
     width = width, height = height, title = title,
@@ -52,8 +52,8 @@ figure <- function(
     plot_width = plot_width, plot_height = plot_height,
     xgrid = xgrid, ygrid = ygrid, xaxes = xaxes, yaxes = yaxes,
     tools = tools, theme = theme,
-    model = figModelSkeleton(id, title, width, height),
-    modeltype = "Plot",
+    model = fig_model_skeleton(id, title, width, height),
+    modeltype = "Plot", # not used
     ref = list(
       type    = "Plot",
       subtype = "Figure",
@@ -61,35 +61,35 @@ figure <- function(
     ),
     time = tt,
     ## place to store spec, data, and function for deferred glyphs
-    glyphDeferSpecs = list(),
-    glyphDeferData = list(),
-    glyphDefer = list(),
+    glyph_defer_specs = list(), # not used
+    glyph_defer_data = list(), # not used
+    glyph_defer = list(),
     layers = list(),
-    dataSigs = list(),
+    data_sigs = list(),
     ## keep track of x and y range of each glyph
-    glyphXRanges = list(),
-    glyphYRanges = list(),
+    glyph_x_ranges = list(),
+    glyph_y_ranges = list(),
     ## keep track of the axes ('cat' or 'num')
-    xAxisType = NULL,
-    yAxisType = NULL,
-    hasXaxis = FALSE,
-    hasYaxis = FALSE,
+    x_axis_type = NULL,
+    y_axis_type = NULL,
+    has_x_axis = FALSE,
+    has_y_axis = FALSE,
     has_x_range = FALSE,
     has_y_range = FALSE
   ), class = "BokehFigure")
 
   ## check and add tools
-  toolList <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "tap", "box_select", "lasso_select", "reset", "save")]
-  notUsed <- setdiff(toolList, tools)
-  if(length(notUsed) > 0)
-    message("Note: tools not used: ", paste(notUsed, collapse = ", "))
-  for(tl in toolList)
+  tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "tap", "box_select", "lasso_select", "reset", "save")]
+  not_used <- setdiff(tool_list, tools)
+  if(length(not_used) > 0)
+    message("Note: tools not used: ", paste(not_used, collapse = ", "))
+  for(tl in tool_list)
     fig <- eval(parse(text = paste("tool_", tl, "(fig)", sep = "")))
 
   fig
 }
 
-figModelSkeleton <- function(id, title, width = 480, height = 480) {
+fig_model_skeleton <- function(id, title, width = 480, height = 480) {
   model <- list(plot = list(
     type       = "Plot",
     subtype    = "Figure",

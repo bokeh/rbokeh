@@ -1,6 +1,6 @@
 
 
-updateLineOpts <- function(fig, opts) {
+update_line_opts <- function(fig, opts) {
 
   ## map to what bokeh expects
   opts$line_dash <- opts$type
@@ -21,31 +21,31 @@ updateLineOpts <- function(fig, opts) {
     }
   }
   if(is.character(opts$line_dash)) {
-    if(!opts$line_dash %in% names(ltyDict))
-      stop("'line_dash' should be one of: ", paste(names(ltyDict), collapse = ", "), call. = FALSE)
-    opts$line_dash <- ltyDict[[opts$line_dash]]
+    if(!opts$line_dash %in% names(lty_dict))
+      stop("'line_dash' should be one of: ", paste(names(lty_dict), collapse = ", "), call. = FALSE)
+    opts$line_dash <- lty_dict[[opts$line_dash]]
   }
 
   if(is.numeric(opts$line_cap))
-    opts$line_cap <- ljoinDict[[as.character(opts$line_cap)]]
+    opts$line_cap <- ljoin_dict[[as.character(opts$line_cap)]]
 
   if(is.null(opts$line_color))
-    opts$line_color <- getNextColor(fig)
+    opts$line_color <- get_next_color(fig)
 
   opts
 }
 
-validateFig <- function(fig, fct) {
+validate_fig <- function(fig, fct) {
   if(!inherits(fig, "BokehFigure"))
     stop("Error in ", fct, ": first argument must be of type 'BokehFigure'", call. = FALSE)
 }
 
 ## some things like rainbow(), etc., give hex with alpha
 ## Bokeh doesn't like hex alpha, so get rid of it
-validateColors <- function(opts) {
-  colFields <- c("line_color", "fill_color", "text_color")
+validate_colors <- function(opts) {
+  col_fields <- c("line_color", "fill_color", "text_color")
 
-  for(fld in colFields) {
+  for(fld in col_fields) {
     if(!is.null(opts[[fld]])) {
       ind <- which(grepl("^#", opts[[fld]]) & nchar(opts[[fld]]) == 9)
       if(length(ind) > 0) {
@@ -58,30 +58,30 @@ validateColors <- function(opts) {
 }
 
 ## should make this return something that will be evaluated at render time
-getNextColor <- function(lgroupobj, which = "fill_color", type = "discrete") {
-  curTheme <- bk_theme[[which]][[type]](10)
-  nLayers <- length(lgroupobj$glyphIds) + 1
-  nextColorIdx <- (nLayers - 1) %% length(curTheme) + 1
-  curTheme[nextColorIdx]
+get_next_color <- function(lgroupobj, which = "fill_color", type = "discrete") {
+  cur_theme <- bk_theme[[which]][[type]](10)
+  n_layers <- length(lgroupobj$glyph_ids) + 1
+  next_color_idx <- (n_layers - 1) %% length(cur_theme) + 1
+  cur_theme[next_color_idx]
 }
 
-checkArcDirection <- function(direction) {
+check_arc_direction <- function(direction) {
   if(!direction %in% c("clock", "anticlock"))
     stop("'direction' must be 'clock' or 'anticlock'", call. = FALSE)
 }
 
 ## take a set of layer groups
 ## and come up with the next increment of 'layer[int]'
-genLayerName <- function(curNames, prefix = "group") {
-  # curNames <- c("asdf", "layer1", "layer23", "qwert", "alayer7", "layer12b")
-  if(length(curNames) == 0) {
+gen_layer_name <- function(cur_names, prefix = "group") {
+  # cur_names <- c("asdf", "layer1", "layer23", "qwert", "alayer7", "layer12b")
+  if(length(cur_names) == 0) {
     name <- paste0(prefix, "1")
   } else {
-    namesWithPrefix <- curNames[grepl(paste0("^", prefix, "([0-9]+)$"), curNames)]
-    if(length(namesWithPrefix) == 0) {
+    names_with_prefix <- cur_names[grepl(paste0("^", prefix, "([0-9]+)$"), cur_names)]
+    if(length(names_with_prefix) == 0) {
       name <- paste0(prefix, "1")
     } else {
-      nn <- as.integer(gsub(prefix, "", namesWithPrefix))
+      nn <- as.integer(gsub(prefix, "", names_with_prefix))
       name <- paste(prefix, max(nn) + 1, sep = "")
     }
   }
@@ -89,32 +89,32 @@ genLayerName <- function(curNames, prefix = "group") {
 }
 
 ## get the axis type and range for x and y axes
-getGlyphAxisTypeRange <- function(x, y, assertX = NULL, assertY = NULL, glyph = "") {
-  xAxisType <- getGlyphAxisType(x)
-  yAxisType <- getGlyphAxisType(y)
+get_glyph_axis_type_range <- function(x, y, assert_x = NULL, assert_y = NULL, glyph = "") {
+  x_axis_type <- get_glyph_axis_type(x)
+  y_axis_type <- get_glyph_axis_type(y)
 
   if(glyph != "")
-    glyphText <- paste("'", glyph, "' ")
+    glyph_text <- paste("'", glyph, "' ")
 
-  if(!is.null(assertX)) {
-    if(xAxisType != assertX)
-      stop("Glyph ", glyph, " expects a ", assertX, " x axis", call. = FALSE)
+  if(!is.null(assert_x)) {
+    if(x_axis_type != assert_x)
+      stop("Glyph ", glyph, " expects a ", assert_x, " x axis", call. = FALSE)
   }
-  if(!is.null(assertY)) {
-    if(yAxisType != assertY)
-      stop("Glyph ", glyph, "expects a ", assertY, " y axis", call. = FALSE)
+  if(!is.null(assert_y)) {
+    if(y_axis_type != assert_y)
+      stop("Glyph ", glyph, "expects a ", assert_y, " y axis", call. = FALSE)
   }
 
   list(
-    xAxisType = xAxisType,
-    yAxisType = yAxisType,
-    xRange = getGlyphRange(x, xAxisType),
-    yRange = getGlyphRange(y, yAxisType)
+    x_axis_type = x_axis_type,
+    y_axis_type = y_axis_type,
+    x_range = get_glyph_range(x, x_axis_type),
+    y_range = get_glyph_range(y, y_axis_type)
   )
 }
 
 ## determine whether axis is "numeric" or "categorical"
-getGlyphAxisType <- function(a) {
+get_glyph_axis_type <- function(a) {
   # this will surely get more complex...
   if(is.character(a) || is.factor(a)) {
     return("categorical")
@@ -126,11 +126,11 @@ getGlyphAxisType <- function(a) {
 }
 
 ## determine the range of an axis for a glyph
-getGlyphRange <- function(a, axisType = NULL, ...) {
-  if(is.null(axisType))
-    axisType <- getGlyphAxisType(a)
+get_glyph_range <- function(a, axis_type = NULL, ...) {
+  if(is.null(axis_type))
+    axis_type <- get_glyph_axis_type(a)
   ## ... can be size, etc. attributes
-  if(axisType %in% c("numeric", "datetime")) {
+  if(axis_type %in% c("numeric", "datetime")) {
     range(a, na.rm = TRUE)
   } else {
     # gsub removes suffixes like ":0.6"
@@ -140,66 +140,66 @@ getGlyphRange <- function(a, axisType = NULL, ...) {
   }
 }
 
-validateAxisType <- function(figType, curType, which) {
-  if(length(figType) > 0 && length(curType) > 0) {
+validate_axis_type <- function(fig_type, cur_type, which) {
+  if(length(fig_type) > 0 && length(cur_type) > 0) {
     # make this more informative...
-    if(figType != curType)
+    if(fig_type != cur_type)
       stop(which, " axis type (numerical / categorical) does not match that of other elements in this figure", call. = FALSE)
   }
 }
 
 ## take a collection of glyph ranges (x or y axis)
 ## and find the global range across all glyphs
-getAllGlyphRange <- function(ranges, padding_factor, axisType = "numeric", log = FALSE) {
-  if(axisType == "numeric") {
-    rangeMat <- do.call(rbind, ranges)
-    hardRange <- c(min(rangeMat[,1], na.rm = TRUE),
-      max(rangeMat[,2], na.rm = TRUE))
+get_all_glyph_range <- function(ranges, padding_factor, axis_type = "numeric", log = FALSE) {
+  if(axis_type == "numeric") {
+    range_mat <- do.call(rbind, ranges)
+    hard_range <- c(min(range_mat[,1], na.rm = TRUE),
+      max(range_mat[,2], na.rm = TRUE))
     ## if log, we need to make padding multiplicative
     if(log) {
-      hardRange <- hardRange * c(padding_factor * 10, 2 - (padding_factor * 10))
+      hard_range <- hard_range * c(padding_factor * 10, 2 - (padding_factor * 10))
     } else {
-      hardRange <- hardRange + c(-1, 1) * padding_factor * diff(hardRange)
+      hard_range <- hard_range + c(-1, 1) * padding_factor * diff(hard_range)
     }
-    if(hardRange[1] == hardRange[2])
-      hardRange <- hardRange + c(-0.5, 0.5)
-    hardRange
-  } else if(axisType == "datetime") {
-    rangeMat <- do.call(rbind, ranges)
-    hardRange <- c(min(rangeMat[,1], na.rm = TRUE),
-      max(rangeMat[,2], na.rm = TRUE))
-    hardRange <- hardRange + c(-1, 1) * padding_factor / 2 * diff(hardRange)
+    if(hard_range[1] == hard_range[2])
+      hard_range <- hard_range + c(-0.5, 0.5)
+    hard_range
+  } else if(axis_type == "datetime") {
+    range_mat <- do.call(rbind, ranges)
+    hard_range <- c(min(range_mat[,1], na.rm = TRUE),
+      max(range_mat[,2], na.rm = TRUE))
+    hard_range <- hard_range + c(-1, 1) * padding_factor / 2 * diff(hard_range)
   } else {
     sort(unique(do.call(c, ranges)))
   }
 }
 
 ## give a little warning if any options are specified that won't be used
-checkOpts <- function(opts, type) {
-  curGlyphProps <- glyphProps[[type]]
+check_opts <- function(opts, type) {
+  cur_glyph_props <- glyph_props[[type]]
 
-  validOpts <- c("xlab", "ylab")
-  if(curGlyphProps$lp)
-    validOpts <- c(validOpts, linePropNames)
-  if(curGlyphProps$fp)
-    validOpts <- c(validOpts, fillPropNames)
-  if(curGlyphProps$tp)
-    validOpts <- c(validOpts, textPropNames)
+  valid_opts <- c("xlab", "ylab")
+  if(cur_glyph_props$lp)
+    valid_opts <- c(valid_opts, line_prop_names)
+  if(cur_glyph_props$fp)
+    valid_opts <- c(valid_opts, fill_prop_names)
+  if(cur_glyph_props$tp)
+    valid_opts <- c(valid_opts, text_prop_names)
 
   if(length(opts) > 0) {
     # only get names of opts that are not NULL
     idx <- which(sapply(opts, function(x) !is.null(x)))
     if(length(idx) > 0) {
-      notUsed <- setdiff(names(opts)[idx], validOpts)
-      if(length(notUsed) > 0)
-        message("note - arguments not used: ", paste(notUsed, collapse = ", "))
+      not_used <- setdiff(names(opts)[idx], valid_opts)
+      if(length(not_used) > 0)
+        message("note - arguments not used: ", paste(not_used, collapse = ", "))
     }
   }
 }
 
 ## take a hex color and reduce its saturation by a factor
 ## (used to get fill for pch=21:25)
-reduceSaturation <- function(col, factor = 0.5) {
+reduce_saturation <- function(col, factor = 0.5) {
   col2 <- do.call(rgb2hsv, structure(as.list(col2rgb(col)[,1]), names = c("r", "g", "b")))
   col2['s', ] <- col2['s', ] * factor
   do.call(hsv, as.list(col2[,1]))
@@ -208,7 +208,7 @@ reduceSaturation <- function(col, factor = 0.5) {
 ## handle different x, y input types
 ## this should be more "class"-y
 ## but this will suffice
-getXYData <- function(x, y) {
+get_xy_data <- function(x, y) {
   if(is.null(y)) {
     if(is.ts(x)) {
       return(list(x = as.vector(time(x)), y = as.vector(x)))
@@ -221,7 +221,7 @@ getXYData <- function(x, y) {
   list(x = x, y = y)
 }
 
-getXYNames <- function(x, y, xname, yname, dots) {
+get_xy_names <- function(x, y, xname, yname, dots) {
 
   if(length(xname) > 1)
     xname <- NULL
@@ -251,11 +251,11 @@ getXYNames <- function(x, y, xname, yname, dots) {
 }
 
 ## take args color and alpha and translate them to f
-resolveColorAlpha <- function(args, hasLine = TRUE, hasFill = TRUE, ly) {
+resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly) {
 
   ## if no color at all is specified, choose from the theme
   if(is.null(args$color) && is.null(args$fill_color) && is.null(args$line_color))
-    args$color <- getNextColor(ly)
+    args$color <- get_next_color(ly)
 
   if(!is.null(args$color)) {
     if(!is.null(args$line_color)) {
@@ -291,11 +291,11 @@ resolveColorAlpha <- function(args, hasLine = TRUE, hasFill = TRUE, ly) {
 
 ## make sure marker fill and line properties are correct for marker glyphs
 ## (for example, some, such as glyph = 1, must not have fill)
-resolveGlyphProps <- function(glyph, args, lgroup) {
-  if(glyph %in% names(markerDict)) {
-    curGlyphProps <- markerDict[[as.character(glyph)]]
-    args$glyph <- curGlyphProps$glyph
-    if(curGlyphProps$fill) {
+resolve_glyph_props <- function(glyph, args, lgroup) {
+  if(glyph %in% names(marker_dict)) {
+    cur_glyph_props <- marker_dict[[as.character(glyph)]]
+    args$glyph <- cur_glyph_props$glyph
+    if(cur_glyph_props$fill) {
       if(is.null(args$fill_color)) {
         if(!is.null(args$line_color)) {
           args$fill_color <- args$line_color
@@ -303,7 +303,7 @@ resolveGlyphProps <- function(glyph, args, lgroup) {
           args$fill_color <- lgroup
         }
       }
-      if(curGlyphProps$line) {
+      if(cur_glyph_props$line) {
         if(is.null(args$fill_alpha)) {
           args$fill_alpha <- 0.5
         } else {
@@ -315,7 +315,7 @@ resolveGlyphProps <- function(glyph, args, lgroup) {
       args$fill_alpha <- NA
     }
 
-    if(curGlyphProps$line) {
+    if(cur_glyph_props$line) {
       if(is.null(args$line_color))
         if(!is.null(args$fill_color)) {
           args$line_color <- args$fill_color
@@ -331,9 +331,9 @@ resolveGlyphProps <- function(glyph, args, lgroup) {
   args
 }
 
-getLgroup <- function(lgroup, fig) {
+get_lgroup <- function(lgroup, fig) {
   if(is.null(lgroup))
-    lgroup <- genLayerName(names(fig$layers))
+    lgroup <- gen_layer_name(names(fig$layers))
   lgroup <- as.character(lgroup)
 }
 
@@ -341,7 +341,7 @@ getLgroup <- function(lgroup, fig) {
 # if a data frame was provided, the arg sould be a
 # list of column names
 # otherwise it should be a named list or data frame
-getHover <- function(hn, data) {
+get_hover <- function(hn, data) {
   tmp <- try(eval(hn), silent = TRUE)
   if(is.data.frame(tmp)) {
     data <- tmp
@@ -390,7 +390,7 @@ v_eval <- function(x, data) {
   res
 }
 
-fixArgs <- function(args, n) {
+fix_args <- function(args, n) {
   lns <- sapply(args, length)
   nms <- names(args)
   idx <- which(!lns %in% c(0, 1, n))
@@ -398,11 +398,11 @@ fixArgs <- function(args, n) {
   if(length(idx) > 0)
     stop("Arguments do not have correct length: ", paste(nms[idx], " (", lns[idx],")", sep = "", collapse = ", "))
 
-  # sclIdx <- which(lns == 1)
-  # splitIdx <- which(lns == n)
-  nullIdx <- which(lns == 0)
-  if(length(nullIdx) > 0)
-    args[nullIdx] <- NULL
+  # scl_idx <- which(lns == 1)
+  # split_idx <- which(lns == n)
+  null_idx <- which(lns == 0)
+  if(length(null_idx) > 0)
+    args[null_idx] <- NULL
 
   args
 }
@@ -424,7 +424,7 @@ to_uint32 <- function(x) {
     bitShiftL(x[,2], 8)), bitShiftL(x[,1], 0))
 }
 
-toEpoch <- function(x) {
+to_epoch <- function(x) {
   if(inherits(x, "Date")) {
     return(as.numeric(x) * 86400000)
   } else if(inherits(x, "POSIXct")) {

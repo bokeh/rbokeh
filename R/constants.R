@@ -1,8 +1,8 @@
-optionNames <- c("width", "height", "title","ylim","xlim","plot_width","plot_height","x_axis_type","y_axis_type","x_mapper_type","y_mapper_type","background_fill","border_fill","min_border","min_border_left","min_border_right","min_border_top","min_border_bottom","h_symmetry","v_symmetry","outline_line_color", "xaxes", "yaxes", "tools")
+option_names <- c("width", "height", "title","ylim","xlim","plot_width","plot_height","x_axis_type","y_axis_type","x_mapper_type","y_mapper_type","background_fill","border_fill","min_border","min_border_left","min_border_right","min_border_top","min_border_bottom","h_symmetry","v_symmetry","outline_line_color", "xaxes", "yaxes", "tools")
 
-linePropNames <- c("line_color", "line_width", "line_alpha", "line_join", "line_cap", "line_dash", "line_dash_offset")
-fillPropNames <- c("fill_color", "fill_alpha")
-textPropNames <- c("text_font", "text_font_size", "text_font_style", "text_color", "text_alpha", "text_align", "text_baseline")
+line_prop_names <- c("line_color", "line_width", "line_alpha", "line_join", "line_cap", "line_dash", "line_dash_offset")
+fill_prop_names <- c("fill_color", "fill_alpha")
+text_prop_names <- c("text_font", "text_font_size", "text_font_style", "text_color", "text_alpha", "text_align", "text_baseline")
 
 ## glyphs are simple enough we can get away with
 ## not having formal classes for them
@@ -10,7 +10,7 @@ textPropNames <- c("text_font", "text_font_size", "text_font_style", "text_color
 ## lp = does this glyph have line properties?
 ## fp = does this glyph have fill properties?
 ## tp = does this glyph have text properties?
-glyphProps <- list(
+glyph_props <- list(
   ###### markers ######
   asterisk = list(lp = TRUE, fp = FALSE, tp = FALSE),
   circle = list(lp = TRUE, fp = TRUE, tp = FALSE),
@@ -48,7 +48,7 @@ glyphProps <- list(
 )
 
 ## list of conversions from R's "pch" to glyph / line / fill properties
-markerDict <- list(
+marker_dict <- list(
    "0" =  list(glyph = "square",            line = TRUE,  fill = FALSE),
    "1" =  list(glyph = "circle",            line = TRUE,  fill = FALSE),
    "2" =  list(glyph = "triangle",          line = TRUE,  fill = FALSE),
@@ -92,7 +92,7 @@ markerDict <- list(
 # 11 and 14 are missing
 
 ## list of conversions from R's "lty" to line_dash
-ltyDict <- list(
+lty_dict <- list(
   "1" = NULL,
   "2" = c(8, 8),
   "3" = c(2, 6),
@@ -107,10 +107,10 @@ ltyDict <- list(
   "twodash" = c(12, 4, 4, 4)
 )
 
-ltyNames <- names(ltyDict)
+lty_names <- names(lty_dict)
 
 ## convert ljoin to line_cap
-ljoinDict <- list(
+ljoin_dict <- list(
   "1" = "round",
   "2" = "mitre",
   "3" = "bevel",
@@ -119,5 +119,5 @@ ljoinDict <- list(
   "bevel" = "bevel"
 )
 
-markerPchTypes <- setdiff(0:25, c(11, 14))
-markerNames <- c("asterisk", "circle", "circle_cross", "circle_x", "cross", "diamond", "diamond_cross", "inverted_triangle", "square", "square_cross", "square_x", "triangle", "x")
+marker_pch_types <- setdiff(0:25, c(11, 14))
+marker_names <- c("asterisk", "circle", "circle_cross", "circle_x", "cross", "diamond", "diamond_cross", "inverted_triangle", "square", "square_cross", "square_x", "triangle", "x")

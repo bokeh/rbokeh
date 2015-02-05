@@ -26,7 +26,7 @@ plot.BokehFigure <- function(x, y, ...) {
 
     fig$model <- remove_model_names(fig$model)
 
-    makeBokehWidget(fig, type = "Plot", debug)
+    make_bokeh_widget(fig, type = "Plot", debug)
   }
 }
 
@@ -44,10 +44,10 @@ plot.BokehGridPlot <- function(x, y, ...) {
 
   fig <- prepare_gridplot(x)
 
-  makeBokehWidget(fig, type = "GridPlot", debug)
+  make_bokeh_widget(fig, type = "GridPlot", debug)
 }
 
-makeBokehWidget <- function(fig, type, debug = FALSE) {
+make_bokeh_widget <- function(fig, type, debug = FALSE) {
   ## create widget
   htmlwidgets::createWidget(
      name = 'rbokeh',

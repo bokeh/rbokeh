@@ -20,9 +20,9 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
   line_color = NULL, line_alpha = NULL,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_annular_wedge")
+  validate_fig(fig, "ly_annular_wedge")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "annular_wedge")
+  check_opts(list(...), "annular_wedge")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -40,11 +40,11 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
     end_angle <- v_eval(substitute(end_angle), data)
   }
 
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  hover <- get_hover(substitute(hover), data)
+  xy_names <- get_xy_names(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
+  xy <- get_xy_data(x, y)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(glyph = "annular_wedge", color = color, alpha = alpha,
     fill_color = fill_color, fill_alpha = fill_alpha,
@@ -53,17 +53,17 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
     start_angle = start_angle, end_angle = end_angle,
     direction = direction, ...)
 
-  args <- resolveColorAlpha(args, hasLine = TRUE, hasFill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
-  checkArcDirection(direction)
+  check_arc_direction(direction)
 
-  axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
   make_glyph(fig, type = "annular_wedge", lname = lname, lgroup = lgroup,
-    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
-    args = args, axisTypeRange = axisTypeRange,
+    data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
+    args = args, axis_type_range = axis_type_range,
     hover = hover, legend = legend,
-    xname = xyNames$x, yname = xyNames$y)
+    xname = xy_names$x, yname = xy_names$y)
 }
 
 #' @export
@@ -75,9 +75,9 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
   hover = NULL, legend = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_annulus")
+  validate_fig(fig, "ly_annulus")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "annulus")
+  check_opts(list(...), "annulus")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -93,26 +93,26 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
     outer_radius <- v_eval(substitute(outer_radius), data)
   }
 
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  hover <- get_hover(substitute(hover), data)
+  xy_names <- get_xy_names(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
+  xy <- get_xy_data(x, y)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(glyph = "annulus", color = color, alpha = alpha,
     fill_color = fill_color, fill_alpha = fill_alpha,
     line_color = line_color, line_alpha = line_alpha,
     inner_radius = inner_radius, outer_radius = outer_radius, ...)
 
-  args <- resolveColorAlpha(args, hasLine = TRUE, hasFill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
-  axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
   make_glyph(fig, type = "annulus", lname = lname, lgroup = lgroup,
-    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
-    args = args, axisTypeRange = axisTypeRange,
+    data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
+    args = args, axis_type_range = axis_type_range,
     hover = hover, legend = legend,
-    xname = xyNames$x, yname = xyNames$y)
+    xname = xy_names$x, yname = xy_names$y)
 }
 
 # doesn't seem to have hover...
@@ -123,9 +123,9 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_arc")
+  validate_fig(fig, "ly_arc")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "arc")
+  check_opts(list(...), "arc")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -141,11 +141,11 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
     line_width  <- v_eval(substitute(line_width), data)
   }
 
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  hover <- get_hover(substitute(hover), data)
+  xy_names <- get_xy_names(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
+  xy <- get_xy_data(x, y)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(glyph = "arc", color = color, alpha = alpha,
     radius = radius, start_angle = start_angle, end_angle = end_angle,
@@ -153,17 +153,17 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
     line_width = line_width, start_angle = start_angle,
     end_angle = end_angle, ...)
 
-  args <- resolveColorAlpha(args, hasLine = TRUE, hasFill = FALSE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = FALSE, fig$layers[[lgroup]])
 
-  checkArcDirection(direction)
+  check_arc_direction(direction)
 
-  axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
   make_glyph(fig, type = "arc", lname = lname, lgroup = lgroup,
-    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
-    args = args, axisTypeRange = axisTypeRange,
+    data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
+    args = args, axis_type_range = axis_type_range,
     hover = hover, legend = legend,
-    xname = xyNames$x, yname = xyNames$y)
+    xname = xy_names$x, yname = xy_names$y)
 }
 
 # doesn't seem to have hover...
@@ -174,9 +174,9 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
   line_color = NULL, line_alpha = NULL,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_oval")
+  validate_fig(fig, "ly_oval")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "oval")
+  check_opts(list(...), "oval")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -193,26 +193,26 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
     angle      <- v_eval(substitute(angle), data)
   }
 
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  hover <- get_hover(substitute(hover), data)
+  xy_names <- get_xy_names(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
+  xy <- get_xy_data(x, y)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(glyph = "oval", color = color, alpha = alpha,
     width = width, height = height, angle = angle,
     fill_color = fill_color, fill_alpha = fill_alpha,
     line_color = line_color, line_alpha = line_alpha, ...)
 
-  args <- resolveColorAlpha(args, hasLine = TRUE, hasFill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
-  axisTypeRange <- getGlyphAxisTypeRange(x, y)
+  axis_type_range <- get_glyph_axis_type_range(x, y)
 
   make_glyph(fig, type = "oval", lname = lname, lgroup = lgroup,
-    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
-    args = args, axisTypeRange = axisTypeRange,
+    data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
+    args = args, axis_type_range = axis_type_range,
     hover = hover, legend = legend,
-    xname = xyNames$x, yname = xyNames$y)
+    xname = xy_names$x, yname = xy_names$y)
 }
 
 #' @export
@@ -222,9 +222,9 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
   line_color = NULL, line_alpha = NULL,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_wedge")
+  validate_fig(fig, "ly_wedge")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "wedge")
+  check_opts(list(...), "wedge")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -241,11 +241,11 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
     end_angle   <- v_eval(substitute(end_angle), data)
   }
 
-  hover <- getHover(substitute(hover), data)
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  hover <- get_hover(substitute(hover), data)
+  xy_names <- get_xy_names(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
+  xy <- get_xy_data(x, y)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(glyph = "wedge", color = color, alpha = alpha,
     radius = radius, start_angle = start_angle, end_angle = end_angle,
@@ -254,17 +254,17 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
     line_alpha = line_alpha, radius = radius, start_angle = start_angle,
     end_angle = end_angle, direction = direction, ...)
 
-  args <- resolveColorAlpha(args, hasLine = TRUE, hasFill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
-  checkArcDirection(direction)
+  check_arc_direction(direction)
 
-  axisTypeRange <- getGlyphAxisTypeRange(x, y, assertX = "numeric", assertY = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
   make_glyph(fig, type = "wedge", lname = lname, lgroup = lgroup,
-    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
-    args = args, axisTypeRange = axisTypeRange,
+    data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
+    args = args, axis_type_range = axis_type_range,
     hover = hover, legend = legend,
-    xname = xyNames$x, yname = xyNames$y)
+    xname = xy_names$x, yname = xy_names$y)
 }
 
 

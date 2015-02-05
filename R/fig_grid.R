@@ -1,9 +1,9 @@
 
-gridPlotModel <- function(id, plotRefs, toolEventRef, width, height) {
+grid_plot_model <- function(id, plot_refs, tool_event_ref, width, height) {
   res <- base_model_object("GridPlot", id)
 
-  res$model$attributes$children <- plotRefs
-  res$model$attributes$tool_events <- toolEventRef
+  res$model$attributes$children <- plot_refs
+  res$model$attributes$tool_events <- tool_event_ref
 
   res$model$attributes$plot_width <- width
   res$model$attributes$plot_height <- height
@@ -62,11 +62,11 @@ grid_plot <- function(objs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
       x$model$plot[c("type", "subtype", "id")]
     })
 
-    plotRefs <- list()
-    length(plotRefs) <- nrow
+    plot_refs <- list()
+    length(plot_refs) <- nrow
     for(ii in nrow) {
-      curIdx <- ((ii - 1) * ncol + 1):(min(ii * ncol, nn))
-      plotRefs[[ii]] <- tmp[curIdx]
+      cur_idx <- ((ii - 1) * ncol + 1):(min(ii * ncol, nn))
+      plot_refs[[ii]] <- tmp[cur_idx]
     }
   } else {
     ## list of lists of BokehFigure objects
@@ -77,7 +77,7 @@ grid_plot <- function(objs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
       stop("'objs' argument to makeGrid must be a list of BokehFigure objects or a list of lists of BokehFigure objects", call. = FALSE)
 
     ## get plot refs
-    plotRefs <- lapply(objs, function(x) {
+    plot_refs <- lapply(objs, function(x) {
       lapply(x, function(y) {
         y$model$plot[c("type", "subtype", "id")]
       })
@@ -89,7 +89,7 @@ grid_plot <- function(objs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
   ## deal with axes
   x_range <- y_range <- NULL
   if(same_x) {
-    x_range <- getGridRanges(objs, "x")
+    x_range <- get_grid_ranges(objs, "x")
     for(ii in seq_along(objs)) {
       objs[[ii]]$xlim <- x_range$range # prevents prepare_figure() from computing range
       objs[[ii]]$has_x_range <- TRUE # prevents prepare_figure() from adding range
@@ -97,7 +97,7 @@ grid_plot <- function(objs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
     }
   }
   if(same_y) {
-    y_range <- getGridRanges(objs, "y")
+    y_range <- get_grid_ranges(objs, "y")
     for(ii in seq_along(objs)) {
       objs[[ii]]$ylim <- y_range$range # prevents prepare_figure() from computing range
       objs[[ii]]$has_y_range <- TRUE # prevents prepare_figure() from adding range
@@ -106,7 +106,7 @@ grid_plot <- function(objs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
   }
 
   structure(list(
-    plotRefs = plotRefs,
+    plot_refs = plot_refs,
     figs = objs,
     x_range = x_range$mod$model,
     y_range = y_range$mod$model,
@@ -116,7 +116,7 @@ grid_plot <- function(objs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
 
 ## add a figure to a BokehGridPlot object/
 ## obj must be a BokehGridPlot and p must be a BokehFigure object
-# addPlot <- function(obj, p, row = NULL, col = NULL, same_y = FALSE, same_x = FALSE) {
+# add_plot <- function(obj, p, row = NULL, col = NULL, same_y = FALSE, same_x = FALSE) {
 #   ## warn if overwriting a plot
 
 # }
@@ -136,10 +136,10 @@ prepare_gridplot <- function(obj) {
 
   wmat <- matrix(0, nrow = obj$nrow, ncol = obj$ncol)
   hmat <- matrix(0, nrow = obj$nrow, ncol = obj$ncol)
-  for(ii in seq_along(obj$plotRefs)) {
-    for(jj in seq_along(obj$plotRefs[[ii]])) {
-      wmat[ii, jj] <- dims[[obj$plotRefs[[ii]][[jj]]$id]]$width
-      hmat[ii, jj] <- dims[[obj$plotRefs[[ii]][[jj]]$id]]$height
+  for(ii in seq_along(obj$plot_refs)) {
+    for(jj in seq_along(obj$plot_refs[[ii]])) {
+      wmat[ii, jj] <- dims[[obj$plot_refs[[ii]][[jj]]$id]]$width
+      hmat[ii, jj] <- dims[[obj$plot_refs[[ii]][[jj]]$id]]$height
     }
   }
   width <- sum(apply(wmat, 2, max))
@@ -147,12 +147,12 @@ prepare_gridplot <- function(obj) {
 
   figs <- lapply(obj$figs, prepare_figure)
 
-  dataMods <- list()
+  data_mods <- list()
   ## deal with linked data
   if(obj$link_data) {
     ## find data signatures that match
     sigs <- do.call(c, lapply(figs, function(x)
-      unique(do.call(c, lapply(x$dataSigs, function(y) y$sig)))))
+      unique(do.call(c, lapply(x$data_sigs, function(y) y$sig)))))
     sigst <- table(sigs)
     idx <- which(sigst > 1)
     if(length(idx) > 0) {
@@ -161,56 +161,56 @@ prepare_gridplot <- function(obj) {
       ## merge the data sources
       ## and then point the glyphrenderers of each to this new data source
       for(sig in names(idx)) {
-        hasData <- list()
+        has_data <- list()
         for(ii in seq_along(figs)) {
-          for(jj in seq_along(figs[[ii]]$dataSigs)) {
-            if(!is.null(figs[[ii]]$dataSigs[[jj]]$sig))
-              if(figs[[ii]]$dataSigs[[jj]]$sig == sig)
-                hasData[[length(hasData) + 1]] <- list(index = c(ii, jj), glrId = figs[[ii]]$dataSigs[[jj]]$glrId)
+          for(jj in seq_along(figs[[ii]]$data_sigs)) {
+            if(!is.null(figs[[ii]]$data_sigs[[jj]]$sig))
+              if(figs[[ii]]$data_sigs[[jj]]$sig == sig)
+                has_data[[length(has_data) + 1]] <- list(index = c(ii, jj), glr_id = figs[[ii]]$data_sigs[[jj]]$glr_id)
           }
         }
-        dId <- genId(NULL, sig)
-        newDataRef <- list(type = "ColumnDataSource", id = dId)
-        hd1 <- hasData[[1]]$index
-        gl1 <- hasData[[1]]$glrId
+        d_id <- gen_id(NULL, sig)
+        new_data_ref <- list(type = "ColumnDataSource", id = d_id)
+        hd1 <- has_data[[1]]$index
+        gl1 <- has_data[[1]]$glr_id
         ds1 <- figs[[hd1[1]]]$model[[gl1]]$attributes$data_source$id
         d1 <- figs[[hd1[1]]]$model[[ds1]]$attributes$data
-        figs[[hd1[1]]]$model[[gl1]]$attributes$data_source <- newDataRef
-        newData <- d1
+        figs[[hd1[1]]]$model[[gl1]]$attributes$data_source <- new_data_ref
+        new_data <- d1
         figs[[hd1[1]]]$model[[ds1]] <- NULL
         ## do the naive thing for now and don't check for identical columns
-        for(ii in seq_along(hasData)[-1]) {
-          hd <- hasData[[ii]]$index
-          glr <- hasData[[ii]]$glrId
+        for(ii in seq_along(has_data)[-1]) {
+          hd <- has_data[[ii]]$index
+          glr <- has_data[[ii]]$glr_id
           ds <- figs[[hd[1]]]$model[[glr]]$attributes$data_source$id
           gl <- figs[[hd[1]]]$model[[glr]]$attributes$glyph$id
           nsgl <- figs[[hd[1]]]$model[[glr]]$attributes$nonselection_glyph$id
           d <- figs[[hd[1]]]$model[[ds]]$attributes$data
-          mergeNames <- intersect(names(d), c("x", "y", "fill_color", "fill_alpha", "line_color", "line_width", "line_alpha"))
-          newNames <- paste0(mergeNames, ii)
-          d2 <- d[mergeNames]
-          names(d2) <- newNames
-          newData <- c(newData, d2, d[setdiff(names(d), c(newNames, names(newData)))])
+          merge_names <- intersect(names(d), c("x", "y", "fill_color", "fill_alpha", "line_color", "line_width", "line_alpha"))
+          new_names <- paste0(merge_names, ii)
+          d2 <- d[merge_names]
+          names(d2) <- new_names
+          new_data <- c(new_data, d2, d[setdiff(names(d), c(new_names, names(new_data)))])
           ## update references
-          upd <- figs[[hd[1]]]$model[[gl]]$attributes[mergeNames]
+          upd <- figs[[hd[1]]]$model[[gl]]$attributes[merge_names]
           for(nm in names(upd)) {
             if(!is.null(upd[[nm]]$field))
               upd[[nm]]$field <- paste0(upd[[nm]]$field, ii)
           }
-          figs[[hd[1]]]$model[[gl]]$attributes[mergeNames] <- upd
+          figs[[hd[1]]]$model[[gl]]$attributes[merge_names] <- upd
 
-          upd <- figs[[hd[1]]]$model[[nsgl]]$attributes[mergeNames]
+          upd <- figs[[hd[1]]]$model[[nsgl]]$attributes[merge_names]
           for(nm in names(upd)) {
             if(!is.null(upd[[nm]]$field))
               upd[[nm]]$field <- paste0(upd[[nm]]$field, ii)
           }
-          figs[[hd[1]]]$model[[nsgl]]$attributes[mergeNames] <- upd
+          figs[[hd[1]]]$model[[nsgl]]$attributes[merge_names] <- upd
 
-          figs[[hd[1]]]$model[[glr]]$attributes$data_source <- newDataRef
+          figs[[hd[1]]]$model[[glr]]$attributes$data_source <- new_data_ref
           figs[[hd[1]]]$model[[ds]] <- NULL
         }
         ## add this data source
-        dataMods[[sig]] <- dataModel(newData, dId)
+        data_mods[[sig]] <- data_model(new_data, d_id)
       }
     } else {
       message("'link_data' was set to TRUE, but none of the figures in the grid have the same data source.")
@@ -219,18 +219,18 @@ prepare_gridplot <- function(obj) {
 
   mod <- unlist(lapply(figs, function(x) remove_model_names(x$model)), recursive = FALSE)
 
-  id <- genId(list(time = Sys.time()), "GridPlot")
-  tid <- genId(list(time = Sys.time()), c("GridPlot", "tool"))
-  toolEvt <- toolEvents(tid)
+  id <- gen_id(list(time = Sys.time()), "GridPlot")
+  tid <- gen_id(list(time = Sys.time()), c("GridPlot", "tool"))
+  tool_evt <- tool_events(tid)
 
-  mod$GridPlot <- gridPlotModel(id, obj$plotRefs, toolEvt$ref, width, height)$model
-  mod$toolEvt <- toolEvt$model
+  mod$grid_plot <- grid_plot_model(id, obj$plot_refs, tool_evt$ref, width, height)$model
+  mod$tool_evt <- tool_evt$model
   mod$x_range <- obj$x_range
   mod$y_range <- obj$y_range
 
-  mod$toolEvt <- toolEvt$model
+  mod$tool_evt <- tool_evt$model
 
-  for(md in dataMods) {
+  for(md in data_mods) {
     mod[[md$ref$id]] <- md$model
   }
 
@@ -239,11 +239,11 @@ prepare_gridplot <- function(obj) {
   list(model = mod, width = width, height = height, id = id)
 }
 
-getGridRanges <- function(objs, which = "x") {
-  w1 <- paste0("glyph", toupper(which), "Ranges")
-  w2 <- paste0(which, "AxisType")
+get_grid_ranges <- function(objs, which = "x") {
+  w1 <- paste0("glyph_", which, "_ranges")
+  w2 <- paste0(which, "_axis_type")
   ranges <- unlist(lapply(objs, function(x) x[[w1]]), recursive = FALSE)
-  rng <- getAllGlyphRange(ranges, objs[[1]]$padding_factor, objs[[1]][[w2]])
-  id <- genId(NULL, c(which, "GridRange"))
-  list(range = rng, mod = rangeModel(ifelse(is.numeric(rng), "Range1d", "FactorRange"), id, rng))
+  rng <- get_all_glyph_range(ranges, objs[[1]]$padding_factor, objs[[1]][[w2]])
+  id <- gen_id(NULL, c(which, "GridRange"))
+  list(range = rng, mod = range_model(ifelse(is.numeric(rng), "Range1d", "FactorRange"), id, rng))
 }

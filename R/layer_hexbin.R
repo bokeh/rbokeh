@@ -16,17 +16,17 @@ ly_hexbin <- function(fig, x, y, data = NULL, xbins = 30, shape = 1,
 
   ind <- complete.cases(x, y)
 
-  hbd <- getHexbinData(x = x[ind], y = y[ind], xbins = xbins, shape = shape,
+  hbd <- get_hexbin_data(x = x[ind], y = y[ind], xbins = xbins, shape = shape,
     style = style, minarea = minarea, maxarea = maxarea, mincnt = mincnt,
     maxcnt = maxcnt, trans = trans, inv = inv)
 
   if(is.character(palette)) {
-    if(validColor(palette)) {
+    if(valid_color(palette)) {
       col <- palette
     } else {
-      if(!palette %in% bkPaletteNames)
+      if(!palette %in% bk_palette_names)
         stop("'palette' specified in ly_hexbin is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
-      palette <- colorRampPalette(bkPalettes[[palette]])
+      palette <- colorRampPalette(bk_palettes[[palette]])
     }
     if(is.function(palette)) {
       colorcut <- seq(0, 1, length = 10)
@@ -50,7 +50,7 @@ ly_hexbin <- function(fig, x, y, data = NULL, xbins = 30, shape = 1,
 
 
 
-getHexbinData <- function(x, y, xbins = 30, shape = 1, xbnds = range(x), ybnds = range(y),
+get_hexbin_data <- function(x, y, xbins = 30, shape = 1, xbnds = range(x), ybnds = range(y),
   style = "lattice", minarea = 0.04, maxarea = 0.8, mincnt = 1, maxcnt = NULL, trans = NULL, inv = NULL) {
 
   if(is.null(xbnds))
@@ -104,12 +104,12 @@ getHexbinData <- function(x, y, xbins = 30, shape = 1, xbnds = range(x), ybnds =
   dx <- inner / sx
   dy <- outer / (2 * sy)
   # rad <- sqrt(dx^2 + dy^2)
-  hexC <- hexcoords(dx, dy, sep = NULL)
+  hex_c <- hexcoords(dx, dy, sep = NULL)
 
   xs <- lapply(seq_along(xnew), function(i)
-    hexC$x * radius[i] + xnew[i])
+    hex_c$x * radius[i] + xnew[i])
   ys <- lapply(seq_along(xnew), function(i)
-    hexC$y * radius[i] + ynew[i])
+    hex_c$y * radius[i] + ynew[i])
 
   list(xs = xs, ys = ys, data = data.frame(x = xnew, y = ynew, count = cnt), rcnt = rcnt)
 }

@@ -6,10 +6,10 @@
 # add ref to plot$attributes$tools
 # add model to object
 
-addHover <- function(obj, tooltips, rendererRef) {
+add_hover <- function(obj, tooltips, renderer_ref) {
 
-  id <- genId(obj, c(rendererRef$id, "hover"))
-  hov <- hoverModel(id, obj$ref, rendererRef, tooltips)
+  id <- gen_id(obj, c(renderer_ref$id, "hover"))
+  hov <- hover_model(id, obj$ref, renderer_ref, tooltips)
 
   obj$model$plot$attributes$tools[[id]] <- hov$ref
   obj$model[[id]] <- hov$model
@@ -17,10 +17,10 @@ addHover <- function(obj, tooltips, rendererRef) {
   obj
 }
 
-hoverModel <- function(id, plotRef, rendererRef, tooltips) {
+hover_model <- function(id, plot_ref, renderer_ref, tooltips) {
   res <- base_model_object("HoverTool", id)
-  res$model$attributes$plot <- plotRef
-  res$model$attributes$renderers <- list(rendererRef)
+  res$model$attributes$plot <- plot_ref
+  res$model$attributes$renderers <- list(renderer_ref)
   res$model$attributes$names <- list()
   res$model$attributes$always_active <- TRUE
   res$model$attributes$tooltips <- tooltips

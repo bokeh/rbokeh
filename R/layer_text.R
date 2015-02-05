@@ -21,9 +21,9 @@ ly_text <- function(fig, x, y = NULL, text = NULL, data = NULL,
   x_offset = NULL, y_offset = NULL,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_text")
+  validate_fig(fig, "ly_text")
   ## see if any options won't be used and give a message
-  checkOpts(list(...), "text")
+  check_opts(list(...), "text")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -36,9 +36,9 @@ ly_text <- function(fig, x, y = NULL, text = NULL, data = NULL,
     angle       <- v_eval(substitute(angle), data)
     font_size   <- v_eval(substitute(font_size), data)
   }
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
+  xy_names <- get_xy_names(x, y, xname, yname, list(...))
+  xy <- get_xy_data(x, y)
+  lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(glyph = "text", ...)
   args$text_color <- color
@@ -55,10 +55,10 @@ ly_text <- function(fig, x, y = NULL, text = NULL, data = NULL,
   if(is.null(text))
     text <- seq_along(xy$x)
 
-  axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y)
+  axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y)
   make_glyph(fig, type = "text", lname = lname, lgroup = lgroup,
     data = c(xy, list(text = text, angle = angle)),
     legend = legend,
-    xname = xyNames$x, yname = xyNames$y,
-    args = args, axisTypeRange = axisTypeRange)
+    xname = xy_names$x, yname = xy_names$y,
+    args = args, axis_type_range = axis_type_range)
 }

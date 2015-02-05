@@ -6,7 +6,7 @@
 #' @importFrom RJSONIO fromJSON
 #'
 #' @export
-bokeh_json <- function(json_file, width = NULL, height = NULL) {
+bokeh_render_json <- function(json_file, width = NULL, height = NULL) {
 
   # extract the id
   tmp <- RJSONIO::fromJSON(json_file)
@@ -19,8 +19,7 @@ bokeh_json <- function(json_file, width = NULL, height = NULL) {
     all_models = paste(readLines(json_file), collapse = "\n"),
     modeltype = modeltype,
     elementid = digest(Sys.time()),
-    modelid = id,
-    isJSON = TRUE
+    modelid = id
   )
 
   # create widget

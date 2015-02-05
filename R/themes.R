@@ -1,6 +1,6 @@
 ## should integrate some of this with scales package
 
-tableauColors <- list(BlueRed12 = c("#2C69B0", "#B5C8E2", "#F02720", "#FFB6B0", "#AC613C", "#E9C39B", "#6BA3D6", "#B5DFFD", "#AC8763", "#DDC9B4", "#BD0A36", "#F4737A"),
+tableau_colors <- list(BlueRed12 = c("#2C69B0", "#B5C8E2", "#F02720", "#FFB6B0", "#AC613C", "#E9C39B", "#6BA3D6", "#B5DFFD", "#AC8763", "#DDC9B4", "#BD0A36", "#F4737A"),
   BlueRed6 = c("#2C69B0", "#F02720", "#AC613C", "#6BA3D6", "#EA6B73", "#E9C39B"),
   ColorBlind10 = c("#006BA4", "#FF800E", "#ABABAB", "#595959", "#5F9ED1", "#C85200", "#898989", "#A2C8EC", "#FFBC79", "#CFCFCF"),
   Gray5 = c("#60636A", "#A5ACAF", "#414451", "#8F8782", "#CFCFCF"),
@@ -17,7 +17,7 @@ tableauColors <- list(BlueRed12 = c("#2C69B0", "#B5C8E2", "#F02720", "#FFB6B0", 
 
 #' @export
 tableau_pal <- function(pal = "Tableau10") {
-  pal <- tableauColors[[pal]]
+  pal <- tableau_colors[[pal]]
   function(n) {
     if(n > length(pal))
       message("There are more levels to color than there are available colors in this palette... repeating colors")
@@ -54,7 +54,7 @@ line_dash_scale <- function() {
     dashes <- as.character(1:6)
     if(n > 6)
       message("There are more levels for line dash than there are available line dash styles in this theme... repeating line dash")
-    ltyDict[dashes[(seq_len(n) - 1) %% length(dashes) + 1]]
+    lty_dict[dashes[(seq_len(n) - 1) %% length(dashes) + 1]]
   }
 }
 
@@ -69,8 +69,8 @@ line_width_scale <- function() {
 
 ## theme
 tableau_theme <- list(
-  line = tableauColors$Tableau10,
-  glyph = tableauColors$Tableau10
+  line = tableau_colors$Tableau10,
+  glyph = tableau_colors$Tableau10
   ## more stuff here
 )
 
@@ -86,10 +86,10 @@ bk_theme <- list(
 
 
 # http://www.w3.org/TR/css3-color/#svg-color
-cssColors <- c("aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black", "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick", "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite", "gold", "goldenrod", "gray", "green", "greenyellow", "grey", "honeydew", "hotpink", "indianred", "indigo", "ivory", "khaki", "lavender", "lavenderblush", "lawngreen", "lemonchiffon", "lightblue", "lightcoral", "lightcyan", "lightgoldenrodyellow", "lightgray", "lightgreen", "lightgrey", "lightpink", "lightsalmon", "lightseagreen", "lightskyblue", "lightslategray", "lightslategrey", "lightsteelblue", "lightyellow", "lime", "limegreen", "linen", "magenta", "maroon", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple", "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise", "mediumvioletred", "midnightblue", "mintcream", "mistyrose", "moccasin", "navajowhite", "navy", "oldlace", "olive", "olivedrab", "orange", "orangered", "orchid", "palegoldenrod", "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink", "plum", "powderblue", "purple", "red", "rosybrown", "royalblue", "saddlebrown", "salmon", "sandybrown", "seagreen", "seashell", "sienna", "silver", "skyblue", "slateblue", "slategray", "slategrey", "snow", "springgreen", "steelblue", "tan", "teal", "thistle", "tomato", "turquoise", "violet", "wheat", "white", "whitesmoke", "yellow", "yellowgreen")
+css_colors <- c("aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black", "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick", "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite", "gold", "goldenrod", "gray", "green", "greenyellow", "grey", "honeydew", "hotpink", "indianred", "indigo", "ivory", "khaki", "lavender", "lavenderblush", "lawngreen", "lemonchiffon", "lightblue", "lightcoral", "lightcyan", "lightgoldenrodyellow", "lightgray", "lightgreen", "lightgrey", "lightpink", "lightsalmon", "lightseagreen", "lightskyblue", "lightslategray", "lightslategrey", "lightsteelblue", "lightyellow", "lime", "limegreen", "linen", "magenta", "maroon", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple", "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise", "mediumvioletred", "midnightblue", "mintcream", "mistyrose", "moccasin", "navajowhite", "navy", "oldlace", "olive", "olivedrab", "orange", "orangered", "orchid", "palegoldenrod", "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink", "plum", "powderblue", "purple", "red", "rosybrown", "royalblue", "saddlebrown", "salmon", "sandybrown", "seagreen", "seashell", "sienna", "silver", "skyblue", "slateblue", "slategray", "slategrey", "snow", "springgreen", "steelblue", "tan", "teal", "thistle", "tomato", "turquoise", "violet", "wheat", "white", "whitesmoke", "yellow", "yellowgreen")
 
 # http://bokeh.pydata.org/en/latest/docs/reference/palettes.html
-bkPalettes <- list(
+bk_palettes <- list(
   Spectral3 = c("#99d594", "#ffffbf", "#fc8d59"),
   Spectral4 = c("#2b83ba", "#abdda4", "#fdae61", "#d7191c"),
   Spectral5 = c("#2b83ba", "#abdda4", "#ffffbf", "#fdae61", "#d7191c"),
@@ -299,5 +299,5 @@ bkPalettes <- list(
   PuBuGn9 = c("#014636", "#016c59", "#02818a", "#3690c0", "#67a9cf", "#a6bddb", "#d0d1e6", "#ece2f0", "#fff7fb")
 )
 
-bkPaletteNames <- names(bkPalettes)
+bk_palette_names <- names(bk_palettes)
 

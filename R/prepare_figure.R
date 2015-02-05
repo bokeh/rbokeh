@@ -11,47 +11,47 @@ prepare_figure <- function(fig) {
   for(ly in fig$layers) {
     if(!is.null(ly$maps)) {
       for(nm in names(ly$maps)) {
-        mapItem <- ly$maps[[nm]]
-        if(is.numeric(mapItem$domain)) {
-          intervals <- pretty(mapItem$domain, 6)
+        map_item <- ly$maps[[nm]]
+        if(is.numeric(map_item$domain)) {
+          intervals <- pretty(map_item$domain, 6)
           nl <- length(intervals) - 1
-          mapItem$domain <- intervals
-          mapItem$labels <- levels(cut(mapItem$domain, intervals, include.lowest = TRUE))
-          mapItem$values <- (head(intervals, nl) + tail(intervals, nl)) / 2
+          map_item$domain <- intervals
+          map_item$labels <- levels(cut(map_item$domain, intervals, include.lowest = TRUE))
+          map_item$values <- (head(intervals, nl) + tail(intervals, nl)) / 2
         } else {
-          mapItem$labels <- mapItem$domain
-          mapItem$values <- mapItem$domain
+          map_item$labels <- map_item$domain
+          map_item$values <- map_item$domain
         }
         ## map the glyphs attributes
-        for(entry in mapItem$mapEntries) {
+        for(entry in map_item$map_entries) {
           did <- fig$model[[entry$id]]$attributes$data_source$id
           gl <- fig$model[[entry$id]]$attributes$glyph
           nsglid <- fig$model[[entry$id]]$attributes$nonselection_glyph$id
-          dataAttrNames <- names(fig$model[[did]]$attributes$data)
-          glyphAttrNames <- names(fig$model[[gl$id]]$attributes)
-          for(attr in entry$mapArgs) {
+          data_attr_names <- names(fig$model[[did]]$attributes$data)
+          glyph_attr_names <- names(fig$model[[gl$id]]$attributes)
+          for(attr in entry$map_args) {
             ## handle glyph type
             if(attr == "glyph") {
-              newType <- underscore2camel(getThemeValue(underscore2camel(mapItem$domain), gl$type, attr))
-              ## should check things in resolveGlyphProps() with new glyph
-              fig$model[[entry$id]]$attributes$glyph$type <- newType
-              fig$model[[gl$id]]$type <- newType
+              new_type <- underscore2camel(get_theme_value(underscore2camel(map_item$domain), gl$type, attr))
+              ## should check things in resolve_glyph_props() with new glyph
+              fig$model[[entry$id]]$attributes$glyph$type <- new_type
+              fig$model[[gl$id]]$type <- new_type
               ## fix it in the non-selection glyph too
               if(!is.null(nsglid)) {
-                fig$model[[entry$id]]$attributes$nonselection_glyph$type <- newType
-                fig$model[[nsglid]]$type <- newType
+                fig$model[[entry$id]]$attributes$nonselection_glyph$type <- new_type
+                fig$model[[nsglid]]$type <- new_type
               }
             } else {
-              if(attr %in% dataAttrNames) {
-                curDat <- fig$model[[did]]$attributes$data[[attr]]
-                fig$model[[did]]$attributes$data[[attr]] <- getThemeValue(mapItem$domain, curDat, attr)
-              } else if(attr %in% glyphAttrNames) {
+              if(attr %in% data_attr_names) {
+                cur_dat <- fig$model[[did]]$attributes$data[[attr]]
+                fig$model[[did]]$attributes$data[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr)
+              } else if(attr %in% glyph_attr_names) {
                 if(attr == "line_dash") {
-                  curDat <- fig$model[[gl$id]]$attributes[[attr]]
-                  fig$model[[gl$id]]$attributes[[attr]] <- getThemeValue(mapItem$domain, curDat, attr)
+                  cur_dat <- fig$model[[gl$id]]$attributes[[attr]]
+                  fig$model[[gl$id]]$attributes[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr)
                 } else {
-                  curDat <- fig$model[[gl$id]]$attributes[[attr]]$value
-                  fig$model[[gl$id]]$attributes[[attr]]$value <- getThemeValue(mapItem$domain, curDat, attr)
+                  cur_dat <- fig$model[[gl$id]]$attributes[[attr]]$value
+                  fig$model[[gl$id]]$attributes[[attr]]$value <- get_theme_value(map_item$domain, cur_dat, attr)
                 }
               }
             }
@@ -59,31 +59,31 @@ prepare_figure <- function(fig) {
         }
 
         ## add legend glyphs and build legend element
-        for(ii in seq_along(mapItem$labels)) {
-          curVal <- mapItem$values[[ii]]
-          curLab <- mapItem$labels[[ii]]
-          lgndId <- paste(nm, curLab, sep = "_")
-          legend[[lgndId]] <- list(list(curLab, list()))
+        for(ii in seq_along(map_item$labels)) {
+          cur_val <- map_item$values[[ii]]
+          cur_lab <- map_item$labels[[ii]]
+          lgnd_id <- paste(nm, cur_lab, sep = "_")
+          legend[[lgnd_id]] <- list(list(cur_lab, list()))
 
-          for(glph in mapItem$legendGlyphs) {
-            for(mrg in glph$mapArgs)
-              glph$args[[mrg]] <- getThemeValue(mapItem$domain, curVal, mrg)
+          for(glph in map_item$legend_glyphs) {
+            for(mrg in glph$map_args)
+              glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg)
             # render legend glyph
             spec <- c(glph$args, list(x = "x", y = "y"))
-            lgroup <- paste("legend_", nm, "_", curLab, sep = "")
+            lgroup <- paste("legend_", nm, "_", cur_lab, sep = "")
             lname <- glph$args$glyph
-            glrId <- genId(fig, c("glyphRenderer", lgroup, lname))
+            glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
             # make it so legend glyph doesn't show up on page
             oo <- NA
             if(!is.null(spec$size))
               spec$size <- NA
             if(!is.null(spec$radius))
               spec$radius <- NA
-            fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
+            fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
 
             # add reference to glyph to legend object
-            nn <- length(legend[[lgndId]][[1]][[2]]) + 1
-            legend[[lgndId]][[1]][[2]][[nn]] <- list(type = "GlyphRenderer", id = glrId)
+            nn <- length(legend[[lgnd_id]][[1]][[2]]) + 1
+            legend[[lgnd_id]][[1]][[2]][[nn]] <- list(type = "GlyphRenderer", id = glr_id)
           }
         }
       }
@@ -91,52 +91,52 @@ prepare_figure <- function(fig) {
   }
 
   ## deal with common legend, if any
-  if(length(fig$commonLegend) > 0) {
-    for(lg in fig$commonLegend) {
+  if(length(fig$common_legend) > 0) {
+    for(lg in fig$common_legend) {
       lgroup <- paste("common_legend", lg$name, sep = "_")
       legend[[lgroup]] <- list(list(lg$name, list()))
-      for(lgArgs in lg$args) {
-        spec <- c(lgArgs, list(x = "x", y = "y"))
-        lname <- lgArgs$glyph
-        glrId <- genId(fig, c("glyphRenderer", lgroup, lname))
+      for(lg_args in lg$args) {
+        spec <- c(lg_args, list(x = "x", y = "y"))
+        lname <- lg_args$glyph
+        glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
         # make it so legend glyph doesn't show up on page
         oo <- NA
         if(!is.null(spec$size))
           spec$size <- NA
         if(!is.null(spec$radius))
           spec$radius <- NA
-        fig <- fig %>% addLayer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
+        fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
 
         # add reference to glyph to legend object
         nn <- length(legend[[lgroup]][[1]][[2]]) + 1
-        legend[[lgroup]][[1]][[2]][[nn]] <- list(type = "GlyphRenderer", id = glrId)
+        legend[[lgroup]][[1]][[2]][[nn]] <- list(type = "GlyphRenderer", id = glr_id)
       }
     }
   }
 
   if(length(legend) > 0)
-    fig <- fig %>% addLegend(unname(unlist(legend, recursive = FALSE)))
+    fig <- fig %>% add_legend(unname(unlist(legend, recursive = FALSE)))
 
   ## see if there is a log axis so we can compute padding appropriately
   ## log axis is only available if explicitly specified through x_axis()
   ## or y_axis(), so at this point, *_mapper_type should be defined
-  xLog <- yLog <- FALSE
+  x_log <- y_log <- FALSE
   if(!is.null(fig$model$plot$attributes$x_mapper_type))
-    xLog <- TRUE
+    x_log <- TRUE
   if(!is.null(fig$model$plot$attributes$y_mapper_type))
-    yLog <- TRUE
+    y_log <- TRUE
 
   ## set xlim and ylim if not set
   if(length(fig$xlim) == 0) {
     message("xlim not specified explicitly... calculating...")
-    xrange <- getAllGlyphRange(fig$glyphXRanges, fig$padding_factor, fig$xAxisType, xLog)
+    xrange <- get_all_glyph_range(fig$glyph_x_ranges, fig$padding_factor, fig$x_axis_type, x_log)
   } else {
     xrange <- fig$xlim
   }
 
   if(length(fig$ylim) == 0) {
     message("ylim not specified explicitly... calculating...")
-    yrange <- getAllGlyphRange(fig$glyphYRanges, fig$padding_factor, fig$yAxisType, yLog)
+    yrange <- get_all_glyph_range(fig$glyph_y_ranges, fig$padding_factor, fig$y_axis_type, y_log)
   } else {
     yrange <- fig$ylim
   }
@@ -147,7 +147,7 @@ prepare_figure <- function(fig) {
   if(!fig$has_y_range)
     fig <- fig %>% y_range(yrange)
 
-  if(!fig$hasXaxis) {
+  if(!fig$has_x_axis) {
     if(is.null(fig$xlab)) {
       fig <- fig %>% x_axis("x", grid = fig$xgrid, position = fig$xaxes)
     } else {
@@ -155,7 +155,7 @@ prepare_figure <- function(fig) {
     }
   }
 
-  if(!fig$hasYaxis) {
+  if(!fig$has_y_axis) {
     if(is.null(fig$ylab)) {
       fig <- fig %>% y_axis("y", grid = fig$ygrid, position = fig$yaxes)
     } else {
@@ -164,11 +164,11 @@ prepare_figure <- function(fig) {
   }
 
   ## see if we need to execute any deferred functions
-  if(length(fig$glyphDefer) > 0) {
-    for(dfr in fig$glyphDefer) {
-      tmpSpec <- dfr$fn(dfr$spec, xrange, yrange)
-      tmpData <- dfr$fn(dfr$data, xrange, yrange)
-      fig <- fig %>% addLayer(tmpSpec, tmpData, dfr$lname, dfr$lgroup)
+  if(length(fig$glyph_defer) > 0) {
+    for(dfr in fig$glyph_defer) {
+      tmp_spec <- dfr$fn(dfr$spec, xrange, yrange)
+      tmp_data <- dfr$fn(dfr$data, xrange, yrange)
+      fig <- fig %>% add_layer(tmp_spec, tmp_data, dfr$lname, dfr$lgroup)
     }
   }
 

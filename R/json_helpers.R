@@ -17,7 +17,7 @@ base_model_object <- function(type, id) {
 }
 
 #' @importFrom digest digest
-genId <- function(obj, name = NULL) {
+gen_id <- function(obj, name = NULL) {
   digest(c(name, obj$time))
 }
 

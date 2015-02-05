@@ -3,108 +3,110 @@
 # you can add new layers to an existing layer group
 # which will ensure that aesthetics are mapped to glyphs within the layer
 
-make_glyph <- function(fig, type, lname, lgroup, data, args, axisTypeRange, hover = NULL, legend = NULL, xname = NULL, yname = NULL, dataSig = NULL) {
+make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range, hover = NULL, legend = NULL, xname = NULL, yname = NULL, data_sig = NA) {
 
   ## give it a unique layer group name if not provided
   if(is.null(lgroup))
-    lgroup <- genLayerName(names(fig$layers))
+    lgroup <- gen_layer_name(names(fig$layers))
   lgroup <- as.character(lgroup)
 
   fig$layers[[lgroup]]$lgroup <- lgroup
 
   ## give it a unique layer name if not provided
   if(is.null(lname))
-    lname <- genLayerName(names(fig$layers[[lgroup]]$glyphIds), prefix = "layer")
+    lname <- gen_layer_name(names(fig$layers[[lgroup]]$glyph_ids), prefix = "layer")
   lname <- as.character(lname)
 
   ## some figure elements need a single index to a layer name/group combination
-  ## such as glyphDefer and glyphXRanges / glyphYRanges
+  ## such as glyph_defer and glyph_x_ranges / glyph_y_ranges
   lgn <- paste(lgroup, lname, sep = "_")
 
-  ## every layer has an associated glyphRenderer
+  ## every layer has an associated glyph_renderer
   ## whose id is generated from the layer name and group
-  glrId <- genId(fig, c("glyphRenderer", lgroup, lname))
+  glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
 
   ## used to keep track of how many layers are in the group
-  fig$layers[[lgroup]]$glyphIds[lname] <- list(glrId)
+  fig$layers[[lgroup]]$glyph_ids[lname] <- list(glr_id)
 
   ## keep track of data sources
-  fig$dataSigs[[glrId]] <- list(glrId = glrId, sig = dataSig)
+  if(is.na(data_sig))
+    data_sig <- NULL
+  fig$data_sigs[[glr_id]] <- list(glr_id = glr_id, sig = data_sig)
 
   ## make sure axis types match anything
   ## that has already been plotted
-  validateAxisType(figType = fig$xAxisType,
-    curType = axisTypeRange$xAxisType, which = "x")
-  validateAxisType(figType = fig$yAxisType,
-    curType = axisTypeRange$yAxisType, which = "y")
+  validate_axis_type(fig_type = fig$x_axis_type,
+    cur_type = axis_type_range$x_axis_type, which = "x")
+  validate_axis_type(fig_type = fig$y_axis_type,
+    cur_type = axis_type_range$y_axis_type, which = "y")
 
-  fig$xAxisType <- axisTypeRange$xAxisType
-  fig$yAxisType <- axisTypeRange$yAxisType
+  fig$x_axis_type <- axis_type_range$x_axis_type
+  fig$y_axis_type <- axis_type_range$y_axis_type
 
   ## make sure specified colors are bokeh-valid hex codes (if they are hex codes)
   ## only to ones that don't need to be mapped
-  isMapped <- sapply(args, function(x) !is.null(attr(x, "nseName")))
-  mappedArgs <- names(args)[isMapped]
-  ind <- setdiff(names(args), mappedArgs)
-  args[ind] <- validateColors(args[ind])
+  is_mapped <- sapply(args, function(x) !is.null(attr(x, "nseName")))
+  mapped_args <- names(args)[is_mapped]
+  ind <- setdiff(names(args), mapped_args)
+  args[ind] <- validate_colors(args[ind])
 
   ## deal with aesthetic inputs that are to be mapped
   ## e.g. fill_color might be mapped to a variable in the data
   ## in which case we need to track its domain
   ## and its range will be filled in from a theme
   ## when the figure is printed
-  aesMaps <- getAesMaps(args, glrId)
+  aes_maps <- get_aes_maps(args, glr_id)
 
   ## deal with manual legend
   if(!is.null(legend)) {
     legend <- as.character(legend)
-    if(!is.null(aesMaps)) {
+    if(!is.null(aes_maps)) {
       message("Ignoring custom legend because an aesthetic is being mapped and therefore the legend is being taken care of automatically.")
     } else {
-      if(!is.null(fig$commonLegend[[legend]])) {
-        fig$commonLegend[[legend]]$args <- c(fig$commonLegend[[legend]]$args, list(args))
+      if(!is.null(fig$common_legend[[legend]])) {
+        fig$common_legend[[legend]]$args <- c(fig$common_legend[[legend]]$args, list(args))
       } else {
-        fig$commonLegend[[legend]] <- list(name = legend, args = list(args))
+        fig$common_legend[[legend]] <- list(name = legend, args = list(args))
       }
     }
   }
 
   ## merge in aesthetic mappings (if any)
-  fig$layers[[lgroup]]$maps <- mergeAesMaps(fig$layers[[lgroup]]$maps, aesMaps)
+  fig$layers[[lgroup]]$maps <- merge_aes_maps(fig$layers[[lgroup]]$maps, aes_maps)
 
   ## save defer function (if any) and remove from data
   if(!is.null(data$defer)) {
-    fig$glyphDefer[[lgn]] <- list(fn = data$defer)
+    fig$glyph_defer[[lgn]] <- list(fn = data$defer)
     data$defer <- NULL
   }
 
   ## validate the spec args
-  # validateOpts(opts, type)
+  # validate_opts(opts, type)
 
   ## move all data scalars over to the spec
-  dataLengths <- sapply(data, length)
-  dataIsList <- sapply(data, is.list)
-  dataNames <- names(data)
-  scalarInd <- which(dataLengths == 1 & !dataIsList)
-  for(ii in scalarInd)
-    args[[dataNames[ii]]] <- data[[ii]]
-  data[scalarInd] <- NULL
+  data_lengths <- sapply(data, length)
+  data_is_list <- sapply(data, is.list)
+  data_names <- names(data)
+  scalar_ind <- which(data_lengths == 1 & !data_is_list)
+  for(ii in scalar_ind)
+    args[[data_names[ii]]] <- data[[ii]]
+  data[scalar_ind] <- NULL
 
   ## move all non-scalar args over to data
   ## except for "line_dash"
-  argLengths <- sapply(args, length)
-  argNames <- names(args)
-  longInd <- which(argLengths > 1 & argNames != "line_dash")
-  for(ii in longInd) {
-    data[[argNames[ii]]] <- args[[ii]]
+  arg_lengths <- sapply(args, length)
+  arg_names <- names(args)
+  long_ind <- which(arg_lengths > 1 & arg_names != "line_dash")
+  for(ii in long_ind) {
+    data[[arg_names[ii]]] <- args[[ii]]
   }
-  args[longInd] <- NULL
+  args[long_ind] <- NULL
 
   ## remove NAs in data at this point?
 
   ## spec needs to point to corresponding data
-  dataNames <- names(data)
-  for(nm in dataNames)
+  data_names <- names(data)
+  for(nm in data_names)
     args[[nm]] <- nm
 
   ## data must have something in it or it won't work
@@ -116,51 +118,51 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axisTypeRange, hove
      args$text <- list(field = "text")
   }
 
-  if(!is.null(fig$glyphDefer[[lgn]])) {
-    fig$glyphDefer[[lgn]]$spec <- args
-    fig$glyphDefer[[lgn]]$data <- data
-    fig$glyphDefer[[lgn]]$lgroup <- lgroup
-    fig$glyphDefer[[lgn]]$lname <- lname
+  if(!is.null(fig$glyph_defer[[lgn]])) {
+    fig$glyph_defer[[lgn]]$spec <- args
+    fig$glyph_defer[[lgn]]$data <- data
+    fig$glyph_defer[[lgn]]$lgroup <- lgroup
+    fig$glyph_defer[[lgn]]$lname <- lname
   }
 
   ## add hover info
   if(!is.null(hover)) {
-    rendererRef <- list(
+    renderer_ref <- list(
       type = "GlyphRenderer",
-      id = glrId
+      id = glr_id
     )
 
-    fig <- fig %>% addHover(hover$dict, rendererRef)
+    fig <- fig %>% add_hover(hover$dict, renderer_ref)
     data <- c(data, hover$data)
   }
 
   args$glyph <- type
 
-  if(axisTypeRange$xAxisType == "datetime") {
-    axisTypeRange$xRange <- toEpoch(axisTypeRange$xRange)
+  if(axis_type_range$x_axis_type == "datetime") {
+    axis_type_range$x_range <- to_epoch(axis_type_range$x_range)
     if(!is.null(data$x))
-      data$x <- toEpoch(data$x)
+      data$x <- to_epoch(data$x)
     if(!is.null(data$x0))
-      data$x0 <- toEpoch(data$x0)
+      data$x0 <- to_epoch(data$x0)
     if(!is.null(data$x1))
-      data$x1 <- toEpoch(data$x1)
+      data$x1 <- to_epoch(data$x1)
   }
 
-  if(axisTypeRange$yAxisType == "datetime") {
-    axisTypeRange$yRange <- toEpoch(axisTypeRange$yRange)
+  if(axis_type_range$y_axis_type == "datetime") {
+    axis_type_range$y_range <- to_epoch(axis_type_range$y_range)
     if(!is.null(data$y))
-      data$y <- toEpoch(data$y)
+      data$y <- to_epoch(data$y)
     if(!is.null(data$y0))
-      data$y0 <- toEpoch(data$y0)
+      data$y0 <- to_epoch(data$y0)
     if(!is.null(data$y1))
-      data$y1 <- toEpoch(data$y1)
+      data$y1 <- to_epoch(data$y1)
   }
 
-  fig <- fig %>% addLayer(args, data, lname, lgroup)
+  fig <- fig %>% add_layer(args, data, lname, lgroup)
 
   ## add x and y range for this glyph
-  fig$glyphXRanges[[lgn]] <- axisTypeRange$xRange
-  fig$glyphYRanges[[lgn]] <- axisTypeRange$yRange
+  fig$glyph_x_ranges[[lgn]] <- axis_type_range$x_range
+  fig$glyph_y_ranges[[lgn]] <- axis_type_range$y_range
 
   ## add x and y labels if missing
   if(is.null(fig$xlab) && length(xname) > 0)

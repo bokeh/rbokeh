@@ -4,13 +4,13 @@
 #   - add a list of legend items
 
 # individual legend items are lists with a label
-# and a list of glyphRenderers that the legend
+# and a list of glyph_renderers that the legend
 # entry refers to
 
-addLegend <- function(obj, legends) {
-  id <- genId(obj, "legend")
+add_legend <- function(obj, legends) {
+  id <- gen_id(obj, "legend")
 
-  leg <- legendModel(id, obj$ref, legends)
+  leg <- legend_model(id, obj$ref, legends)
 
   obj$model$plot$attributes$renderers[[id]] <- leg$ref
   obj$model[[id]] <- leg$model
@@ -18,9 +18,9 @@ addLegend <- function(obj, legends) {
   obj
 }
 
-legendModel <- function(id, plotRef, legends) {
+legend_model <- function(id, plot_ref, legends) {
   res <- base_model_object("Legend", id)
-  res$model$attributes$plot <- plotRef
+  res$model$attributes$plot <- plot_ref
   res$model$attributes$legends <- legends
   res
 }

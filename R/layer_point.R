@@ -28,7 +28,7 @@ ly_point <- function(fig, x, y = NULL, data = NULL,
   fill_color = NULL, fill_alpha = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
-  validateFig(fig, "ly_point")
+  validate_fig(fig, "ly_point")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -44,12 +44,12 @@ ly_point <- function(fig, x, y = NULL, data = NULL,
     fill_color <- v_eval(substitute(fill_color), data)
   }
 
-  hover <- getHover(substitute(hover), data)
+  hover <- get_hover(substitute(hover), data)
 
-  xyNames <- getXYNames(x, y, xname, yname, list(...))
+  xy_names <- get_xy_names(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
-  xy <- getXYData(x, y)
-  lgroup <- getLgroup(lgroup, fig)
+  xy <- get_xy_data(x, y)
+  lgroup <- get_lgroup(lgroup, fig)
 
   if(is.null(glyph))
     glyph <- "circle"
@@ -76,39 +76,39 @@ ly_point <- function(fig, x, y = NULL, data = NULL,
     lns <- sapply(args, length)
     idx <- which(lns == length(xy$x))
 
-    dfArgs <- args[idx]
+    df_args <- args[idx]
 
     if(is.character(gl))
       gl <- factor(gl)
 
-    dfSplit <- split(seq_along(gl), gl)
-    for(ii in seq_along(dfSplit)) {
-      curIdx <- dfSplit[[ii]]
-      curGlyph <- paste("glyph_")
+    df_split <- split(seq_along(gl), gl)
+    for(ii in seq_along(df_split)) {
+      cur_idx <- df_split[[ii]]
+      # cur_glyph <- paste("glyph_")
 
       fig <- do.call(ly_point,
-        c(lapply(dfArgs, function(x) subset_with_attributes(x, curIdx)), args[-idx],
-          list(fig = fig, x = xy$x[curIdx], y = xy$y[curIdx],
-            glyph = subset_with_attributes(gl, curIdx[1]), lgroup = lgroup,
-            lname = ii, hover = hover$data[curIdx, , drop = FALSE])))
+        c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)), args[-idx],
+          list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
+            glyph = subset_with_attributes(gl, cur_idx[1]), lgroup = lgroup,
+            lname = ii, hover = hover$data[cur_idx, , drop = FALSE])))
     }
     return(fig)
   }
 
-  args <- resolveColorAlpha(args, hasLine = TRUE, hasFill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
-  args <- resolveGlyphProps(glyph, args, lgroup)
-  args <- fixArgs(args, length(xy$x))
+  args <- resolve_glyph_props(glyph, args, lgroup)
+  args <- fix_args(args, length(xy$x))
 
   ## see if any options won't be used and give a message
-  if(args$glyph %in% names(markerDict))
-    checkOpts(list(...), args$glyph)
+  if(args$glyph %in% names(marker_dict))
+    check_opts(list(...), args$glyph)
 
-  axisTypeRange <- getGlyphAxisTypeRange(xy$x, xy$y, glyph = glyph)
+  axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y, glyph = glyph)
 
   make_glyph(fig, args$glyph, lname = lname, lgroup = lgroup,
-    data = xy, dataSig = ifelse(is.null(data), NULL, digest(data)),
-    args = args, axisTypeRange = axisTypeRange,
+    data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
+    args = args, axis_type_range = axis_type_range,
     hover = hover, legend = legend,
-    xname = xyNames$x, yname = xyNames$y)
+    xname = xy_names$x, yname = xy_names$y)
 }

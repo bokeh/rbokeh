@@ -1,14 +1,14 @@
 #' @export
 x_range <- function(obj, dat) {
-  updateRange(obj, "x", dat)
+  update_range(obj, "x", dat)
 }
 
 #' @export
 y_range <- function(obj, dat) {
-  updateRange(obj, "y", dat)
+  update_range(obj, "y", dat)
 }
 
-rangeModel <- function(type = "Range1d", id, dat) {
+range_model <- function(type = "Range1d", id, dat) {
   res <- base_model_object(type, id)
 
   if(type == "Range1d") {
@@ -23,7 +23,7 @@ rangeModel <- function(type = "Range1d", id, dat) {
 
 # range ref needs to be added to plot attributes as "x_range" or "y_range"
 # then range model added to object
-updateRange <- function(obj, axis = "x", dat) {
+update_range <- function(obj, axis = "x", dat) {
   if(is.numeric(dat)) {
     type <- "Range1d"
     dat <- range(dat, na.rm = TRUE)
@@ -31,12 +31,12 @@ updateRange <- function(obj, axis = "x", dat) {
     type <- "FactorRange"
   }
 
-  rangeName <- paste0(axis, "_range")
+  range_name <- paste0(axis, "_range")
 
-  id <- genId(obj, rangeName)
-  model <- rangeModel(type, id, dat)
+  id <- gen_id(obj, range_name)
+  model <- range_model(type, id, dat)
 
-  obj$model$plot$attributes[[rangeName]] <- model$ref
+  obj$model$plot$attributes[[range_name]] <- model$ref
   obj$model[[id]] <- model$model
   obj[[paste0("has_", axis, "_range")]] <- TRUE
 

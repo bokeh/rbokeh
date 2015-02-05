@@ -1,27 +1,27 @@
-# __layerAesMap__
+# __layer_aes_map__
 # -> var1
 #   -> domain (vector of characters or numeric range)
-#   -> legendGlyphs (list of aesLegendGlyph objects)
-#   -> mapEntries (list of aesMapEntry objects)
+#   -> legend_glyphs (list of aesLegendGlyph objects)
+#   -> map_entries (list of aesMapEntry objects)
 # -> var2
 
 # __aesLegendGlyph__
 # -> name (name of the glyph this map applies to)
-# -> mapArgs (vector of glyph attribute names that need to be mapped)
+# -> map_args (vector of glyph attribute names that need to be mapped)
 # -> args (arguments that do not need to be mapped - used to create legend glyphs)
 
 # __aesMapEntry__
-# -> id (id of glyphRenderer that needs its variables updated)
-# -> mapArgs (vector of glyph attribute names that need to be mapped)
+# -> id (id of glyph_renderer that needs its variables updated)
+# -> map_args (vector of glyph attribute names that need to be mapped)
 
-getAesMaps <- function(args, glrId) {
+get_aes_maps <- function(args, glr_id) {
   nms <- names(args)
   ## get an index of arguments that need a map and have an nseName
   ## nseName is used in the legend so we know what variable created the map
   mappable <- sapply(seq_along(args), function(ii) {
     if(!is.null(attr(args[[ii]], "nseName"))) {
-      if(!is.null(needsMapFns[[nms[ii]]])) {
-        if(needsMapFns[[nms[ii]]](args[[ii]]))
+      if(!is.null(needs_map_fns[[nms[ii]]])) {
+        if(needs_map_fns[[nms[ii]]](args[[ii]]))
           return(TRUE)
       }
     }
@@ -34,15 +34,15 @@ getAesMaps <- function(args, glrId) {
 
     # build an aesMap object with an entry for each unique nseName
     # entry has the name, domain
-    nseNames <- as.character(sapply(args[mappable], function(x) attr(x, "nseName")))
-    uNseNames <- unique(nseNames)
+    nse_names <- as.character(sapply(args[mappable], function(x) attr(x, "nseName")))
+    u_nse_names <- unique(nse_names)
 
-    layerAesMap <- structure(vector("list",
-      length = length(uNseNames)), names = uNseNames)
+    layer_aes_map <- structure(vector("list",
+      length = length(u_nse_names)), names = u_nse_names)
 
-    for(nm in uNseNames) {
+    for(nm in u_nse_names) {
       ## args we need to map
-      margs <- args[mappable[nseNames == nm]]
+      margs <- args[mappable[nse_names == nm]]
       ## args we need to maintain for legend glyphs
       ## -- for now the assumption is these will be scalar
       ## -- (assume all args are either mapped or scalar)
@@ -50,59 +50,57 @@ getAesMaps <- function(args, glrId) {
       gargs <- lapply(args[!mappable], function(x) x[1])
 
       ## some args need to be overridden based on the glyph type
-      gargs <- overrideLegendGlyphArgs(gargs)
+      gargs <- override_legend_glyph_args(gargs)
 
-      dmn <- getDomain(do.call(c, lapply(margs, getDomain)))
-      layerAesMap[[nm]]$domain <- dmn
+      dmn <- get_domain(do.call(c, lapply(margs, get_domain)))
+      layer_aes_map[[nm]]$domain <- dmn
 
-      glyphName <- as.character(args$glyph[1])
-      if(!glyphName %in% names(glyphProps))
-        glyphName <- "mappedGlyph"
+      glyph_name <- as.character(args$glyph[1])
+      if(!glyph_name %in% names(glyph_props))
+        glyph_name <- "mappedGlyph"
 
-      layerAesMap[[nm]]$legendGlyphs[[glyphName]] <- list(name = glyphName, args = gargs, mapArgs = names(margs))
+      layer_aes_map[[nm]]$legend_glyphs[[glyph_name]] <- list(name = glyph_name, args = gargs, map_args = names(margs))
 
-      layerAesMap[[nm]]$mapEntries[[glrId]] <- list(id = glrId, mapArgs = names(margs), args = gargs)
+      layer_aes_map[[nm]]$map_entries[[glr_id]] <- list(id = glr_id, map_args = names(margs), args = gargs)
     }
-    return(layerAesMap)
+    return(layer_aes_map)
   }
   NULL
 }
 
 # merge map2 into map1
-mergeAesMaps <- function(map1, map2) {
+merge_aes_maps <- function(map1, map2) {
   m1n <- names(map1)
   m2n <- names(map2)
-  sameVar <- intersect(m1n, m2n)
-  newVar <- setdiff(m2n, sameVar)
-  if(length(newVar) > 0) {
-    map1[newVar] <- map2[newVar]
+  same_var <- intersect(m1n, m2n)
+  new_var <- setdiff(m2n, same_var)
+  if(length(new_var) > 0) {
+    map1[new_var] <- map2[new_var]
   }
-  if(length(sameVar) > 0) {
-    for(nm in sameVar) {
+  if(length(same_var) > 0) {
+    for(nm in same_var) {
       ## merge the domains
-      map1[[nm]]$domain <- mergeAesDomains(map1[[nm]]$domain, map2[[nm]]$domain)
-      ## merge legend entries
-      # map1[[nm]]$legendEntries <- mergeAesLegendEntries(map1[[nm]]$legendEntries, map2[[nm]]$legendEntries)
+      map1[[nm]]$domain <- merge_aes_domains(map1[[nm]]$domain, map2[[nm]]$domain)
       ## merge map entries
-      map1[[nm]]$legendGlyphs <- mergeAesLegendGlyphs(map1[[nm]]$legendGlyphs, map2[[nm]]$legendGlyphs)
-      id <- map2[[nm]]$mapEntries[[1]]$id
-      map1[[nm]]$mapEntries[[id]] <- map2[[nm]]$mapEntries[[1]]
+      map1[[nm]]$legend_glyphs <- merge_aes_legend_glyphs(map1[[nm]]$legend_glyphs, map2[[nm]]$legend_glyphs)
+      id <- map2[[nm]]$map_entries[[1]]$id
+      map1[[nm]]$map_entries[[id]] <- map2[[nm]]$map_entries[[1]]
     }
   }
   map1
 }
 
-mergeAesLegendGlyphs <- function(gly1, gly2) {
+merge_aes_legend_glyphs <- function(gly1, gly2) {
   g1n <- names(gly1)
   g2n <- names(gly2)
-  sameVar <- intersect(g1n, g2n)
-  newVar <- setdiff(g2n, sameVar)
-  if(length(newVar) > 0) {
-    gly1[newVar] <- gly2[newVar]
+  same_var <- intersect(g1n, g2n)
+  new_var <- setdiff(g2n, same_var)
+  if(length(new_var) > 0) {
+    gly1[new_var] <- gly2[new_var]
   }
-  # if(length(sameVar) > 0) {
-  #   if(any(sameVar == "mappedGlyph")) {
-  #     if(!identical(gly1[[sameVar]], gly2[[sameVar]]))
+  # if(length(same_var) > 0) {
+  #   if(any(same_var == "mappedGlyph")) {
+  #     if(!identical(gly1[[same_var]], gly2[[same_var]]))
   #       message("A layer added to an existing layer group has the same glyph mapped to a same attribute... it will be ignored.")
   #   } else {
   #     message("A layer added to an existing layer group has the same glyph mapped to a same attribute... it will be ignored.")
@@ -111,7 +109,7 @@ mergeAesLegendGlyphs <- function(gly1, gly2) {
   gly1
 }
 
-mergeAesDomains <- function(d1, d2) {
+merge_aes_domains <- function(d1, d2) {
   if(is.null(d1))
     return(d2)
   if(is.null(d2))
@@ -124,7 +122,7 @@ mergeAesDomains <- function(d1, d2) {
   }
 }
 
-getDomain <- function(x) {
+get_domain <- function(x) {
   if(is.factor(x)) {
     return(levels(x))
   } else if(is.character(x)) {
@@ -134,10 +132,10 @@ getDomain <- function(x) {
   }
 }
 
-getThemeValue <- function(domain, values, type) {
-  isDiscrete <- ifelse(is.numeric(domain), FALSE, TRUE)
-  subtype <- ifelse(isDiscrete, "discrete", "continuous")
-  if(isDiscrete) {
+get_theme_value <- function(domain, values, type) {
+  is_discrete <- ifelse(is.numeric(domain), FALSE, TRUE)
+  subtype <- ifelse(is_discrete, "discrete", "continuous")
+  if(is_discrete) {
     idx <- match(values, domain)
     vals <- bk_theme[[type]][[subtype]](length(domain))
   } else {
@@ -152,36 +150,36 @@ getThemeValue <- function(domain, values, type) {
   }
 }
 
-validColor <- function(dd) {
-  all(dd %in% cssColors || (nchar(as.character(dd)) == 7 && grepl("^#", dd)))
+valid_color <- function(dd) {
+  all(dd %in% css_colors || (nchar(as.character(dd)) == 7 && grepl("^#", dd)))
 }
 
-validLine <- function(dd) {
-  all(as.character(dd) %in% ltyNames)
+valid_line <- function(dd) {
+  all(as.character(dd) %in% lty_names)
 }
 
 # any variable with nseName will be a candidate to be mapped
 # but if it is a valid value, it won't be mapped
-needsMapFns <- list(
+needs_map_fns <- list(
   glyph = function(dd)
-    !all(dd %in% markerPchTypes || dd %in% markerNames),
+    !all(dd %in% marker_pch_types || dd %in% marker_names),
   color = function(dd)
-    !validColor(dd),
+    !valid_color(dd),
   line_color = function(dd)
-    !validColor(dd),
+    !valid_color(dd),
   fill_color = function(dd)
-    !validColor(dd),
+    !valid_color(dd),
   text_color = function(dd)
-    !validColor(dd),
+    !valid_color(dd),
   lty = function(dd)
-    !validLine(dd),
+    !valid_line(dd),
   size = function(dd)
     TRUE,
   line_dash = function(dd)
-    !validLine(dd)
+    !valid_line(dd)
 )
 
-overrideLegendGlyphArgs <- function(args) {
+override_legend_glyph_args <- function(args) {
   if(!is.null(args$end_angle))
     args$end_angle <- 2*pi
   if(!is.null(args$start_angle))
