@@ -61,7 +61,11 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range, ho
   if(!is.null(legend)) {
     legend <- as.character(legend)
     if(!is.null(aes_maps)) {
-      message("Ignoring custom legend because an aesthetic is being mapped and therefore the legend is being taken care of automatically.")
+      if(legend == "FALSE") {
+        fig$layers[[lgroup]]$do_legend <- FALSE
+      } else {
+        message("Ignoring custom legend because an aesthetic is being mapped and therefore the legend is being taken care of automatically.")
+      }
     } else {
       if(!is.null(fig$common_legend[[legend]])) {
         fig$common_legend[[legend]]$args <- c(fig$common_legend[[legend]]$args, list(args))

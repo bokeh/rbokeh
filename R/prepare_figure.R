@@ -59,31 +59,33 @@ prepare_figure <- function(fig) {
         }
 
         ## add legend glyphs and build legend element
-        for(ii in seq_along(map_item$labels)) {
-          cur_val <- map_item$values[[ii]]
-          cur_lab <- map_item$labels[[ii]]
-          lgnd_id <- paste(nm, cur_lab, sep = "_")
-          legend[[lgnd_id]] <- list(list(cur_lab, list()))
+        if(is.null(ly$do_legend)) {
+          for(ii in seq_along(map_item$labels)) {
+            cur_val <- map_item$values[[ii]]
+            cur_lab <- map_item$labels[[ii]]
+            lgnd_id <- paste(nm, cur_lab, sep = "_")
+            legend[[lgnd_id]] <- list(list(cur_lab, list()))
 
-          for(glph in map_item$legend_glyphs) {
-            for(mrg in glph$map_args)
-              glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg)
-            # render legend glyph
-            spec <- c(glph$args, list(x = "x", y = "y"))
-            lgroup <- paste("legend_", nm, "_", cur_lab, sep = "")
-            lname <- glph$args$glyph
-            glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
-            # make it so legend glyph doesn't show up on page
-            oo <- NA
-            if(!is.null(spec$size))
-              spec$size <- NA
-            if(!is.null(spec$radius))
-              spec$radius <- NA
-            fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
+            for(glph in map_item$legend_glyphs) {
+              for(mrg in glph$map_args)
+                glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg)
+              # render legend glyph
+              spec <- c(glph$args, list(x = "x", y = "y"))
+              lgroup <- paste("legend_", nm, "_", cur_lab, sep = "")
+              lname <- glph$args$glyph
+              glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
+              # make it so legend glyph doesn't show up on page
+              oo <- NA
+              if(!is.null(spec$size))
+                spec$size <- NA
+              if(!is.null(spec$radius))
+                spec$radius <- NA
+              fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
 
-            # add reference to glyph to legend object
-            nn <- length(legend[[lgnd_id]][[1]][[2]]) + 1
-            legend[[lgnd_id]][[1]][[2]][[nn]] <- list(type = "GlyphRenderer", id = glr_id)
+              # add reference to glyph to legend object
+              nn <- length(legend[[lgnd_id]][[1]][[2]]) + 1
+              legend[[lgnd_id]][[1]][[2]][[nn]] <- list(type = "GlyphRenderer", id = glr_id)
+            }
           }
         }
       }
