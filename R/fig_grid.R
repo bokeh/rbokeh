@@ -50,6 +50,11 @@ grid_plot <- function(objs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
       stop("'objs' argument to makeGrid must be a list of BokehFigure objects or a list of lists of BokehFigure objects", call. = FALSE)
 
     nn <- length(objs)
+    if(missing(ncol))
+      ncol <- ceiling(nn / nrow)
+    if(missing(nrow))
+      nrow <- ceiling(nn / ncol)
+
     if((nrow * ncol) < nn) {
       if(byrow) {
         ncol <- ceiling(nn / nrow)
@@ -62,9 +67,8 @@ grid_plot <- function(objs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
       x$model$plot[c("type", "subtype", "id")]
     })
 
-    plot_refs <- list()
-    length(plot_refs) <- nrow
-    for(ii in nrow) {
+    plot_refs <- vector("list", nrow)
+    for(ii in seq_len(nrow)) {
       cur_idx <- ((ii - 1) * ncol + 1):(min(ii * ncol, nn))
       plot_refs[[ii]] <- tmp[cur_idx]
     }
