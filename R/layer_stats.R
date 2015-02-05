@@ -115,9 +115,9 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
   if(is.null(group))
     group <- rep(1, length(x))
 
-  na_idx <- which(is.na(x))
-  x <- x[-na_idx]
-  group <- group[-na_idx]
+  na_idx <- is.na(x)
+  x <- x[!na_idx]
+  group <- group[!na_idx]
 
   idx <- split(seq_along(x), group)
 
@@ -205,7 +205,7 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
   fill_ind <- grepl("^fill_", names(args))
 
   if(is.null(y)) {
-    xname <- ""
+    xname <- " "
     yname <- xnm
     group <- rep(xname, length(x))
   } else {
@@ -240,7 +240,7 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
   for(ii in seq_along(idx)) {
     bp <- boxplot.stats(x = x[idx[[ii]]], coef = coef)
 
-    gp <- group[[idx[[ii]][1]]] ## doesn't work right now
+    gp <- group[idx[[ii]][1]] ## doesn't work right now
     ## for lines and whiskers
     gpl <- paste(gp, ":0.4", sep = "")
     gpr <- paste(gp, ":0.6", sep = "")
