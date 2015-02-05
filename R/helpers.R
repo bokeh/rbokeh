@@ -228,6 +228,11 @@ get_xy_names <- function(x, y, xname, yname, dots) {
   if(length(yname) > 1)
     yname <- NULL
 
+  if(!is.null(attr(x, "stringName")))
+    xname <- attr(x, "stringName")
+  if(!is.null(attr(y, "stringName")))
+    yname <- attr(y, "stringName")
+
   if(is.null(y)) {
     if(is.ts(x)) {
       res <- list(x = "time", y = xname)
@@ -382,6 +387,18 @@ get_hover <- function(hn, data) {
 
 v_eval <- function(x, data) {
   res <- eval(x, data)
+
+  ## variable name could have been supplied in quotes
+  if(length(res) == 1 && is.character(res) && nrow(data) > 1) {
+    if(res %in% names(data)) {
+      nm <- res
+      res <- data[[res]]
+      attr(res, "stringName") <- nm
+    } else {
+      res <- rep(res, nrow(data))
+    }
+  }
+
   if(is.null(res))
     return(res)
   dp <- deparse(x)[1]
