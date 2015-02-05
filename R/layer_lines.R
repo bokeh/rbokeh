@@ -233,7 +233,7 @@ ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
   ## see if any options won't be used and give a message
   check_opts(list(...), "line")
 
-  xy_names <- get_xy_names(NULL, NULL, "x", "f(x)", list(...))
+  xname <- "x"
 
   lgroup <- get_lgroup(lgroup, fig)
 
