@@ -10,11 +10,12 @@ Version 0.2
 - add datetime axis
 - add log axis
 - add ly_hexbin
-- migrate to standard json model
+- add grid_plot with linked pan/zoom and brushing
 - several "stats" layers - hist, density, quantile, boxplot, etc.
-- image_url working
+- add image_url
 - axis labels
 - tools control
+- migrate to standard json model
 - move to s3 methods + pipes for adding layers
 
 Version 0.1
