@@ -10,7 +10,6 @@ print.BokehFigure <- function(x, ...) {
   print(plot(x, y = NULL, ...))
 }
 
-#'@export
 plot.BokehFigure <- function(x, y, ...) {
   dots <- list(...)
   debug <- dots$debug
@@ -35,7 +34,6 @@ print.BokehGridPlot <- function(x, ...) {
   print(plot(x, y = NULL, ...))
 }
 
-#'@export
 plot.BokehGridPlot <- function(x, y, ...) {
   dots <- list(...)
   debug <- dots$debug

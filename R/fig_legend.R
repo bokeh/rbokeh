@@ -7,6 +7,9 @@
 # and a list of glyph_renderers that the legend
 # entry refers to
 
+## these are all internal functions called from make_glyph
+## legends are specified through the various layer functions
+
 add_legend <- function(obj, legends) {
   id <- gen_id(obj, "legend")
 

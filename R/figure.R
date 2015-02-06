@@ -1,4 +1,4 @@
-#' Start a Bokeh Figure
+#' Initialize a Bokeh figure
 #'
 #' @param width figure width in pixels
 #' @param height figure width in pixels

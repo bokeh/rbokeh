@@ -1,11 +1,20 @@
+#' Update x axis range in a Bokeh figure
+#' @param fig figure to modify
+#' @param dat either a vector (min, max) if the axis is numeric, or a vector of values if the axis is categorical.  In the latter case, the order in which the values are supplied is how they will be arranged on the axis.
+#' @family ranges
+#' @example man-roxygen/ex-range.R
 #' @export
-x_range <- function(obj, dat) {
-  update_range(obj, "x", dat)
+x_range <- function(fig, dat) {
+  update_range(fig, "x", dat)
 }
 
+#' Update y axis range in a Bokeh figure
+#' @inheritParams x_range
+#' @family ranges
+#' @example man-roxygen/ex-range.R
 #' @export
-y_range <- function(obj, dat) {
-  update_range(obj, "y", dat)
+y_range <- function(fig, dat) {
+  update_range(fig, "y", dat)
 }
 
 range_model <- function(type = "Range1d", id, dat) {

@@ -6,6 +6,9 @@
 # add ref to plot$attributes$tools
 # add model to object
 
+## this is only used internally
+## users cannot manually add a hover tool
+## it must be done through the hover argument to the layer functions
 add_hover <- function(obj, tooltips, renderer_ref) {
 
   id <- gen_id(obj, c(renderer_ref$id, "hover"))

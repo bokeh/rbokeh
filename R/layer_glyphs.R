@@ -1,23 +1,28 @@
 
-# x The x-coordinates of the center of the annular wedges.
-# y The y-coordinates of the center of the annular wedges.
-# direction ("clock", "anticlock") Which direction to stroke between the start and end angles.
-# end_angle The angles to end the annular wedges, in radians, as measured from the horizontal.
-# fill_alpha The fill alpha values for the annular wedges.
-# fill_color The fill color values for the annular wedges.
-# inner_radius The inner radii of the annular wedges.
-# line_alpha The line alpha values for the annular wedges.
-# line_color The line color values for the annular wedges.
-# outer_radius The outer radii of the annular wedges.
-# start_angle The angles to start the annular wedges, in radians, as measured from the horizontal.
-# addiional parameters \code{line_cap}, \code{line_dash}, \code{line_dash_offset}, \code{line_join}, \code{line_width}
-
+#' Add an "annular_wedge" layer to a Bokeh figure
+#' @param x the x-coordinates of the centers of the annular wedges
+#' @param y the y-coordinates of the centers of the annular wedges
+#' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
+#' @param inner_radius the inner radii of the annular wedges
+#' @param outer_radius The outer radii of the annular wedges
+#' @param start_angle the angles to start the annular wedges, in radians, as measured from the horizontal
+#' @param end_angle the angles to end the annular wedges, in radians, as measured from the horizontal
+#' @param direction which direction to stroke between the start and end angles ("clock", "anticlock")
+#' @template par-coloralpha
+#' @template par-fill
+#' @template par-line
+#' @template par-hover
+#' @template par-legend
+#' @template par-lnamegroup
+#' @param \ldots additional parameters
+#' @family layer functions
 #' @export
 ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
   inner_radius = 0.1, outer_radius = 0.3,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
-  color = NULL, alpha = NULL, fill_color = NULL, fill_alpha = 0.75,
-  line_color = NULL, line_alpha = NULL,
+  color = NULL, alpha = NULL,
+  fill_color = NULL, fill_alpha = 0.75,
+  line_color = NULL, line_width = 1, line_alpha = NULL,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_annular_wedge")
@@ -48,7 +53,7 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
 
   args <- list(glyph = "annular_wedge", color = color, alpha = alpha,
     fill_color = fill_color, fill_alpha = fill_alpha,
-    line_color = line_color, line_alpha = line_alpha,
+    line_color = line_color, line_width = line_width, line_alpha = line_alpha,
     inner_radius = inner_radius, outer_radius = outer_radius,
     start_angle = start_angle, end_angle = end_angle,
     direction = direction, ...)

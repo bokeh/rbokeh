@@ -1,4 +1,103 @@
 
+#' Create a Bokeh grid plot from a list of Bokeh figures
+#' @param figs list of Bokeh figures - see details for what is acceptable
+#' @param nrow number of rows in the grid
+#' @param ncol number of columns in the grid
+#' @param byrow populate the grid by row according to the order of figure elements supplied in \code{params}
+#' @param same_axes logical or vector of two logicals specifying whether the x and/or y axis limits should be the same for each plot in the grid
+#' @param link_data logical - should an attempt be made to join the data sources of each plot for linked brushing? (see details)
+#' @example man-roxygen/ex-grid.R
+#' @details The \code{figs} parameter can either be a list of figures or a list of lists of figures.  If the latter, the list structure will determine the layout, with each super-list of figures defining a single row of the grid.  If the former, the parameters \code{nrow} and \code{ncol} and \code{byrow} are used to determine the layout.  The grid is from top to bottom left to right.
+#'
+#' If \code{link_data} is \code{TRUE}, then an effort will be made to link all data sources that are common among the different figures in the plot.  Note that at this point, only data sources that are specified in the \code{data} argument to the different layer functions are checked.
+#' @export
+grid_plot <- function(figs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE, link_data = FALSE) {
+  if(length(same_axes) == 1) {
+    same_x <- same_y <- same_axes
+  } else {
+    same_x <- same_axes[1]
+    same_y <- same_axes[2]
+  }
+
+  if(!is.list(figs))
+    stop("'figs' must be a list")
+
+  if(inherits(figs[[1]], "BokehFigure")) {
+    ## list of BokehFigure objects
+    ok <- sapply(figs, function(x) inherits(x, "BokehFigure"))
+    if(!all(ok))
+      stop("'figs' argument to makeGrid must be a list of BokehFigure objects or a list of lists of BokehFigure objects", call. = FALSE)
+
+    nn <- length(figs)
+    if(missing(ncol))
+      ncol <- ceiling(nn / nrow)
+    if(missing(nrow))
+      nrow <- ceiling(nn / ncol)
+
+    if((nrow * ncol) < nn) {
+      if(byrow) {
+        ncol <- ceiling(nn / nrow)
+      } else {
+        nrow <- ceiling(nn / ncol)
+      }
+    }
+
+    tmp <- lapply(figs, function(x)
+      x$model$plot[c("type", "subtype", "id")])
+
+    plot_refs <- vector("list", nrow)
+    for(ii in seq_len(nrow)) {
+      cur_idx <- ((ii - 1) * ncol + 1):(min(ii * ncol, nn))
+      plot_refs[[ii]] <- tmp[cur_idx]
+    }
+  } else {
+    ## list of lists of BokehFigure objects
+    ok <- sapply(figs, function(x) {
+      all(sapply(x, function(y) inherits(y, "BokehFigure")))
+    })
+    if(!all(ok))
+      stop("'figs' argument to makeGrid must be a list of BokehFigure objects or a list of lists of BokehFigure objects", call. = FALSE)
+
+    ## get plot refs
+    plot_refs <- lapply(figs, function(x) {
+      lapply(x, function(y) {
+        y$model$plot[c("type", "subtype", "id")]
+      })
+    })
+    figs <- unlist(figs, recursive = FALSE)
+    nrow <- length(plot_refs)
+    ncol <- max(sapply(plot_refs, length))
+  }
+
+  ## deal with axes
+  x_range <- y_range <- NULL
+  if(same_x) {
+    x_range <- get_grid_ranges(figs, "x")
+    for(ii in seq_along(figs)) {
+      figs[[ii]]$xlim <- x_range$range # prevents prepare_figure() from computing range
+      figs[[ii]]$has_x_range <- TRUE # prevents prepare_figure() from adding range
+      figs[[ii]]$model$plot$attributes$x_range <- x_range$mod$ref
+    }
+  }
+  if(same_y) {
+    y_range <- get_grid_ranges(figs, "y")
+    for(ii in seq_along(figs)) {
+      figs[[ii]]$ylim <- y_range$range # prevents prepare_figure() from computing range
+      figs[[ii]]$has_y_range <- TRUE # prevents prepare_figure() from adding range
+      figs[[ii]]$model$plot$attributes$y_range <- y_range$mod$ref
+    }
+  }
+
+  structure(list(
+    plot_refs = plot_refs,
+    figs = figs,
+    x_range = x_range$mod$model,
+    y_range = y_range$mod$model,
+    link_data = link_data,
+    nrow = nrow, ncol = ncol), class = "BokehGridPlot")
+}
+
+
 grid_plot_model <- function(id, plot_refs, tool_event_ref, width, height) {
   res <- base_model_object("GridPlot", id)
 
@@ -20,110 +119,17 @@ grid_plot_model <- function(id, plot_refs, tool_event_ref, width, height) {
   res
 }
 
-## for linked pan / zoom, set each plot's Range1d to be the same
-## and adjust limits
-
-## for linked brushing, set each plot's data sources to be the same (where possible)
-
-## for linked brushing, set each plot's data to be the same
-
-## a list of BokehFigure objects
-## can be a list of lists in which case each element of the master list
-## is interpreted as one row of the grid
-## or it can be a single long list with additional arguments nrow, ncol, and byrow
-#' @export
-grid_plot <- function(objs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE, link_data = FALSE) {
-  if(length(same_axes) == 1) {
-    same_x <- same_y <- same_axes
-  } else {
-    same_x <- same_axes[1]
-    same_y <- same_axes[2]
-  }
-
-  if(!is.list(objs))
-    stop("'objs' must be a list")
-
-  if(inherits(objs[[1]], "BokehFigure")) {
-    ## list of BokehFigure objects
-    ok <- sapply(objs, function(x) inherits(x, "BokehFigure"))
-    if(!all(ok))
-      stop("'objs' argument to makeGrid must be a list of BokehFigure objects or a list of lists of BokehFigure objects", call. = FALSE)
-
-    nn <- length(objs)
-    if(missing(ncol))
-      ncol <- ceiling(nn / nrow)
-    if(missing(nrow))
-      nrow <- ceiling(nn / ncol)
-
-    if((nrow * ncol) < nn) {
-      if(byrow) {
-        ncol <- ceiling(nn / nrow)
-      } else {
-        nrow <- ceiling(nn / ncol)
-      }
-    }
-
-    tmp <- lapply(objs, function(x) {
-      x$model$plot[c("type", "subtype", "id")]
-    })
-
-    plot_refs <- vector("list", nrow)
-    for(ii in seq_len(nrow)) {
-      cur_idx <- ((ii - 1) * ncol + 1):(min(ii * ncol, nn))
-      plot_refs[[ii]] <- tmp[cur_idx]
-    }
-  } else {
-    ## list of lists of BokehFigure objects
-    ok <- sapply(objs, function(x) {
-      all(sapply(x, function(y) inherits(y, "BokehFigure")))
-    })
-    if(!all(ok))
-      stop("'objs' argument to makeGrid must be a list of BokehFigure objects or a list of lists of BokehFigure objects", call. = FALSE)
-
-    ## get plot refs
-    plot_refs <- lapply(objs, function(x) {
-      lapply(x, function(y) {
-        y$model$plot[c("type", "subtype", "id")]
-      })
-    })
-    objs <- unlist(objs, recursive = FALSE)
-  }
-
-
-  ## deal with axes
-  x_range <- y_range <- NULL
-  if(same_x) {
-    x_range <- get_grid_ranges(objs, "x")
-    for(ii in seq_along(objs)) {
-      objs[[ii]]$xlim <- x_range$range # prevents prepare_figure() from computing range
-      objs[[ii]]$has_x_range <- TRUE # prevents prepare_figure() from adding range
-      objs[[ii]]$model$plot$attributes$x_range <- x_range$mod$ref
-    }
-  }
-  if(same_y) {
-    y_range <- get_grid_ranges(objs, "y")
-    for(ii in seq_along(objs)) {
-      objs[[ii]]$ylim <- y_range$range # prevents prepare_figure() from computing range
-      objs[[ii]]$has_y_range <- TRUE # prevents prepare_figure() from adding range
-      objs[[ii]]$model$plot$attributes$y_range <- y_range$mod$ref
-    }
-  }
-
-  structure(list(
-    plot_refs = plot_refs,
-    figs = objs,
-    x_range = x_range$mod$model,
-    y_range = y_range$mod$model,
-    link_data = link_data,
-    nrow = nrow, ncol = ncol), class = "BokehGridPlot")
-}
-
 ## add a figure to a BokehGridPlot object/
 ## obj must be a BokehGridPlot and p must be a BokehFigure object
 # add_plot <- function(obj, p, row = NULL, col = NULL, same_y = FALSE, same_x = FALSE) {
 #   ## warn if overwriting a plot
 
 # }
+
+
+## for linked pan / zoom, set each plot's Range1d to be the same
+## and adjust limits
+## for linked brushing, set each plot's data sources to be the same (where possible)
 
 ## run prepare on all figures in the grid
 ## merge axes and ranges if necessary

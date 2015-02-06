@@ -1,5 +1,14 @@
+#' Add x axis to a Bokeh figure
+#' @param fig figure to modify
+#' @param label axis label
+#' @param position where to place the axis (either "above" or "below")
+#' @param log logical - should a log axis be used?
+#' @param grid logical - should a reference grid be shown for this axis?
+#' @param num_minor_ticks number of minor ticks
+#' @family axes
+#' @example man-roxygen/ex-axis.R
 #' @export
-x_axis <- function(obj, label, position = "below", log = FALSE, grid = TRUE, num_minor_ticks = 5) {
+x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE, num_minor_ticks = 5) {
   if(is.null(position))
     position <- "below"
   if(!position %in% c("below", "above")) {
@@ -8,13 +17,18 @@ x_axis <- function(obj, label, position = "below", log = FALSE, grid = TRUE, num
   }
 
   if(missing(label))
-    label <- obj$xlab
-  obj$xlab <- label
-  update_axis(obj, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, log = log)
+    label <- fig$xlab
+  fig$xlab <- label
+  update_axis(fig, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, log = log)
 }
 
+#' Add y axis to a Bokeh figure
+#' @inheritParams x_axis
+#' @param position where to place the axis (either "left" or "right")
+#' @family axes
+#' @example man-roxygen/ex-axis.R
 #' @export
-y_axis <- function(obj, label, position = "left", log = FALSE, grid = TRUE, num_minor_ticks = 5) {
+y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_minor_ticks = 5) {
   if(is.null(position))
     position <- "left"
   if(!position %in% c("left", "right")) {
@@ -23,9 +37,9 @@ y_axis <- function(obj, label, position = "left", log = FALSE, grid = TRUE, num_
   }
 
   if(missing(label))
-    label <- obj$ylab
-  obj$ylab <- label
-  update_axis(obj, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, log = log)
+    label <- fig$ylab
+  fig$ylab <- label
+  update_axis(fig, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, log = log)
 }
 
 # axis ref needs to be added to plot attributes as "above", "below", "left", or "right"
@@ -113,7 +127,6 @@ ticker_model <- function(type = "BasicTicker", id, num_minor_ticks = 5, log = FA
 
   res
 }
-
 
 grid_model <- function(id, dimension = 0, plot_ref, ticker_ref) {
   res <- base_model_object("Grid", id)

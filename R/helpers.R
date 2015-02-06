@@ -1,4 +1,4 @@
-
+## internal helper methods
 
 update_line_opts <- function(fig, opts) {
 

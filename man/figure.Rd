@@ -2,7 +2,7 @@
 % Please edit documentation in R/figure.R
 \name{figure}
 \alias{figure}
-\title{Start a Bokeh Figure}
+\title{Initialize a Bokeh figure}
 \usage{
 figure(width = 480, height = 480, title = NULL, xlab = NULL,
   ylab = NULL, xlim = NULL, ylim = NULL, padding_factor = 0.07,
@@ -42,6 +42,6 @@ figure(width = 480, height = 480, title = NULL, xlab = NULL,
 \item{theme}{an rbokeh theme to use (tableau by default)}
 }
 \description{
-Start a Bokeh Figure
+Initialize a Bokeh figure
 }
 

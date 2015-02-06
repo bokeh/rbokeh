@@ -75,12 +75,13 @@ prepare_figure <- function(fig) {
               lname <- glph$args$glyph
               glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
               # make it so legend glyph doesn't show up on page
-              oo <- NA
+              oox <- ifelse(fig$x_axis_type == "categorical", "", NA)
+              ooy <- ifelse(fig$y_axis_type == "categorical", "", NA)
               if(!is.null(spec$size))
                 spec$size <- NA
               if(!is.null(spec$radius))
                 spec$radius <- NA
-              fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
+              fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
 
               # add reference to glyph to legend object
               nn <- length(legend[[lgnd_id]][[1]][[2]]) + 1
@@ -102,12 +103,13 @@ prepare_figure <- function(fig) {
         lname <- lg_args$glyph
         glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
         # make it so legend glyph doesn't show up on page
-        oo <- NA
+        oox <- ifelse(fig$x_axis_type == "categorical", "", NA)
+        ooy <- ifelse(fig$y_axis_type == "categorical", "", NA)
         if(!is.null(spec$size))
           spec$size <- NA
         if(!is.null(spec$radius))
           spec$radius <- NA
-        fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oo, oo), y = c(oo, oo)), lname = lname, lgroup = lgroup)
+        fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
 
         # add reference to glyph to legend object
         nn <- length(legend[[lgroup]][[1]][[2]]) + 1

@@ -1,69 +1,127 @@
 # http://bokeh.pydata.org/en/latest/docs/reference/models.html
 
+#' Add "pan" tool to a Bokeh figure
+#' @param dimensions a vector specifying whether the pan tool should pan with respect to the x axis ("width") and the y axis ("height") or both (c("width", "height"))
+#' @template tools
+#' @examples
+#' # only pan on x axis
+#' figure() %>% ly_point(1:10) %>%
+#'  tool_pan(dimensions = "height")
 #' @export
-tool_pan <- function(obj, dimensions = c("width", "height")) {
-  update_tool(obj, which = "pan", args = list(dimensions = dimensions, plot_ref = obj$ref))
+tool_pan <- function(fig, dimensions = c("width", "height")) {
+  update_tool(fig, which = "pan", args = list(dimensions = dimensions, plot_ref = fig$ref))
 }
 
+#' Add "wheel_zoom" tool to a Bokeh figure
+#' @param dimensions a vector specifying whether the wheel_zoom tool should zoom with respect to the x axis ("width") and the y axis ("height") or both (c("width", "height"))
+#' @template tools
+#' @examples
+#' # only zoom on x axis
+#' figure() %>% ly_point(1:10) %>%
+#'  tool_wheel_zoom(dimensions = "height")
 #' @export
-tool_wheel_zoom <- function(obj, dimensions = c("width", "height")) {
-  update_tool(obj, which = "wheel_zoom", args = list(dimensions = dimensions, plot_ref = obj$ref))
+tool_wheel_zoom <- function(fig, dimensions = c("width", "height")) {
+  update_tool(fig, which = "wheel_zoom", args = list(dimensions = dimensions, plot_ref = fig$ref))
 }
 
+#' Add "box_zoom" tool to a Bokeh figure
+#' @template tools
+#' @examples
+#' figure() %>% ly_point(1:10) %>%
+#'  tool_box_zoom()
 #' @export
-tool_box_zoom <- function(obj) {
-  update_tool(obj, which = "box_zoom", args = list(plot_ref = obj$ref))
+tool_box_zoom <- function(fig) {
+  update_tool(fig, which = "box_zoom", args = list(plot_ref = fig$ref))
 }
 
+#' Add "save" tool to a Bokeh figure
+#' @template tools
+#' @examples
+#' figure() %>% ly_point(1:10) %>%
+#'  tool_save()
 #' @export
-tool_save <- function(obj) {
-  update_tool(obj, which = "preview_save", args = list(plot_ref = obj$ref))
+tool_save <- function(fig) {
+  update_tool(fig, which = "preview_save", args = list(plot_ref = fig$ref))
 }
 
+#' Add "crosshair" tool to a Bokeh figure
+#' @template tools
+#' @examples
+#' figure() %>% ly_point(1:10) %>%
+#'  tool_crosshair()
 #' @export
-tool_crosshair <- function(obj) {
-  update_tool(obj, which = "crosshair", args = list(plot_ref = obj$ref))
+tool_crosshair <- function(fig) {
+  update_tool(fig, which = "crosshair", args = list(plot_ref = fig$ref))
 }
 
+#' Add "tap" tool to a Bokeh figure
+#' @template tools
+#' @examples
+#' figure() %>% ly_point(1:10) %>%
+#'  tool_tap()
 #' @export
-tool_tap <- function(obj) {
-  update_tool(obj, which = "tap", args = list(plot_ref = obj$ref))
+tool_tap <- function(fig) {
+  update_tool(fig, which = "tap", args = list(plot_ref = fig$ref))
 }
 
+#' Add "resize" tool to a Bokeh figure
+#' @template tools
+#' @examples
+#' figure() %>% ly_point(1:10) %>%
+#'  tool_resize()
 #' @export
-tool_resize <- function(obj) {
-  update_tool(obj, which = "resize", args = list(plot_ref = obj$ref))
+tool_resize <- function(fig) {
+  update_tool(fig, which = "resize", args = list(plot_ref = fig$ref))
 }
 
+#' Add "reset" tool to a Bokeh figure
+#' @template tools
+#' @examples
+#' figure() %>% ly_point(1:10) %>%
+#'  tool_reset()
 #' @export
-tool_reset <- function(obj) {
-  update_tool(obj, which = "reset", args = list(plot_ref = obj$ref))
+tool_reset <- function(fig) {
+  update_tool(fig, which = "reset", args = list(plot_ref = fig$ref))
 }
 
+#' Add "box_select" tool to a Bokeh figure
+#' @template tools
+#' @param select_every_mousemove logical - should the tool's callback be triggered on every mouse move?
+#' @examples
+#' figure() %>% ly_point(1:10) %>%
+#'  tool_box_select()
 #' @export
-tool_box_select <- function(obj, select_every_mousemove = TRUE) {
-  update_tool(obj, which = "box_select", args = list(plot_ref = obj$ref,
+tool_box_select <- function(fig, select_every_mousemove = TRUE) {
+  update_tool(fig, which = "box_select", args = list(plot_ref = fig$ref,
     select_every_mousemove = select_every_mousemove))
 }
 
+#' Add "lasso_select" tool to a Bokeh figure
+#' @template tools
+#' @param select_every_mousemove logical - should the tool's callback be triggered on every mouse move?
+#' @examples
+#' figure() %>% ly_point(1:10) %>%
+#'  tool_lasso_select()
 #' @export
-tool_lasso_select <- function(obj, select_every_mousemove = TRUE) {
-  update_tool(obj, which = "lasso_select", args = list(plot_ref = obj$ref,
+tool_lasso_select <- function(fig, select_every_mousemove = TRUE) {
+  update_tool(fig, which = "lasso_select", args = list(plot_ref = fig$ref,
     select_every_mousemove = select_every_mousemove))
 }
 
-update_tool <- function(obj, which, args) {
-  id <- gen_id(obj, which)
+## internal methods
+
+update_tool <- function(fig, which, args) {
+  id <- gen_id(fig, which)
   args$id <- id
   args$tool_name <- get_tool_name(which)
   model <- do.call(tool_model, args)
 
-  obj$model$plot$attributes$tools[[model$ref$id]] <- model$ref
-  obj$model[[id]] <- model$model
+  fig$model$plot$attributes$tools[[model$ref$id]] <- model$ref
+  fig$model[[id]] <- model$model
 
-  obj <- update_tool_events(obj)
+  fig <- update_tool_events(fig)
 
-  obj
+  fig
 }
 
 get_tool_name <- function(x) {
@@ -88,12 +146,12 @@ tool_events <- function(id) {
   res
 }
 
-update_tool_events <- function(obj) {
-  id <- gen_id(obj, "ToolEvents")
+update_tool_events <- function(fig) {
+  id <- gen_id(fig, "ToolEvents")
   model <- tool_events(id)
 
-  obj$model$plot$attributes$tool_events <- model$ref
-  obj$model[[id]] <- model$model
+  fig$model$plot$attributes$tool_events <- model$ref
+  fig$model[[id]] <- model$model
 
-  obj
+  fig
 }

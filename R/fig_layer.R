@@ -10,6 +10,9 @@
 # - add GlyphRenderer reference to "renderers"
 # - add GlyphRenderer model to object
 
+## these are all internal functions called from make_glyph
+## which is called from the various layer functions
+
 add_layer <- function(obj, spec, dat, lname, lgroup) {
   glyph <- spec$glyph
   glyph <- underscore2camel(glyph)

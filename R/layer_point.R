@@ -2,11 +2,6 @@
 
 # major aesthetic specification:
 # type: what type of glyph to plot at each point
-# color: the color
-#   when using a type that has only an outline, this will be the color of the outline
-#   when using a type that has outline and fill, this will be the color of the outline and the fill will be a slightly less-saturated value of the same color
-# alpha: the alpha of both the line and the fill
-# size: the size of the glyph
 # type can be any of the following:
 # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25
 # these matche R's pch setting (see point_types())
@@ -14,11 +9,7 @@
 # or asterisk, circle, circle_cross, circle_x, cross, diamond, diamond_cross, inverted_triangle, square, square_cross, square_x, triangle, x
 # the integer-based types simply map to any of these named types but with different line and/or fill properties
 
-# in addition, lower-level control can be specified over
 
-# grouping:
-# any of the following properties can be specified as a "grouping" variable, with length as long as x and y, for which colors from the specified theme will be assigned to groups based on the unique values provided.  either a vector of valid values for that field can be given (e.g. for colors, a vector of valid css color names or hex codes) or a vector of factor levels which will be used to assign attributes based on the theme
-# grouping variables: type, color, line_color, fill_color
 
 #' @export
 ly_point <- function(fig, x, y = NULL, data = NULL,

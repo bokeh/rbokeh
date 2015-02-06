@@ -1,3 +1,29 @@
+#' Print the JSON of a Bokeh figure
+#' @param fig figure to print
+#' @param prepare logical - should the figure be sent through preparations that need to be done prior to plotting (TRUE), or printed as-is (FALSE)
+#' @param pretty parameter passed on to \code{\link[RJSONIO]{toJSON}}
+#' @param pbcopy logical - if on OSX, should the results be passed to the clipboard (TRUE) instead of printed to the screen (FALSE)?
+#' @examples
+#' p <- figure() %>% ly_point(1:10) %>%
+#'  tool_pan(dimensions = "height")
+#' print_model_json(p)
+#' @importFrom RJSONIO toJSON
+#' @export
+print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, pbcopy = FALSE) {
+  if(prepare) {
+    if(inherits(fig, "BokehFigure")) {
+      fig <- prepare_figure(fig)
+    } else if(inherits(fig, "BokehGridPlot")) {
+      fig <- prepare_gridplot(fig)
+    }
+  }
+
+  file <- ""
+  if(pbcopy)
+    file <- pipe("pbcopy")
+  cat(toJSON(remove_model_names(fig$model), digits = 50, pretty = pretty), file = file)
+}
+
 base_model_object <- function(type, id) {
   list(
     model = list(
@@ -26,23 +52,6 @@ remove_model_names <- function(obj) {
   names(obj$plot$attributes$renderers) <- NULL
   names(obj) <- NULL
   obj
-}
-
-#' @importFrom RJSONIO toJSON
-#' @export
-print_model_json <- function(obj, prepare = TRUE, pretty = TRUE, pbcopy = FALSE) {
-  if(prepare) {
-    if(inherits(obj, "BokehFigure")) {
-      obj <- prepare_figure(obj)
-    } else if(inherits(obj, "BokehGridPlot")) {
-      obj <- prepare_gridplot(obj)
-    }
-  }
-
-  file <- ""
-  if(pbcopy)
-    file <- pipe("pbcopy")
-  cat(toJSON(remove_model_names(obj$model), digits = 50, pretty = pretty), file = file)
 }
 
 underscore2camel <- function(x) {
