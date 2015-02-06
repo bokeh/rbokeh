@@ -1,10 +1,10 @@
 
 
-# major aesthetic specification:
+# major attribute specification:
 # type: what type of glyph to plot at each point
 # type can be any of the following:
 # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25
-# these matche R's pch setting (see point_types())
+# these match R's pch setting (see point_types())
 # except 11 and 14 are missing, and 16, 19, 20 are the same
 # or asterisk, circle, circle_cross, circle_x, cross, diamond, diamond_cross, inverted_triangle, square, square_cross, square_x, triangle, x
 # the integer-based types simply map to any of these named types but with different line and/or fill properties
@@ -13,10 +13,8 @@
 
 #' @export
 ly_point <- function(fig, x, y = NULL, data = NULL,
-  glyph = 21, color = NULL, alpha = NULL, size = 10,
+  glyph = 21, color = NULL, alpha = 1, size = 10,
   hover = NULL, legend = NULL,
-  line_color = NULL, line_alpha = 1, line_width = 1,
-  fill_color = NULL, fill_alpha = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_point")
@@ -26,18 +24,20 @@ ly_point <- function(fig, x, y = NULL, data = NULL,
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    size       <- v_eval(substitute(size), data)
-    glyph      <- v_eval(substitute(glyph), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
+    dots  <- substitute(list(...))[-1]
+    args  <- lapply(dots, function(x) v_eval(x, data))
+    x     <- v_eval(substitute(x), data)
+    y     <- v_eval(substitute(y), data)
+    size  <- v_eval(substitute(size), data)
+    glyph <- v_eval(substitute(glyph), data)
+    color <- v_eval(substitute(color), data)
+  } else {
+    args <- list(...)
   }
 
   hover <- get_hover(substitute(hover), data)
 
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
+  xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
   lgroup <- get_lgroup(lgroup, fig)
@@ -45,10 +45,8 @@ ly_point <- function(fig, x, y = NULL, data = NULL,
   if(is.null(glyph))
     glyph <- "circle"
 
-  args <- list(glyph = glyph, color = color, size = size,
-    line_color = line_color, line_alpha = line_alpha,
-    line_width = line_width, fill_color = fill_color,
-    fill_alpha = fill_alpha, ...)
+  args <- c(args, list(glyph = glyph, color = color,
+    alpha = alpha, size = size))
 
   # if glyph is not unique, we need to split the data
   # and call make_glyph several times
@@ -57,12 +55,6 @@ ly_point <- function(fig, x, y = NULL, data = NULL,
   if(length(unique(glyph)) > 1) {
     gl <- args$glyph
     args$glyph <- NULL
-
-    ## for now, handle fill alpha here (assumes theme will always have line and fill)
-    ## otherwise, need to handle this in print() when we find new glyph from theme
-    if(is.null(args$fill_alpha)) {
-      args$fill_alpha <- 0.5
-    }
 
     lns <- sapply(args, length)
     idx <- which(lns == length(xy$x))
@@ -86,14 +78,15 @@ ly_point <- function(fig, x, y = NULL, data = NULL,
     return(fig)
   }
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]],
+    solid = as.character(glyph) %in% as.character(15:20))
 
   args <- resolve_glyph_props(glyph, args, lgroup)
   args <- fix_args(args, length(xy$x))
 
   ## see if any options won't be used and give a message
   if(args$glyph %in% names(marker_dict))
-    check_opts(list(...), args$glyph)
+    check_opts(args, args$glyph)
 
   axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y, glyph = glyph)
 

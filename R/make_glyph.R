@@ -1,7 +1,7 @@
 # glyphs are stored in layers
 # layers have names (lname) and group names (lgroup)
 # you can add new layers to an existing layer group
-# which will ensure that aesthetics are mapped to glyphs within the layer
+# which will ensure that attributes are mapped to glyphs within the layer
 
 make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range, hover = NULL, legend = NULL, xname = NULL, yname = NULL, data_sig = NA) {
 
@@ -50,21 +50,21 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range, ho
   ind <- setdiff(names(args), mapped_args)
   args[ind] <- validate_colors(args[ind])
 
-  ## deal with aesthetic inputs that are to be mapped
+  ## deal with attribute inputs that are to be mapped
   ## e.g. fill_color might be mapped to a variable in the data
   ## in which case we need to track its domain
   ## and its range will be filled in from a theme
   ## when the figure is printed
-  aes_maps <- get_aes_maps(args, glr_id)
+  attr_maps <- get_attr_maps(args, glr_id)
 
   ## deal with manual legend
   if(!is.null(legend)) {
     legend <- as.character(legend)
-    if(!is.null(aes_maps)) {
+    if(!is.null(attr_maps)) {
       if(legend == "FALSE") {
         fig$layers[[lgroup]]$do_legend <- FALSE
       } else {
-        message("Ignoring custom legend because an aesthetic is being mapped and therefore the legend is being taken care of automatically.")
+        message("Ignoring custom legend because an attribute is being mapped and therefore the legend is being taken care of automatically.")
       }
     } else {
       if(!is.null(fig$common_legend[[legend]])) {
@@ -75,8 +75,8 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range, ho
     }
   }
 
-  ## merge in aesthetic mappings (if any)
-  fig$layers[[lgroup]]$maps <- merge_aes_maps(fig$layers[[lgroup]]$maps, aes_maps)
+  ## merge in attribute mappings (if any)
+  fig$layers[[lgroup]]$maps <- merge_attr_maps(fig$layers[[lgroup]]$maps, attr_maps)
 
   ## save defer function (if any) and remove from data
   if(!is.null(data$defer)) {

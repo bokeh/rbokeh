@@ -46,8 +46,7 @@ ly_quadratic <- function(fig, x0, y0, x1, y1, cx, cy, data = NULL, hover = NULL,
 
 #' @export
 ly_patch <- function(fig, x, y, data = NULL,
-  color = NULL, alpha = NULL,
-  fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1,
+  color = NULL, alpha = 1,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_patch")
@@ -57,23 +56,23 @@ ly_patch <- function(fig, x, y, data = NULL,
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    color      <- v_eval(substitute(color), data)
-    alpha      <- v_eval(substitute(alpha), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
+    dots  <- substitute(list(...))[-1]
+    args  <- lapply(dots, function(x) v_eval(x, data))
+    x     <- v_eval(substitute(x), data)
+    y     <- v_eval(substitute(y), data)
+    color <- v_eval(substitute(color), data)
+    alpha <- v_eval(substitute(alpha), data)
+  } else {
+    args <- list(...)
   }
 
   hover <- get_hover(substitute(hover), data)
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
+  xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
   lgroup <- get_lgroup(lgroup, fig)
 
-  args <- list(color = color, alpha = alpha,
-    fill_color = fill_color, fill_alpha = fill_alpha,
-    line_color = line_color, line_alpha = line_alpha, ...)
+  args <- c(args, list(color = color, alpha = alpha))
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 

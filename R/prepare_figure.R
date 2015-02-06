@@ -3,11 +3,11 @@
 ## such as axes and ranges
 ## also, all deferred glyphs are resolved
 ##   (glyphs that need to know the final bounds of the figure)
-## also, all aesthetic mappings are resolved and automatic legend entries are added
+## also, all attribute mappings are resolved and automatic legend entries are added
 prepare_figure <- function(fig) {
   legend <- list()
 
-  ## resolve aesthetic mappings
+  ## resolve attribute mappings
   for(ly in fig$layers) {
     if(!is.null(ly$maps)) {
       for(nm in names(ly$maps)) {

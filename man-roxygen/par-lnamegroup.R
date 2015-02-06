@@ -1,2 +1,2 @@
-#' @param lname
-#' @param lgroup
+#' @param lname layer name
+#' @param lgroup layer group

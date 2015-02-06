@@ -1,7 +1,19 @@
+
+#' Add a "hexbin" layer to a Bokeh figure
+#' @param fig figure to modify
+#' @param x values or field name of center x coordinates to be binned
+#' @param y values or field name of center y coordinates to be binned
+#' @param data an optional data frame, providing the source for x and y
+#' @param xbins,shape parameters passed to \code{\link[hexbin]{hexbin}}
+#' @param style type of plotting for hexbins (see \code{\link[hexbin]{grid.hexagons}}) - "colorramp" and "lattice" are currently supported
+#' @param trans,inv transformation and inverse transformation function for the bin counts
+#' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
+#' @param fill logical - should hexagons be filled?
+#' @param line logical - should hexagons have an outline?
+#' @param hover logical - should a hover tool be added to show the count in each hexagon?
 #' @export
-ly_hexbin <- function(fig, x, y, data = NULL, xbins = 30, shape = 1,
-  style = "colorramp",
-  minarea = 0.04, maxarea = 0.8, mincnt = 1, maxcnt = NULL,
+ly_hexbin <- function(fig, x, y, data = NULL,
+  xbins = 30, shape = 1, style = "colorscale",
   trans = NULL, inv = NULL,
   palette = "RdYlGn11", fill = TRUE, line = FALSE, hover = TRUE) {
 
@@ -10,12 +22,13 @@ ly_hexbin <- function(fig, x, y, data = NULL, xbins = 30, shape = 1,
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
+    x <- v_eval(substitute(x), data)
+    y <- v_eval(substitute(y), data)
   }
 
   ind <- complete.cases(x, y)
 
+  minarea <- 0.04; maxarea <- 0.8; mincnt <- 1; maxcnt <- NULL
   hbd <- get_hexbin_data(x = x[ind], y = y[ind], xbins = xbins, shape = shape,
     style = style, minarea = minarea, maxarea = maxarea, mincnt = mincnt,
     maxcnt = maxcnt, trans = trans, inv = inv)

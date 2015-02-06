@@ -2,9 +2,7 @@
 ly_hist <- function(fig, x, group = NULL, data = NULL,
   breaks = "Sturges", freq = TRUE, include.lowest = TRUE, right = TRUE,
   density = NULL, angle = 45, warn.unused = FALSE,
-  color = NULL, alpha = NULL,
-  line_color = NULL, line_width = 1, line_alpha = 1,
-  fill_color = NULL, fill_alpha = NULL,
+  color = NULL, alpha = 1,
   lname = NULL, lgroup = NULL, ...) {
 
   xname <- deparse(substitute(x))
@@ -27,9 +25,7 @@ ly_hist <- function(fig, x, group = NULL, data = NULL,
     density = density, angle = angle, col = col,
     warn.unused = warn.unused, plot = FALSE)
 
-  args <- list(color = color, alpha = alpha, line_color = line_color,
-    line_width = line_width, line_alpha = line_alpha,
-    fill_color = fill_color, fill_alpha = fill_alpha, ...)
+  args <- list(color = color, alpha = alpha, ...)
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
@@ -51,8 +47,7 @@ ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
   kernel = c("gaussian", "epanechnikov", "rectangular", "triangular",
     "biweight", "cosine", "optcosine"),
   weights = NULL, window = kernel, n = 512, cut = 3, na.rm = FALSE,
-  color = "black", alpha = NULL, width = 1, type = 1,
-  line_join = 1, line_cap = "round",
+  color = "black", alpha = 1, width = 1, type = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_density")
@@ -74,7 +69,7 @@ ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
     x <- eval(substitute(x), data)
 
   args <- list(color = color, alpha = alpha, width = width,
-    type = type, line_join = line_join, line_cap = line_cap, ...)
+    type = type, ...)
 
   args <- update_line_opts(fig, args)
 
@@ -88,9 +83,7 @@ ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
 #' @export
 ly_quantile <- function(fig, x, group = NULL, data = NULL,
   probs = NULL, distn = qunif, ncutoff = 200,
-  color = NULL, alpha = NULL,
-  line_color = NULL, line_alpha = 1, line_width = 1,
-  fill_color = NULL, fill_alpha = NULL,
+  color = NULL, alpha = 1,
   legend = TRUE,
   lname = NULL, lgroup = NULL, ...) {
 
@@ -107,10 +100,7 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
 
   lgroup <- get_lgroup(lgroup, fig)
 
-  args <- list(color = color, alpha = alpha,
-    line_color = line_color, line_alpha = line_alpha,
-    line_width = line_width, fill_color = fill_color,
-    fill_alpha = fill_alpha, ...)
+  args <- list(color = color, alpha = alpha, ...)
 
   if(is.null(group))
     group <- rep(1, length(x))

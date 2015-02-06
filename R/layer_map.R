@@ -1,10 +1,7 @@
 #' @import maps
 #' @export
 ly_map <- function(fig, database = "world", regions = ".",
-  color = NULL, alpha = NULL,
-  line_color = NULL, line_alpha = 1, line_width = 1,
-  fill_color = NULL, fill_alpha = NULL,
-  lname = NULL, lgroup = NULL, ...) {
+  color = NULL, alpha = 1, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_map")
 
@@ -18,9 +15,7 @@ ly_map <- function(fig, database = "world", regions = ".",
   dd <- map2df(map(database = database,
     regions = regions, fill = TRUE, plot = FALSE))
 
-  args <- list(color = color, alpha = alpha,
-    line_color = line_color, line_alpha = line_alpha, line_width = line_width,
-    fill_color = fill_color, fill_alpha = fill_alpha, ...)
+  args <- list(color = color, alpha = alpha, ...)
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 

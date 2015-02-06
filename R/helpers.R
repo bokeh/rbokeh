@@ -256,7 +256,7 @@ get_xy_names <- function(x, y, xname, yname, dots) {
 }
 
 ## take args color and alpha and translate them to f
-resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly) {
+resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, solid = FALSE) {
 
   ## if no color at all is specified, choose from the theme
   if(is.null(args$color) && is.null(args$fill_color) && is.null(args$line_color))
@@ -284,9 +284,12 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly) {
     if(!is.null(args$fill_alpha)) {
       message("both alpha and fill_alpha specified - honoring fill_alpha")
     } else {
-      args$fill_alpha <- args$alpha
+      args$fill_alpha <- args$alpha * 0.5
     }
   }
+
+  if(solid)
+    args$fill_alpha <- args$line_alpha
 
   args$color <- NULL
   args$alpha <- NULL

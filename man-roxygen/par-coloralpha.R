@@ -6,6 +6,7 @@
 #'   \item When using a glyph that has has line and fill properties, this will be the color of the line and the fill, with the alpha level of the fill reduced by 50\%.
 #'   \item If full control over fill and line color is desired, the \code{fill_color} and \code{line_color} attributes can be specified explicitly and will override \code{color}.
 #' }
+#' When color is \code{NULL} and \code{fill_color} or \code{line_color} are not specified, the color will be chosen from the theme.
 #' @section Handling alpha: The \code{alpha} is a high-level plot attribute that sets the transparency of the glyph being plotted.
 #' \itemize{
 #'   \item When using a glyph that only has line properties, this will be the alpha of the line.

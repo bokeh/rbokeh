@@ -1,20 +1,20 @@
-# __layer_aes_map__
+# __layer_attr_map__
 # -> var1
 #   -> domain (vector of characters or numeric range)
-#   -> legend_glyphs (list of aesLegendGlyph objects)
-#   -> map_entries (list of aesMapEntry objects)
+#   -> legend_glyphs (list of attrLegendGlyph objects)
+#   -> map_entries (list of attrMapEntry objects)
 # -> var2
 
-# __aesLegendGlyph__
+# __attrLegendGlyph__
 # -> name (name of the glyph this map applies to)
 # -> map_args (vector of glyph attribute names that need to be mapped)
 # -> args (arguments that do not need to be mapped - used to create legend glyphs)
 
-# __aesMapEntry__
+# __attrMapEntry__
 # -> id (id of glyph_renderer that needs its variables updated)
 # -> map_args (vector of glyph attribute names that need to be mapped)
 
-get_aes_maps <- function(args, glr_id) {
+get_attr_maps <- function(args, glr_id) {
   nms <- names(args)
   ## get an index of arguments that need a map and have an nseName
   ## nseName is used in the legend so we know what variable created the map
@@ -32,12 +32,12 @@ get_aes_maps <- function(args, glr_id) {
     if(length(which(mappable)) == 0)
       return(NULL)
 
-    # build an aesMap object with an entry for each unique nseName
+    # build an attrMap object with an entry for each unique nseName
     # entry has the name, domain
     nse_names <- as.character(sapply(args[mappable], function(x) attr(x, "nseName")))
     u_nse_names <- unique(nse_names)
 
-    layer_aes_map <- structure(vector("list",
+    layer_attr_map <- structure(vector("list",
       length = length(u_nse_names)), names = u_nse_names)
 
     for(nm in u_nse_names) {
@@ -53,23 +53,23 @@ get_aes_maps <- function(args, glr_id) {
       gargs <- override_legend_glyph_args(gargs)
 
       dmn <- get_domain(do.call(c, lapply(margs, get_domain)))
-      layer_aes_map[[nm]]$domain <- dmn
+      layer_attr_map[[nm]]$domain <- dmn
 
       glyph_name <- as.character(args$glyph[1])
       if(!glyph_name %in% names(glyph_props))
         glyph_name <- "mappedGlyph"
 
-      layer_aes_map[[nm]]$legend_glyphs[[glyph_name]] <- list(name = glyph_name, args = gargs, map_args = names(margs))
+      layer_attr_map[[nm]]$legend_glyphs[[glyph_name]] <- list(name = glyph_name, args = gargs, map_args = names(margs))
 
-      layer_aes_map[[nm]]$map_entries[[glr_id]] <- list(id = glr_id, map_args = names(margs), args = gargs)
+      layer_attr_map[[nm]]$map_entries[[glr_id]] <- list(id = glr_id, map_args = names(margs), args = gargs)
     }
-    return(layer_aes_map)
+    return(layer_attr_map)
   }
   NULL
 }
 
 # merge map2 into map1
-merge_aes_maps <- function(map1, map2) {
+merge_attr_maps <- function(map1, map2) {
   m1n <- names(map1)
   m2n <- names(map2)
   same_var <- intersect(m1n, m2n)
@@ -80,9 +80,9 @@ merge_aes_maps <- function(map1, map2) {
   if(length(same_var) > 0) {
     for(nm in same_var) {
       ## merge the domains
-      map1[[nm]]$domain <- merge_aes_domains(map1[[nm]]$domain, map2[[nm]]$domain)
+      map1[[nm]]$domain <- merge_attr_domains(map1[[nm]]$domain, map2[[nm]]$domain)
       ## merge map entries
-      map1[[nm]]$legend_glyphs <- merge_aes_legend_glyphs(map1[[nm]]$legend_glyphs, map2[[nm]]$legend_glyphs)
+      map1[[nm]]$legend_glyphs <- merge_attr_legend_glyphs(map1[[nm]]$legend_glyphs, map2[[nm]]$legend_glyphs)
       id <- map2[[nm]]$map_entries[[1]]$id
       map1[[nm]]$map_entries[[id]] <- map2[[nm]]$map_entries[[1]]
     }
@@ -90,7 +90,7 @@ merge_aes_maps <- function(map1, map2) {
   map1
 }
 
-merge_aes_legend_glyphs <- function(gly1, gly2) {
+merge_attr_legend_glyphs <- function(gly1, gly2) {
   g1n <- names(gly1)
   g2n <- names(gly2)
   same_var <- intersect(g1n, g2n)
@@ -109,7 +109,7 @@ merge_aes_legend_glyphs <- function(gly1, gly2) {
   gly1
 }
 
-merge_aes_domains <- function(d1, d2) {
+merge_attr_domains <- function(d1, d2) {
   if(is.null(d1))
     return(d2)
   if(is.null(d2))

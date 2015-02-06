@@ -15,7 +15,7 @@
 
 #' @export
 ly_text <- function(fig, x, y = NULL, text = NULL, data = NULL,
-  color = "black", alpha = NULL,
+  color = "black", alpha = 1,
   angle = 0, align = NULL, baseline = NULL,
   font = NULL, font_size = NULL, font_style = NULL,
   x_offset = NULL, y_offset = NULL,

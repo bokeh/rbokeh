@@ -3,8 +3,7 @@
 
 #' @export
 ly_polygon <- function(fig, xs, ys, group = NULL, data = NULL,
-  color = NULL, alpha = NULL,
-  fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1,
+  color = NULL, alpha = 1,
   hover = NULL, # legend = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
@@ -15,17 +14,17 @@ ly_polygon <- function(fig, xs, ys, group = NULL, data = NULL,
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    xs         <- v_eval(substitute(xs), data)
-    ys         <- v_eval(substitute(ys), data)
-    group      <- v_eval(substitute(group), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
+    dots  <- substitute(list(...))[-1]
+    args  <- lapply(dots, function(x) v_eval(x, data))
+    xs    <- v_eval(substitute(xs), data)
+    ys    <- v_eval(substitute(ys), data)
+    group <- v_eval(substitute(group), data)
+    color <- v_eval(substitute(color), data)
+  } else {
+    args <- list(...)
   }
 
-  args <- list(color = color, alpha = alpha,
-    fill_color = fill_color, fill_alpha = fill_alpha,
-    line_color = line_color, line_alpha = line_alpha, ...)
+  args <- c(args, list(color = color, alpha = alpha))
 
   if(!is.null(group)) {
     idx <- unname(split(seq_along(group), group))
@@ -46,7 +45,7 @@ ly_polygon <- function(fig, xs, ys, group = NULL, data = NULL,
   }
 
   # hover <- get_hover(substitute(hover), data)
-  xy_names <- get_xy_names(xs, ys, xname, yname, list(...))
+  xy_names <- get_xy_names(xs, ys, xname, yname, args)
   ## translate different x, y types to vectors
   lgroup <- get_lgroup(lgroup, fig)
 
@@ -68,8 +67,7 @@ ly_polygon <- function(fig, xs, ys, group = NULL, data = NULL,
 
 #' @export
 ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
-  color = NULL, alpha = NULL,
-  fill_color = NULL, line_color = NULL, fill_alpha = 1, line_alpha = 1,
+  color = NULL, alpha = 1,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_rect")
@@ -79,24 +77,24 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    xleft      <- v_eval(substitute(xleft), data)
-    yright     <- v_eval(substitute(yright), data)
-    ybottom    <- v_eval(substitute(ybottom), data)
-    ytop       <- v_eval(substitute(ytop), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
+    dots    <- substitute(list(...))[-1]
+    args    <- lapply(dots, function(x) v_eval(x, data))
+    xleft   <- v_eval(substitute(xleft), data)
+    yright  <- v_eval(substitute(yright), data)
+    ybottom <- v_eval(substitute(ybottom), data)
+    ytop    <- v_eval(substitute(ytop), data)
+    color   <- v_eval(substitute(color), data)
+  } else {
+    args <- list(...)
   }
 
   hover <- get_hover(substitute(hover), data)
 
-  xy_names <- get_xy_names(xleft, ybottom, xname, yname, list(...))
+  xy_names <- get_xy_names(xleft, ybottom, xname, yname, args)
 
   lgroup <- get_lgroup(lgroup, fig)
 
-  args <- list(color = color, alpha = alpha,
-    fill_color = fill_color, fill_alpha = fill_alpha,
-    line_color = line_color, line_alpha = line_alpha, ...)
+  args <- c(args, list(color = color, alpha = alpha))
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
@@ -114,8 +112,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
 
 #' @export
 ly_crect <- function(fig, x, y = NULL, data = NULL,
-  width = 1, height = 1, angle = 0, color = NULL, alpha = NULL,
-  fill_color = NULL, fill_alpha = 1, line_color = NULL, line_alpha = 1,
+  width = 1, height = 1, angle = 0, color = NULL, alpha = 1,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_crect")
@@ -125,26 +122,26 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    width      <- v_eval(substitute(width), data)
-    height     <- v_eval(substitute(height), data)
-    angle      <- v_eval(substitute(angle), data)
-    color      <- v_eval(substitute(color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
+    dots   <- substitute(list(...))[-1]
+    args   <- lapply(dots, function(x) v_eval(x, data))
+    x      <- v_eval(substitute(x), data)
+    y      <- v_eval(substitute(y), data)
+    width  <- v_eval(substitute(width), data)
+    height <- v_eval(substitute(height), data)
+    angle  <- v_eval(substitute(angle), data)
+    color  <- v_eval(substitute(color), data)
+  } else {
+    args <- list(...)
   }
 
   hover <- get_hover(substitute(hover), data)
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
+  xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
   lgroup <- get_lgroup(lgroup, fig)
 
-  args <- list(color = color, alpha = alpha,
-    width = width, height = height, angle = angle,
-    fill_color = fill_color, fill_alpha = fill_alpha,
-    line_color = line_color, line_alpha = line_alpha, ...)
+  args <- c(args, list(color = color, alpha = alpha,
+    width = width, height = height, angle = angle))
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 

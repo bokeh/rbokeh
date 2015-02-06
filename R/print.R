@@ -1,6 +1,5 @@
-#' Print a Bokeh Figure
-#'
-#' @param x Bokeh figure
+#' Print a Bokeh figure
+#' @param x BokehFigure object
 #' @param \ldots further arguments - most importantly \code{debug = TRUE}
 #' will print information about the figure in the javascript console in the
 #' web browser
@@ -29,6 +28,11 @@ plot.BokehFigure <- function(x, y, ...) {
   }
 }
 
+#' Print a Bokeh grid plot
+#' @param x BokehGridPlot object
+#' @param \ldots further arguments - most importantly \code{debug = TRUE}
+#' will print information about the figure in the javascript console in the
+#' web browser
 #'@export
 print.BokehGridPlot <- function(x, ...) {
   print(plot(x, y = NULL, ...))

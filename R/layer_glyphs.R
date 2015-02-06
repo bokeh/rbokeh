@@ -1,64 +1,62 @@
 
 #' Add an "annular_wedge" layer to a Bokeh figure
-#' @param x the x-coordinates of the centers of the annular wedges
-#' @param y the y-coordinates of the centers of the annular wedges
+#' @param fig figure to modify
+#' @param x values or field name of center x coordinates
+#' @param y values or field name of center y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
-#' @param inner_radius the inner radii of the annular wedges
-#' @param outer_radius The outer radii of the annular wedges
+#' @param inner_radius values or field name of inner radii
+#' @param outer_radius values or field name of outer radii
 #' @param start_angle the angles to start the annular wedges, in radians, as measured from the horizontal
 #' @param end_angle the angles to end the annular wedges, in radians, as measured from the horizontal
-#' @param direction which direction to stroke between the start and end angles ("clock", "anticlock")
+#' @param direction direction to turn between starting and ending angles ("anticlock", "clock")
 #' @template par-coloralpha
-#' @template par-fill
-#' @template par-line
 #' @template par-hover
 #' @template par-legend
 #' @template par-lnamegroup
-#' @param \ldots additional parameters
+#' @template dots-fillline
 #' @family layer functions
 #' @export
 ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
   inner_radius = 0.1, outer_radius = 0.3,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
-  color = NULL, alpha = NULL,
-  fill_color = NULL, fill_alpha = 0.75,
-  line_color = NULL, line_width = 1, line_alpha = NULL,
+  color = NULL, alpha = 1,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_annular_wedge")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "annular_wedge")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    color      <- v_eval(substitute(color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
-    line_color <- v_eval(substitute(line_color), data)
+    dots <- substitute(list(...))[-1]
+    args <- lapply(dots, function(x) v_eval(x, data))
+    x            <- v_eval(substitute(x), data)
+    y            <- v_eval(substitute(y), data)
+    color        <- v_eval(substitute(color), data)
     inner_radius <- v_eval(substitute(inner_radius), data)
     outer_radius <- v_eval(substitute(outer_radius), data)
-    start_angle <- v_eval(substitute(start_angle), data)
-    end_angle <- v_eval(substitute(end_angle), data)
+    start_angle  <- v_eval(substitute(start_angle), data)
+    end_angle    <- v_eval(substitute(end_angle), data)
+  } else {
+    args <- list(...)
   }
 
   hover <- get_hover(substitute(hover), data)
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
+  xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
   lgroup <- get_lgroup(lgroup, fig)
 
-  args <- list(glyph = "annular_wedge", color = color, alpha = alpha,
-    fill_color = fill_color, fill_alpha = fill_alpha,
-    line_color = line_color, line_width = line_width, line_alpha = line_alpha,
+  args <- c(args, list(glyph = "annular_wedge", color = color, alpha = alpha,
     inner_radius = inner_radius, outer_radius = outer_radius,
     start_angle = start_angle, end_angle = end_angle,
-    direction = direction, ...)
+    direction = direction))
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+
+  ## see if any options won't be used and give a message
+  check_opts(args, "annular_wedge")
 
   check_arc_direction(direction)
 
@@ -71,45 +69,57 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
     xname = xy_names$x, yname = xy_names$y)
 }
 
+#' Add an "annulus" layer to a Bokeh figure
+#' @param fig figure to modify
+#' @param x values or field name of center x coordinates
+#' @param y values or field name of center y coordinates
+#' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
+#' @param inner_radius values or field name of inner radii
+#' @param outer_radius values or field name of outer radii
+#' @template par-coloralpha
+#' @template par-hover
+#' @template par-legend
+#' @template par-lnamegroup
+#' @template dots-fillline
+#' @family layer functions
 #' @export
 ly_annulus <- function(fig, x, y = NULL, data = NULL,
   inner_radius = 0.1, outer_radius = 0.2,
-  color = NULL, alpha = NULL,
-  line_color = NULL, line_alpha = NULL,
-  fill_color = NULL, fill_alpha = 0.75,
+  color = NULL, alpha = 1,
   hover = NULL, legend = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_annulus")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "annulus")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
+    dots <- substitute(list(...))[-1]
+    args <- lapply(dots, function(x) v_eval(x, data))
     x            <- v_eval(substitute(x), data)
     y            <- v_eval(substitute(y), data)
     color        <- v_eval(substitute(color), data)
-    line_color   <- v_eval(substitute(line_color), data)
-    fill_color   <- v_eval(substitute(fill_color), data)
     inner_radius <- v_eval(substitute(inner_radius), data)
     outer_radius <- v_eval(substitute(outer_radius), data)
+  } else {
+    args <- list(...)
   }
 
   hover <- get_hover(substitute(hover), data)
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
+  xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
   lgroup <- get_lgroup(lgroup, fig)
 
-  args <- list(glyph = "annulus", color = color, alpha = alpha,
-    fill_color = fill_color, fill_alpha = fill_alpha,
-    line_color = line_color, line_alpha = line_alpha,
-    inner_radius = inner_radius, outer_radius = outer_radius, ...)
+  args <- c(args, list(glyph = "annulus", color = color, alpha = alpha,
+    inner_radius = inner_radius, outer_radius = outer_radius))
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+
+  ## see if any options won't be used and give a message
+  check_opts(args, "annulus")
 
   axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
@@ -120,17 +130,29 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
     xname = xy_names$x, yname = xy_names$y)
 }
 
-# doesn't seem to have hover...
+#' Add an "arc" layer to a Bokeh figure
+#' @param fig figure to modify
+#' @param x values or field name of center x coordinates
+#' @param y values or field name of center y coordinates
+#' @param y the y-coordinates of the centers of the ovals
+#' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
+#' @template par-lineprops
+#' @param radius values or field name of arc radii
+#' @param start_angle values or field name of starting angles
+#' @param end_angle values or field name of ending angles
+#' @param direction direction to turn between starting and ending angles ("anticlock", "clock")
+#' @template par-legend
+#' @template par-lnamegroup
+#' @template dots-line
+#' @family layer functions
 #' @export
 ly_arc <- function(fig, x, y = NULL, data = NULL,
-  color = NULL, alpha = NULL, line_width = 2,
+  color = NULL, alpha = 1, width = 2, type = 1,
   radius = 0.2,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
-  hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_arc")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "arc")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -146,7 +168,6 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
     line_width  <- v_eval(substitute(line_width), data)
   }
 
-  hover <- get_hover(substitute(hover), data)
   xy_names <- get_xy_names(x, y, xname, yname, list(...))
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -154,11 +175,13 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
 
   args <- list(glyph = "arc", color = color, alpha = alpha,
     radius = radius, start_angle = start_angle, end_angle = end_angle,
-    direction = direction,
-    line_width = line_width, start_angle = start_angle,
-    end_angle = end_angle, ...)
+    direction = direction, start_angle = start_angle, end_angle = end_angle,
+    width = width, type = type, ...)
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = FALSE, fig$layers[[lgroup]])
+  args <- update_line_opts(fig, args)
+
+  ## see if any options won't be used and give a message
+  check_opts(args, "arc")
 
   check_arc_direction(direction)
 
@@ -171,45 +194,58 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
     xname = xy_names$x, yname = xy_names$y)
 }
 
-# doesn't seem to have hover...
+#' Add an "oval" layer to a Bokeh figure
+#' @param fig figure to modify
+#' @param x values or field name of center x coordinates
+#' @param y values or field name of center y coordinates
+#' @param y the y-coordinates of the centers of the ovals
+#' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
+#' @param width values or field name of widths
+#' @param height values or field name of heights
+#' @param angle values or field name of rotation angles
+#' @template par-coloralpha
+#' @template par-legend
+#' @template par-lnamegroup
+#' @template dots-fillline
+#' @family layer functions
 #' @export
 ly_oval <- function(fig, x, y = NULL, data = NULL,
   width = 0.1, height = 0.1, angle = 0,
-  color = NULL, alpha = NULL, fill_color = NULL, fill_alpha = 0.75,
-  line_color = NULL, line_alpha = NULL,
-  hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  color = NULL, alpha = 1,
+  legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_oval")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "oval")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
-    x          <- v_eval(substitute(x), data)
-    y          <- v_eval(substitute(y), data)
-    color      <- v_eval(substitute(color), data)
-    fill_color <- v_eval(substitute(fill_color), data)
-    line_color <- v_eval(substitute(line_color), data)
-    width      <- v_eval(substitute(width), data)
-    height     <- v_eval(substitute(height), data)
-    angle      <- v_eval(substitute(angle), data)
+    dots   <- substitute(list(...))[-1]
+    args   <- lapply(dots, function(x) v_eval(x, data))
+    x      <- v_eval(substitute(x), data)
+    y      <- v_eval(substitute(y), data)
+    color  <- v_eval(substitute(color), data)
+    width  <- v_eval(substitute(width), data)
+    height <- v_eval(substitute(height), data)
+    angle  <- v_eval(substitute(angle), data)
+  } else {
+    args <- list(...)
   }
 
   hover <- get_hover(substitute(hover), data)
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
+  xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
   lgroup <- get_lgroup(lgroup, fig)
 
-  args <- list(glyph = "oval", color = color, alpha = alpha,
-    width = width, height = height, angle = angle,
-    fill_color = fill_color, fill_alpha = fill_alpha,
-    line_color = line_color, line_alpha = line_alpha, ...)
+  args <- c(args, list(glyph = "oval", color = color, alpha = alpha,
+    width = width, height = height, angle = angle))
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+
+  ## see if any options won't be used and give a message
+  check_opts(args, "oval")
 
   axis_type_range <- get_glyph_axis_type_range(x, y)
 
@@ -220,46 +256,61 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
     xname = xy_names$x, yname = xy_names$y)
 }
 
+#' Add a "wedge" layer to a Bokeh figure
+#' @param fig figure to modify
+#' @param x values or field name of center x coordinates
+#' @param y values or field name of center y coordinates
+#' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
+#' @param radius values or field name of wedge radii
+#' @param start_angle the angles to start the wedges, in radians, as measured from the horizontal
+#' @param end_angle the angles to end the wedges, in radians, as measured from the horizontal
+#' @param direction direction to turn between starting and ending angles ("anticlock", "clock")
+#' @template par-coloralpha
+#' @template par-hover
+#' @template par-legend
+#' @template par-lnamegroup
+#' @template dots-fillline
+#' @family layer functions
 #' @export
 ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
-  color = NULL, alpha = NULL, fill_color = NULL, fill_alpha = 0.75,
-  line_color = NULL, line_alpha = NULL,
+  color = NULL, alpha = 1,
   hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_wedge")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "wedge")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
+    dots        <- substitute(list(...))[-1]
+    args        <- lapply(dots, function(x) v_eval(x, data))
     x           <- v_eval(substitute(x), data)
     y           <- v_eval(substitute(y), data)
     color       <- v_eval(substitute(color), data)
-    fill_color  <- v_eval(substitute(fill_color), data)
-    line_color  <- v_eval(substitute(line_color), data)
     radius      <- v_eval(substitute(radius), data)
     start_angle <- v_eval(substitute(start_angle), data)
     end_angle   <- v_eval(substitute(end_angle), data)
+  } else {
+    args <- list(...)
   }
 
   hover <- get_hover(substitute(hover), data)
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
+  xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
   lgroup <- get_lgroup(lgroup, fig)
 
-  args <- list(glyph = "wedge", color = color, alpha = alpha,
+  args <- c(args, list(glyph = "wedge", color = color, alpha = alpha,
     radius = radius, start_angle = start_angle, end_angle = end_angle,
-    direction = direction,
-    fill_color = fill_color, fill_alpha = fill_alpha, line_color = line_color,
-    line_alpha = line_alpha, radius = radius, start_angle = start_angle,
-    end_angle = end_angle, direction = direction, ...)
+    direction = direction, radius = radius, start_angle = start_angle,
+    end_angle = end_angle, direction = direction))
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+
+  ## see if any options won't be used and give a message
+  check_opts(args, "wedge")
 
   check_arc_direction(direction)
 

@@ -2,7 +2,6 @@
 #' @export
 ly_line <- function(fig, x, y = NULL, data = NULL, group = NULL,
   color = "black", type = 1, width = 1, alpha = NULL,
-  line_join = 1, line_cap = "round",
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_line")
@@ -28,8 +27,7 @@ ly_line <- function(fig, x, y = NULL, data = NULL, group = NULL,
   lgroup <- get_lgroup(lgroup, fig)
 
   args <- list(glyph = "line", group = group, color = color,
-    width = width, type = type, line_join = line_join,
-    line_cap = line_cap, ...)
+    width = width, type = type, ...)
 
   args$alpha <- alpha
 
@@ -80,7 +78,6 @@ ly_line <- function(fig, x, y = NULL, data = NULL, group = NULL,
 #' @export
 ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
   color = NULL, alpha = NULL, width = 1, type = 1,
-  line_join = 1, line_cap = "round",
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   ## see if any options won't be used and give a message
@@ -108,8 +105,7 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
 
   args <- list(glyph = "segment", color = color,
     alpha = alpha, width = width,
-    type = type, line_join = line_join,
-    line_cap = line_cap, ...)
+    type = type, ...)
 
   args <- update_line_opts(fig, args)
 
@@ -226,7 +222,6 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
 #' @export
 ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
   color = "black", alpha = NULL, width = 1, type = 1,
-  line_join = 1, line_cap = "round",
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_curve")
@@ -256,8 +251,7 @@ ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
 
   args <- list(color = color,
     alpha = alpha, width = width,
-    type = type, line_join = line_join,
-    line_cap = line_cap, ...)
+    type = type, ...)
 
   args <- update_line_opts(fig, args)
 
@@ -269,8 +263,7 @@ ly_contour <- function(fig, image,
   x = seq(0, 1, length.out = nrow(image)), y = seq(0, 1, length.out = ncol(image)),
   nlevels = 10, levels = pretty(range(image, na.rm = TRUE), nlevels),
   color = "black", alpha = 0.75, width = 1,
-  type = 1, line_join = 1, line_cap = "round",
-  lname = NULL, lgroup = NULL, ...) {
+  type = 1, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_contour")
   ## see if any options won't be used and give a message
@@ -282,8 +275,7 @@ ly_contour <- function(fig, image,
 
   args <- list(color = color,
     alpha = alpha, width = width,
-    type = type, line_join = line_join,
-    line_cap = line_cap, ...)
+    type = type, ...)
 
   args <- update_line_opts(fig, args)
 
@@ -306,7 +298,6 @@ ly_contour <- function(fig, image,
 #' @export
 ly_ray <- function(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
   color = "black", type = 1, width = 1, alpha = NULL,
-  line_join = NULL, line_cap = NULL,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_ray")
@@ -332,8 +323,7 @@ ly_ray <- function(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
 
   args <- list(glyph = "ray", color = color,
     alpha = alpha, width = width, type = type,
-    length = length, angle = angle,
-    line_join = line_join, line_cap = line_cap, ...)
+    length = length, angle = angle, ...)
 
   args <- update_line_opts(fig, args)
 
