@@ -175,10 +175,10 @@ get_all_glyph_range <- function(ranges, padding_factor, axis_type = "numeric", l
 }
 
 ## give a little warning if any options are specified that won't be used
-check_opts <- function(opts, type) {
+check_opts <- function(opts, type, formals = NULL) {
   cur_glyph_props <- glyph_props[[type]]
 
-  valid_opts <- c("xlab", "ylab")
+  valid_opts <- c("glyph", "xlab", "ylab", formals)
   if(cur_glyph_props$lp)
     valid_opts <- c(valid_opts, line_prop_names)
   if(cur_glyph_props$fp)
@@ -435,14 +435,14 @@ map2df <- function(a) {
 }
 
 
-#' @importFrom bitops bitShiftL bitOr
-#' @export
-to_uint32 <- function(x) {
-  if(is.vector(x))
-    x <- matrix(x, nrow = 1)
-  bitOr(bitOr(bitOr(bitShiftL(x[,4], 24), bitShiftL(x[,3], 16)),
-    bitShiftL(x[,2], 8)), bitShiftL(x[,1], 0))
-}
+# # importFrom bitops bitShiftL bitOr
+# # export
+# to_uint32 <- function(x) {
+#   if(is.vector(x))
+#     x <- matrix(x, nrow = 1)
+#   bitOr(bitOr(bitOr(bitShiftL(x[,4], 24), bitShiftL(x[,3], 16)),
+#     bitShiftL(x[,2], 8)), bitShiftL(x[,1], 0))
+# }
 
 to_epoch <- function(x) {
   if(inherits(x, "Date")) {

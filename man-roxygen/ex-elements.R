@@ -1,3 +1,4 @@
+\donttest{
 # prepare data
 elements <- subset(elements, !is.na(group))
 elements$group <- as.character(elements$group)
@@ -47,3 +48,4 @@ ly_text(symx, massy, text = atomic.mass, data = elements,
   font_size = "6pt", align = "left", baseline = "middle")
 
 p
+}

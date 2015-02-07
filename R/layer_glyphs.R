@@ -14,6 +14,7 @@
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
+#' @example man-roxygen/ex-annwedge.R
 #' @family layer functions
 #' @export
 ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
@@ -56,7 +57,7 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
-  check_opts(args, "annular_wedge")
+  check_opts(args, "annular_wedge", names(formals(ly_annular_wedge)))
 
   check_arc_direction(direction)
 
@@ -81,6 +82,7 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
+#' @example man-roxygen/ex-annwedge.R
 #' @family layer functions
 #' @export
 ly_annulus <- function(fig, x, y = NULL, data = NULL,
@@ -119,7 +121,7 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
-  check_opts(args, "annulus")
+  check_opts(args, "annulus", formals = names(formals(ly_annulus)))
 
   axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
@@ -134,7 +136,6 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
 #' @param fig figure to modify
 #' @param x values or field name of center x coordinates
 #' @param y values or field name of center y coordinates
-#' @param y the y-coordinates of the centers of the ovals
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
 #' @template par-lineprops
 #' @param radius values or field name of arc radii
@@ -144,6 +145,7 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-line
+#' @example man-roxygen/ex-annwedge.R
 #' @family layer functions
 #' @export
 ly_arc <- function(fig, x, y = NULL, data = NULL,
@@ -165,7 +167,7 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
     radius      <- v_eval(substitute(radius), data)
     start_angle <- v_eval(substitute(start_angle), data)
     end_angle   <- v_eval(substitute(end_angle), data)
-    line_width  <- v_eval(substitute(line_width), data)
+    width       <- v_eval(substitute(width), data)
   }
 
   xy_names <- get_xy_names(x, y, xname, yname, list(...))
@@ -181,7 +183,7 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
   args <- update_line_opts(fig, args)
 
   ## see if any options won't be used and give a message
-  check_opts(args, "arc")
+  check_opts(args, "arc", formals = names(formals(ly_arc)))
 
   check_arc_direction(direction)
 
@@ -190,70 +192,7 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
   make_glyph(fig, type = "arc", lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
-    hover = hover, legend = legend,
-    xname = xy_names$x, yname = xy_names$y)
-}
-
-#' Add an "oval" layer to a Bokeh figure
-#' @param fig figure to modify
-#' @param x values or field name of center x coordinates
-#' @param y values or field name of center y coordinates
-#' @param y the y-coordinates of the centers of the ovals
-#' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
-#' @param width values or field name of widths
-#' @param height values or field name of heights
-#' @param angle values or field name of rotation angles
-#' @template par-coloralpha
-#' @template par-legend
-#' @template par-lnamegroup
-#' @template dots-fillline
-#' @family layer functions
-#' @export
-ly_oval <- function(fig, x, y = NULL, data = NULL,
-  width = 0.1, height = 0.1, angle = 0,
-  color = NULL, alpha = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
-
-  validate_fig(fig, "ly_oval")
-
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots   <- substitute(list(...))[-1]
-    args   <- lapply(dots, function(x) v_eval(x, data))
-    x      <- v_eval(substitute(x), data)
-    y      <- v_eval(substitute(y), data)
-    color  <- v_eval(substitute(color), data)
-    width  <- v_eval(substitute(width), data)
-    height <- v_eval(substitute(height), data)
-    angle  <- v_eval(substitute(angle), data)
-  } else {
-    args <- list(...)
-  }
-
-  hover <- get_hover(substitute(hover), data)
-  xy_names <- get_xy_names(x, y, xname, yname, args)
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- c(args, list(glyph = "oval", color = color, alpha = alpha,
-    width = width, height = height, angle = angle))
-
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
-
-  ## see if any options won't be used and give a message
-  check_opts(args, "oval")
-
-  axis_type_range <- get_glyph_axis_type_range(x, y)
-
-  make_glyph(fig, type = "oval", lname = lname, lgroup = lgroup,
-    data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
-    args = args, axis_type_range = axis_type_range,
-    hover = hover, legend = legend,
-    xname = xy_names$x, yname = xy_names$y)
+    legend = legend, xname = xy_names$x, yname = xy_names$y)
 }
 
 #' Add a "wedge" layer to a Bokeh figure
@@ -270,6 +209,7 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
+#' @example man-roxygen/ex-annwedge.R
 #' @family layer functions
 #' @export
 ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
@@ -310,7 +250,7 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
-  check_opts(args, "wedge")
+  check_opts(args, "wedge", formals = names(formals(ly_wedge)))
 
   check_arc_direction(direction)
 
@@ -322,5 +262,4 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
     hover = hover, legend = legend,
     xname = xy_names$x, yname = xy_names$y)
 }
-
 

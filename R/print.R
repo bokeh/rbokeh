@@ -87,6 +87,7 @@ registerMethods <- function(methods) {
   })
 }
 
+#' @importFrom knitr knit_print
 knit_print.BokehFigure <- function(x, ..., options = NULL) {
   knitr::knit_print(htmlwidgets:::toHTML(plot(x), standalone = FALSE, knitrOptions = options), options = options,  ...)
 }

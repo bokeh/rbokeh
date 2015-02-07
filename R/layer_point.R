@@ -1,5 +1,3 @@
-
-
 # major attribute specification:
 # type: what type of glyph to plot at each point
 # type can be any of the following:
@@ -9,15 +7,28 @@
 # or asterisk, circle, circle_cross, circle_x, cross, diamond, diamond_cross, inverted_triangle, square, square_cross, square_x, triangle, x
 # the integer-based types simply map to any of these named types but with different line and/or fill properties
 
-
-
+#' Add a "points" layer to a Bokeh figure
+#' @param fig figure to modify
+#' @param x values or field name of center x coordinates
+#' @param y values or field name of center y coordinates
+#' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
+#' @param glyph value(s) or field name of the glyph to use (see \code{\link{point_types}})
+#' @template par-coloralpha
+#' @param size size of the glyph in screen units
+#' @template par-hover
+#' @template par-legend
+#' @template par-lnamegroup
+#' @template dots-fillline
+#' @example man-roxygen/ex-points.R
+#' @example man-roxygen/ex-lines.R
+#' @family layer functions
 #' @export
-ly_point <- function(fig, x, y = NULL, data = NULL,
+ly_points <- function(fig, x, y = NULL, data = NULL,
   glyph = 21, color = NULL, alpha = 1, size = 10,
   hover = NULL, legend = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
-  validate_fig(fig, "ly_point")
+  validate_fig(fig, "ly_points")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -69,7 +80,7 @@ ly_point <- function(fig, x, y = NULL, data = NULL,
       cur_idx <- df_split[[ii]]
       # cur_glyph <- paste("glyph_")
 
-      fig <- do.call(ly_point,
+      fig <- do.call(ly_points,
         c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)), args[-idx],
           list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
             glyph = subset_with_attributes(gl, cur_idx[1]), lgroup = lgroup,
@@ -86,7 +97,7 @@ ly_point <- function(fig, x, y = NULL, data = NULL,
 
   ## see if any options won't be used and give a message
   if(args$glyph %in% names(marker_dict))
-    check_opts(args, args$glyph)
+    check_opts(args, args$glyph, formals = names(formals(ly_points)))
 
   axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y, glyph = glyph)
 

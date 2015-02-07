@@ -19,8 +19,10 @@ print_model_json(fig, prepare = TRUE, pretty = TRUE, pbcopy = FALSE)
 Print the JSON of a Bokeh figure
 }
 \examples{
-p <- figure() \%>\% ly_point(1:10) \%>\%
+\donttest{
+p <- figure() \%>\% ly_points(1:10) \%>\%
  tool_pan(dimensions = "height")
 print_model_json(p)
+}
 }
 

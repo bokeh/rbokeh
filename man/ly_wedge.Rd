@@ -62,7 +62,7 @@ When color is \code{NULL} and \code{fill_color} or \code{line_color} are not spe
 }
 
 \section{Mapped plot attributes and legends}{
- When specifying an input data frame for a layer through the \code{data} argument, columns of \code{data} can be used to specify various plot attributes such as \code{color}, etc. For example, with \code{ly_point(..., data = iris, color = Species)}, the \code{Species} variable is used to determine how to color the points.  Here, \code{Species} is "mapped" to the \code{color} attribute.  Both continuous and categorical variables can be mapped.  In the case of continuous variables, the range is cut into slices and attributes are applied to each interval.  The mapping from the values of the variable to the actual plot attributes is determined based on the theme.
+ When specifying an input data frame for a layer through the \code{data} argument, columns of \code{data} can be used to specify various plot attributes such as \code{color}, etc. For example, with \code{ly_points(..., data = iris, color = Species)}, the \code{Species} variable is used to determine how to color the points.  Here, \code{Species} is "mapped" to the \code{color} attribute.  Both continuous and categorical variables can be mapped.  In the case of continuous variables, the range is cut into slices and attributes are applied to each interval.  The mapping from the values of the variable to the actual plot attributes is determined based on the theme.
 }
 
 \section{Additional parameters}{
@@ -79,9 +79,48 @@ When color is \code{NULL} and \code{fill_color} or \code{line_color} are not spe
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+\examples{
+\donttest{
+rescale <- function(x)
+  (x - min(x)) / diff(range(x))
+
+figure() \%>\%
+  ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris,
+    end_angle = rescale(Petal.Length)*2*pi, color = Species,
+    inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5,
+    hover = Species)
+
+figure() \%>\%
+  ly_wedge(Sepal.Length, Sepal.Width, data = iris,
+    end_angle = rescale(Petal.Length)*2*pi, color = Species,
+    radius = 0.15, alpha = 0.5,
+    hover = Species)
+
+figure() \%>\%
+  ly_arc(Sepal.Length, Sepal.Width, data = iris,
+    end_angle = rescale(Petal.Length)*2*pi, color = Species,
+    alpha = 0.5)
+
+figure() \%>\%
+  ly_annulus(Sepal.Length, Sepal.Width, data = iris,
+    color = Species, hover = Species,
+    outer_radius = rescale(Petal.Length) * 0.3,
+    inner_radius = rescale(Petal.Length) * 0.1)
+}
+}
 \seealso{
-Other layer functions: \code{\link{ly_annular_wedge}};
-  \code{\link{ly_annulus}}; \code{\link{ly_arc}};
-  \code{\link{ly_oval}}
+Other layer functions: \code{\link{ly_abline}};
+  \code{\link{ly_annular_wedge}}; \code{\link{ly_annulus}};
+  \code{\link{ly_arc}}; \code{\link{ly_bezier}};
+  \code{\link{ly_boxplot}}; \code{\link{ly_contour}};
+  \code{\link{ly_crect}}; \code{\link{ly_curve}};
+  \code{\link{ly_density}}; \code{\link{ly_hist}};
+  \code{\link{ly_image_url}}; \code{\link{ly_image}};
+  \code{\link{ly_lines}}; \code{\link{ly_map}};
+  \code{\link{ly_oval}}; \code{\link{ly_patch}};
+  \code{\link{ly_points}}; \code{\link{ly_polygons}};
+  \code{\link{ly_quadratic}}; \code{\link{ly_quantile}};
+  \code{\link{ly_ray}}; \code{\link{ly_rect}};
+  \code{\link{ly_segments}}; \code{\link{ly_text}}
 }
 

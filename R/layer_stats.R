@@ -1,7 +1,16 @@
+
+#' Add a "hist" layer to a Bokeh figure
+#' Draws a histogram
+#' @param fig figure to modify
+#' @param x,breaks,freq,include.lowest,right parameters passed to \code{\link[graphics]{hist}}
+#' @param data an optional data frame, providing the source for x
+#' @template par-coloralpha
+#' @template par-lnamegroup
+#' @template dots-fillline
+#' @family layer functions
 #' @export
-ly_hist <- function(fig, x, group = NULL, data = NULL,
+ly_hist <- function(fig, x, data = NULL,
   breaks = "Sturges", freq = TRUE, include.lowest = TRUE, right = TRUE,
-  density = NULL, angle = 45, warn.unused = FALSE,
   color = NULL, alpha = 1,
   lname = NULL, lgroup = NULL, ...) {
 
@@ -16,14 +25,10 @@ ly_hist <- function(fig, x, group = NULL, data = NULL,
     # group <- v_eval(substitute(group), data)
   }
 
-  xy_names <- get_xy_names(NULL, NULL, xname, yname, list(...))
-
   lgroup <- get_lgroup(lgroup, fig)
 
   hh <- graphics::hist.default(x = x, breaks = breaks,
-    freq = freq, include.lowest = include.lowest, right = right,
-    density = density, angle = angle, col = col,
-    warn.unused = warn.unused, plot = FALSE)
+    include.lowest = include.lowest, right = right, plot = FALSE)
 
   args <- list(color = color, alpha = alpha, ...)
 
@@ -38,10 +43,21 @@ ly_hist <- function(fig, x, group = NULL, data = NULL,
   do.call(ly_rect, c(list(fig = fig,
     xleft = hh$breaks[-length(hh$breaks)],
     xright = hh$breaks[-1], ytop = y, ybottom = 0,
-    xlab = xy_names$x, ylab = xy_names$y,
+    xlab = xname, ylab = yname,
     lname = lname, lgroup = lgroup), args))
 }
 
+
+#' Add a "density" layer to a Bokeh figure
+#' Draws a histogram
+#' @param fig figure to modify
+#' @param x,bw,adjust,kernel,weights,window,n,cut,na.rm parameters passed to \code{\link[stats]{density}}
+#' @param data an optional data frame, providing the source for x
+#' @template par-lineprops
+#' @param legend text to display in the legend entry for the density line
+#' @template par-lnamegroup
+#' @template dots-line
+#' @family layer functions
 #' @export
 ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
   kernel = c("gaussian", "epanechnikov", "rectangular", "triangular",
@@ -75,17 +91,31 @@ ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
 
   dd <- stats::density.default(x = x, bw = bw, adjust = adjust, kernel = kernel, n = n, cut = 3, na.rm = na.rm)
 
-  do.call(ly_line, c(list(fig = fig, x = dd$x, y = dd$y, xlab = xname, ylab = yname), args))
+  do.call(ly_lines, c(list(fig = fig, x = dd$x, y = dd$y, xlab = xname, ylab = yname), args))
 }
 
 # ly_rug
 
+
+#' Add a "quantile" layer to a Bokeh figure
+#' Draws quantiles
+#' @param fig figure to modify
+#' @param x numeric vector or field name of variable to compute sample quantiles for
+#' @param group values or field name of a grouping variable to break quantile computations up by
+#' @param data an optional data frame, providing the source for x
+#' @param probs numeric vector of probabilities with values in \code{[0,1]} at which to compute quantiles - if \code{NULL}, every point of \code{x} is a quantile
+#' @param distn quantile function to use on the x-axis (e.g. \code{\link[stats]{qnorm}}) - default is \code{\link[stats]{qunif}},
+#' @param ncutoff if the length of \code{x} exceeds this value and \code{probs} is not specified, compute quantiles at \code{ncutoff} points
+#' @template par-coloralpha
+#' @template par-legend
+#' @template par-lnamegroup
+#' @template dots-fillline
+#' @family layer functions
 #' @export
 ly_quantile <- function(fig, x, group = NULL, data = NULL,
   probs = NULL, distn = qunif, ncutoff = 200,
   color = NULL, alpha = 1,
-  legend = TRUE,
-  lname = NULL, lgroup = NULL, ...) {
+  legend = TRUE, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_quantile")
 
@@ -145,7 +175,7 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
         cur_legend <- legend
       }
 
-      fig <- do.call(ly_point, c(list(fig = fig, x = ff, y = qq,
+      fig <- do.call(ly_points, c(list(fig = fig, x = ff, y = qq,
         xlab = xname, ylab = yname,
         lgroup = lgroup, legend = cur_legend), args))
     }
@@ -153,11 +183,20 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
   fig
 }
 
+#' Add a "boxplot" layer to a Bokeh figure
+#' @param fig figure to modify
+#' @param x either a numeric vector or a factor
+#' @param y either a numeric vector or a factor
+#' @param data an optional data frame, providing the source for x and y
+#' @param coef see \code{\link[grDevices]{boxplot.stats}}
+#' @template par-coloralpha
+#' @template par-lnamegroup
+#' @template dots-fillline
+#' @family layer functions
 #' @export
 ly_boxplot <- function(fig, x, y = NULL, data = NULL,
-  coef = 1.5, line_color = "black",
-  line_alpha = 1, line_width = 2,
-  fill_color = "lightblue", fill_alpha = 0.5,
+  coef = 1.5,
+  color = "blue", alpha = 1,
   lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_boxplot")
@@ -188,9 +227,9 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
       y <- as.character(y)
   }
 
-  args <- list(line_color = line_color, line_alpha = line_alpha,
-    line_width = line_width, fill_color = fill_color,
-    fill_alpha = fill_alpha, ...)
+  args <- list(color = color, alpha = alpha, ...)
+
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE)
 
   fill_ind <- grepl("^fill_", names(args))
 
@@ -243,7 +282,7 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
     fig <- do.call(ly_segments, c(list(fig = fig, x0 = c(gp, gp, gpr, gpr), y0 = c(bp$stats[1], bp$stats[4], bp$stats[1], bp$stats[5]), x1 = c(gp, gp, gpl, gpl), y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5])), args[!fill_ind]))
 
     if(length(bp$out) > 0) {
-      fig <- do.call(ly_point, c(list(fig = fig, x = rep(gp, length(bp$out)), y = bp$out, type = 1), args))
+      fig <- do.call(ly_points, c(list(fig = fig, x = rep(gp, length(bp$out)), y = bp$out, type = 1), args))
     }
   }
 

@@ -12,6 +12,9 @@ Imports:
     methods,
     magrittr,
     digest,
-    maps
+    maps,
+    RJSONIO,
+    hexbin,
+    knitr
 Suggests:
     testthat

@@ -2,7 +2,7 @@
 % Please edit documentation in R/point_types.R
 \name{point_types}
 \alias{point_types}
-\title{Display glyph types available for ly_point()}
+\title{Display glyph types available for ly_points()}
 \usage{
 point_types(size = 25, color = "blue")
 }
@@ -12,6 +12,6 @@ point_types(size = 25, color = "blue")
 \item{color}{color to use for line and fill properties}
 }
 \description{
-Display glyph types available for ly_point()
+Display glyph types available for ly_points()
 }
 

@@ -24,10 +24,12 @@ y_axis(fig, label, position = "left", log = FALSE, grid = TRUE,
 Add y axis to a Bokeh figure
 }
 \examples{
+\donttest{
 figure() \%>\%
-  ly_point(rexp(1000), rexp(1000)) \%>\%
+  ly_points(rexp(1000), rexp(1000)) \%>\%
   x_axis(label = "x", log = TRUE) \%>\%
   y_axis(label = "y", log = TRUE)
+}
 }
 \seealso{
 Other axes: \code{\link{x_axis}}

@@ -8,14 +8,18 @@
 #' @param style type of plotting for hexbins (see \code{\link[hexbin]{grid.hexagons}}) - "colorramp" and "lattice" are currently supported
 #' @param trans,inv transformation and inverse transformation function for the bin counts
 #' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
-#' @param fill logical - should hexagons be filled?
 #' @param line logical - should hexagons have an outline?
+#' @param alpha the alpha transparency of the hexagons between 0 (transparent) and 1 (opaque)
 #' @param hover logical - should a hover tool be added to show the count in each hexagon?
+#' @examples
+#' \donttest{
+#' figure() %>% ly_hexbin(rnorm(10000), rnorm(10000))
+#' }
 #' @export
 ly_hexbin <- function(fig, x, y, data = NULL,
   xbins = 30, shape = 1, style = "colorscale",
   trans = NULL, inv = NULL,
-  palette = "RdYlGn11", fill = TRUE, line = FALSE, hover = TRUE) {
+  palette = "RdYlGn11", line = FALSE, alpha = 1, hover = TRUE) {
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -56,13 +60,22 @@ ly_hexbin <- function(fig, x, y, data = NULL,
   }
   names(hbd$data)[1:2] <- c(xname, yname)
 
-  fig %>% ly_polygon(xs = hbd$xs, ys = hbd$ys, color = col, hover = hbd$data,
-    xlab = xname, ylab = yname)
+  if(!line) {
+    line_color <- NA
+  } else {
+    line_color <- col
+  }
+
+  fig %>% ly_polygons(xs = hbd$xs, ys = hbd$ys, color = NULL,
+    fill_color = col, alpha = NULL,
+    fill_alpha = alpha, line_color = line_color,
+    hover = hbd$data, xlab = xname, ylab = yname)
 }
-# figure() %>% ly_hexbin(rnorm(1000), rnorm(1000), style = "lattice")
 
 
-
+#' @importFrom hexbin hexbin
+#' @importFrom hexbin hcell2xy
+#' @importFrom hexbin hexcoords
 get_hexbin_data <- function(x, y, xbins = 30, shape = 1, xbnds = range(x), ybnds = range(y),
   style = "lattice", minarea = 0.04, maxarea = 0.8, mincnt = 1, maxcnt = NULL, trans = NULL, inv = NULL) {
 

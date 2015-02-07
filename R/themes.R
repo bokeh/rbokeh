@@ -15,8 +15,13 @@ tableau_colors <- list(BlueRed12 = c("#2C69B0", "#B5C8E2", "#F02720", "#FFB6B0",
   TrafficLight = c("#B10318", "#DBA13A", "#309343", "#D82526", "#FFC156", "#69B764", "#F26C64", "#FFDD71", "#9FCD99")
 )
 
+#' Scales for themes
+#' @rdname scales
+#' @param pal palette name
+#' @param min minimum value
+#' @param max maximum value
 #' @export
-tableau_pal <- function(pal = "Tableau10") {
+scale_tableau_pal <- function(pal = "Tableau10") {
   pal <- tableau_colors[[pal]]
   function(n) {
     if(n > length(pal))
@@ -24,10 +29,11 @@ tableau_pal <- function(pal = "Tableau10") {
     pal[(seq_len(n) - 1) %% length(pal) + 1]
   }
 }
-# show_col(tableau_pal("Tableau20")(20))
+# show_col(scale_tableau_pal("Tableau20")(20))
 
+#' @rdname scales
 #' @export
-glyph_scale <- function() {
+scale_glyph <- function() {
   function(n) {
     pal <- c("circle", "square", "triangle", "diamond", "circle_cross", "circle_x", "cross", "diamond_cross", "inverted_triangle","square_cross", "square_x", "x", "asterisk")
     if(n > length(pal))
@@ -36,20 +42,23 @@ glyph_scale <- function() {
   }
 }
 
+#' @rdname scales
 #' @export
-continuous_pal <- function() {
+scale_continuous_pal <- function() {
   colorRampPalette(c("#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B"))
 }
 
-# add trans and inv
+#' @rdname scales
 #' @export
-size_scale <- function(min = 2, max = 20) {
+scale_size <- function(min = 2, max = 20) {
   function(n) {
     seq(min, max, length = n)
   }
 }
 
-line_dash_scale <- function() {
+#' @rdname scales
+#' @export
+scale_line_dash <- function() {
   function(n) {
     dashes <- as.character(1:6)
     if(n > 6)
@@ -58,7 +67,9 @@ line_dash_scale <- function() {
   }
 }
 
-line_width_scale <- function() {
+#' @rdname scales
+#' @export
+scale_line_width <- function() {
   function(n) {
     dashes <- as.character(1:6)
     if(n > 6)
@@ -67,6 +78,18 @@ line_width_scale <- function() {
   }
 }
 
+bk_theme <- list(
+  glyph = list(discrete = scale_glyph(), continuous = scale_glyph()),
+  line_color = list(discrete = scale_tableau_pal("Tableau10"), continuous = scale_continuous_pal()),
+  fill_color = list(discrete = scale_tableau_pal("Tableau10"), continuous = scale_continuous_pal()),
+  text_color = list(discrete = scale_tableau_pal("Tableau10"), continuous = scale_continuous_pal()),
+  size = list(discrete = scale_size(), continuous = scale_size()),
+  line_dash = list(discrete = scale_line_dash(), continuous = scale_line_dash()),
+  line_width = list(discrete = scale_line_width(), continuous = scale_line_width())
+)
+
+
+
 ## theme
 tableau_theme <- list(
   line = tableau_colors$Tableau10,
@@ -74,15 +97,6 @@ tableau_theme <- list(
   ## more stuff here
 )
 
-bk_theme <- list(
-  glyph = list(discrete = glyph_scale(), continuous = glyph_scale()),
-  line_color = list(discrete = tableau_pal("Tableau10"), continuous = continuous_pal()),
-  fill_color = list(discrete = tableau_pal("Tableau10"), continuous = continuous_pal()),
-  text_color = list(discrete = tableau_pal("Tableau10"), continuous = continuous_pal()),
-  size = list(discrete = size_scale(), continuous = size_scale()),
-  line_dash = list(discrete = line_dash_scale(), continuous = line_dash_scale()),
-  line_width = list(discrete = line_width_scale(), continuous = line_width_scale())
-)
 
 
 # http://www.w3.org/TR/css3-color/#svg-color

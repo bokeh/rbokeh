@@ -1,11 +1,12 @@
+\donttest{
 tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "resize", "reset")
 
 p1 <- figure(tools = tools) %>%
-  ly_point(Sepal.Length, Sepal.Width, data = iris,
+  ly_points(Sepal.Length, Sepal.Width, data = iris,
     color = Species, hover = list(Sepal.Length, Sepal.Width))
 
 p2 <- figure(tools = tools) %>%
-  ly_point(Petal.Length, Petal.Width, data = iris,
+  ly_points(Petal.Length, Petal.Width, data = iris,
     color = Species, hover = list(Sepal.Length, Sepal.Width))
 
 # 1 row, 2 columns
@@ -21,3 +22,4 @@ grid_plot(list(p1, p2), ncol = 1)
 # send lists instead of specifying nrow and ncol
 grid_plot(list(c(list(p1), list(p2))))
 grid_plot(list(list(p1), list(p2)))
+}

@@ -4,9 +4,11 @@
 #' @param pretty parameter passed on to \code{\link[RJSONIO]{toJSON}}
 #' @param pbcopy logical - if on OSX, should the results be passed to the clipboard (TRUE) instead of printed to the screen (FALSE)?
 #' @examples
-#' p <- figure() %>% ly_point(1:10) %>%
+#' \donttest{
+#' p <- figure() %>% ly_points(1:10) %>%
 #'  tool_pan(dimensions = "height")
 #' print_model_json(p)
+#' }
 #' @importFrom RJSONIO toJSON
 #' @export
 print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, pbcopy = FALSE) {

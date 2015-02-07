@@ -18,9 +18,11 @@ Add "pan" tool to a Bokeh figure
 Tools can be easily specified as a vector of tool names in the \code{tools} argument when instantiating a \code{\link{figure}}.  In this case, they are added with defaults.  Explicitly calling these \code{tool_} functions will manually add the tool to a figure and allow additional specification of parameters.
 }
 \examples{
+\donttest{
 # only pan on x axis
-figure() \%>\% ly_point(1:10) \%>\%
+figure() \%>\% ly_points(1:10) \%>\%
  tool_pan(dimensions = "height")
+}
 }
 \seealso{
 Other tools: \code{\link{tool_box_select}};

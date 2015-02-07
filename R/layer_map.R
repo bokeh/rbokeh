@@ -1,3 +1,12 @@
+
+#' Add a "map" layer to a Bokeh figure
+#' Draws lines and polygons as specified by a map database
+#' @param fig figure to modify
+#' @param database,regions parameters passed to \code{\link[maps]{map}}
+#' @template par-coloralpha
+#' @template par-lnamegroup
+#' @template dots-fillline
+#' @family layer functions
 #' @import maps
 #' @export
 ly_map <- function(fig, database = "world", regions = ".",
@@ -19,6 +28,7 @@ ly_map <- function(fig, database = "world", regions = ".",
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
-  do.call(ly_polygon, c(list(fig = fig, xs = dd$lon, ys = dd$lat, group = dd$group, lname = lname, lgroup = lgroup, xlab = xy_names$x, ylab = xy_names$y), args))
+  do.call(ly_polygons, c(list(fig = fig, xs = dd$lon, ys = dd$lat, group = dd$group,
+    lname = lname, lgroup = lgroup, xlab = xy_names$x, ylab = xy_names$y), args))
 }
 

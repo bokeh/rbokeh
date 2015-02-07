@@ -1,29 +1,33 @@
 
-
-# x The x-coordinates to locate the text anchors.
-# y The y-coordinates to locate the text anchors.
-# text The text values to render.
-# align The text align values for the text ("left", "right", "center")
-# alpha The text alpha values for the text.
-# baseline The text baseline values for the text ("top", "middle", "bottom", "alphabetic", "hanging")
-# color The text color values for the text.
-# font The text font values for the text.
-# font_size The text font size values for the text.
-# font_style The text font style values for the text ("normal", "italic", "bold")
-# x_offset Offset values to apply to the x-coordinates.
-# y_offset Offset values to apply to the y-coordinates.
-
+#' Add a "text" layer to a Bokeh figure
+#' @param fig figure to modify
+#' @param x x coordinates of text anchors
+#' @param y y coordinates of text anchors
+#' @param text text values to render
+#' @param data an optional data frame, providing the source for inputs x, y, text, and other glyph properties
+#' @param color text color values for the text
+#' @param alpha text alpha values for the text
+#' @param angle angle to rotate the text in radians
+#' @param align text align values for the text ("left", "right", "center")
+#' @param baseline text baseline values for the text ("top", "middle", "bottom", "alphabetic", "hanging")
+#' @param font text font values for the text
+#' @param font_size text font size values for the text
+#' @param font_style text font style values for the text ("normal", "italic", "bold")
+#' @param x_offset offset values to apply to the x-coordinates
+#' @param y_offset offset values to apply to the y-coordinates
+#' @template par-legend
+#' @template par-lnamegroup
+#' @example man-roxygen/ex-elements.R
+#' @family layer functions
 #' @export
 ly_text <- function(fig, x, y = NULL, text = NULL, data = NULL,
   color = "black", alpha = 1,
   angle = 0, align = NULL, baseline = NULL,
   font = NULL, font_size = NULL, font_style = NULL,
   x_offset = NULL, y_offset = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL) {
 
   validate_fig(fig, "ly_text")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "text")
 
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
@@ -36,11 +40,11 @@ ly_text <- function(fig, x, y = NULL, text = NULL, data = NULL,
     angle       <- v_eval(substitute(angle), data)
     font_size   <- v_eval(substitute(font_size), data)
   }
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
+  xy_names <- get_xy_names(x, y, xname, yname, NULL)
   xy <- get_xy_data(x, y)
   lgroup <- get_lgroup(lgroup, fig)
 
-  args <- list(glyph = "text", ...)
+  args <- list(glyph = "text")
   args$text_color <- color
   args$angle <- angle
   args$text_align <- align

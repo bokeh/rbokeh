@@ -1,5 +1,5 @@
 
-#' Display glyph types available for ly_point()
+#' Display glyph types available for ly_points()
 #' @param size size of the glyph
 #' @param color color to use for line and fill properties
 #' @export
@@ -14,7 +14,7 @@ point_types <- function(size = 25, color = "blue") {
   for(ii in seq_along(types)) {
     cur_grid <- as.character(grid[ii,])
     f <- f %>%
-      ly_point(cur_grid[1], cur_grid[2],
+      ly_points(cur_grid[1], cur_grid[2],
        glyph = types[[ii]], color = color, size = size)
   }
 
@@ -22,5 +22,5 @@ point_types <- function(size = 25, color = "blue") {
     ly_text(as.character(grid[,1]),
       paste(as.character(grid[,2]), ":0.15", sep = ""),
       unlist(types),
-      text_align = "center", text_baseline = "bottom")
+      align = "center", baseline = "bottom")
 }

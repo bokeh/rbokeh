@@ -1,672 +1,177 @@
 
-test_that("markers", {
-  alpha <- c(6:2) / 10
-  colors <- c("pink", "orange", "red", "blue", "green")
-  xr <- yr <- c(0, 6)
+test_that("examples", {
 
-  ### asterisk
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "asterisk",
-    line_color = colors, size = seq(12, 40, length = 5),
-    line_width = c(2:6) / 2)
-  a
+  # rescale <- function(x)
+  #   (x - min(x)) / diff(range(x))
+  # figure() %>%
+  #   ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris,
+  #     end_angle = rescale(Petal.Length)*2*pi, color = Species,
+  #     inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5,
+  #     hover = Species)
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # figure() %>%
+  #   ly_wedge(Sepal.Length, Sepal.Width, data = iris,
+  #     end_angle = rescale(Petal.Length)*2*pi, color = Species,
+  #     radius = 0.15, alpha = 0.5,
+  #     hover = Species)
 
-  ### circle (no radius)
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "circle",
-    size = seq(12, 40, length = 5),
-    line_color = colors, fill_color = colors, fill_alpha = 0.5)
-  a
+  # figure() %>%
+  #   ly_arc(Sepal.Length, Sepal.Width, data = iris,
+  #     end_angle = rescale(Petal.Length)*2*pi, color = Species,
+  #     alpha = 0.5)
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # figure() %>%
+  #   ly_annulus(Sepal.Length, Sepal.Width, data = iris,
+  #     color = Species, hover = Species,
+  #     outer_radius = rescale(Petal.Length) * 0.3,
+  #     inner_radius = rescale(Petal.Length) * 0.1)
 
-  ### circle_cross
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "circle_cross",
-    size = seq(12, 40, length = 5),
-    line_color = colors, fill_color = colors, fill_alpha = 0.5)
-  a
+  # figure() %>%
+  #   ly_points(rexp(1000), rexp(1000)) %>%
+  #   x_axis(label = "x", log = TRUE) %>%
+  #   y_axis(label = "y", log = TRUE)
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # figure(ylab = "Height (inches)", width = 600) %>%
+  #   ly_boxplot(voice.part, height, data = lattice::singer)
 
-  ### circle_x
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "circle_x",
-    size = seq(12, 40, length = 5),
-    line_color = colors, fill_color = colors, fill_alpha = 0.5)
-  a
+  # # prepare data
+  # elements <- subset(elements, !is.na(group))
+  # elements$group <- as.character(elements$group)
+  # elements$period <- as.character(elements$period)
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # # add colors for groups
+  # metals <- c("alkali metal", "alkaline earth metal", "halogen",
+  #   "metal", "metalloid", "noble gas", "nonmetal", "transition metal")
+  # colors <- c("#a6cee3", "#1f78b4", "#fdbf6f", "#b2df8a", "#33a02c",
+  #   "#bbbb88", "#baa2a6", "#e08e79")
+  # elements$color <- colors[match(elements$metal, metals)]
+  # elements$type <- elements$metal
 
-  ### cross
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "cross",
-    size = seq(12, 40, length = 5),
-    line_width = 3, line_color = colors)
-  a
+  # # make coordinates for labels
+  # elements$symx <- paste(elements$group, ":0.1", sep = "")
+  # elements$numbery <- paste(elements$period, ":0.8", sep = "")
+  # elements$massy <- paste(elements$period, ":0.15", sep = "")
+  # elements$namey <- paste(elements$period, ":0.3", sep = "")
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # # create figure
+  # p <- figure(title = "Periodic Table", tools = c("resize", "hover"),
+  #   ylim = as.character(c(7:1)), xlim = as.character(1:18),
+  #   xgrid = FALSE, ygrid = FALSE, xlab = "", ylab = "",
+  #   height = 600, width = 1200) %>%
 
-  ### diamond
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "diamond",
-    size = seq(12, 40, length = 5),
-    line_color = colors, fill_color = colors, fill_alpha = 0.5)
-  a
+  # # plot rectangles
+  # ly_crect(group, period, data = elements, 0.9, 0.9,
+  #   fill_color = color, line_color = color, fill_alpha = 0.6,
+  #   hover = list(name, atomic.number, type, atomic.mass,
+  #     electronic.configuration)) %>%
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # # add symbol text
+  # ly_text(symx, period, text = symbol, data = elements,
+  #   font_style = "bold", font_size = "15pt",
+  #   align = "left", baseline = "middle") %>%
 
-  ### diamond_cross
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "diamond_cross",
-    size = seq(12, 40, length = 5),
-    line_color = colors, fill_color = colors, fill_alpha = 0.5)
-  a
+  # # add atomic number text
+  # ly_text(symx, numbery, text = atomic.number, data = elements,
+  #   font_size = "9pt", align = "left", baseline = "middle") %>%
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # # add name text
+  # ly_text(symx, namey, text = name, data = elements,
+  #   font_size = "6pt", align = "left", baseline = "middle") %>%
 
-  ### inverted_triangle
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "inverted_triangle",
-    size = seq(12, 40, length = 5),
-    line_color = colors, fill_color = colors, fill_alpha = 0.5)
-  a
+  # # add atomic mass text
+  # ly_text(symx, massy, text = atomic.mass, data = elements,
+  #   font_size = "6pt", align = "left", baseline = "middle")
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # p
 
-  ### square
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "square",
-    size = seq(12, 40, length = 5),
-    line_color = colors, fill_color = colors, fill_alpha = 0.5)
-  a
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # p <- figure(width = 1000) %>%
+  #   ly_points(date, Freq, data = flightfreq,
+  #     hover = list(date, Freq, dow), size = 5) %>%
+  #   ly_abline(v = as.Date("2001-09-11"))
+  # p
 
-  ### square_cross
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "square_cross",
-    size = seq(12, 40, length = 5),
-    line_color = colors,
-    fill_color = colors, fill_alpha = 0.5)
-  a
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # p1 <- figure(tools = tools) %>%
+  #   ly_points(Sepal.Length, Sepal.Width, data = iris,
+  #     color = Species, hover = list(Sepal.Length, Sepal.Width))
 
-  ### square_x
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "square_x",
-    size = seq(12, 40, length = 5),
-    line_color = colors, fill_color = colors, fill_alpha = 0.5)
-  a
+  # p2 <- figure(tools = tools) %>%
+  #   ly_points(Petal.Length, Petal.Width, data = iris,
+  #     color = Species, hover = list(Sepal.Length, Sepal.Width))
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "resize", "reset")
 
-  ### triangle
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "triangle",
-    size = seq(12, 40, length = 5),
-    line_color = colors, fill_color = colors, fill_alpha = 0.5)
-  a
+  # # 1 row, 2 columns
+  # grid_plot(list(p1, p2))
+  # # x and y axis with same (and linked) limits
+  # grid_plot(list(p1, p2), same_axes = TRUE)
+  # # x axis has same (and linked) limits
+  # grid_plot(list(p1, p2), same_axes = c(TRUE, FALSE))
+  # # same axes and data is linked (try box_select tool)
+  # grid_plot(list(p1, p2), same_axes = TRUE, link_data = TRUE)
+  # # 1 column, 2 rows
+  # grid_plot(list(p1, p2), ncol = 1)
+  # # send lists instead of specifying nrow and ncol
+  # grid_plot(list(c(list(p1), list(p2))))
+  # grid_plot(list(list(p1), list(p2)))
 
-  a$xlim <- a$ylim <- NULL
-  a
+  # p <- figure(xlim = c(0, 1), ylim = c(0, 1), title = "Volcano") %>%
+  #   ly_image(volcano) %>%
+  #   ly_contour(volcano)
+  # p
 
-  ### x
-  a <- figure(xlim = xr, ylim = yr) %>%
-    lay_points(x = 1:5, y = 5:1, type = "x",
-    size = seq(12, 40, length = 5),
-    line_color = colors, line_width = c(2:6) / 2)
-  a
 
-  a$xlim <- a$ylim <- NULL
-  a
+
+  # url <- c("http://bokeh.pydata.org/en/latest/_static/bokeh-transparent.png",
+  #   "http://developer.r-project.org/Logo/Rlogo-4.png")
+
+  # ss <- seq(0, 2*pi, length = 13)[-1]
+  # ws <- runif(12, 2.5, 5) * rep(c(1, 0.8), 6)
+
+  # imgdat <- data.frame(
+  #   x = sin(ss) * 10, y = cos(ss) * 10,
+  #   w = ws, h = ws * rep(c(1, 0.76), 6),
+  #   url = rep(url, 6)
+  # )
+
+  # p <- figure(xlab = "x", ylab = "y") %>%
+  #   ly_image_url(x, y, w = w, h = h, url = url, data = imgdat,
+  #     anchor = "center") %>%
+  #   ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
+  #     width = 15, alpha = 0.1)
+  # p
+
+
+  # z <- lm(dist ~ speed, data = cars)
+  # p <- figure() %>%
+  #   ly_points(cars, hover = cars) %>%
+  #   ly_lines(lowess(cars), legend = "lowess") %>%
+  #   ly_abline(z, type = 2, legend = "lm", width = 2)
+  # p
+
+
+  # p <- figure() %>%
+  #   ly_points(Sepal.Length, Sepal.Width, data = iris,
+  #     color = Species, glyph = Species,
+  #     hover = list(Sepal.Length, Sepal.Width))
+  # p
+
+
+
+  # # get data from Duluth site in 'barley' data
+  # du <- subset(lattice::barley, site == "Duluth")
+
+  # # plot with default ranges
+  # p <- figure(width = 600) %>%
+  #   ly_points(yield, variety, color = year, data = du)
+  # p
+  # # y axis is alphabetical
+
+  # # manually set x and y axis (y in order of 1932 yield)
+  # p %>%
+  #   x_range(c(20, 40)) %>%
+  #   y_range(du$variety[order(subset(du, year == 1932)$yield)])
+
+
 })
-
-test_that("glyphs", {
-  alpha <- c(6:2) / 10
-  colors <- c("pink", "orange", "red", "blue", "green")
-  xr <- yr <- c(0, 6)
-
-  ### annular_wedge
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_annular_wedge(x = 1:5, y = 5:1, 
-    start_angle = 0, end_angle = c(1:5) / 2,
-    inner_radius = 0.3, outer_radius = 0.7,
-    fill_color = colors, fill_alpha = alpha, 
-    line_color = colors)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### annulus
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_annulus(x = 1:5, y = 5:1, 
-    inner_radius = c(2:6) / 10, 
-    outer_radius = 0.8,
-    fill_color = colors, line_color = colors, 
-    fill_alpha = alpha)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### arc
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_arc(x = 1:5, y = 5:1, 
-    start_angle = 0, end_angle = c(1.5, 2, 2.5, 3.0, 4.5),
-    line_color = colors, line_width = 1:5, radius = 0.5)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### bezier
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_bezier(x0 = 1:5, x1 = 2:6, y0 = 5:1, y1 = 5:1, 
-    cx0 = 1:5, cy0 = rep(6, 5), cx1 = 4, cy1 = rep(6, 5), 
-    line_width = 2, line_color = colors)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### image
-  N <- 300
-  d1 <- rep(1:N, each = N)
-  d2 <- rep(1:N, times = N)
-  d <- sin(10*d1/N)*cos(20*d2/N)
-  a <- figure(xlim = c(0, 10), ylim = c(0, 10)) %>%
-    lay_image(x = 0, y = 0, dw = 10, dh = 10,
-      image = d, rows = N, cols = N,
-      palette = "Spectral-10")
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### line
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_line(x = 1:5, y = c(4, 5, 3, 5.5, 1), 
-    line_color = "#43A2CA",
-    line_dash = c(5, 2), line_width = 2)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### multi_line
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_multi_line(xs = list(c(1, 2, 3), c(2, 3, 4), 
-      c(0, 1, 0), c(2, 5, 4), c(5, 3, 2)),
-    ys = list(c(5, 2, 3), c(1, 1, 4), 
-      c(5, 5, 2), c(4, 1, 5), c(3, 5, 5)),
-    line_width = c(1, 1.5, 2, 2.5, 3),
-    line_color = colors,
-    line_dash = c(5, 2))
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### oval
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_oval(x = 1:5, y = 5:1,
-    angle = c(1:5) / 5, width = c(1:5) / 5,
-    height = c(5:1) / 5, line_color = colors,
-    fill_color = colors, fill_alpha = alpha)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### patch
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_polygon(x = 1:5, y = c(4, 5, 3, 5.5, 1), 
-    line_width = 2, line_dash = c(5, 2, 5, 6),
-    line_color = "#2C7FB8", fill_color = "#7FCDBB")
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### patches
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_polygons(xs = list(c(1, 2, 3), c(2, 3, 4), 
-      c(0, 1, 0), c(2, 5, 4), c(5, 3, 2)),
-    ys = list(c(5, 2, 3), c(1, 1, 4), c(5, 5, 2), 
-      c(4, 1, 5), c(3, 5, 4)),
-    line_width = 2, line_dash = c(5, 2),
-    fill_alpha = alpha, fill_color = colors,
-    line_color = colors)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### quad
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_rect(ytop = c(5.1, 4.2, 3.7, 2.4, 1.5),
-    ybottom = c(4.9, 3.8, 2.3, 1.6, 0.5),
-    xleft = c(0.9, 1.6, 2.7, 3.6, 4.4),
-    xright = c(1.1, 2.4, 3.3, 4.4, 5.7),
-    fill_alpha = alpha, fill_color = colors,
-    line_color = colors)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### quadratic
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_quadratic(x0 = 1:5, x1 = 2:6, y0 = 5:1, y1 = 5:1, 
-    cx = 1:5, cy = rep(6, 5), 
-    line_width = 2, line_color = colors)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### ray
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_ray(x = 1:5, y = 5:1,
-    angle = c(1:5) / 2, length = 30,
-    line_width = 2, line_color = colors)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### rect
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_crect(x = 1:5, y = 5:1,
-    angle = c(1:5) / 5, 
-    width = c(1:5) / 5, height = c(5:1) / 5,
-    fill_alpha = alpha, 
-    line_color = colors, fill_color = colors)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### segment
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_segments(x0 = 1:5, x1 = 2:6, y0 = 5:1, 
-    y1 = c(6, 4.8, 3.6, 2.4, 1.2), 
-    line_width = 2, line_color = colors)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### text
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_text(x = 1:5, y = 5:1, 
-    text = c("foo", "bar", "baz", "hello", "world"),
-    angle = c(1:5) / 10,
-    text_color = colors)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-
-  ### wedge
-  a <- figure(xlim = xr, ylim = yr) %>%
-  lay_wedge(x = 1:5, y = 5:1, 
-    start_angle = 0, end_angle = c(1:5) / 2,
-    radius = 0.7,
-    fill_color = colors, fill_alpha = alpha, 
-    line_color = colors)
-  a
-
-  a$xlim <- a$ylim <- NULL
-  a
-})
-
-
-test_that("lay_points with plotting characters", {
-  p <- figure() %>%
-    lay_points(rnorm(10), rnorm(10), type = 0) %>%
-    lay_points(rnorm(10), rnorm(10), type = 1) %>%
-    lay_points(rnorm(10), rnorm(10), type = 2) %>%
-    lay_points(rnorm(10), rnorm(10), type = 3) %>%
-    lay_points(rnorm(10), rnorm(10), type = 4)
-  p
-
-  p <- figure() %>%
-    lay_points(rnorm(10), rnorm(10), type = 21) %>%
-    lay_points(rnorm(10), rnorm(10), type = 22) %>%
-    lay_points(rnorm(10), rnorm(10), type = 23) %>%
-    lay_points(rnorm(10), rnorm(10), type = 24) %>%
-    lay_points(rnorm(10), rnorm(10), type = 25)
-  p
-})
-
-test_that("lay_points with other options", {
-  p <- figure(height = 600, width = 600) %>%
-    lay_points(rnorm(50), rnorm(50), type = 21, fill_alpha = 0.3, line_alpha = 0.3) %>%
-    lay_points(rnorm(50), rnorm(50), type = 22, fill_alpha = 0.3, line_alpha = 0.3) %>%
-    lay_points(rnorm(50), rnorm(50), type = 23, fill_alpha = 0.3, line_alpha = 0.3) %>%
-    lay_points(rnorm(50), rnorm(50), type = 24, fill_alpha = 0.3, line_alpha = 0.3) %>%
-    lay_points(rnorm(50), rnorm(50), type = 25, fill_alpha = 0.3, line_alpha = 0.3)
-  p
-})
-
-test_that("lay_points with bg colors", {
-  p <- figure(height = 600, width = 600) %>%
-    lay_points(rnorm(50), rnorm(50), type = 21, fill_color = "blue", size = 20) %>%
-    lay_points(rnorm(50), rnorm(50), type = 22, fill_color = "green", size = 30)
-  p
-
-  expect_equal(p$glyphSpecs[[1]]$fill_color, "blue")
-  expect_equal(p$glyphSpecs[[2]]$fill_color, "green")
-
-  thm <- getOption("bokeh_theme")$glyph
-  expect_equal(p$glyphSpecs[[1]]$line_color, thm[1])
-  expect_equal(p$glyphSpecs[[2]]$line_color, thm[2])
-})
-
-test_that("lay_points with line colors", {
-  p <- figure(height = 600, width = 600) %>%
-    lay_points(rnorm(50), rnorm(50), type = 21, line_color = "blue", size = 20) %>%
-    lay_points(rnorm(50), rnorm(50), type = 22, line_color = "green", size = 30)
-  p
-
-  # check outline color (should match what was specified)
-  expect_equal(p$glyphSpecs[[1]]$line_color, "blue")
-  expect_equal(p$glyphSpecs[[2]]$line_color, "green")
-
-  # fill color should be saturation-adjusted value of outline color
-  expect_equal(p$glyphSpecs[[1]]$fill_color, rbokeh:::reduceSaturation(p$glyphSpecs[[1]]$line_color))
-  expect_equal(p$glyphSpecs[[2]]$fill_color, rbokeh:::reduceSaturation(p$glyphSpecs[[2]]$line_color))
-})
-
-test_that("lay_points with pch having no outline", {
-  # should be solid colors
-  p <- figure(height = 600, width = 600) %>%
-    lay_points(rnorm(50), rnorm(50), type = 15, fill_color = "blue") %>%
-    lay_points(rnorm(50), rnorm(50), type = 16, fill_color = "green")
-  p
-
-  expect_equal(p$glyphSpecs[[1]]$line_color, NULL)
-  expect_equal(p$glyphSpecs[[2]]$line_color, NULL)
-})
-
-test_that("lay_points with pch as text", {
-  p <- figure(height = 600, width = 600) %>%
-    lay_points(rnorm(50), rnorm(50), type = "a")
-  p
-  thm <- getOption("bokeh_theme")$glyph
-  expect_equal(p$glyphSpecs[[1]]$text_color, thm[1])
-
-  p <- figure(height = 600, width = 600) %>%
-    lay_points(rnorm(50), rnorm(50), type = "a", text_color = "red")
-  p
-  expect_equal(p$glyphSpecs[[1]]$text_color, "red")
-})
-
-test_that("lay_points and lines together", {
-  p <- figure() %>%
-    lay_points(runif(10), runif(10)) %>%
-    lay_lines(c(0, 1), c(0, 1), line_color = "black", line_dash = 2)
-  p
-})
-
-test_that("lines with single vector input", {
-  p <- figure() %>%
-    lay_lines(rnorm(100))
-  p
-})
-
-test_that("lines with different lty", {
-  set.seed(1234)
-  p <- figure() %>%
-    lay_lines(rnorm(10), line_dash = 1, line_width = 2, line_alpha = 0.6) %>%
-    lay_lines(rnorm(10), line_dash = 2, line_width = 2, line_alpha = 0.6) %>%
-    lay_lines(rnorm(10), line_dash = 3, line_width = 2, line_alpha = 0.6) %>%
-    lay_lines(rnorm(10), line_dash = 4, line_width = 2, line_alpha = 0.6) %>%
-    lay_lines(rnorm(10), line_dash = 5, line_width = 2, line_alpha = 0.6) %>%
-    lay_lines(rnorm(10), line_dash = 6, line_width = 2, line_alpha = 0.6)
-  p
-})
-
-test_that("lowess example", {
-  p <- figure() %>%
-    lay_points(cars) %>%
-    lay_lines(lowess(cars), line_color = "black")
-  p
-})
-
-test_that("histogram", {
-  h <- figure() %>%
-    lay_hist(faithful$eruptions, breaks = 40)
-  h
-
-  ## add another one
-  h <- h %>% lay_hist(runif(100, 1, 5), breaks = 30, line_alpha = 0.3, fill_alpha = 0.3)
-  h
-})
-
-test_that("segments", {
-  p <- figure() %>%
-    lay_segments(rnorm(100), rnorm(100), rnorm(100), rnorm(100), line_alpha = 0.5, line_width = 2, line_color = rainbow(100))
-  p
-})
-
-test_that("abline", {
-  p <- figure() %>%
-    lay_points(rnorm(100), rnorm(100)) %>%
-    lay_abline(0, 1, line_color = "black") %>%
-    lay_abline(h = 1, line_color = "red") %>%
-    lay_abline(v = 1, line_color = "blue")
-  p
-})
-
-test_that("multiple abline hv", {
-  p <- figure() %>%
-    lay_points(rnorm(100), rnorm(100)) %>%
-    lay_abline(h = seq(-3, 3, length = 25)) %>%
-    lay_abline(v = seq(-3, 3, length = 25))
-  p
-})
-
-test_that("multiple abline ab", {
-  p <- figure() %>%
-    lay_points(rnorm(100), rnorm(100)) %>%
-    lay_abline(0, seq(-10, 10, length = 100))
-  p
-})
-
-test_that("abline coef", {
-  z <- lm(dist ~ speed, data = cars)
-  p <- figure() %>%
-    lay_points(cars) %>%
-    lay_abline(z)
-  p
-})
-
-test_that("curve", {
-  ff <- function(x) x^2
-  xx <- c(-10:10)
-  yy <- ff(xx)
-  p <- figure() %>%
-    lay_points(xx, yy) %>%
-    lay_curve(ff, -10, 10)
-  p
-})
-
-# test_that("curve with no limits", {
-#   ff <- function(x) x^2
-#   xx <- c(-10:10)
-#   yy <- ff(xx)
-#   p <- figure() %>%
-#     lay_points(xx, yy) %>%
-#     lay_curve(ff)
-#   p
-# })
-
-test_that("rect", {
-  p <- figure() %>%
-    lay_rect(1:10, 1:10, 2:11, 2:11)
-  p
-})
-
-test_that("rect char", {
-  p <- figure() %>%
-    lay_rect(letters[1:10], letters[1:10], letters[2:11], letters[2:11])
-  p
-})
-
-test_that("crect", {
-  p <- figure() %>%
-    lay_crect(1:10, 1:10, 0.9, 0.9)
-  p
-})
-
-test_that("crect char", {
-  p <- figure() %>%
-    lay_crect(letters[1:10], letters[1:10], 1, 1, fill_alpha = 0.8)
-  p
-})
-
-test_that("polygon", {
-  require(maps)
-  mdat <- map("state", "washington", fill = TRUE, plot = FALSE)
-  n <- length(mdat$x)
-  p <- figure() %>%
-    lay_polygon(mdat$x[102:n], mdat$y[102:n])
-  p
-})
-
-test_that("polygons", {
-  map2df <- function(a) {
-    dd <- data.frame(lon = a$x, lat = a$y, 
-      group = cumsum(is.na(a$x) & is.na(a$y)) + 1)
-    dd[complete.cases(dd$lon, dd$lat), ]
-  }
-  require(maps)
-  mdat <- map("county", "washington", fill = TRUE, plot = FALSE)
-  mdat <- map2df(mdat)
-
-  p <- figure() %>%
-    lay_polygons(lon, lat, group = group, data = mdat)
-  p
-})
-
-test_that("polygons list", {
-  map2df <- function(a) {
-    dd <- data.frame(lon = a$x, lat = a$y, 
-      group = cumsum(is.na(a$x) & is.na(a$y)) + 1)
-    dd[complete.cases(dd$lon, dd$lat), ]
-  }
-  require(maps)
-  mdat <- map("county", "washington", fill = TRUE, plot = FALSE)
-  mdat <- map2df(mdat)
-  xs <- split(mdat$lon, mdat$group)
-  ys <- split(mdat$lat, mdat$group)
-  p <- figure() %>%
-    lay_polygons(xs, ys)
-  p
-})
-
-test_that("contour", {
-  p <- figure() %>%
-    lay_image(volcano) %>%
-    lay_contour(volcano, line_color = "black", line_alpha = 0.5)
-  p
-
-  p <- figure() %>%
-    lay_contour(volcano)
-  p
-})
-
-test_that("quantile", {
-  p <- figure() %>%
-    lay_quantile(Sepal.Length, group = Species, data = iris)
-  p
-
-  p <- figure() %>%
-    lay_quantile(Sepal.Length, group = Species, data = iris, probs = c(0.25, 0.5, 0.75))
-  p
-
-  p <- figure() %>%
-    lay_quantile(rnorm(1000), distn = qnorm) %>%
-    lay_abline(0, 1, line_color = "black", line_width = 2)
-  p
-
-  p <- figure() %>%
-    lay_quantile(rnorm(1000), group = sample(1:3, 1000, replace = TRUE), distn = qnorm) %>%
-    lay_abline(0, 1, line_color = "black", line_width = 2)
-  p
-})
-
-test_that("density", {
-  h <- figure() %>%
-    lay_density(faithful$eruptions, bw = 0.08)
-  h
-
-  h <- figure() %>%
-    lay_hist(faithful$eruptions, breaks = 20, freq = FALSE) %>%
-    lay_density(faithful$eruptions)
-  h
-})
-
-
-test_that("misc", {
-  a <- figure() %>%
-    lay_points(letters, 1:26)
-  a
-
-  a <- figure() %>%
-    lay_points("a", 1)
-  a
-})
-
-test_that("map", {
-  require(maps)
-  data(us.cities)
-  cities <- subset(us.cities, long > -130)
-
-  p <- figure(width = 800, height = 550, padding_factor = 0) %>% 
-    lay_map("county", fill_color = "#1F77B4", 
-      line_color = "white", line_alpha = 0.2, fill_alpha = 0.5) %>%
-    lay_map("state", line_color = "white") %>%
-    lay_points(long, lat, data = cities, type = 19, size = 4, 
-      fill_color = "black", fill_alpha = 0.75) %>%
-    lay_text(long, lat, name, data = cities, text_font_size = "4pt")
-})
-
-test_that("boxplot", {
-  figure() %>% lay_boxplot(rnorm(100))
-  figure() %>% lay_boxplot(Sepal.Length, Species, data = iris)
-})
-
-# ### line with categorical x-axis
-# a <- figure(ylim = yr)
-# a$line(x = letters[1:5], y = c(4, 5, 3, 5.5, 1), 
-#   line_color = "#43A2CA",
-#   line_dash = c(5, 2), line_width = 2)
-# a
-
-# # now try to add numeric x (should error)
-#   lay_points(x = 1:5, y = c(4, 5, 3, 5.5, 1), 
-#   line_color = "#43A2CA")
-
-# # now add new categorical lay_points
-#   lay_points(x = letters[2:6], y = c(4, 5, 3, 5.5, 1), 
-#   line_color = "#43A2CA")
-# a

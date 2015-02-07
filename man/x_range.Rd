@@ -15,12 +15,13 @@ x_range(fig, dat)
 Update x axis range in a Bokeh figure
 }
 \examples{
+\donttest{
 # get data from Duluth site in 'barley' data
 du <- subset(lattice::barley, site == "Duluth")
 
 # plot with default ranges
 p <- figure(width = 600) \%>\%
-  ly_point(yield, variety, color = year, data = du)
+  ly_points(yield, variety, color = year, data = du)
 p
 # y axis is alphabetical
 
@@ -28,7 +29,7 @@ p
 p \%>\%
   x_range(c(20, 40)) \%>\%
   y_range(du$variety[order(subset(du, year == 1932)$yield)])
-
+}
 }
 \seealso{
 Other ranges: \code{\link{y_range}}

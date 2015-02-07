@@ -6,7 +6,7 @@
 \usage{
 ly_hexbin(fig, x, y, data = NULL, xbins = 30, shape = 1,
   style = "colorscale", trans = NULL, inv = NULL, palette = "RdYlGn11",
-  fill = TRUE, line = FALSE, hover = TRUE)
+  line = FALSE, alpha = 1, hover = TRUE)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -25,13 +25,18 @@ ly_hexbin(fig, x, y, data = NULL, xbins = 30, shape = 1,
 
 \item{palette}{name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
 
-\item{fill}{logical - should hexagons be filled?}
-
 \item{line}{logical - should hexagons have an outline?}
+
+\item{alpha}{the alpha transparency of the hexagons between 0 (transparent) and 1 (opaque)}
 
 \item{hover}{logical - should a hover tool be added to show the count in each hexagon?}
 }
 \description{
 Add a "hexbin" layer to a Bokeh figure
+}
+\examples{
+\donttest{
+figure() \%>\% ly_hexbin(rnorm(10000), rnorm(10000))
+}
 }
 
