@@ -2,11 +2,10 @@
 % Please edit documentation in R/layer_lines.R
 \name{ly_curve}
 \alias{ly_curve}
-\title{Add a "curve" layer to a Bokeh figure
-Draws a curve corresponding to a function over the interval \code{[from, to]}.}
+\title{Add a "curve" layer to a Bokeh figure}
 \usage{
 ly_curve(fig, expr, from = NULL, to = NULL, n = 101, color = "black",
-  alpha = NULL, width = 1, type = 1, legend = NULL, lname = NULL,
+  alpha = 1, width = 1, type = 1, legend = NULL, lname = NULL,
   lgroup = NULL, ...)
 }
 \arguments{
@@ -31,7 +30,6 @@ ly_curve(fig, expr, from = NULL, to = NULL, n = 101, color = "black",
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
-Add a "curve" layer to a Bokeh figure
 Draws a curve corresponding to a function over the interval \code{[from, to]}.
 }
 \section{Mapped plot attributes and legends}{
@@ -62,11 +60,12 @@ Other layer functions: \code{\link{ly_abline}};
   \code{\link{ly_crect}}; \code{\link{ly_density}};
   \code{\link{ly_hist}}; \code{\link{ly_image_url}};
   \code{\link{ly_image}}; \code{\link{ly_lines}};
-  \code{\link{ly_map}}; \code{\link{ly_oval}};
-  \code{\link{ly_patch}}; \code{\link{ly_points}};
-  \code{\link{ly_polygons}}; \code{\link{ly_quadratic}};
-  \code{\link{ly_quantile}}; \code{\link{ly_ray}};
-  \code{\link{ly_rect}}; \code{\link{ly_segments}};
-  \code{\link{ly_text}}; \code{\link{ly_wedge}}
+  \code{\link{ly_map}}; \code{\link{ly_multi_line}};
+  \code{\link{ly_oval}}; \code{\link{ly_patch}};
+  \code{\link{ly_points}}; \code{\link{ly_polygons}};
+  \code{\link{ly_quadratic}}; \code{\link{ly_quantile}};
+  \code{\link{ly_ray}}; \code{\link{ly_rect}};
+  \code{\link{ly_segments}}; \code{\link{ly_text}};
+  \code{\link{ly_wedge}}
 }
 

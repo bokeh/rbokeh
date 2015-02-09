@@ -2,8 +2,7 @@
 % Please edit documentation in R/layer_lines.R
 \name{ly_abline}
 \alias{ly_abline}
-\title{Add an "abline" layer to a Bokeh figure
-Draws one or more straight lines.}
+\title{Add an "abline" layer to a Bokeh figure}
 \usage{
 ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   color = "black", alpha = NULL, width = 1, type = 1, legend = NULL,
@@ -37,7 +36,6 @@ ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
-Add an "abline" layer to a Bokeh figure
 Draws one or more straight lines.
 }
 \section{Mapped plot attributes and legends}{
@@ -71,11 +69,12 @@ Other layer functions: \code{\link{ly_annular_wedge}};
   \code{\link{ly_curve}}; \code{\link{ly_density}};
   \code{\link{ly_hist}}; \code{\link{ly_image_url}};
   \code{\link{ly_image}}; \code{\link{ly_lines}};
-  \code{\link{ly_map}}; \code{\link{ly_oval}};
-  \code{\link{ly_patch}}; \code{\link{ly_points}};
-  \code{\link{ly_polygons}}; \code{\link{ly_quadratic}};
-  \code{\link{ly_quantile}}; \code{\link{ly_ray}};
-  \code{\link{ly_rect}}; \code{\link{ly_segments}};
-  \code{\link{ly_text}}; \code{\link{ly_wedge}}
+  \code{\link{ly_map}}; \code{\link{ly_multi_line}};
+  \code{\link{ly_oval}}; \code{\link{ly_patch}};
+  \code{\link{ly_points}}; \code{\link{ly_polygons}};
+  \code{\link{ly_quadratic}}; \code{\link{ly_quantile}};
+  \code{\link{ly_ray}}; \code{\link{ly_rect}};
+  \code{\link{ly_segments}}; \code{\link{ly_text}};
+  \code{\link{ly_wedge}}
 }
 

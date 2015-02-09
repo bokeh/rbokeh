@@ -13,7 +13,7 @@
 #' @family layer functions
 #' @export
 ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
-  color = "black", type = 1, width = 1, alpha = NULL,
+  color = "black", type = 1, width = 1, alpha = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_lines")
@@ -40,6 +40,9 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
 
   args <- list(glyph = "line", group = group, color = color,
     width = width, type = type, ...)
+
+  if(missing(color) && !is.null(args$line_color))
+    args$color <- NULL
 
   args$alpha <- alpha
 
@@ -77,7 +80,7 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
     return(fig)
   }
 
-  args <- update_line_opts(fig, args)
+  args <- resolve_line_args(fig, args)
 
   axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y)
 
@@ -88,6 +91,7 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
 }
 
 #' Add a "segments" layer to a Bokeh figure
+#'
 #' Draws line segments with the given starting and ending coordinates.
 #' @param fig figure to modify
 #' @param x0 values or field name of starting x coordinates
@@ -102,7 +106,7 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
 #' @family layer functions
 #' @export
 ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
-  color = NULL, alpha = NULL, width = 1, type = 1,
+  color = "black", alpha = 1, width = 1, type = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   ## see if any options won't be used and give a message
@@ -132,7 +136,10 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
     alpha = alpha, width = width,
     type = type, ...)
 
-  args <- update_line_opts(fig, args)
+  if(missing(color) && !is.null(args$line_color))
+    args$color <- NULL
+
+  args <- resolve_line_args(fig, args)
 
   axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1))
   make_glyph(fig, type = "segment",
@@ -143,6 +150,7 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
 }
 
 #' Add an "abline" layer to a Bokeh figure
+#'
 #' Draws one or more straight lines.
 #' @param fig figure to modify
 #' @param a,b the intercept and slope of the line(s) to draw
@@ -172,7 +180,10 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     alpha = alpha, width = width,
     type = type, ...)
 
-  args <- update_line_opts(fig, args)
+  if(missing(color) && !is.null(args$line_color))
+    args$color <- NULL
+
+  args <- resolve_line_args(fig, args)
 
   if(!is.null(coef) || inherits(a, "lm")) {
     if(is.null(coef))
@@ -259,6 +270,7 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
 }
 
 #' Add a "curve" layer to a Bokeh figure
+#'
 #' Draws a curve corresponding to a function over the interval \code{[from, to]}.
 #' @param fig figure to modify
 #' @param expr,from,to,n parameters sent to \code{\link[graphics]{curve}}
@@ -275,7 +287,7 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
 #' @family layer functions
 #' @export
 ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
-  color = "black", alpha = NULL, width = 1, type = 1,
+  color = "black", alpha = 1, width = 1, type = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_curve")
@@ -307,13 +319,17 @@ ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
     alpha = alpha, width = width,
     type = type, ...)
 
-  args <- update_line_opts(fig, args)
+  if(missing(color) && !is.null(args$line_color))
+    args$color <- NULL
+
+  args <- resolve_line_args(fig, args)
 
   do.call(ly_lines, c(list(fig = fig, x = x, y = y, legend = legend,
     lname = lname, lgroup = lgroup, xlab = xname, ylab = yname), args))
 }
 
 #' Add a "contour" layer to a Bokeh figure
+#'
 #' Computes and draws contour lines.
 #' @param fig figure to modify
 #' @param z a matrix containing the values to compute contour lines for
@@ -343,7 +359,7 @@ ly_contour <- function(fig, z,
     alpha = alpha, width = width,
     type = type, ...)
 
-  args <- update_line_opts(fig, args)
+  args <- resolve_line_args(fig, args)
 
   contr <- do.call(contourLines, list(x = x, y = y, z = z, nlevels = nlevels, levels = levels))
 
@@ -359,6 +375,7 @@ ly_contour <- function(fig, z,
 }
 
 #' Add a "ray" layer to a Bokeh figure
+#'
 #' Draws line segments starting at the given coordinate and extending the given length at the given angle.
 #' @param fig figure to modify
 #' @param x values or field name of center x coordinates
@@ -401,7 +418,10 @@ ly_ray <- function(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
     alpha = alpha, width = width, type = type,
     length = length, angle = angle, ...)
 
-  args <- update_line_opts(fig, args)
+  if(missing(color) && !is.null(args$line_color))
+    args$color <- NULL
+
+  args <- resolve_line_args(fig, args)
 
   axis_type_range <- get_glyph_axis_type_range(x, y)
 
@@ -413,6 +433,7 @@ ly_ray <- function(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
 
 
 #' Add a "bezier" layer to a Bokeh figure
+#'
 #' Draws Bezier curves with the given starting, ending, and control points.
 #' @param fig figure to modify
 #' @param x0 values or field name of starting x coordinates
@@ -461,7 +482,10 @@ ly_bezier <- function(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = NULL,
   args <- list(glyph = "bezier", color = color, type = type,
     width = width, alpha = alpha, ...)
 
-  args <- update_line_opts(fig, args)
+  if(missing(color) && !is.null(args$line_color))
+    args$color <- NULL
+
+  args <- resolve_line_args(fig, args)
 
   axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1),
     assert_x = "numeric", assert_y = "numeric")
@@ -473,8 +497,8 @@ ly_bezier <- function(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = NULL,
     args = args, axis_type_range = axis_type_range)
 }
 
-
 #' Add a "quadratic" layer to a Bokeh figure
+#'
 #' Draws quadratic curves with the given starting, ending, and control points.
 #' @param fig figure to modify
 #' @param x0 values or field name of starting x coordinates
@@ -519,7 +543,10 @@ ly_quadratic <- function(fig, x0, y0, x1, y1, cx, cy, data = NULL,
   args <- list(glyph = "quadratic", color = color, type = type,
     width = width, alpha = alpha, ...)
 
-  args <- update_line_opts(fig, args)
+  if(missing(color) && !is.null(args$line_color))
+    args$color <- NULL
+
+  args <- resolve_line_args(fig, args)
 
   axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1),
     assert_x = "numeric", assert_y = "numeric")
@@ -533,15 +560,43 @@ ly_quadratic <- function(fig, x0, y0, x1, y1, cx, cy, data = NULL,
 ## a common thing to do is make a layer with both points and lines (type = "b")
 # ly_pointsline <- function()
 
-## ly_lines does everything multiline does
-# #' @export
-# ly_multi_line <- function(fig, xs, ys, lname = NULL, lgroup = NULL, ...) {
+#' Add a "multi_line" layer to a Bokeh figure
+#'
+#' Draws multiple lines with the given lists of coordinates.
+#' @param fig figure to modify
+#' @param xs list of vectors of x coordinates
+#' @param ys list of vectors of y coordinates
+#' @template par-lineprops
+#' @template par-legend
+#' @template par-lnamegroup
+#' @template dots-line
+#' @family layer functions
+#' @export
+ly_multi_line <- function(fig, xs, ys,
+  color = "black", alpha = 1, width = 1, type = 1,
+  lname = NULL, lgroup = NULL, ...) {
 
-#   validate_fig(fig, "ly_multi_line")
-#   ## see if any options won't be used and give a message
-#   check_opts(list(...), "multi_line")
+  xname <- deparse(substitute(xs))
+  yname <- deparse(substitute(ys))
 
-#   axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
-#   make_glyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
-#     data = list(xs = xs, ys = ys), args = list(...), axis_type_range = axis_type_range)
-# }
+  validate_fig(fig, "ly_multi_line")
+  ## see if any options won't be used and give a message
+  check_opts(list(...), "multi_line")
+
+  args <- list(glyph = "line", color = color,
+    width = width, type = type, ...)
+
+  if(missing(color) && !is.null(args$line_color))
+    args$color <- NULL
+
+  args$alpha <- alpha
+
+  args <- resolve_line_args(fig, args)
+
+  axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
+
+  make_glyph(fig, type = "multi_line", xname = xname, yname = yname,
+    lname = lname, lgroup = lgroup,
+    data = list(xs = xs, ys = ys), args = args,
+    axis_type_range = axis_type_range)
+}

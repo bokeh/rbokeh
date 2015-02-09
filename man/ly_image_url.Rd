@@ -2,8 +2,7 @@
 % Please edit documentation in R/layer_image.R
 \name{ly_image_url}
 \alias{ly_image_url}
-\title{Add an "image_url" layer to a Bokeh figure
-Renders raster images from URLs at provided coordinates}
+\title{Add an "image_url" layer to a Bokeh figure}
 \usage{
 ly_image_url(fig, x = 0, y = 0, data = NULL, w = 10, h = 10, url,
   dilate = TRUE, anchor = "top_left", angle = 0, lname = NULL,
@@ -33,7 +32,6 @@ ly_image_url(fig, x = 0, y = 0, data = NULL, w = 10, h = 10, url,
 \item{lgroup}{layer group}
 }
 \description{
-Add an "image_url" layer to a Bokeh figure
 Renders raster images from URLs at provided coordinates
 }
 \examples{
@@ -66,11 +64,12 @@ Other layer functions: \code{\link{ly_abline}};
   \code{\link{ly_crect}}; \code{\link{ly_curve}};
   \code{\link{ly_density}}; \code{\link{ly_hist}};
   \code{\link{ly_image}}; \code{\link{ly_lines}};
-  \code{\link{ly_map}}; \code{\link{ly_oval}};
-  \code{\link{ly_patch}}; \code{\link{ly_points}};
-  \code{\link{ly_polygons}}; \code{\link{ly_quadratic}};
-  \code{\link{ly_quantile}}; \code{\link{ly_ray}};
-  \code{\link{ly_rect}}; \code{\link{ly_segments}};
-  \code{\link{ly_text}}; \code{\link{ly_wedge}}
+  \code{\link{ly_map}}; \code{\link{ly_multi_line}};
+  \code{\link{ly_oval}}; \code{\link{ly_patch}};
+  \code{\link{ly_points}}; \code{\link{ly_polygons}};
+  \code{\link{ly_quadratic}}; \code{\link{ly_quantile}};
+  \code{\link{ly_ray}}; \code{\link{ly_rect}};
+  \code{\link{ly_segments}}; \code{\link{ly_text}};
+  \code{\link{ly_wedge}}
 }
 

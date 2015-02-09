@@ -1,5 +1,6 @@
 
 #' Add a "hist" layer to a Bokeh figure
+#'
 #' Draws a histogram
 #' @param fig figure to modify
 #' @param x,breaks,freq,include.lowest,right parameters passed to \code{\link[graphics]{hist}}
@@ -49,7 +50,8 @@ ly_hist <- function(fig, x, data = NULL,
 
 
 #' Add a "density" layer to a Bokeh figure
-#' Draws a histogram
+#'
+#' Draws a kernel density estimate
 #' @param fig figure to modify
 #' @param x,bw,adjust,kernel,weights,window,n,cut,na.rm parameters passed to \code{\link[stats]{density}}
 #' @param data an optional data frame, providing the source for x
@@ -87,7 +89,7 @@ ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
   args <- list(color = color, alpha = alpha, width = width,
     type = type, ...)
 
-  args <- update_line_opts(fig, args)
+  args <- resolve_line_args(fig, args)
 
   dd <- stats::density.default(x = x, bw = bw, adjust = adjust, kernel = kernel, n = n, cut = 3, na.rm = na.rm)
 
@@ -98,6 +100,7 @@ ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
 
 
 #' Add a "quantile" layer to a Bokeh figure
+#'
 #' Draws quantiles
 #' @param fig figure to modify
 #' @param x numeric vector or field name of variable to compute sample quantiles for

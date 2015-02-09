@@ -59,6 +59,12 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
   ## translate different x, y types to vectors
   lgroup <- get_lgroup(lgroup, fig)
 
+  if(is.vector(xs) && !is.list(xs))
+    xs <- list(xs)
+
+  if(is.vector(ys) && !is.list(ys))
+    ys <- list(ys)
+
   if(!(is.list(xs) && is.list(ys)))
     stop("For ly_polygons, xs and ys must be lists or specified through a data frame through 'data' argument.")
 

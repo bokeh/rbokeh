@@ -2,8 +2,7 @@
 % Please edit documentation in R/layer_stats.R
 \name{ly_density}
 \alias{ly_density}
-\title{Add a "density" layer to a Bokeh figure
-Draws a histogram}
+\title{Add a "density" layer to a Bokeh figure}
 \usage{
 ly_density(fig, x, data = NULL, bw = "nrd0", adjust = 1,
   kernel = c("gaussian", "epanechnikov", "rectangular", "triangular",
@@ -36,8 +35,7 @@ ly_density(fig, x, data = NULL, bw = "nrd0", adjust = 1,
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
-Add a "density" layer to a Bokeh figure
-Draws a histogram
+Draws a kernel density estimate
 }
 \section{Additional parameters}{
 
@@ -56,11 +54,12 @@ Other layer functions: \code{\link{ly_abline}};
   \code{\link{ly_crect}}; \code{\link{ly_curve}};
   \code{\link{ly_hist}}; \code{\link{ly_image_url}};
   \code{\link{ly_image}}; \code{\link{ly_lines}};
-  \code{\link{ly_map}}; \code{\link{ly_oval}};
-  \code{\link{ly_patch}}; \code{\link{ly_points}};
-  \code{\link{ly_polygons}}; \code{\link{ly_quadratic}};
-  \code{\link{ly_quantile}}; \code{\link{ly_ray}};
-  \code{\link{ly_rect}}; \code{\link{ly_segments}};
-  \code{\link{ly_text}}; \code{\link{ly_wedge}}
+  \code{\link{ly_map}}; \code{\link{ly_multi_line}};
+  \code{\link{ly_oval}}; \code{\link{ly_patch}};
+  \code{\link{ly_points}}; \code{\link{ly_polygons}};
+  \code{\link{ly_quadratic}}; \code{\link{ly_quantile}};
+  \code{\link{ly_ray}}; \code{\link{ly_rect}};
+  \code{\link{ly_segments}}; \code{\link{ly_text}};
+  \code{\link{ly_wedge}}
 }
 

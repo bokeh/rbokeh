@@ -1,5 +1,6 @@
 
 #' Add an "image" layer to a Bokeh figure
+#'
 #' Draws a grid of rectangles with colors corresponding to the values in \code{z}
 #' @param fig figure to modify
 #' @param z matrix or vector of image values
@@ -43,6 +44,7 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
 }
 
 #' Add an "image_url" layer to a Bokeh figure
+#'
 #' Renders raster images from URLs at provided coordinates
 #' @param fig figure to modify
 #' @param x x coordinates

@@ -2,8 +2,7 @@
 % Please edit documentation in R/layer_image.R
 \name{ly_image}
 \alias{ly_image}
-\title{Add an "image" layer to a Bokeh figure
-Draws a grid of rectangles with colors corresponding to the values in \code{z}}
+\title{Add an "image" layer to a Bokeh figure}
 \usage{
 ly_image(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
   palette = "Spectral-10", dilate = FALSE, lname = NULL, lgroup = NULL)
@@ -34,7 +33,6 @@ ly_image(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
 \item{lgroup}{layer group}
 }
 \description{
-Add an "image" layer to a Bokeh figure
 Draws a grid of rectangles with colors corresponding to the values in \code{z}
 }
 \examples{
@@ -53,11 +51,12 @@ Other layer functions: \code{\link{ly_abline}};
   \code{\link{ly_crect}}; \code{\link{ly_curve}};
   \code{\link{ly_density}}; \code{\link{ly_hist}};
   \code{\link{ly_image_url}}; \code{\link{ly_lines}};
-  \code{\link{ly_map}}; \code{\link{ly_oval}};
-  \code{\link{ly_patch}}; \code{\link{ly_points}};
-  \code{\link{ly_polygons}}; \code{\link{ly_quadratic}};
-  \code{\link{ly_quantile}}; \code{\link{ly_ray}};
-  \code{\link{ly_rect}}; \code{\link{ly_segments}};
-  \code{\link{ly_text}}; \code{\link{ly_wedge}}
+  \code{\link{ly_map}}; \code{\link{ly_multi_line}};
+  \code{\link{ly_oval}}; \code{\link{ly_patch}};
+  \code{\link{ly_points}}; \code{\link{ly_polygons}};
+  \code{\link{ly_quadratic}}; \code{\link{ly_quantile}};
+  \code{\link{ly_ray}}; \code{\link{ly_rect}};
+  \code{\link{ly_segments}}; \code{\link{ly_text}};
+  \code{\link{ly_wedge}}
 }
 

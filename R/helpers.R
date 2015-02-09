@@ -1,38 +1,50 @@
 ## internal helper methods
 
-update_line_opts <- function(fig, opts) {
+resolve_line_args <- function(fig, args) {
 
-  ## map to what bokeh expects
-  opts$line_dash <- opts$type
-  opts$type <- NULL
-
-  opts$line_color <- opts$color
-  opts$color <- NULL
-
-  opts$line_width <- opts$width
-  opts$width <- NULL
-
-  opts$line_alpha <- opts$alpha
-  opts$alpha <- NULL
-
-  if(is.numeric(opts$line_dash)) {
-    if(length(opts$line_dash) == 1) {
-      opts$line_dash <- as.character(opts$line_dash)
+  if(!is.null(args$color)) {
+    if(!is.null(args$line_color)) {
+      if(args$color != args$line_color)
+        message("both color and line_color specified - honoring line_color")
+    } else {
+      args$line_color <- args$color
     }
   }
-  if(is.character(opts$line_dash)) {
-    if(!opts$line_dash %in% names(lty_dict))
-      stop("'line_dash' should be one of: ", paste(names(lty_dict), collapse = ", "), call. = FALSE)
-    opts$line_dash <- lty_dict[[opts$line_dash]]
+
+  if(!is.null(args$alpha)) {
+    if(!is.null(args$line_alpha)) {
+      if(args$alpha != args$line_alpha)
+        message("both alpha and line_alpha specified - honoring line_alpha")
+    } else {
+      args$line_alpha <- args$alpha
+    }
   }
 
-  if(is.numeric(opts$line_cap))
-    opts$line_cap <- ljoin_dict[[as.character(opts$line_cap)]]
+  ## map to what bokeh expects
+  args$line_dash <- args$type
+  args$type <- NULL
 
-  if(is.null(opts$line_color))
-    opts$line_color <- get_next_color(fig)
+  args$line_width <- args$width
+  args$width <- NULL
 
-  opts
+  if(is.numeric(args$line_dash)) {
+    if(length(args$line_dash) == 1) {
+      args$line_dash <- as.character(args$line_dash)
+    }
+  }
+  if(is.character(args$line_dash)) {
+    if(!args$line_dash %in% names(lty_dict))
+      stop("'line_dash' should be one of: ", paste(names(lty_dict), collapse = ", "), call. = FALSE)
+    args$line_dash <- lty_dict[[args$line_dash]]
+  }
+
+  if(is.numeric(args$line_cap))
+    args$line_cap <- ljoin_dict[[as.character(args$line_cap)]]
+
+  if(is.null(args$line_color))
+    args$line_color <- get_next_color(fig)
+
+  args
 }
 
 validate_fig <- function(fig, fct) {
@@ -264,12 +276,14 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, soli
 
   if(!is.null(args$color)) {
     if(!is.null(args$line_color)) {
-      message("both color and line_color specified - honoring line_color")
+      if(args$color != args$line_color)
+        message("both color and line_color specified - honoring line_color")
     } else {
       args$line_color <- args$color
     }
     if(!is.null(args$fill_color)) {
-      message("both color and fill_color specified - honoring fill_color")
+      if(args$color != args$fill_color)
+        message("both color and fill_color specified - honoring fill_color")
     } else {
       args$fill_color <- args$color
     }
@@ -277,12 +291,14 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, soli
 
   if(!is.null(args$alpha)) {
     if(!is.null(args$line_alpha)) {
-      message("both alpha and line_alpha specified - honoring line_alpha")
+      if(args$alpha != args$line_alpha)
+        message("both alpha and line_alpha specified - honoring line_alpha")
     } else {
       args$line_alpha <- args$alpha
     }
     if(!is.null(args$fill_alpha)) {
-      message("both alpha and fill_alpha specified - honoring fill_alpha")
+      if(args$alpha != args$fill_alpha)
+        message("both alpha and fill_alpha specified - honoring fill_alpha")
     } else {
       args$fill_alpha <- args$alpha * 0.5
     }

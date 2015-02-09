@@ -180,7 +180,7 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
     direction = direction, start_angle = start_angle, end_angle = end_angle,
     width = width, type = type, ...)
 
-  args <- update_line_opts(fig, args)
+  args <- resolve_line_args(fig, args)
 
   ## see if any options won't be used and give a message
   check_opts(args, "arc", formals = names(formals(ly_arc)))

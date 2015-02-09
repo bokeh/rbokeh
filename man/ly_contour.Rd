@@ -2,8 +2,7 @@
 % Please edit documentation in R/layer_lines.R
 \name{ly_contour}
 \alias{ly_contour}
-\title{Add a "contour" layer to a Bokeh figure
-Computes and draws contour lines.}
+\title{Add a "contour" layer to a Bokeh figure}
 \usage{
 ly_contour(fig, z, x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1,
   length.out = ncol(z)), nlevels = 10, levels = pretty(range(z, na.rm =
@@ -34,7 +33,6 @@ ly_contour(fig, z, x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1,
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
-Add a "contour" layer to a Bokeh figure
 Computes and draws contour lines.
 }
 \section{Additional parameters}{
@@ -62,11 +60,12 @@ Other layer functions: \code{\link{ly_abline}};
   \code{\link{ly_curve}}; \code{\link{ly_density}};
   \code{\link{ly_hist}}; \code{\link{ly_image_url}};
   \code{\link{ly_image}}; \code{\link{ly_lines}};
-  \code{\link{ly_map}}; \code{\link{ly_oval}};
-  \code{\link{ly_patch}}; \code{\link{ly_points}};
-  \code{\link{ly_polygons}}; \code{\link{ly_quadratic}};
-  \code{\link{ly_quantile}}; \code{\link{ly_ray}};
-  \code{\link{ly_rect}}; \code{\link{ly_segments}};
-  \code{\link{ly_text}}; \code{\link{ly_wedge}}
+  \code{\link{ly_map}}; \code{\link{ly_multi_line}};
+  \code{\link{ly_oval}}; \code{\link{ly_patch}};
+  \code{\link{ly_points}}; \code{\link{ly_polygons}};
+  \code{\link{ly_quadratic}}; \code{\link{ly_quantile}};
+  \code{\link{ly_ray}}; \code{\link{ly_rect}};
+  \code{\link{ly_segments}}; \code{\link{ly_text}};
+  \code{\link{ly_wedge}}
 }
 

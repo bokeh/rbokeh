@@ -2,8 +2,7 @@
 % Please edit documentation in R/layer_lines.R
 \name{ly_ray}
 \alias{ly_ray}
-\title{Add a "ray" layer to a Bokeh figure
-Draws line segments starting at the given coordinate and extending the given length at the given angle.}
+\title{Add a "ray" layer to a Bokeh figure}
 \usage{
 ly_ray(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
   color = "black", type = 1, width = 1, alpha = NULL, legend = NULL,
@@ -39,7 +38,6 @@ ly_ray(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
-Add a "ray" layer to a Bokeh figure
 Draws line segments starting at the given coordinate and extending the given length at the given angle.
 }
 \section{Mapped plot attributes and legends}{
@@ -64,10 +62,11 @@ Other layer functions: \code{\link{ly_abline}};
   \code{\link{ly_density}}; \code{\link{ly_hist}};
   \code{\link{ly_image_url}}; \code{\link{ly_image}};
   \code{\link{ly_lines}}; \code{\link{ly_map}};
-  \code{\link{ly_oval}}; \code{\link{ly_patch}};
-  \code{\link{ly_points}}; \code{\link{ly_polygons}};
-  \code{\link{ly_quadratic}}; \code{\link{ly_quantile}};
-  \code{\link{ly_rect}}; \code{\link{ly_segments}};
-  \code{\link{ly_text}}; \code{\link{ly_wedge}}
+  \code{\link{ly_multi_line}}; \code{\link{ly_oval}};
+  \code{\link{ly_patch}}; \code{\link{ly_points}};
+  \code{\link{ly_polygons}}; \code{\link{ly_quadratic}};
+  \code{\link{ly_quantile}}; \code{\link{ly_rect}};
+  \code{\link{ly_segments}}; \code{\link{ly_text}};
+  \code{\link{ly_wedge}}
 }
 

@@ -2,8 +2,7 @@
 % Please edit documentation in R/layer_map.R
 \name{ly_map}
 \alias{ly_map}
-\title{Add a "map" layer to a Bokeh figure
-Draws lines and polygons as specified by a map database}
+\title{Add a "map" layer to a Bokeh figure}
 \usage{
 ly_map(fig, database = "world", regions = ".", color = NULL, alpha = 1,
   lname = NULL, lgroup = NULL, ...)
@@ -24,7 +23,6 @@ ly_map(fig, database = "world", regions = ".", color = NULL, alpha = 1,
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
 \description{
-Add a "map" layer to a Bokeh figure
 Draws lines and polygons as specified by a map database
 }
 \section{Handling color}{
@@ -68,11 +66,12 @@ Other layer functions: \code{\link{ly_abline}};
   \code{\link{ly_crect}}; \code{\link{ly_curve}};
   \code{\link{ly_density}}; \code{\link{ly_hist}};
   \code{\link{ly_image_url}}; \code{\link{ly_image}};
-  \code{\link{ly_lines}}; \code{\link{ly_oval}};
-  \code{\link{ly_patch}}; \code{\link{ly_points}};
-  \code{\link{ly_polygons}}; \code{\link{ly_quadratic}};
-  \code{\link{ly_quantile}}; \code{\link{ly_ray}};
-  \code{\link{ly_rect}}; \code{\link{ly_segments}};
-  \code{\link{ly_text}}; \code{\link{ly_wedge}}
+  \code{\link{ly_lines}}; \code{\link{ly_multi_line}};
+  \code{\link{ly_oval}}; \code{\link{ly_patch}};
+  \code{\link{ly_points}}; \code{\link{ly_polygons}};
+  \code{\link{ly_quadratic}}; \code{\link{ly_quantile}};
+  \code{\link{ly_ray}}; \code{\link{ly_rect}};
+  \code{\link{ly_segments}}; \code{\link{ly_text}};
+  \code{\link{ly_wedge}}
 }
 

@@ -2,8 +2,7 @@
 % Please edit documentation in R/layer_lines.R
 \name{ly_quadratic}
 \alias{ly_quadratic}
-\title{Add a "quadratic" layer to a Bokeh figure
-Draws quadratic curves with the given starting, ending, and control points.}
+\title{Add a "quadratic" layer to a Bokeh figure}
 \usage{
 ly_quadratic(fig, x0, y0, x1, y1, cx, cy, data = NULL, color = "black",
   alpha = 1, width = 1, type = 1, legend = NULL, lname = NULL,
@@ -43,7 +42,6 @@ ly_quadratic(fig, x0, y0, x1, y1, cx, cy, data = NULL, color = "black",
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
 \description{
-Add a "quadratic" layer to a Bokeh figure
 Draws quadratic curves with the given starting, ending, and control points.
 }
 \section{Mapped plot attributes and legends}{
@@ -73,10 +71,11 @@ Other layer functions: \code{\link{ly_abline}};
   \code{\link{ly_density}}; \code{\link{ly_hist}};
   \code{\link{ly_image_url}}; \code{\link{ly_image}};
   \code{\link{ly_lines}}; \code{\link{ly_map}};
-  \code{\link{ly_oval}}; \code{\link{ly_patch}};
-  \code{\link{ly_points}}; \code{\link{ly_polygons}};
-  \code{\link{ly_quantile}}; \code{\link{ly_ray}};
-  \code{\link{ly_rect}}; \code{\link{ly_segments}};
-  \code{\link{ly_text}}; \code{\link{ly_wedge}}
+  \code{\link{ly_multi_line}}; \code{\link{ly_oval}};
+  \code{\link{ly_patch}}; \code{\link{ly_points}};
+  \code{\link{ly_polygons}}; \code{\link{ly_quantile}};
+  \code{\link{ly_ray}}; \code{\link{ly_rect}};
+  \code{\link{ly_segments}}; \code{\link{ly_text}};
+  \code{\link{ly_wedge}}
 }
 

@@ -16,7 +16,7 @@
 #' figure() %>% ly_hexbin(rnorm(10000), rnorm(10000))
 #' }
 #' @export
-ly_hexbin <- function(fig, x, y, data = NULL,
+ly_hexbin <- function(fig, x, y = NULL, data = NULL,
   xbins = 30, shape = 1, style = "colorscale",
   trans = NULL, inv = NULL,
   palette = "RdYlGn11", line = FALSE, alpha = 1, hover = TRUE) {
@@ -30,10 +30,17 @@ ly_hexbin <- function(fig, x, y, data = NULL,
     y <- v_eval(substitute(y), data)
   }
 
-  ind <- complete.cases(x, y)
+  if(!inherits(x, "hexbin")) {
+    xy_names <- get_xy_names(x, y, xname, yname, NULL)
+    xy <- get_xy_data(x, y)
+    x <- xy$x
+    y <- xy$y
+    xname <- xy_names$x
+    yname <- xy_names$y
+  }
 
   minarea <- 0.04; maxarea <- 0.8; mincnt <- 1; maxcnt <- NULL
-  hbd <- get_hexbin_data(x = x[ind], y = y[ind], xbins = xbins, shape = shape,
+  hbd <- get_hexbin_data(x = x, y = y, xbins = xbins, shape = shape,
     style = style, minarea = minarea, maxarea = maxarea, mincnt = mincnt,
     maxcnt = maxcnt, trans = trans, inv = inv)
 
@@ -46,7 +53,7 @@ ly_hexbin <- function(fig, x, y, data = NULL,
       palette <- colorRampPalette(bk_palettes[[palette]])
     }
     if(is.function(palette)) {
-      colorcut <- seq(0, 1, length = 10)
+      colorcut <- seq(0, 1, length = 100)
       nc <- length(colorcut)
       colgrp <- cut(hbd$rcnt, colorcut, labels = FALSE, include.lowest = TRUE)
       clrs <- palette(length(colorcut) - 1)
@@ -85,7 +92,12 @@ get_hexbin_data <- function(x, y, xbins = 30, shape = 1, xbnds = range(x), ybnds
   if(is.null(ybnds))
     ybnds <- range(y, na.rm = TRUE)
 
-  dat <- hexbin(x, y, shape = shape, xbins = xbins, xbnds = xbnds, ybnds = ybnds)
+  if(inherits(x, "hexbin")) {
+    dat <- x
+  } else {
+    ind <- complete.cases(x, y)
+    dat <- hexbin(x[ind], y[ind], shape = shape, xbins = xbins, xbnds = xbnds, ybnds = ybnds)
+  }
 
   cnt <- dat@count
   xbins <- dat@xbins

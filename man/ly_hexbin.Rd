@@ -4,7 +4,7 @@
 \alias{ly_hexbin}
 \title{Add a "hexbin" layer to a Bokeh figure}
 \usage{
-ly_hexbin(fig, x, y, data = NULL, xbins = 30, shape = 1,
+ly_hexbin(fig, x, y = NULL, data = NULL, xbins = 30, shape = 1,
   style = "colorscale", trans = NULL, inv = NULL, palette = "RdYlGn11",
   line = FALSE, alpha = 1, hover = TRUE)
 }
