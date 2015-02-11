@@ -13,7 +13,7 @@ devtools::install_github("ramnathv/htmlwidgets")
 devtools::install_github("hafen/rbokeh")
 ```
 
-### Using
+### Use
 
 Please see [here](http://hafen.github.io/rbokeh).
 
