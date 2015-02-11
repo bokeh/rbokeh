@@ -1,6 +1,6 @@
 # rbokeh
 
-[![Build Status](https://travis-ci.org/bokeh/rvbokeh.svg?branch=master)](https://travis-ci.org/bokeh/rbokeh)
+[![Build Status](https://travis-ci.org/bokeh/rbokeh.svg?branch=master)](https://travis-ci.org/bokeh/rbokeh)
 
 R interface to Bokeh.
 
