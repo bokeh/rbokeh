@@ -142,7 +142,7 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range, ho
     fig <- fig %>% add_hover(hover$dict, renderer_ref)
     data <- c(data, hover$data)
   }
-browser()
+
   args$glyph <- type
 
   if(axis_type_range$x_axis_type == "datetime") {
