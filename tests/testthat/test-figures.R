@@ -1,177 +1,187 @@
 
+## difficult to test what the plots actually look like
+## currently just run a wide variety of things and make
+## sure there are no errors in creating or preparing
+
 test_that("examples", {
 
-  # rescale <- function(x)
-  #   (x - min(x)) / diff(range(x))
-  # figure() %>%
-  #   ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris,
-  #     end_angle = rescale(Petal.Length)*2*pi, color = Species,
-  #     inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5,
-  #     hover = Species)
+  rescale <- function(x)
+    (x - min(x)) / diff(range(x))
 
-  # figure() %>%
-  #   ly_wedge(Sepal.Length, Sepal.Width, data = iris,
-  #     end_angle = rescale(Petal.Length)*2*pi, color = Species,
-  #     radius = 0.15, alpha = 0.5,
-  #     hover = Species)
+  p <- figure() %>%
+    ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris,
+      end_angle = rescale(Petal.Length)*2*pi, color = Species,
+      inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5,
+      hover = Species)
+  print_model_json(p, file = "/dev/null")
 
-  # figure() %>%
-  #   ly_arc(Sepal.Length, Sepal.Width, data = iris,
-  #     end_angle = rescale(Petal.Length)*2*pi, color = Species,
-  #     alpha = 0.5)
+  p <- figure() %>%
+    ly_wedge(Sepal.Length, Sepal.Width, data = iris,
+      end_angle = rescale(Petal.Length)*2*pi, color = Species,
+      radius = 0.15, alpha = 0.5,
+      hover = Species)
+  print_model_json(p, file = "/dev/null")
 
-  # figure() %>%
-  #   ly_annulus(Sepal.Length, Sepal.Width, data = iris,
-  #     color = Species, hover = Species,
-  #     outer_radius = rescale(Petal.Length) * 0.3,
-  #     inner_radius = rescale(Petal.Length) * 0.1)
+  p <- figure() %>%
+    ly_arc(Sepal.Length, Sepal.Width, data = iris,
+      end_angle = rescale(Petal.Length)*2*pi, color = Species,
+      alpha = 0.5)
+  print_model_json(p, file = "/dev/null")
 
-  # figure() %>%
-  #   ly_points(rexp(1000), rexp(1000)) %>%
-  #   x_axis(label = "x", log = TRUE) %>%
-  #   y_axis(label = "y", log = TRUE)
+  p <- figure() %>%
+    ly_annulus(Sepal.Length, Sepal.Width, data = iris,
+      color = Species, hover = Species,
+      outer_radius = rescale(Petal.Length) * 0.3,
+      inner_radius = rescale(Petal.Length) * 0.1)
+  print_model_json(p, file = "/dev/null")
 
-  # figure(ylab = "Height (inches)", width = 600) %>%
-  #   ly_boxplot(voice.part, height, data = lattice::singer)
+  p <- figure() %>%
+    ly_points(rexp(1000), rexp(1000)) %>%
+    x_axis(label = "x", log = TRUE) %>%
+    y_axis(label = "y", log = TRUE)
+  print_model_json(p, file = "/dev/null")
 
-  # # prepare data
-  # elements <- subset(elements, !is.na(group))
-  # elements$group <- as.character(elements$group)
-  # elements$period <- as.character(elements$period)
+  p <- figure(ylab = "Height (inches)", width = 600) %>%
+    ly_boxplot(voice.part, height, data = lattice::singer)
+  print_model_json(p, file = "/dev/null")
 
-  # # add colors for groups
-  # metals <- c("alkali metal", "alkaline earth metal", "halogen",
-  #   "metal", "metalloid", "noble gas", "nonmetal", "transition metal")
-  # colors <- c("#a6cee3", "#1f78b4", "#fdbf6f", "#b2df8a", "#33a02c",
-  #   "#bbbb88", "#baa2a6", "#e08e79")
-  # elements$color <- colors[match(elements$metal, metals)]
-  # elements$type <- elements$metal
+  # prepare data
+  elements <- subset(elements, !is.na(group))
+  elements$group <- as.character(elements$group)
+  elements$period <- as.character(elements$period)
 
-  # # make coordinates for labels
-  # elements$symx <- paste(elements$group, ":0.1", sep = "")
-  # elements$numbery <- paste(elements$period, ":0.8", sep = "")
-  # elements$massy <- paste(elements$period, ":0.15", sep = "")
-  # elements$namey <- paste(elements$period, ":0.3", sep = "")
+  # add colors for groups
+  metals <- c("alkali metal", "alkaline earth metal", "halogen",
+    "metal", "metalloid", "noble gas", "nonmetal", "transition metal")
+  colors <- c("#a6cee3", "#1f78b4", "#fdbf6f", "#b2df8a", "#33a02c",
+    "#bbbb88", "#baa2a6", "#e08e79")
+  elements$color <- colors[match(elements$metal, metals)]
+  elements$type <- elements$metal
 
-  # # create figure
-  # p <- figure(title = "Periodic Table", tools = c("resize", "hover"),
-  #   ylim = as.character(c(7:1)), xlim = as.character(1:18),
-  #   xgrid = FALSE, ygrid = FALSE, xlab = "", ylab = "",
-  #   height = 600, width = 1200) %>%
+  # make coordinates for labels
+  elements$symx <- paste(elements$group, ":0.1", sep = "")
+  elements$numbery <- paste(elements$period, ":0.8", sep = "")
+  elements$massy <- paste(elements$period, ":0.15", sep = "")
+  elements$namey <- paste(elements$period, ":0.3", sep = "")
 
-  # # plot rectangles
-  # ly_crect(group, period, data = elements, 0.9, 0.9,
-  #   fill_color = color, line_color = color, fill_alpha = 0.6,
-  #   hover = list(name, atomic.number, type, atomic.mass,
-  #     electronic.configuration)) %>%
+  # create figure
+  p <- figure(title = "Periodic Table", tools = c("resize", "hover"),
+    ylim = as.character(c(7:1)), xlim = as.character(1:18),
+    xgrid = FALSE, ygrid = FALSE, xlab = "", ylab = "",
+    height = 600, width = 1200) %>%
 
-  # # add symbol text
-  # ly_text(symx, period, text = symbol, data = elements,
-  #   font_style = "bold", font_size = "15pt",
-  #   align = "left", baseline = "middle") %>%
+  # plot rectangles
+  ly_crect(group, period, data = elements, 0.9, 0.9,
+    fill_color = color, line_color = color, fill_alpha = 0.6,
+    hover = list(name, atomic.number, type, atomic.mass,
+      electronic.configuration)) %>%
 
-  # # add atomic number text
-  # ly_text(symx, numbery, text = atomic.number, data = elements,
-  #   font_size = "9pt", align = "left", baseline = "middle") %>%
+  # add symbol text
+  ly_text(symx, period, text = symbol, data = elements,
+    font_style = "bold", font_size = "15pt",
+    align = "left", baseline = "middle") %>%
 
-  # # add name text
-  # ly_text(symx, namey, text = name, data = elements,
-  #   font_size = "6pt", align = "left", baseline = "middle") %>%
+  # add atomic number text
+  ly_text(symx, numbery, text = atomic.number, data = elements,
+    font_size = "9pt", align = "left", baseline = "middle") %>%
 
-  # # add atomic mass text
-  # ly_text(symx, massy, text = atomic.mass, data = elements,
-  #   font_size = "6pt", align = "left", baseline = "middle")
+  # add name text
+  ly_text(symx, namey, text = name, data = elements,
+    font_size = "6pt", align = "left", baseline = "middle") %>%
 
-  # p
+  # add atomic mass text
+  ly_text(symx, massy, text = atomic.mass, data = elements,
+    font_size = "6pt", align = "left", baseline = "middle")
 
+  print_model_json(p, file = "/dev/null")
 
-  # p <- figure(width = 1000) %>%
-  #   ly_points(date, Freq, data = flightfreq,
-  #     hover = list(date, Freq, dow), size = 5) %>%
-  #   ly_abline(v = as.Date("2001-09-11"))
-  # p
+  p <- figure(width = 1000) %>%
+    ly_points(date, Freq, data = flightfreq,
+      hover = list(date, Freq, dow), size = 5) %>%
+    ly_abline(v = as.Date("2001-09-11"))
+  print_model_json(p, file = "/dev/null")
 
+  p1 <- figure(tools = tools) %>%
+    ly_points(Sepal.Length, Sepal.Width, data = iris,
+      color = Species, hover = list(Sepal.Length, Sepal.Width))
 
-  # p1 <- figure(tools = tools) %>%
-  #   ly_points(Sepal.Length, Sepal.Width, data = iris,
-  #     color = Species, hover = list(Sepal.Length, Sepal.Width))
+  p2 <- figure(tools = tools) %>%
+    ly_points(Petal.Length, Petal.Width, data = iris,
+      color = Species, hover = list(Sepal.Length, Sepal.Width))
 
-  # p2 <- figure(tools = tools) %>%
-  #   ly_points(Petal.Length, Petal.Width, data = iris,
-  #     color = Species, hover = list(Sepal.Length, Sepal.Width))
+  tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "resize", "reset")
 
-  # tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "resize", "reset")
+  # 1 row, 2 columns
+  p <- grid_plot(list(p1, p2))
+  print_model_json(p, file = "/dev/null")
+  # x and y axis with same (and linked) limits
+  p <- grid_plot(list(p1, p2), same_axes = TRUE)
+  print_model_json(p, file = "/dev/null")
+  # x axis has same (and linked) limits
+  p <- grid_plot(list(p1, p2), same_axes = c(TRUE, FALSE))
+  print_model_json(p, file = "/dev/null")
+  # same axes and data is linked (try box_select tool)
+  p <- grid_plot(list(p1, p2), same_axes = TRUE, link_data = TRUE)
+  print_model_json(p, file = "/dev/null")
+  # 1 column, 2 rows
+  p <- grid_plot(list(p1, p2), ncol = 1)
+  print_model_json(p, file = "/dev/null")
+  # send lists instead of specifying nrow and ncol
+  p <- grid_plot(list(c(list(p1), list(p2))))
+  print_model_json(p, file = "/dev/null")
+  p <- grid_plot(list(list(p1), list(p2)))
+  print_model_json(p, file = "/dev/null")
 
-  # # 1 row, 2 columns
-  # grid_plot(list(p1, p2))
-  # # x and y axis with same (and linked) limits
-  # grid_plot(list(p1, p2), same_axes = TRUE)
-  # # x axis has same (and linked) limits
-  # grid_plot(list(p1, p2), same_axes = c(TRUE, FALSE))
-  # # same axes and data is linked (try box_select tool)
-  # grid_plot(list(p1, p2), same_axes = TRUE, link_data = TRUE)
-  # # 1 column, 2 rows
-  # grid_plot(list(p1, p2), ncol = 1)
-  # # send lists instead of specifying nrow and ncol
-  # grid_plot(list(c(list(p1), list(p2))))
-  # grid_plot(list(list(p1), list(p2)))
+  p <- figure(xlim = c(0, 1), ylim = c(0, 1), title = "Volcano") %>%
+    ly_image(volcano) %>%
+    ly_contour(volcano)
+  print_model_json(p, file = "/dev/null")
 
-  # p <- figure(xlim = c(0, 1), ylim = c(0, 1), title = "Volcano") %>%
-  #   ly_image(volcano) %>%
-  #   ly_contour(volcano)
-  # p
+  url <- c("http://bokeh.pydata.org/en/latest/_static/bokeh-transparent.png",
+    "http://developer.r-project.org/Logo/Rlogo-4.png")
 
+  ss <- seq(0, 2*pi, length = 13)[-1]
+  ws <- runif(12, 2.5, 5) * rep(c(1, 0.8), 6)
 
+  imgdat <- data.frame(
+    x = sin(ss) * 10, y = cos(ss) * 10,
+    w = ws, h = ws * rep(c(1, 0.76), 6),
+    url = rep(url, 6)
+  )
 
-  # url <- c("http://bokeh.pydata.org/en/latest/_static/bokeh-transparent.png",
-  #   "http://developer.r-project.org/Logo/Rlogo-4.png")
-
-  # ss <- seq(0, 2*pi, length = 13)[-1]
-  # ws <- runif(12, 2.5, 5) * rep(c(1, 0.8), 6)
-
-  # imgdat <- data.frame(
-  #   x = sin(ss) * 10, y = cos(ss) * 10,
-  #   w = ws, h = ws * rep(c(1, 0.76), 6),
-  #   url = rep(url, 6)
-  # )
-
-  # p <- figure(xlab = "x", ylab = "y") %>%
-  #   ly_image_url(x, y, w = w, h = h, url = url, data = imgdat,
-  #     anchor = "center") %>%
-  #   ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
-  #     width = 15, alpha = 0.1)
-  # p
-
-
-  # z <- lm(dist ~ speed, data = cars)
-  # p <- figure() %>%
-  #   ly_points(cars, hover = cars) %>%
-  #   ly_lines(lowess(cars), legend = "lowess") %>%
-  #   ly_abline(z, type = 2, legend = "lm", width = 2)
-  # p
-
-
-  # p <- figure() %>%
-  #   ly_points(Sepal.Length, Sepal.Width, data = iris,
-  #     color = Species, glyph = Species,
-  #     hover = list(Sepal.Length, Sepal.Width))
-  # p
+  p <- figure(xlab = "x", ylab = "y") %>%
+    ly_image_url(x, y, w = w, h = h, url = url, data = imgdat,
+      anchor = "center") %>%
+    ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
+      width = 15, alpha = 0.1)
+  print_model_json(p, file = "/dev/null")
 
 
+  z <- lm(dist ~ speed, data = cars)
+  p <- figure() %>%
+    ly_points(cars, hover = cars) %>%
+    ly_lines(lowess(cars), legend = "lowess") %>%
+    ly_abline(z, type = 2, legend = "lm", width = 2)
+  print_model_json(p, file = "/dev/null")
 
-  # # get data from Duluth site in 'barley' data
-  # du <- subset(lattice::barley, site == "Duluth")
+  p <- figure() %>%
+    ly_points(Sepal.Length, Sepal.Width, data = iris,
+      color = Species, glyph = Species,
+      hover = list(Sepal.Length, Sepal.Width))
+  print_model_json(p, file = "/dev/null")
 
-  # # plot with default ranges
-  # p <- figure(width = 600) %>%
-  #   ly_points(yield, variety, color = year, data = du)
-  # p
-  # # y axis is alphabetical
+  # get data from Duluth site in 'barley' data
+  du <- subset(lattice::barley, site == "Duluth")
 
-  # # manually set x and y axis (y in order of 1932 yield)
-  # p %>%
-  #   x_range(c(20, 40)) %>%
-  #   y_range(du$variety[order(subset(du, year == 1932)$yield)])
+  # plot with default ranges
+  p <- figure(width = 600) %>%
+    ly_points(yield, variety, color = year, data = du)
+  print_model_json(p, file = "/dev/null")
+  # y axis is alphabetical
 
-
+  # manually set x and y axis (y in order of 1932 yield)
+  p <- p %>%
+    x_range(c(20, 40)) %>%
+    y_range(du$variety[order(subset(du, year == 1932)$yield)])
+  print_model_json(p, file = "/dev/null")
 })
