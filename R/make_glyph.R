@@ -5,6 +5,9 @@
 
 make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range, hover = NULL, legend = NULL, xname = NULL, yname = NULL, data_sig = NA) {
 
+  if(is.null(args))
+    args <- list()
+
   ## give it a unique layer group name if not provided
   if(is.null(lgroup))
     lgroup <- gen_layer_name(names(fig$layers))
