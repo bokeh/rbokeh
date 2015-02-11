@@ -1,6 +1,6 @@
 # rbokeh
 
-[![Build Status](https://travis-ci.org/hafen/rBokeh.svg?branch=master)](https://travis-ci.org/hafen/rBokeh)
+[![Build Status](https://travis-ci.org/bokeh/rvbokeh.svg?branch=master)](https://travis-ci.org/bokeh/rbokeh)
 
 R interface to Bokeh.
 
@@ -10,7 +10,7 @@ Using the `devtools` package:
 
 ```
 devtools::install_github("ramnathv/htmlwidgets")
-devtools::install_github("hafen/rbokeh")
+devtools::install_github("bokeh/rbokeh")
 ```
 
 ### Use
