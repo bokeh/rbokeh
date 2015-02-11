@@ -62,11 +62,14 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
     idx <- which(lns == length(xy$x))
 
     df_args <- args[idx]
+    df_args$group <- NULL
 
     ## much more efficient way to do this but would probably require more dependencies...
     lvls <- apply(as.matrix(data.frame(g_args)), 1,
       function(x) paste(x, collapse = ""))
     df_split <- split(seq_along(lvls), lvls)
+
+    g_args$group <- NULL
 
     for(ii in seq_along(df_split)) {
       cur_idx <- df_split[[ii]]
