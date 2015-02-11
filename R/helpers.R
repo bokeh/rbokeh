@@ -1,52 +1,5 @@
 ## internal helper methods
 
-resolve_line_args <- function(fig, args) {
-
-  if(!is.null(args$color)) {
-    if(!is.null(args$line_color)) {
-      if(args$color != args$line_color)
-        message("both color and line_color specified - honoring line_color")
-    } else {
-      args$line_color <- args$color
-    }
-  }
-
-  if(!is.null(args$alpha)) {
-    if(!is.null(args$line_alpha)) {
-      if(args$alpha != args$line_alpha)
-        message("both alpha and line_alpha specified - honoring line_alpha")
-    } else {
-      args$line_alpha <- args$alpha
-    }
-  }
-
-  ## map to what bokeh expects
-  args$line_dash <- args$type
-  args$type <- NULL
-
-  args$line_width <- args$width
-  args$width <- NULL
-
-  if(is.numeric(args$line_dash)) {
-    if(length(args$line_dash) == 1) {
-      args$line_dash <- as.character(args$line_dash)
-    }
-  }
-  if(is.character(args$line_dash)) {
-    if(!args$line_dash %in% names(lty_dict))
-      stop("'line_dash' should be one of: ", paste(names(lty_dict), collapse = ", "), call. = FALSE)
-    args$line_dash <- lty_dict[[args$line_dash]]
-  }
-
-  if(is.numeric(args$line_cap))
-    args$line_cap <- ljoin_dict[[as.character(args$line_cap)]]
-
-  if(is.null(args$line_color))
-    args$line_color <- get_next_color(fig)
-
-  args
-}
-
 validate_fig <- function(fig, fct) {
   if(!inherits(fig, "BokehFigure"))
     stop("Error in ", fct, ": first argument must be of type 'BokehFigure'", call. = FALSE)
@@ -265,6 +218,56 @@ get_xy_names <- function(x, y, xname, yname, dots) {
     res$y <- dots$ylab
 
   res
+}
+
+resolve_line_args <- function(fig, args) {
+
+  if(!is.null(args$color)) {
+    if(!is.null(args$line_color)) {
+      if(args$color != args$line_color)
+        message("both color and line_color specified - honoring line_color")
+    } else {
+      args$line_color <- args$color
+    }
+  }
+
+  if(!is.null(args$alpha)) {
+    if(!is.null(args$line_alpha)) {
+      if(args$alpha != args$line_alpha)
+        message("both alpha and line_alpha specified - honoring line_alpha")
+    } else {
+      args$line_alpha <- args$alpha
+    }
+  }
+
+  ## map to what bokeh expects
+  args$line_dash <- args$type
+  args$type <- NULL
+
+  args$line_width <- args$width
+  args$width <- NULL
+
+  if(is.numeric(args$line_dash)) {
+    if(length(args$line_dash) == 1) {
+      args$line_dash <- as.character(args$line_dash)
+    }
+  }
+  if(is.character(args$line_dash)) {
+    if(!args$line_dash %in% names(lty_dict))
+      stop("'line_dash' should be one of: ", paste(names(lty_dict), collapse = ", "), call. = FALSE)
+    args$line_dash <- lty_dict[[args$line_dash]]
+  }
+
+  if(is.numeric(args$line_cap))
+    args$line_cap <- ljoin_dict[[as.character(args$line_cap)]]
+
+  if(is.null(args$line_color))
+    args$line_color <- get_next_color(fig)
+
+  args$color <- NULL
+  args$alpha <- NULL
+
+  args
 }
 
 ## take args color and alpha and translate them to f
