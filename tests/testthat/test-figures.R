@@ -5,34 +5,25 @@
 
 test_that("examples", {
 
-  rescale <- function(x)
-    (x - min(x)) / diff(range(x))
-
   p <- figure() %>%
     ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris,
-      end_angle = rescale(Petal.Length)*2*pi, color = Species,
-      inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5,
-      hover = Species)
+      color = Species, inner_radius = 0.1, outer_radius = 0.15,
+      alpha = 0.5, hover = Species)
   print_model_json(p, file = "/dev/null")
 
   p <- figure() %>%
     ly_wedge(Sepal.Length, Sepal.Width, data = iris,
-      end_angle = rescale(Petal.Length)*2*pi, color = Species,
-      radius = 0.15, alpha = 0.5,
-      hover = Species)
+      color = Species, radius = 0.15, alpha = 0.5, hover = Species)
   print_model_json(p, file = "/dev/null")
 
   p <- figure() %>%
     ly_arc(Sepal.Length, Sepal.Width, data = iris,
-      end_angle = rescale(Petal.Length)*2*pi, color = Species,
-      alpha = 0.5)
+      color = Species, alpha = 0.5)
   print_model_json(p, file = "/dev/null")
 
   p <- figure() %>%
     ly_annulus(Sepal.Length, Sepal.Width, data = iris,
-      color = Species, hover = Species,
-      outer_radius = rescale(Petal.Length) * 0.3,
-      inner_radius = rescale(Petal.Length) * 0.1)
+      color = Species, hover = Species)
   print_model_json(p, file = "/dev/null")
 
   p <- figure() %>%
@@ -46,6 +37,7 @@ test_that("examples", {
   print_model_json(p, file = "/dev/null")
 
   # prepare data
+  data(elements, package = "rbokeh")
   elements <- subset(elements, !is.na(group))
   elements$group <- as.character(elements$group)
   elements$period <- as.character(elements$period)
@@ -95,12 +87,14 @@ test_that("examples", {
 
   print_model_json(p, file = "/dev/null")
 
+  data(flightFreq, package = "rbokeh")
   p <- figure(width = 1000) %>%
     ly_points(date, Freq, data = flightfreq,
       hover = list(date, Freq, dow), size = 5) %>%
     ly_abline(v = as.Date("2001-09-11"))
   print_model_json(p, file = "/dev/null")
 
+  tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "resize", "reset")
   p1 <- figure(tools = tools) %>%
     ly_points(Sepal.Length, Sepal.Width, data = iris,
       color = Species, hover = list(Sepal.Length, Sepal.Width))
@@ -108,8 +102,6 @@ test_that("examples", {
   p2 <- figure(tools = tools) %>%
     ly_points(Petal.Length, Petal.Width, data = iris,
       color = Species, hover = list(Sepal.Length, Sepal.Width))
-
-  tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "resize", "reset")
 
   # 1 row, 2 columns
   p <- grid_plot(list(p1, p2))
