@@ -11,7 +11,7 @@
 #' }
 #' @importFrom RJSONIO toJSON
 #' @export
-print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, pbcopy = FALSE) {
+print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, file = "", pbcopy = FALSE) {
   if(prepare) {
     if(inherits(fig, "BokehFigure")) {
       fig <- prepare_figure(fig)
@@ -20,7 +20,6 @@ print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, pbcopy = FALSE)
     }
   }
 
-  file <- ""
   if(pbcopy)
     file <- pipe("pbcopy")
   cat(toJSON(remove_model_names(fig$model), digits = 50, pretty = pretty), file = file)
