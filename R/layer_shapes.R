@@ -192,7 +192,7 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
   xy <- get_xy_data(x, y)
   lgroup <- get_lgroup(lgroup, fig)
 
-  args <- c(args, list(color = color, alpha = alpha,
+  args <- c(args, list(glyph = "rect", color = color, alpha = alpha,
     width = width, height = height, angle = angle, dilate = dilate))
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
