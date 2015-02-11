@@ -3,9 +3,7 @@
 #' @param size size of the glyph
 #' @param color color to use for line and fill properties
 #' @export
-point_types <- function(size = 25, color = "blue") {
-
-  width <- 1100; height <- 600
+point_types <- function(size = 25, color = "blue", width = 800, height = 450) {
 
   types <- c(as.list(marker_pch_types), as.list(marker_names))
 
@@ -20,7 +18,7 @@ point_types <- function(size = 25, color = "blue") {
 
   f %>%
     ly_text(as.character(grid[,1]),
-      paste(as.character(grid[,2]), ":0.15", sep = ""),
-      unlist(types),
+      paste(as.character(grid[,2]), ":0.1", sep = ""),
+      unlist(types), font_size = "12px",
       align = "center", baseline = "bottom")
 }
