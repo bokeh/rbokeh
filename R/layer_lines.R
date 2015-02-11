@@ -570,7 +570,6 @@ ly_quadratic <- function(fig, x0, y0, x1, y1, cx, cy, data = NULL,
 #' @param xs list of vectors of x coordinates
 #' @param ys list of vectors of y coordinates
 #' @template par-lineprops
-#' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-line
 #' @family layer functions

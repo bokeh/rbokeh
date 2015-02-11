@@ -2,6 +2,7 @@
 #' @param fig figure to print
 #' @param prepare logical - should the figure be sent through preparations that need to be done prior to plotting (TRUE), or printed as-is (FALSE)
 #' @param pretty parameter passed on to \code{\link[RJSONIO]{toJSON}}
+#' @param file parameter passed on to \code{\link[base]{cat}}
 #' @param pbcopy logical - if on OSX, should the results be passed to the clipboard (TRUE) instead of printed to the screen (FALSE)?
 #' @examples
 #' \donttest{

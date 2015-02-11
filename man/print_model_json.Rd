@@ -4,7 +4,8 @@
 \alias{print_model_json}
 \title{Print the JSON of a Bokeh figure}
 \usage{
-print_model_json(fig, prepare = TRUE, pretty = TRUE, pbcopy = FALSE)
+print_model_json(fig, prepare = TRUE, pretty = TRUE, file = "",
+  pbcopy = FALSE)
 }
 \arguments{
 \item{fig}{figure to print}
@@ -12,6 +13,8 @@ print_model_json(fig, prepare = TRUE, pretty = TRUE, pbcopy = FALSE)
 \item{prepare}{logical - should the figure be sent through preparations that need to be done prior to plotting (TRUE), or printed as-is (FALSE)}
 
 \item{pretty}{parameter passed on to \code{\link[RJSONIO]{toJSON}}}
+
+\item{file}{parameter passed on to \code{\link[base]{cat}}}
 
 \item{pbcopy}{logical - if on OSX, should the results be passed to the clipboard (TRUE) instead of printed to the screen (FALSE)?}
 }

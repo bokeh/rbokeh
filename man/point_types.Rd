@@ -4,12 +4,14 @@
 \alias{point_types}
 \title{Display glyph types available for ly_points()}
 \usage{
-point_types(size = 25, color = "blue")
+point_types(size = 25, color = "blue", width = 800, height = 450)
 }
 \arguments{
 \item{size}{size of the glyph}
 
 \item{color}{color to use for line and fill properties}
+
+\item{width,height}{dimensions of output plot}
 }
 \description{
 Display glyph types available for ly_points()
