@@ -100,7 +100,7 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
     check_opts(args, args$glyph, formals = names(formals(ly_points)))
 
   axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y, glyph = glyph)
-
+browser()
   make_glyph(fig, args$glyph, lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
