@@ -16,7 +16,14 @@ bokeh_render_json <- function(json_file) {
   # extract the id
   tmp <- RJSONIO::fromJSON(json_file)
   nms <- sapply(tmp, function(x) { x$type })
-  modeltype <- ifelse("GridPlot" %in% nms, "GridPlot", "Plot")
+  if("GridPlot" %in% nms) {
+    modeltype <- "GridPlot"
+  } else if("GMapPlot" %in% nms) {
+    modeltype <- "GMapPlot"
+  } else {
+    modeltype <- "Plot"
+  }
+
   id <- tmp[[which(nms %in% modeltype)[1]]]$id
 
   # forward options using x
