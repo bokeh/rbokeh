@@ -84,7 +84,7 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
         c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)), args[-idx],
           list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
             glyph = subset_with_attributes(gl, cur_idx[1]), lgroup = lgroup,
-            lname = ii, hover = hover$data[cur_idx, , drop = FALSE], legend = legend)))
+            lname = ii, hover = hover$data[cur_idx, , drop = FALSE], legend = legend, xlab = xy_names$x, ylab = xy_names$y)))
     }
     return(fig)
   }
