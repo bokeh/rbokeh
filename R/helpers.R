@@ -407,6 +407,35 @@ get_hover <- function(hn, data) {
   ), class = "hoverSpec"))
 }
 
+
+# get the "url" argument and turn it into data and "dict"
+# must be a vector or a string referencing variables in data
+get_url <- function(url, data) {
+  if(length(url) == 1) {
+    if(!grepl("@", url))
+      message("url tap tool not added - 'url' must be a vector of URLs or a string referencing names of 'data' with e.g. @varname")
+    if(!is.null(data)) {
+      tmp <- strsplit(url, "@")[[1]][-1]
+      vars <- gsub("(^[A-Za-z]+).*", "\\1", tmp)
+      if(!all(vars %in% names(data))) {
+        message("url tap tool not added - one or more of the following detected variables are not in the 'data' argument: ", paste(vars, collapse = ", "))
+      } else {
+        data <- data[vars]
+      }
+    } else {
+      message("url tap tool not added - 'url' must be a vector of URLs or a string referencing names of 'data' with e.g. @varname")
+    }
+  } else {
+    data <- data.frame(data_url = url)
+    url <- "@data_url"
+  }
+
+  return(structure(list(
+    data = data,
+    url = url
+  ), class = "urlSpec"))
+}
+
 v_eval <- function(x, data) {
   res <- eval(x, data)
 

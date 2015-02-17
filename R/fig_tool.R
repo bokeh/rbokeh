@@ -64,18 +64,6 @@ tool_crosshair <- function(fig) {
   update_tool(fig, which = "crosshair", args = list(plot_ref = fig$ref))
 }
 
-#' Add "tap" tool to a Bokeh figure
-#' @template tools
-#' @examples
-#' \donttest{
-#' figure() %>% ly_points(1:10) %>%
-#'  tool_tap()
-#' }
-#' @export
-tool_tap <- function(fig) {
-  update_tool(fig, which = "tap", args = list(plot_ref = fig$ref))
-}
-
 #' Add "resize" tool to a Bokeh figure
 #' @template tools
 #' @examples
