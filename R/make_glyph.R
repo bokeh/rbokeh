@@ -3,7 +3,8 @@
 # you can add new layers to an existing layer group
 # which will ensure that attributes are mapped to glyphs within the layer
 
-make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range, hover = NULL, legend = NULL, xname = NULL, yname = NULL, data_sig = NA) {
+make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
+  hover = NULL, url = NULL, legend = NULL, xname = NULL, yname = NULL, data_sig = NA) {
 
   if(is.null(args))
     args <- list()
@@ -141,6 +142,16 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range, ho
 
     fig <- fig %>% add_hover(hover$dict, renderer_ref)
     data <- c(data, hover$data)
+  }
+
+  if(!is.null(url)) {
+    renderer_ref <- list(
+      type = "GlyphRenderer",
+      id = glr_id
+    )
+
+    fig <- fig %>% add_tap_url(url$url, renderer_ref)
+    data <- c(data, url$data)
   }
 
   args$glyph <- type

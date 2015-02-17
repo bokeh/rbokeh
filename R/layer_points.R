@@ -16,6 +16,7 @@
 #' @template par-coloralpha
 #' @param size size of the glyph in screen units
 #' @template par-hover
+#' @template par-url
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
@@ -25,7 +26,7 @@
 #' @export
 ly_points <- function(fig, x, y = NULL, data = NULL,
   glyph = 21, color = NULL, alpha = 1, size = 10,
-  hover = NULL, legend = NULL,
+  hover = NULL, url = NULL, legend = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_points")
@@ -47,6 +48,7 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
+  url <- get_url(substitute(url), data)
 
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
@@ -84,7 +86,7 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
         c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)), args[-idx],
           list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
             glyph = subset_with_attributes(gl, cur_idx[1]), lgroup = lgroup,
-            lname = ii, hover = hover$data[cur_idx, , drop = FALSE], legend = legend)))
+            lname = ii, hover = hover$data[cur_idx, , drop = FALSE], legend = legend, xlab = xy_names$x, ylab = xy_names$y)))
     }
     return(fig)
   }
@@ -104,6 +106,6 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
   make_glyph(fig, args$glyph, lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
-    hover = hover, legend = legend,
+    hover = hover, url = url, legend = legend,
     xname = xy_names$x, yname = xy_names$y)
 }

@@ -6,7 +6,8 @@
 \usage{
 ly_wedge(fig, x, y = NULL, data = NULL, radius = 0.3, start_angle = 0,
   end_angle = 2 * pi, direction = "anticlock", color = NULL, alpha = 1,
-  hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...)
+  hover = NULL, url = NULL, legend = NULL, lname = NULL,
+  lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -30,6 +31,8 @@ ly_wedge(fig, x, y = NULL, data = NULL, radius = 0.3, start_angle = 0,
 \item{alpha}{the alpha transparency of the glyph between 0 (transparent) and 1 (opaque) - if glyph has both fill and color properties, see "Handling alpha" below}
 
 \item{hover}{a data frame of variables to be displayed when hovering over the glyph or a vector of variable names that can be found and extracted from the \code{data} argument}
+
+\item{url}{a string of URLs or a single string that references a variable name (via @var_name) that can be found and extracted from the \code{data} argument}
 
 \item{legend}{either a logical specifying not to plot a legend for this layer (FALSE) or a string indicating the name of the legend entry for this layer (note that when mapping plot attributes to variables in \code{data}, a legend is automatically created and does not need to be specified - see "Mapped plot attributes and legends" below)}
 

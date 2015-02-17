@@ -5,7 +5,8 @@
 \title{Add a "polygons" layer to a Bokeh figure}
 \usage{
 ly_polygons(fig, xs, ys, group = NULL, data = NULL, color = NULL,
-  alpha = 1, hover = NULL, lname = NULL, lgroup = NULL, ...)
+  alpha = 1, hover = NULL, url = NULL, lname = NULL, lgroup = NULL,
+  ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -23,6 +24,8 @@ ly_polygons(fig, xs, ys, group = NULL, data = NULL, color = NULL,
 \item{alpha}{the alpha transparency of the glyph between 0 (transparent) and 1 (opaque) - if glyph has both fill and color properties, see "Handling alpha" below}
 
 \item{hover}{a data frame of variables to be displayed when hovering over the glyph or a vector of variable names that can be found and extracted from the \code{data} argument}
+
+\item{url}{a string of URLs or a single string that references a variable name (via @var_name) that can be found and extracted from the \code{data} argument}
 
 \item{lname}{layer name}
 

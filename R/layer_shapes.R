@@ -8,13 +8,14 @@
 #' @details \code{xs} and \code{ys} can be a list of vectors, each element for one polygon to be drawn, or can be vectors with the \code{group} argument specifying how to break them up into individual polygons.
 #' @template par-coloralpha
 #' @template par-hover
+#' @template par-url
 #' @template par-lnamegroup
 #' @template dots-fillline
 #' @family layer functions
 #' @export
 ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
   color = NULL, alpha = 1,
-  hover = NULL, # legend = NULL,
+  hover = NULL, url = NULL, # legend = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_polygons")
@@ -77,11 +78,12 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
     args$fill_alpha <- 0.5
 
   hover <- get_hover(hover)
+  url <- get_url(url, data)
 
   axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
   make_glyph(fig, type = "patches", data = list(xs = unname(xs), ys = unname(ys)),
     args = args, axis_type_range = axis_type_range, xname = xy_names$x, yname = xy_names$y,
-    lname = lname, lgroup = lgroup, hover = hover)
+    lname = lname, lgroup = lgroup, hover = hover, url = url)
 }
 
 #' Add a "rect" layer to a Bokeh figure
@@ -93,6 +95,7 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
 #' @param data an optional data frame, providing the source for inputs xleft, ybottom, xright, ytop, and other glyph properties
 #' @template par-coloralpha
 #' @template par-hover
+#' @template par-url
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
@@ -100,7 +103,7 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
 #' @export
 ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
   color = NULL, alpha = 1,
-  hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_rect")
 
@@ -121,6 +124,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
+  url <- get_url(substitute(url), data)
 
   xy_names <- get_xy_names(xleft, ybottom, xname, yname, args)
 
@@ -139,7 +143,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
   axis_type_range <- get_glyph_axis_type_range(c(xleft, xright), c(ybottom, ytop))
   make_glyph(fig, type = "quad", lname = lname, lgroup = lgroup,
     xname = xy_names$x, yname = xy_names$y,
-    legend = legend, hover = hover,
+    legend = legend, hover = hover, url = url,
     data = list(left = xleft, right = xright, top = ytop, bottom = ybottom),
     data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range)
@@ -156,6 +160,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
 #' @param dilate logical - whether to dilate pixel distance computations when drawing
 #' @template par-coloralpha
 #' @template par-hover
+#' @template par-url
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
@@ -165,7 +170,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
 ly_crect <- function(fig, x, y = NULL, data = NULL,
   width = 1, height = 1, angle = 0, dilate = FALSE,
   color = NULL, alpha = 1,
-  hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_crect")
 
@@ -187,6 +192,7 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
+  url <- get_url(substitute(url), data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -216,7 +222,7 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
 
   make_glyph(fig, type = "rect", lname = lname, lgroup = lgroup,
     xname = xy_names$x, yname = xy_names$y,
-    legend = legend, hover = hover,
+    legend = legend, hover = hover, url = url,
     data_sig = ifelse(is.null(data), NA, digest(data)),
     data = xy, args = args, axis_type_range = axis_type_range)
 }
@@ -260,6 +266,7 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
+  url <- get_url(substitute(url), data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -278,7 +285,7 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
   make_glyph(fig, type = "oval", lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
-    hover = hover, legend = legend,
+    hover = hover, url = url, legend = legend,
     xname = xy_names$x, yname = xy_names$y)
 }
 
@@ -289,6 +296,7 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
 #' @template par-coloralpha
 #' @template par-hover
+#' @template par-url
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
@@ -297,7 +305,7 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
 #' @export
 ly_patch <- function(fig, x, y, data = NULL,
   color = NULL, alpha = 1,
-  hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_patch")
 
@@ -317,6 +325,7 @@ ly_patch <- function(fig, x, y, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
+  url <- get_url(substitute(url), data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -332,7 +341,7 @@ ly_patch <- function(fig, x, y, data = NULL,
   axis_type_range <- get_glyph_axis_type_range(x, y)
 
   make_glyph(fig, type = "patch", data = xy, args = args,
-    legend = legend, hover = hover,
+    legend = legend, hover = hover, url = url,
     lname = lname, lgroup = lgroup,
     axis_type_range = axis_type_range)
 }

@@ -11,6 +11,7 @@
 #' @param direction direction to turn between starting and ending angles ("anticlock", "clock")
 #' @template par-coloralpha
 #' @template par-hover
+#' @template par-url
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
@@ -21,7 +22,7 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
   inner_radius = 0.1, outer_radius = 0.3,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   color = NULL, alpha = 1,
-  hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_annular_wedge")
 
@@ -44,6 +45,7 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
+  url <- get_url(substitute(url), data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -66,7 +68,7 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
   make_glyph(fig, type = "annular_wedge", lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
-    hover = hover, legend = legend,
+    hover = hover, url = url, legend = legend,
     xname = xy_names$x, yname = xy_names$y)
 }
 
@@ -79,6 +81,7 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
 #' @param outer_radius values or field name of outer radii
 #' @template par-coloralpha
 #' @template par-hover
+#' @template par-url
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
@@ -88,7 +91,7 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
 ly_annulus <- function(fig, x, y = NULL, data = NULL,
   inner_radius = 0.1, outer_radius = 0.2,
   color = NULL, alpha = 1,
-  hover = NULL, legend = NULL,
+  hover = NULL, url = NULL, legend = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_annulus")
@@ -110,6 +113,7 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
+  url <- get_url(substitute(url), data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -128,7 +132,7 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
   make_glyph(fig, type = "annulus", lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
-    hover = hover, legend = legend,
+    hover = hover, url = url, legend = legend,
     xname = xy_names$x, yname = xy_names$y)
 }
 
@@ -206,6 +210,7 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
 #' @param direction direction to turn between starting and ending angles ("anticlock", "clock")
 #' @template par-coloralpha
 #' @template par-hover
+#' @template par-url
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
@@ -215,7 +220,7 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
 ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   color = NULL, alpha = 1,
-  hover = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_wedge")
 
@@ -237,6 +242,7 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
   }
 
   hover <- get_hover(substitute(hover), data)
+  url <- get_url(substitute(url), data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -259,7 +265,7 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
   make_glyph(fig, type = "wedge", lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
-    hover = hover, legend = legend,
+    hover = hover, url = url, legend = legend,
     xname = xy_names$x, yname = xy_names$y)
 }
 

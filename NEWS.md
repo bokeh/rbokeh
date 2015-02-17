@@ -1,4 +1,5 @@
 Version 0.2
+----------------------------------------------------------------------
 
 - add default nonselection glyph properties for box/lasso select
 - add basic theme support
@@ -7,6 +8,7 @@ Version 0.2
 - add automatic generation of legends for aesthetic mappings
 - add generic legend support
 - hover tool support
+- tap to open URL support
 - add datetime axis
 - add log axis
 - add ly_hexbin
