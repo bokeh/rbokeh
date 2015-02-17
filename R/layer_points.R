@@ -82,11 +82,15 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
       cur_idx <- df_split[[ii]]
       # cur_glyph <- paste("glyph_")
 
+      cur_hover <- hover
+      cur_hover$data <- cur_hover$data[cur_idx, , drop = FALSE]
+
       fig <- do.call(ly_points,
         c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)), args[-idx],
           list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
             glyph = subset_with_attributes(gl, cur_idx[1]), lgroup = lgroup,
-            lname = ii, hover = hover$data[cur_idx, , drop = FALSE], legend = legend, xlab = xy_names$x, ylab = xy_names$y)))
+            lname = ii, hover = cur_hover, legend = legend,
+            xlab = xy_names$x, ylab = xy_names$y)))
     }
     return(fig)
   }

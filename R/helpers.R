@@ -375,6 +375,8 @@ get_hover <- function(hn, data) {
   if(is.data.frame(tmp)) {
     data <- tmp
     hn <- names(data)
+  } else if(inherits(tmp, "hoverSpec")) {
+    return(tmp)
   } else {
     if(deparse(hn)[1] == "NULL")
       return(NULL)
@@ -397,9 +399,12 @@ get_hover <- function(hn, data) {
       data <- data[hn]
     }
   }
-  # hn <- setdiff(hn, c("x", "y", "size", "glyph", "color", "line_color", "fill_color"))
-  hn2 <- gsub("\\.|\\(|\\)| ", "_", hn)
+  ## to be safe, give hover columns their own name and format them as strings
+  hn2 <- paste("hover_", gsub("\\.|\\(|\\)| ", "_", hn), sep = "")
   names(data) <- hn2
+
+  for(ii in seq_len(ncol(data)))
+    data[[ii]] <- format(data[[ii]])
 
   hdict <- lapply(seq_along(hn), function(ii) list(hn[ii], paste("@", hn2[ii], sep = "")))
 
