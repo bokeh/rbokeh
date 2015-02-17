@@ -65,7 +65,7 @@ Initialize a Bokeh figure
 \code{axis_line_dash_offset} \tab (integer) The line dash offset of the axis line. \cr
 \code{axis_line_join} \tab ('miter', 'round', 'bevel') The line join of the axis line. \cr
 \code{axis_line_width} \tab (integer) The line width of the axis line. \cr
-\code{major_label_orientation} \tab ('horizontal', 'vertical'), or angle) What direction the major label text should be oriented. If a i number is supplied, the angle of the text is measured from horizontal. \cr
+\code{major_label_orientation} \tab ('horizontal', 'vertical', or angle in degrees) What direction the major label text should be oriented. If a number is supplied, the angle of the text is measured from horizontal. \cr
 \code{major_label_standoff} \tab (integer) The distance in pixels that the major tick labels should be offset from the associated ticks. \cr
 \code{major_label_text_align} \tab ('left', 'right', 'center') The text align of the major tick labels. \cr
 \code{major_label_text_alpha} \tab (numeric) The text alpha of the major tick labels. \cr
