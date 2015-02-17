@@ -85,7 +85,7 @@ figure <- function(
     fig$model$plot$attributes <- c(fig$model$plot$attributes, extra_pars)
 
   ## check and add tools
-  tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "tap", "box_select", "lasso_select", "reset", "save")]
+  tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save")]
   not_used <- setdiff(tool_list, tools)
   if(length(not_used) > 0)
     message("Note: tools not used: ", paste(not_used, collapse = ", "))
