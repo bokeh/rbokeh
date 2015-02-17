@@ -241,10 +241,12 @@ resolve_line_args <- function(fig, args) {
   }
 
   ## map to what bokeh expects
-  args$line_dash <- args$type
+  if(is.null(args$line_dash) && !is.null(args$type))
+    args$line_dash <- args$type
   args$type <- NULL
 
-  args$line_width <- args$width
+  if(is.null(args$line_width) && !is.null(args$width))
+    args$line_width <- args$width
   args$width <- NULL
 
   if(is.numeric(args$line_dash)) {
