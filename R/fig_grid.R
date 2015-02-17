@@ -22,6 +22,8 @@ grid_plot <- function(figs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
   if(!is.list(figs))
     stop("'figs' must be a list")
 
+  figs <- unname(figs)
+
   if(inherits(figs[[1]], "BokehFigure")) {
     ## list of BokehFigure objects
     ok <- sapply(figs, function(x) inherits(x, "BokehFigure"))
@@ -42,12 +44,19 @@ grid_plot <- function(figs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
       }
     }
 
+    ## hold plot references for each plot
     tmp <- lapply(figs, function(x)
       x$model$plot[c("type", "subtype", "id")])
 
+    ## arrange plot references for gridplot
+    idx <- seq_along(tmp)
+    idx <- c(idx, rep(NA, nrow * ncol - length(idx)))
+    idxm <- matrix(idx, nrow = nrow, ncol = ncol, byrow = byrow)
+
     plot_refs <- vector("list", nrow)
-    for(ii in seq_len(nrow)) {
-      cur_idx <- ((ii - 1) * ncol + 1):(min(ii * ncol, nn))
+    for(ii in seq_len(nrow(idxm))) {
+      cur_idx <- idxm[ii,]
+      cur_idx <- cur_idx[!is.na(cur_idx)]
       plot_refs[[ii]] <- tmp[cur_idx]
     }
   } else {
