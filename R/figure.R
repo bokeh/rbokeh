@@ -11,8 +11,8 @@
 #' @param plot_width,plot_height width and height of the entire plot in pixels, including border space
 #' @param xgrid whether to draw x axis grid lines
 #' @param ygrid whether to draw y axis grid lines
-#' @param xaxes where to put x axis labels
-#' @param yaxes where to put y axis labels
+#' @param xaxes where to put x axis, or FALSE if no x axis ticks / labels
+#' @param yaxes where to put y axis, or FALSE if no y axis ticks / labels
 #' @param tools interactivity tools options
 #' @param theme an rbokeh theme to use (tableau by default)
 #' @template dots-axis
