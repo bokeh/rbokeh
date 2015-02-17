@@ -153,17 +153,27 @@ prepare_figure <- function(fig) {
 
   if(!fig$has_x_axis) {
     if(is.null(fig$xlab)) {
-      fig <- fig %>% x_axis("x", grid = fig$xgrid, position = fig$xaxes)
+      this_xlab <- "x"
     } else {
-      fig <- fig %>% x_axis(fig$xlab, grid = fig$xgrid, position = fig$xaxes)
+      this_xlab <- fig$xlab
+    }
+    if(fig$xaxes == FALSE) {
+      fig <- fig %>% x_axis(this_xlab, grid = fig$xgrid, visible = FALSE)
+    } else {
+      fig <- fig %>% x_axis(this_xlab, grid = fig$xgrid, position = fig$xaxes)
     }
   }
 
   if(!fig$has_y_axis) {
     if(is.null(fig$ylab)) {
-      fig <- fig %>% y_axis("y", grid = fig$ygrid, position = fig$yaxes)
+      this_ylab <- "y"
     } else {
-      fig <- fig %>% y_axis(fig$ylab, grid = fig$ygrid, position = fig$yaxes)
+      this_ylab <- fig$ylab
+    }
+    if(fig$yaxes == FALSE) {
+      fig <- fig %>% y_axis(this_ylab, grid = fig$ygrid, visible = FALSE)
+    } else {
+      fig <- fig %>% y_axis(this_ylab, grid = fig$ygrid, position = fig$yaxes)
     }
   }
 

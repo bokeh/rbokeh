@@ -241,10 +241,12 @@ resolve_line_args <- function(fig, args) {
   }
 
   ## map to what bokeh expects
-  args$line_dash <- args$type
+  if(is.null(args$line_dash) && !is.null(args$type))
+    args$line_dash <- args$type
   args$type <- NULL
 
-  args$line_width <- args$width
+  if(is.null(args$line_width) && !is.null(args$width))
+    args$line_width <- args$width
   args$width <- NULL
 
   if(is.numeric(args$line_dash)) {
@@ -411,19 +413,25 @@ get_hover <- function(hn, data) {
 # get the "url" argument and turn it into data and "dict"
 # must be a vector or a string referencing variables in data
 get_url <- function(url, data) {
+  if(is.null(url))
+    return(NULL)
   if(length(url) == 1) {
-    if(!grepl("@", url))
+    if(!grepl("@", url)) {
       message("url tap tool not added - 'url' must be a vector of URLs or a string referencing names of 'data' with e.g. @varname")
+      return(NULL)
+    }
     if(!is.null(data)) {
       tmp <- strsplit(url, "@")[[1]][-1]
       vars <- gsub("(^[A-Za-z]+).*", "\\1", tmp)
       if(!all(vars %in% names(data))) {
         message("url tap tool not added - one or more of the following detected variables are not in the 'data' argument: ", paste(vars, collapse = ", "))
+        return(NULL)
       } else {
         data <- data[vars]
       }
     } else {
       message("url tap tool not added - 'url' must be a vector of URLs or a string referencing names of 'data' with e.g. @varname")
+      return(NULL)
     }
   } else {
     data <- data.frame(data_url = url)

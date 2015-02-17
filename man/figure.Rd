@@ -34,9 +34,9 @@ figure(width = 480, height = 480, title = NULL, xlab = NULL,
 
 \item{ygrid}{whether to draw y axis grid lines}
 
-\item{xaxes}{where to put x axis labels}
+\item{xaxes}{where to put x axis, or FALSE if no x axis ticks / labels}
 
-\item{yaxes}{where to put y axis labels}
+\item{yaxes}{where to put y axis, or FALSE if no y axis ticks / labels}
 
 \item{tools}{interactivity tools options}
 

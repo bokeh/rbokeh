@@ -11,8 +11,8 @@
 #' @param plot_width,plot_height width and height of the entire plot in pixels, including border space
 #' @param xgrid whether to draw x axis grid lines
 #' @param ygrid whether to draw y axis grid lines
-#' @param xaxes where to put x axis labels
-#' @param yaxes where to put y axis labels
+#' @param xaxes where to put x axis, or FALSE if no x axis ticks / labels
+#' @param yaxes where to put y axis, or FALSE if no y axis ticks / labels
 #' @param tools interactivity tools options
 #' @param theme an rbokeh theme to use (tableau by default)
 #' @template dots-axis
@@ -85,7 +85,7 @@ figure <- function(
     fig$model$plot$attributes <- c(fig$model$plot$attributes, extra_pars)
 
   ## check and add tools
-  tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "tap", "box_select", "lasso_select", "reset", "save")]
+  tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save")]
   not_used <- setdiff(tool_list, tools)
   if(length(not_used) > 0)
     message("Note: tools not used: ", paste(not_used, collapse = ", "))
