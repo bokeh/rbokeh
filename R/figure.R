@@ -15,7 +15,7 @@
 #' @param yaxes where to put y axis, or FALSE if no y axis ticks / labels
 #' @param tools interactivity tools options
 #' @param theme an rbokeh theme to use (tableau by default)
-#' @template dots-axis
+#' @template dots-figure
 #' @export
 #' @import htmlwidgets
 #' @import methods
