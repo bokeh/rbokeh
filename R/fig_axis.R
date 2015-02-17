@@ -5,10 +5,12 @@
 #' @param log logical - should a log axis be used?
 #' @param grid logical - should a reference grid be shown for this axis?
 #' @param num_minor_ticks number of minor ticks
+#' @param visible should axis be shown?
+#' @template dots-axis
 #' @family axes
 #' @example man-roxygen/ex-axis.R
 #' @export
-x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE, num_minor_ticks = 5) {
+x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE, num_minor_ticks = 5, visible = TRUE, ...) {
   if(is.null(position))
     position <- "below"
   if(!position %in% c("below", "above")) {
@@ -19,16 +21,17 @@ x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE, num
   if(missing(label))
     label <- fig$xlab
   fig$xlab <- label
-  update_axis(fig, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, log = log)
+  update_axis(fig, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, visible = visible, log = log, ...)
 }
 
 #' Add y axis to a Bokeh figure
 #' @inheritParams x_axis
 #' @param position where to place the axis (either "left" or "right")
+#' @template dots-axis
 #' @family axes
 #' @example man-roxygen/ex-axis.R
 #' @export
-y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_minor_ticks = 5) {
+y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_minor_ticks = 5, visible = TRUE, ...) {
   if(is.null(position))
     position <- "left"
   if(!position %in% c("left", "right")) {
@@ -39,7 +42,7 @@ y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_
   if(missing(label))
     label <- fig$ylab
   fig$ylab <- label
-  update_axis(fig, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, log = log)
+  update_axis(fig, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, visible = visible, log = log, ...)
 }
 
 # axis ref needs to be added to plot attributes as "above", "below", "left", or "right"
@@ -54,7 +57,9 @@ y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_
 # ticker model added to object, also referred to in grid
 # also create grid
 
-update_axis <- function(obj, position, label, grid = TRUE, num_minor_ticks = 5, log = FALSE) {
+update_axis <- function(obj, position, label, grid = TRUE,
+  num_minor_ticks = 5, visible = TRUE, log = FALSE, ...) {
+
   f_id <- gen_id(obj, c(position, "formatter"))
   t_id <- gen_id(obj, c(position, "ticker"))
   a_id <- gen_id(obj, position)
@@ -79,9 +84,11 @@ update_axis <- function(obj, position, label, grid = TRUE, num_minor_ticks = 5, 
     type_list <- list(format = "CategoricalTickFormatter", tick = "CategoricalTicker", axis = "CategoricalAxis")
   }
 
+  extra_pars <- handle_extra_pars(list(...), axis_par_validator_map)
+
   formatter <- formatter_model(type_list$format, f_id)
   ticker <- ticker_model(type_list$tick, t_id, num_minor_ticks, log)
-  axis <- axis_model(type = type_list$axis, label = label, id = a_id, plot_ref = obj$ref, formatter_ref = formatter$ref, ticker_ref = ticker$ref)
+  axis <- axis_model(type = type_list$axis, label = label, id = a_id, plot_ref = obj$ref, formatter_ref = formatter$ref, ticker_ref = ticker$ref, visible = visible, extra_pars)
 
   obj$model$plot$attributes[[position]][[1]] <- axis$ref
   obj$model$plot$attributes$renderers[[axis$ref$id]] <- axis$ref
@@ -106,13 +113,15 @@ update_axis <- function(obj, position, label, grid = TRUE, num_minor_ticks = 5, 
   obj
 }
 
-axis_model <- function(type = "LinearAxis", label = NULL, id, plot_ref, formatter_ref, ticker_ref) {
+axis_model <- function(type = "LinearAxis", label = NULL, id, plot_ref, formatter_ref, ticker_ref, visible, extra_pars) {
 
   res <- base_model_object(type, id)
   res$model$attributes$plot <- plot_ref
   res$model$attributes$axis_label <- label
   res$model$attributes$formatter <- formatter_ref
   res$model$attributes$ticker <- ticker_ref
+  res$model$attributes$visible <- visible
+  res$model$attributes <- c(res$model$attributes, extra_pars)
 
   res
 }
@@ -136,5 +145,53 @@ grid_model <- function(id, dimension = 0, plot_ref, ticker_ref) {
 
   res
 }
+
+axis_par_validator_map <- list(
+  "axis_label_standoff" = "int",
+  "major_label_standoff" = "int",
+  "major_tick_in" = "int",
+  "major_tick_line_dash_offset" = "int",
+  "major_tick_out" = "int",
+  "minor_tick_in" = "int",
+  "minor_tick_out" = "int",
+  "minor_tick_line_dash_offset" = "int",
+  "axis_line_dash_offset" = "int",
+  "axis_label_text_alpha" = "num_data_spec",
+  "axis_line_alpha" = "num_data_spec",
+  "axis_line_width" = "num_data_spec",
+  "major_label_text_alpha" = "num_data_spec",
+  "major_tick_line_alpha" = "num_data_spec",
+  "major_tick_line_width" = "num_data_spec",
+  "minor_tick_line_alpha" = "num_data_spec",
+  "minor_tick_line_width" = "num_data_spec",
+  "axis_label_text_color" = "color",
+  "axis_line_color" = "color",
+  "major_label_text_color" = "color",
+  "major_tick_line_color" = "color",
+  "minor_tick_line_color" = "color",
+  "axis_label_text_font" = "string",
+  "major_label_text_font" = "string",
+  "axis_label_text_font_size" = "font_size_string",
+  "major_label_text_font_size" = "font_size_string",
+  "axis_line_dash" = "line_dash",
+  "major_tick_line_dash" = "line_dash",
+  "minor_tick_line_dash" = "line_dash",
+  "axis_label_text_align" = "text_align",
+  "major_label_text_align" = "text_align",
+  "axis_label_text_baseline" = "text_baseline",
+  "major_label_text_baseline" = "text_baseline",
+  "axis_label_text_font_style" = "font_style",
+  "major_label_text_font_style" = "font_style",
+  "axis_line_cap" = "line_cap",
+  "major_tick_line_cap" = "line_cap",
+  "minor_tick_line_cap" = "line_cap",
+  "axis_line_join" = "line_join",
+  "major_tick_line_join" = "line_join",
+  "minor_tick_line_join" = "line_join",
+  "major_label_orientation" = "orientation"
+)
+
+
+
 
 

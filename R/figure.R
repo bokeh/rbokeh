@@ -15,6 +15,7 @@
 #' @param yaxes where to put y axis labels
 #' @param tools interactivity tools options
 #' @param theme an rbokeh theme to use (tableau by default)
+#' @template dots-axis
 #' @export
 #' @import htmlwidgets
 #' @import methods
@@ -34,7 +35,8 @@ figure <- function(
   xaxes = "below",
   yaxes = "left",
   tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save"),
-  theme = getOption("bokeh_theme")
+  theme = getOption("bokeh_theme"),
+  ...
 ) {
   if(is.null(xlab) && !missing(xlab))
     xlab <- ""
@@ -78,6 +80,10 @@ figure <- function(
     has_y_range = FALSE
   ), class = "BokehFigure")
 
+  extra_pars <- handle_extra_pars(list(...), figure_par_validator_map)
+  if(!is.null(extra_pars))
+    fig$model$plot$attributes <- c(fig$model$plot$attributes, extra_pars)
+
   ## check and add tools
   tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "tap", "box_select", "lasso_select", "reset", "save")]
   not_used <- setdiff(tool_list, tools)
@@ -115,3 +121,35 @@ fig_model_skeleton <- function(id, title, width = 480, height = 480) {
     )
   ))
 }
+
+
+figure_par_validator_map <- list(
+  "background_fill" = "color",
+  "border_fill" = "color",
+  "outline_line_color" = "color",
+  "title_text_color" = "color",
+  "min_border" = "int",
+  "min_border_bottom" = "int",
+  "min_border_left" = "int",
+  "min_border_right" = "int",
+  "min_border_top" = "int",
+  "outline_line_dash_offset" = "int",
+  "plot_width" = "int",
+  "outline_line_alpha" = "num_data_spec",
+  "title_text_alpha" = "num_data_spec",
+  "outline_line_width" = "num_data_spec",
+  "title_text_font" = "string",
+  "title_text_font_size" = "font_size_string",
+  "outline_line_cap" = "line_cap",
+  "outline_line_dash" = "line_dash",
+  "outline_line_join" = "line_join",
+  "title_text_align" = "text_align",
+  "title_text_baseline" = "text_baseline",
+  "title_text_font_style" = "font_style",
+  "toolbar_location" = "toolbar_location",
+  "logo" =  "logo",
+  "h_symmetry" = "logical",
+  "v_symmetry" = "logical"
+)
+
+
