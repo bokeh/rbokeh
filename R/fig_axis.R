@@ -188,7 +188,7 @@ axis_par_validator_map <- list(
   "axis_line_join" = "line_join",
   "major_tick_line_join" = "line_join",
   "minor_tick_line_join" = "line_join",
-  "major_label_orientation" = "orientation"
+  "major_label_orientation" = "label_orientation"
 )
 
 

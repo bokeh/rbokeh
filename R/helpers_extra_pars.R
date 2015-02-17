@@ -24,7 +24,9 @@ par_type_validate_fns <- list(
   line_join = function(name, val) {
     validate_enum(name, val, c("miter", "round", "bevel"))
   },
-  orientation = function(name, val) {
+  label_orientation = function(name, val) {
+    if(is.numeric(val))
+      return(val * pi / 180) # convert from degrees to radians
     validate_enum(name, val, c("horizontal", "vertical"))
   },
   text_baseline = function(name, val) {
