@@ -55,6 +55,8 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
     inner_radius = inner_radius, outer_radius = outer_radius,
     start_angle = start_angle, end_angle = end_angle,
     direction = direction))
+  if(missing(alpha))
+    args$alpha <- NULL
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
@@ -121,6 +123,8 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
 
   args <- c(args, list(glyph = "annulus", color = color, alpha = alpha,
     inner_radius = inner_radius, outer_radius = outer_radius))
+  if(missing(alpha))
+    args$alpha <- NULL
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
@@ -252,6 +256,8 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
     radius = radius, start_angle = start_angle, end_angle = end_angle,
     direction = direction, radius = radius, start_angle = start_angle,
     end_angle = end_angle, direction = direction))
+  if(missing(alpha))
+    args$alpha <- NULL
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 

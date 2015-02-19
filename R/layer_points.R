@@ -60,6 +60,8 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
 
   args <- c(args, list(glyph = glyph, color = color,
     alpha = alpha, size = size))
+  if(missing(alpha))
+    args$alpha <- NULL
 
   # if glyph is not unique, we need to split the data
   # and call make_glyph several times

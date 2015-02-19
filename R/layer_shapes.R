@@ -35,7 +35,10 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
     args <- list(...)
   }
 
-  args <- c(args, list(color = color, alpha = alpha))
+  args$color <- color
+  args$alpha <- alpha
+  if(missing(alpha))
+    args$alpha <- NULL
 
   if(!is.null(group)) {
     idx <- unname(split(seq_along(group), group))
@@ -131,6 +134,8 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
   lgroup <- get_lgroup(lgroup, fig)
 
   args <- c(args, list(color = color, alpha = alpha))
+  if(missing(alpha))
+    args$alpha <- NULL
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
@@ -200,6 +205,8 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
 
   args <- c(args, list(glyph = "rect", color = color, alpha = alpha,
     width = width, height = height, angle = angle, dilate = dilate))
+  if(missing(alpha))
+    args$alpha <- NULL
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
@@ -274,6 +281,8 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
 
   args <- c(args, list(glyph = "oval", color = color, alpha = alpha,
     width = width, height = height, angle = angle))
+  if(missing(alpha))
+    args$alpha <- NULL
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 
@@ -332,6 +341,8 @@ ly_patch <- function(fig, x, y, data = NULL,
   lgroup <- get_lgroup(lgroup, fig)
 
   args <- c(args, list(color = color, alpha = alpha))
+  if(missing(alpha))
+    args$alpha <- NULL
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
 

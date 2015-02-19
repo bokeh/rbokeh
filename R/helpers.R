@@ -292,6 +292,9 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, soli
     } else {
       args$fill_color <- args$color
     }
+  } else {
+    if(is.null(args$line_color))
+      args$line_color <- NA
   }
 
   if(!is.null(args$alpha)) {
