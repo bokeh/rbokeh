@@ -17,7 +17,7 @@
 #' @family layer functions
 #' @export
 ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
-  palette = "Spectral-10", dilate = FALSE,
+  palette = "Spectral10", dilate = FALSE,
   lname = NULL, lgroup = NULL) {
 
   validate_fig(fig, "ly_image")
