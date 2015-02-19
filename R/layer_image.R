@@ -52,7 +52,7 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
     }
   } else if( is.character(palette) && length(palette) > 1 ) {
     # check for valid colors in the palette
-    if(!all(sapply(palette,valid_color))){
+    if(!valid_color(palette)){
       stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)    
     }
   } else {
