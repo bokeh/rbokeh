@@ -83,8 +83,10 @@ ly_hexbin <- function(fig, x, y = NULL, data = NULL,
 #' @importFrom hexbin hexbin
 #' @importFrom hexbin hcell2xy
 #' @importFrom hexbin hexcoords
-get_hexbin_data <- function(x, y, xbins = 30, shape = 1, xbnds = range(x), ybnds = range(y),
-  style = "lattice", minarea = 0.04, maxarea = 0.8, mincnt = 1, maxcnt = NULL, trans = NULL, inv = NULL) {
+get_hexbin_data <- function(x, y, xbins = 30, shape = 1,
+  xbnds = range(x, na.rm = TRUE), ybnds = range(y, na.rm = TRUE),
+  style = "lattice", minarea = 0.04, maxarea = 0.8, mincnt = 1, maxcnt = NULL,
+  trans = NULL, inv = NULL) {
 
   if(is.null(xbnds))
     xbnds <- range(x, na.rm = TRUE)
