@@ -10,7 +10,7 @@
 #' @param y lower left y coordinates
 #' @param dw image width distances
 #' @param dh image height distances
-#' @param palette palette to use for color-mapping
+#' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
 #' @param dilate logical - whether to dilate pixel distance computations when drawing
 #' @template par-lnamegroup
 #' @example man-roxygen/ex-image.R
@@ -35,6 +35,19 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
     cols <- nrow(z)
     rows <- ncol(z)
     z <- array(z)
+  }
+  
+  # palette checker / transformer from layer_hexbin minus function
+  if(is.character(palette)) {
+    if(valid_color(palette)) {
+      col <- palette
+    } else {
+      if(!palette %in% bk_palette_names){
+        stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
+      } else {
+        palette <- bk_palettes[[palette]]
+      }
+    }
   }
 
   make_glyph(fig, type = "image", lname = lname, lgroup = lgroup,

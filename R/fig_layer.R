@@ -46,7 +46,7 @@ add_layer <- function(obj, spec, dat, lname, lgroup) {
 
   if(glyph == "Image") {
     c_id <- gen_id(obj, "ColorMapper")
-    cmap <- color_mapper_model(c_id)
+    cmap <- color_mapper_model(c_id, palette = dat$palette)
     glyph_attrs$color_mapper <- cmap$ref
     obj$model[[c_id]] <- cmap$model
   }
@@ -113,8 +113,8 @@ glyph_renderer_model <- function(id, data_ref, glyph_ref, ns_glyph_ref) {
   res
 }
 
-color_mapper_model <- function(id) {
+color_mapper_model <- function(id, palette = c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2")) {
   res <- base_model_object("LinearColorMapper", id)
-  res$model$attributes$palette <- c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2")
+  res$model$attributes$palette <- palette
   res
 }
