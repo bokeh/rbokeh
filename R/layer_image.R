@@ -37,8 +37,10 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
     z <- array(z)
   }
   
+  # really ugly nested if else
   # palette checker / transformer from layer_hexbin minus function
-  if(is.character(palette)) {
+  #   plus added check for length 1
+  if( is.character(palette) && length(palette) == 1 ) {
     if(valid_color(palette)) {
       col <- palette
     } else {
@@ -48,6 +50,13 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
         palette <- bk_palettes[[palette]]
       }
     }
+  } else if( is.character(palette) && length(palette) > 1 ) {
+    # check for valid colors in the palette
+    if(!all(sapply(palette,valid_color))){
+      stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)    
+    }
+  } else {
+    stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)    
   }
 
   make_glyph(fig, type = "image", lname = lname, lgroup = lgroup,
