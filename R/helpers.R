@@ -453,7 +453,22 @@ get_url <- function(url, data) {
 }
 
 v_eval <- function(x, data) {
-  res <- eval(x, data)
+  res <- try(eval(x, data), silent = TRUE)
+
+  if(inherits(res, "try-error")) {
+    ## In this case, the user has specified a 'data' argument
+    ## but has also specified an "additional parameter" argument
+    ## such as fill_alpha, etc. which has been set to a variable
+    ## in the calling frame
+    ## for example:
+    ##  col <- "blue"
+    ##  figure() %>% ly_polygon(..., data = d, fill_color = col)
+    ## it is looking for "col" in 'data' but instead should get it from the calling frame
+    ## but right now, we throw an error
+    ## and the way around it is to not use the 'data' argument
+    ## and specify everything explicitly
+    stop("argument '", deparse(x), "' is not present in the 'data' argument")
+  }
 
   ## variable name could have been supplied in quotes
   if(length(res) == 1 && is.character(res) && nrow(data) > 1) {
