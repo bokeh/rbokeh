@@ -162,7 +162,7 @@ prepare_gridplot <- function(obj) {
     }
   }
   width <- sum(apply(wmat, 2, max))
-  height <- sum(apply(hmat, 2, max))
+  height <- sum(apply(hmat, 1, max))
 
   figs <- lapply(obj$figs, prepare_figure)
 
