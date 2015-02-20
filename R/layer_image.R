@@ -10,14 +10,14 @@
 #' @param y lower left y coordinates
 #' @param dw image width distances
 #' @param dh image height distances
-#' @param palette palette to use for color-mapping
+#' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
 #' @param dilate logical - whether to dilate pixel distance computations when drawing
 #' @template par-lnamegroup
 #' @example man-roxygen/ex-image.R
 #' @family layer functions
 #' @export
 ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
-  palette = "Spectral-10", dilate = FALSE,
+  palette = "Spectral10", dilate = FALSE,
   lname = NULL, lgroup = NULL) {
 
   validate_fig(fig, "ly_image")
@@ -35,6 +35,28 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
     cols <- nrow(z)
     rows <- ncol(z)
     z <- array(z)
+  }
+  
+  # really ugly nested if else
+  # palette checker / transformer from layer_hexbin minus function
+  #   plus added check for length 1
+  if( is.character(palette) && length(palette) == 1 ) {
+    if(valid_color(palette)) {
+      stop("'palette' specified in ly_image is a single color; please supply a vector of colors or name of a bokeh palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
+    } else {
+      if(!palette %in% bk_palette_names){
+        stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
+      } else {
+        palette <- bk_palettes[[palette]]
+      }
+    }
+  } else if( is.character(palette) && length(palette) > 1 ) {
+    # check for valid colors in the palette
+    if(!valid_color(palette)){
+      stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)    
+    }
+  } else {
+    stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)    
   }
 
   make_glyph(fig, type = "image", lname = lname, lgroup = lgroup,
