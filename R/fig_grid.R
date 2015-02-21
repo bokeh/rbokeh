@@ -162,7 +162,7 @@ prepare_gridplot <- function(obj) {
     }
   }
   width <- sum(apply(wmat, 2, max))
-  height <- sum(apply(hmat, 2, max))
+  height <- sum(apply(hmat, 1, max))
 
   figs <- lapply(obj$figs, prepare_figure)
 
@@ -263,6 +263,6 @@ get_grid_ranges <- function(objs, which = "x") {
   w2 <- paste0(which, "_axis_type")
   ranges <- unlist(lapply(objs, function(x) x[[w1]]), recursive = FALSE)
   rng <- get_all_glyph_range(ranges, objs[[1]]$padding_factor, objs[[1]][[w2]])
-  id <- gen_id(NULL, c(which, "GridRange"))
+  id <- gen_id(objs[[1]], c(which, "GridRange"))
   list(range = rng, mod = range_model(ifelse(is.numeric(rng), "Range1d", "FactorRange"), id, rng))
 }
