@@ -35,10 +35,10 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
 
   ## v_eval will repeat these, but the line glyph doesn't like this
   if(length(unique(color)) == 1)
-    color <- color[1]
-  if(length(unique(color)) == 1)
+    color <- subset_with_attributes(color, 1)
+  if(length(unique(type)) == 1)
     type <- type[1]
-  if(length(unique(color)) == 1)
+  if(length(unique(width)) == 1)
     width <- width[1]
 
   xy_names <- get_xy_names(x, y, xname, yname, list(...))
