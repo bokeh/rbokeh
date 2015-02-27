@@ -36,7 +36,7 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
     rows <- ncol(z)
     z <- array(z)
   }
-  
+
   # really ugly nested if else
   # palette checker / transformer from layer_hexbin minus function
   #   plus added check for length 1
@@ -53,10 +53,10 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
   } else if( is.character(palette) && length(palette) > 1 ) {
     # check for valid colors in the palette
     if(!valid_color(palette)){
-      stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)    
+      stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
     }
   } else {
-    stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)    
+    stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
   }
 
   make_glyph(fig, type = "image", lname = lname, lgroup = lgroup,
@@ -92,8 +92,16 @@ ly_image_url <- function(fig, x = 0, y = 0, data = NULL, w = 10, h = 10,
   if(! anchor %in% anchor_opts)
     stop("anchor must be one of: ", paste(anchor_opts, collapse = ", "), call. = FALSE)
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  if(missing(x)) {
+    xname <- "x"
+  } else {
+    xname <- deparse(substitute(x))
+  }
+  if(missing(y)) {
+    yname <- "y"
+  } else {
+    yname <- deparse(substitute(y))
+  }
 
   ## deal with possible named inputs from a data source
   if(!is.null(data)) {
