@@ -2,7 +2,7 @@
 #' @param fig figure to modify
 #' @param label axis label
 #' @param position where to place the axis (either "above" or "below")
-#' @param log logical - should a log axis be used?
+#' @param log logical or integer - if TRUE, a log axis with base 10 is used - if an integer, a log axis with base of that integer will be used
 #' @param grid logical - should a reference grid be shown for this axis?
 #' @param num_minor_ticks number of minor ticks
 #' @param visible should axis be shown?
@@ -16,6 +16,16 @@ x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE, num
   if(!position %in% c("below", "above")) {
     message("x axis position must be either below or above - setting to 'below'")
     position <- "below"
+  }
+
+  if(is.logical(log)) {
+    if(log) {
+      log <- 10.0
+    } else {
+      log <- NULL
+    }
+  } else {
+    log <- as.numeric(log)
   }
 
   if(missing(label))
@@ -39,6 +49,16 @@ y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_
     position <- "left"
   }
 
+  if(is.logical(log)) {
+    if(log) {
+      log <- 10.0
+    } else {
+      log <- NULL
+    }
+  } else {
+    log <- as.numeric(log)
+  }
+
   if(missing(label))
     label <- fig$ylab
   fig$ylab <- label
@@ -58,7 +78,7 @@ y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_
 # also create grid
 
 update_axis <- function(obj, position, label, grid = TRUE,
-  num_minor_ticks = 5, visible = TRUE, log = FALSE, ...) {
+  num_minor_ticks = 5, visible = TRUE, log = NULL, ...) {
 
   f_id <- gen_id(obj, c(position, "formatter"))
   t_id <- gen_id(obj, c(position, "ticker"))
@@ -68,7 +88,7 @@ update_axis <- function(obj, position, label, grid = TRUE,
 
   axis_type <- ifelse(is_y, obj$y_axis_type, obj$x_axis_type)
   if(axis_type == "numeric") {
-    if(log) {
+    if(!is.null(log)) {
       type_list <- list(format = "LogTickFormatter", tick = "LogTicker", axis = "LogAxis")
       if(is_y) {
         obj$model$plot$attributes$y_mapper_type <- "log"
@@ -130,9 +150,11 @@ formatter_model <- function(type = "BasicTickFormatter", id) {
   base_model_object(type, id)
 }
 
-ticker_model <- function(type = "BasicTicker", id, num_minor_ticks = 5, log = FALSE) {
+ticker_model <- function(type = "BasicTicker", id, num_minor_ticks = 5, log = NULL) {
   res <- base_model_object(type, id)
   res$model$attributes$num_minor_ticks = num_minor_ticks
+  if(!is.null(log))
+    res$model$attributes$base = log
 
   res
 }
