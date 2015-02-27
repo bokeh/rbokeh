@@ -23,7 +23,52 @@ print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, file = "", pbco
 
   if(pbcopy)
     file <- pipe("pbcopy")
-  cat(toJSON(remove_model_names(fig$model), digits = 50, pretty = pretty), file = file)
+  cat(toJSON(remove_model_names(fig$model), pretty = pretty), file = file)
+}
+
+#' Get the HTML content required to embed a Bokeh figure
+#' @param fig figure
+#' @export
+get_bokeh_html <- function(fig) {
+  all_models <- fig$model
+  elementid <- digest(Sys.time())
+  modelid <- fig$model$plot$id
+
+  if(inherits(fig, "BokehFigure")) {
+    type <- "Plot"
+    fig <- prepare_figure(fig)
+  } else if(inherits(fig, "BokehGridPlot")) {
+    type <- "GridPlot"
+    fig <- prepare_gridplot(fig)
+  } else {
+    stop("'fig' is not a valid type", call. = FALSE)
+  }
+
+  fig <- toJSON(remove_model_names(fig$model))
+
+  a <- paste(
+  '<head>\n',
+  '<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.1.min.js"></script>\n',
+  '<link href="http://cdn.pydata.org/bokeh/release/bokeh-0.8.1.min.css" rel="stylesheet">\n',
+  '</head>\n\n',
+  '<div id=', elementid, ' class="plotdiv"></div>\n\n',
+  '<script type="text/javascript">\n',
+  'Bokeh.$(function() {\n',
+  'var modelid = "', modelid, '";\n',
+  'var modeltype = "', type,'";\n',
+  'var elementid = "', elementid,'";\n',
+  'Bokeh.logger.info("Realizing plot:");\n',
+  'Bokeh.logger.info(" - modeltype: ', type, '");\n',
+  'Bokeh.logger.info(" - modelid: ', modelid, '");\n',
+  'Bokeh.logger.info(" - elementid: ', elementid, '");\n',
+  'var all_models = ', fig, ';\n',
+  'Bokeh.load_models(all_models);\n',
+  'var model = Bokeh.Collections(modeltype).get(modelid);\n',
+  'var view = new model.default_view({model: model, el: \'#', elementid, '\'});\n',
+  'Bokeh.index[modelid] = view;\n',
+  '});\n',
+  '</script>\n',
+  sep = "")
 }
 
 base_model_object <- function(type, id) {
