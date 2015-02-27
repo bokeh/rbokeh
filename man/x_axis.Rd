@@ -14,7 +14,7 @@ x_axis(fig, label, position = "below", log = FALSE, grid = TRUE,
 
 \item{position}{where to place the axis (either "above" or "below")}
 
-\item{log}{logical - should a log axis be used?}
+\item{log}{logical or integer - if TRUE, a log axis with base 10 is used - if an integer, a log axis with base of that integer will be used}
 
 \item{grid}{logical - should a reference grid be shown for this axis?}
 
