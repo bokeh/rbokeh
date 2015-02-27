@@ -15,16 +15,17 @@ plot.BokehFigure <- function(x, y, ...) {
   if(is.null(debug))
     debug <- FALSE
 
-  if(length(x$layers) == 0) {
+  if(length(x$layers) == 0 && x$model$plot$type != "GMapPlot") {
     message("This figure is empty...")
   } else {
     fig <- prepare_figure(x)
     fig$height <- fig$height + 50
     fig$width <- fig$width + 50
 
-    fig$model <- remove_model_names(fig$model)
+    type <- fig$model$plot$type
 
-    make_bokeh_widget(fig, type = "Plot", debug)
+    fig$model <- remove_model_names(fig$model)
+    make_bokeh_widget(fig, type = type, debug)
   }
 }
 
