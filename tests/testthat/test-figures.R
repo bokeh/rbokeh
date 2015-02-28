@@ -128,14 +128,14 @@ test_that("examples", {
     ly_image(volcano) %>%
     ly_contour(volcano)
   print_model_json(p, file = "/dev/null")
-  
+
   # check palette with ly_image
   #  should reject a single color
    expect_error(
      ly_image(
        figure( width = 700, height = 400 )
        ,volcano
-       ,palette = "#FF00FF" 
+       ,palette = "#FF00FF"
      )
    )
   #  should accept no palette and use default
@@ -143,24 +143,24 @@ test_that("examples", {
     figure( width = 700, height = 400 )
     ,volcano
   )
-  print_model_json(p, file = "/dev/null") 
+  print_model_json(p, file = "/dev/null")
   #  should accept a Bokeh palette name
   p <- ly_image(
     figure( width = 700, height = 400 )
     ,volcano
     ,palette = "Greys9"
   )
-  print_model_json(p, file = "/dev/null") 
+  print_model_json(p, file = "/dev/null")
   #  should accept a vector of colors
   p <- ly_image(
     figure( width = 700, height = 400 )
     ,volcano
     ,palette = blues9
   )
-  print_model_json(p, file = "/dev/null")   
+  print_model_json(p, file = "/dev/null")
 
-  
-  
+
+
   url <- c("http://bokeh.pydata.org/en/latest/_static/bokeh-transparent.png",
     "http://developer.r-project.org/Logo/Rlogo-4.png")
 
@@ -208,4 +208,7 @@ test_that("examples", {
     x_range(c(20, 40)) %>%
     y_range(du$variety[order(subset(du, year == 1932)$yield)])
   print_model_json(p, file = "/dev/null")
+
+  # google map
+  print_model_json(gmap(), file = "/dev/null")
 })

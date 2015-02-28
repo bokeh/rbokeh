@@ -335,13 +335,6 @@ resolve_glyph_props <- function(glyph, args, lgroup) {
           args$fill_color <- lgroup
         }
       }
-      if(cur_glyph_props$line) {
-        if(is.null(args$fill_alpha)) {
-          args$fill_alpha <- 0.5
-        } else {
-          args$fill_alpha <- args$fill_alpha * 0.5
-        }
-      }
     } else {
       args$fill_color <- NA
       args$fill_alpha <- NA

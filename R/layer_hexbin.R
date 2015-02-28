@@ -30,6 +30,7 @@ ly_hexbin <- function(fig, x, y = NULL, data = NULL,
     y <- v_eval(substitute(y), data)
   }
 
+  minarea <- 0.04; maxarea <- 0.8; mincnt <- 1; maxcnt <- NULL
   if(!inherits(x, "hexbin")) {
     xy_names <- get_xy_names(x, y, xname, yname, NULL)
     xy <- get_xy_data(x, y)
@@ -37,12 +38,19 @@ ly_hexbin <- function(fig, x, y = NULL, data = NULL,
     y <- xy$y
     xname <- xy_names$x
     yname <- xy_names$y
+
+    hbd <- get_hexbin_data(x = x, y = y, xbins = xbins,
+      shape = shape)
+  } else {
+    xname <- "x"
+    yname <- "y"
+
+    hbd <- x
   }
 
-  minarea <- 0.04; maxarea <- 0.8; mincnt <- 1; maxcnt <- NULL
-  hbd <- get_hexbin_data(x = x, y = y, xbins = xbins, shape = shape,
-    style = style, minarea = minarea, maxarea = maxarea, mincnt = mincnt,
-    maxcnt = maxcnt, trans = trans, inv = inv)
+  hbd <- get_from_hexbin(hbd, maxcnt = maxcnt,
+    mincnt =mincnt, trans = trans, inv = inv, style = style,
+    minarea = minarea, maxarea = maxarea)
 
   if(is.character(palette)) {
     if(valid_color(palette)) {
@@ -84,9 +92,8 @@ ly_hexbin <- function(fig, x, y = NULL, data = NULL,
 #' @importFrom hexbin hcell2xy
 #' @importFrom hexbin hexcoords
 get_hexbin_data <- function(x, y, xbins = 30, shape = 1,
-  xbnds = range(x, na.rm = TRUE), ybnds = range(y, na.rm = TRUE),
-  style = "lattice", minarea = 0.04, maxarea = 0.8, mincnt = 1, maxcnt = NULL,
-  trans = NULL, inv = NULL) {
+  xbnds = range(x, na.rm = TRUE),
+  ybnds = range(y, na.rm = TRUE)) {
 
   if(is.null(xbnds))
     xbnds <- range(x, na.rm = TRUE)
@@ -94,12 +101,12 @@ get_hexbin_data <- function(x, y, xbins = 30, shape = 1,
   if(is.null(ybnds))
     ybnds <- range(y, na.rm = TRUE)
 
-  if(inherits(x, "hexbin")) {
-    dat <- x
-  } else {
-    ind <- complete.cases(x, y)
-    dat <- hexbin(x[ind], y[ind], shape = shape, xbins = xbins, xbnds = xbnds, ybnds = ybnds)
-  }
+  ind <- complete.cases(x, y)
+  hexbin(x[ind], y[ind], shape = shape, xbins = xbins, xbnds = xbnds, ybnds = ybnds)
+}
+
+
+get_from_hexbin <- function(dat, maxcnt = NULL, mincnt = 1, trans = identity, inv = identity, maxarea = 0.8, minarea = 0.04, style = style) {
 
   cnt <- dat@count
   xbins <- dat@xbins
