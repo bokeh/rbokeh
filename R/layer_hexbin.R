@@ -32,7 +32,7 @@ ly_hexbin <- function(fig, x, y = NULL, data = NULL,
 
   minarea <- 0.04; maxarea <- 0.8; mincnt <- 1; maxcnt <- NULL
   if(!inherits(x, "hexbin")) {
-    xy_names <- get_xy_names(x, y, xname, yname, list(...))
+    xy_names <- get_xy_names(x, y, xname, yname, NULL)
     xy <- get_xy_data(x, y)
     x <- xy$x
     y <- xy$y
