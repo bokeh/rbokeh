@@ -92,4 +92,13 @@ This can be used in the same way as \code{\link{figure}}, adding layers on top o
 \code{logo} \tab ('normal', 'grey') What version of the Bokeh logo to display on the toolbar. If set to None, no logo will be displayed. \cr
  }
 }
+\examples{
+\donttest{
+gmap(title = "NYC taxi pickups January 2013",
+  lat = 40.74, lng = -73.95, zoom = 11,
+  map_type = "roadmap", width = 1000, height = 800) \%>\%
+  ly_hexbin(nyctaxihex, alpha = 0.5,
+    palette = "Spectral10", trans = log, inv = exp)
+}
+}
 

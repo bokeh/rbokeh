@@ -14,6 +14,7 @@
 #' @template dots-figure
 #' @note This can be used in the same way as \code{\link{figure}}, adding layers on top of the Google Map.
 #' @inheritParams figure
+#' @example man-roxygen/ex-gmap.R
 #' @export
 gmap <- function(lat = 0, lng = 0, zoom = 0,
   map_type = "hybrid",
