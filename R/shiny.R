@@ -2,6 +2,8 @@
 #' @param outputId output variable to read from
 #' @param width a valid CSS unit for the width or a number, which will be coerced to a string and have "px" appended.
 #' @param height a valid CSS unit for the height or a number, which will be coerced to a string and have "px" appended.
+#' 
+#' @example man-roxygen/ex-shiny.R
 #'
 #' @export
 rbokehOutput <- function(outputId, width = '100%', height = '400px'){
