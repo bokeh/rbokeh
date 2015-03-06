@@ -11,6 +11,9 @@ HTMLWidgets.widget({
   },
 
   renderValue: function(el, x, instance) {
+    
+    //clear el for Shiny/dynamic contexts
+    el.innerHTML = "";
 
     if(x.isJSON == true) {
       x.all_models = JSON.parse(x.all_models);
