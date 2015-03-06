@@ -4,23 +4,6 @@ library("shiny")
 library("rbokeh")
 library("htmlwidgets")
 
-
-#' Widget output function for use in Shiny
-#'
-#' @export
-rbokehOutput <- function(outputId, width = '100%', height = '400px'){
-  shinyWidgetOutput(outputId, 'rbokeh', width, height, package = 'rbokeh')
-}
-
-#' Widget render function for use in Shiny
-#'
-#' @export
-renderRbokeh <- function(expr, env = parent.frame(), quoted = FALSE) {
-  if (!quoted) { expr <- substitute(expr) } # force quoted
-  shinyRenderWidget(expr, rbokehOutput, env, quoted = TRUE)
-}
-
-
 ui <- fluidPage(
   rbokehOutput("rbokeh")
 )
