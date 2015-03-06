@@ -73,7 +73,7 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
     stop("For ly_polygons, xs and ys must be lists or specified through a data frame through 'data' argument.")
   }
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
   check_opts(args, "patches", formals = names(formals(ly_polygons)))
@@ -138,7 +138,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
   if(missing(alpha))
     args$alpha <- NULL
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
   check_opts(args, "quad", formals = names(formals(ly_rect)))
@@ -209,7 +209,7 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
   if(missing(alpha))
     args$alpha <- NULL
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
   check_opts(args, "rect", formals = names(formals(ly_crect)))
@@ -285,7 +285,7 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
   if(missing(alpha))
     args$alpha <- NULL
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
   check_opts(args, "oval", formals = names(formals(ly_oval)))
@@ -345,7 +345,7 @@ ly_patch <- function(fig, x, y, data = NULL,
   if(missing(alpha))
     args$alpha <- NULL
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
   check_opts(args, "patch", formals = names(formals(ly_patch)))

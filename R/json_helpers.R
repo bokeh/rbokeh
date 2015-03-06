@@ -23,16 +23,16 @@ print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, file = "", pbco
 
   if(pbcopy)
     file <- pipe("pbcopy")
-  cat(toJSON(remove_model_names(fig$model), pretty = pretty), file = file)
+  cat(toJSON(remove_model_names(fig$x$spec$model), pretty = pretty), file = file)
 }
 
 #' Get the HTML content required to embed a Bokeh figure
 #' @param fig figure
 #' @export
 get_bokeh_html <- function(fig) {
-  all_models <- fig$model
+  all_models <- fig$x$spec$model
   elementid <- digest(Sys.time())
-  modelid <- fig$model$plot$id
+  modelid <- fig$x$spec$model$plot$id
 
   if(inherits(fig, "BokehFigure")) {
     type <- "Plot"
@@ -44,7 +44,7 @@ get_bokeh_html <- function(fig) {
     stop("'fig' is not a valid type", call. = FALSE)
   }
 
-  fig <- toJSON(remove_model_names(fig$model))
+  fig <- toJSON(remove_model_names(fig$x$spec$model))
 
   a <- paste(
   '<head>\n',

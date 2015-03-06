@@ -32,7 +32,7 @@ range_model <- function(type = "Range1d", id, dat) {
 
 # range ref needs to be added to plot attributes as "x_range" or "y_range"
 # then range model added to object
-update_range <- function(obj, axis = "x", dat) {
+update_range <- function(fig, axis = "x", dat) {
   if(is.numeric(dat)) {
     type <- "Range1d"
     dat <- range(dat, na.rm = TRUE)
@@ -42,13 +42,13 @@ update_range <- function(obj, axis = "x", dat) {
 
   range_name <- paste0(axis, "_range")
 
-  id <- gen_id(obj, range_name)
+  id <- gen_id(fig, range_name)
   model <- range_model(type, id, dat)
 
-  obj$model$plot$attributes[[range_name]] <- model$ref
-  obj$model[[id]] <- model$model
-  obj[[paste0("has_", axis, "_range")]] <- TRUE
+  fig$x$spec$model$plot$attributes[[range_name]] <- model$ref
+  fig$x$spec$model[[id]] <- model$model
+  fig[[paste0("has_", axis, "_range")]] <- TRUE
 
-  obj
+  fig
 }
 

@@ -11,14 +11,14 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
 
   ## give it a unique layer group name if not provided
   if(is.null(lgroup))
-    lgroup <- gen_layer_name(names(fig$layers))
+    lgroup <- gen_layer_name(names(fig$x$spec$layers))
   lgroup <- as.character(lgroup)
 
-  fig$layers[[lgroup]]$lgroup <- lgroup
+  fig$x$spec$layers[[lgroup]]$lgroup <- lgroup
 
   ## give it a unique layer name if not provided
   if(is.null(lname))
-    lname <- gen_layer_name(names(fig$layers[[lgroup]]$glyph_ids), prefix = "layer")
+    lname <- gen_layer_name(names(fig$x$spec$layers[[lgroup]]$glyph_ids), prefix = "layer")
   lname <- as.character(lname)
 
   ## some figure elements need a single index to a layer name/group combination
@@ -30,22 +30,22 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
   glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
 
   ## used to keep track of how many layers are in the group
-  fig$layers[[lgroup]]$glyph_ids[lname] <- list(glr_id)
+  fig$x$spec$layers[[lgroup]]$glyph_ids[lname] <- list(glr_id)
 
   ## keep track of data sources
   if(is.na(data_sig))
     data_sig <- NULL
-  fig$data_sigs[[glr_id]] <- list(glr_id = glr_id, sig = data_sig)
+  fig$x$spec$data_sigs[[glr_id]] <- list(glr_id = glr_id, sig = data_sig)
 
   ## make sure axis types match anything
   ## that has already been plotted
-  validate_axis_type(fig_type = fig$x_axis_type,
+  validate_axis_type(fig_type = fig$x$spec$x_axis_type,
     cur_type = axis_type_range$x_axis_type, which = "x")
-  validate_axis_type(fig_type = fig$y_axis_type,
+  validate_axis_type(fig_type = fig$x$spec$y_axis_type,
     cur_type = axis_type_range$y_axis_type, which = "y")
 
-  fig$x_axis_type <- axis_type_range$x_axis_type
-  fig$y_axis_type <- axis_type_range$y_axis_type
+  fig$x$spec$x_axis_type <- axis_type_range$x_axis_type
+  fig$x$spec$y_axis_type <- axis_type_range$y_axis_type
 
   ## make sure specified colors are bokeh-valid hex codes (if they are hex codes)
   ## only to ones that don't need to be mapped
@@ -66,25 +66,25 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
     legend <- as.character(legend)
     if(!is.null(attr_maps)) {
       if(legend == "FALSE") {
-        fig$layers[[lgroup]]$do_legend <- FALSE
+        fig$x$spec$layers[[lgroup]]$do_legend <- FALSE
       } else {
         message("Ignoring custom legend because an attribute is being mapped and therefore the legend is being taken care of automatically.")
       }
     } else {
-      if(!is.null(fig$common_legend[[legend]])) {
-        fig$common_legend[[legend]]$args <- c(fig$common_legend[[legend]]$args, list(args))
+      if(!is.null(fig$x$spec$common_legend[[legend]])) {
+        fig$x$spec$common_legend[[legend]]$args <- c(fig$x$spec$common_legend[[legend]]$args, list(args))
       } else {
-        fig$common_legend[[legend]] <- list(name = legend, args = list(args))
+        fig$x$spec$common_legend[[legend]] <- list(name = legend, args = list(args))
       }
     }
   }
 
   ## merge in attribute mappings (if any)
-  fig$layers[[lgroup]]$maps <- merge_attr_maps(fig$layers[[lgroup]]$maps, attr_maps)
+  fig$x$spec$layers[[lgroup]]$maps <- merge_attr_maps(fig$x$spec$layers[[lgroup]]$maps, attr_maps)
 
   ## save defer function (if any) and remove from data
   if(!is.null(data$defer)) {
-    fig$glyph_defer[[lgn]] <- list(fn = data$defer)
+    fig$x$spec$glyph_defer[[lgn]] <- list(fn = data$defer)
     data$defer <- NULL
   }
 
@@ -126,11 +126,11 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
      args$text <- list(field = "text")
   }
 
-  if(!is.null(fig$glyph_defer[[lgn]])) {
-    fig$glyph_defer[[lgn]]$spec <- args
-    fig$glyph_defer[[lgn]]$data <- data
-    fig$glyph_defer[[lgn]]$lgroup <- lgroup
-    fig$glyph_defer[[lgn]]$lname <- lname
+  if(!is.null(fig$x$spec$glyph_defer[[lgn]])) {
+    fig$x$spec$glyph_defer[[lgn]]$spec <- args
+    fig$x$spec$glyph_defer[[lgn]]$data <- data
+    fig$x$spec$glyph_defer[[lgn]]$lgroup <- lgroup
+    fig$x$spec$glyph_defer[[lgn]]$lname <- lname
   }
 
   ## add hover info
@@ -179,15 +179,15 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
   fig <- fig %>% add_layer(args, data, lname, lgroup)
 
   ## add x and y range for this glyph
-  fig$glyph_x_ranges[[lgn]] <- axis_type_range$x_range
-  fig$glyph_y_ranges[[lgn]] <- axis_type_range$y_range
+  fig$x$spec$glyph_x_ranges[[lgn]] <- axis_type_range$x_range
+  fig$x$spec$glyph_y_ranges[[lgn]] <- axis_type_range$y_range
 
   ## add x and y labels if missing
-  if(is.null(fig$xlab) && length(xname) > 0)
-    fig$xlab <- xname
+  if(is.null(fig$x$spec$xlab) && length(xname) > 0)
+    fig$x$spec$xlab <- xname
 
-  if(is.null(fig$ylab) && length(yname) > 0)
-    fig$ylab <- yname
+  if(is.null(fig$x$spec$ylab) && length(yname) > 0)
+    fig$x$spec$ylab <- yname
 
   fig
 }

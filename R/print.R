@@ -51,20 +51,11 @@ plot.BokehGridPlot <- function(x, y, ...) {
 }
 
 make_bokeh_widget <- function(fig, type, debug = FALSE) {
-  ## create widget
-  htmlwidgets::createWidget(
-     name = 'rbokeh',
-     list(
-        r_debug = debug,
-        all_models = fig$model,
-        elementid = digest(Sys.time()),
-        modeltype = type,
-        modelid = fig$id
-     ),
-     width = fig$width,
-     height = fig$height,
-     package = 'rbokeh'
-  )
+  fig$x$r_debug <- debug
+  fig$x$all_models <- fig$model
+  fig$x$spec <- NULL
+
+  fig
 }
 
 # Reusable function for registering a set of methods with S3 manually. The

@@ -8,12 +8,12 @@ add_tap_url <- function(fig, url, renderer_ref) {
   act <- open_url_model(u_id, url)
 
   id <- gen_id(fig, c(renderer_ref$id, "TapTool"))
-  tap <- tap_model(id, fig$ref, renderer_ref, act$ref)
+  tap <- tap_model(id, fig$x$spec$ref, renderer_ref, act$ref)
 
-  fig$model$plot$attributes$tools[[id]] <- tap$ref
-  fig$model[[id]] <- tap$model
+  fig$x$spec$model$plot$attributes$tools[[id]] <- tap$ref
+  fig$x$spec$model[[id]] <- tap$model
 
-  fig$model[[u_id]] <- act$model
+  fig$x$spec$model[[u_id]] <- act$model
 
   fig
 }

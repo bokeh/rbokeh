@@ -11,7 +11,7 @@
 #' }
 #' @export
 tool_pan <- function(fig, dimensions = c("width", "height")) {
-  update_tool(fig, which = "pan", args = list(dimensions = dimensions, plot_ref = fig$ref))
+  update_tool(fig, which = "pan", args = list(dimensions = dimensions, plot_ref = fig$x$spec$ref))
 }
 
 #' Add "wheel_zoom" tool to a Bokeh figure
@@ -25,7 +25,7 @@ tool_pan <- function(fig, dimensions = c("width", "height")) {
 #' }
 #' @export
 tool_wheel_zoom <- function(fig, dimensions = c("width", "height")) {
-  update_tool(fig, which = "wheel_zoom", args = list(dimensions = dimensions, plot_ref = fig$ref))
+  update_tool(fig, which = "wheel_zoom", args = list(dimensions = dimensions, plot_ref = fig$x$spec$ref))
 }
 
 #' Add "box_zoom" tool to a Bokeh figure
@@ -37,7 +37,7 @@ tool_wheel_zoom <- function(fig, dimensions = c("width", "height")) {
 #' }
 #' @export
 tool_box_zoom <- function(fig) {
-  update_tool(fig, which = "box_zoom", args = list(plot_ref = fig$ref))
+  update_tool(fig, which = "box_zoom", args = list(plot_ref = fig$x$spec$ref))
 }
 
 #' Add "save" tool to a Bokeh figure
@@ -49,7 +49,7 @@ tool_box_zoom <- function(fig) {
 #' }
 #' @export
 tool_save <- function(fig) {
-  update_tool(fig, which = "preview_save", args = list(plot_ref = fig$ref))
+  update_tool(fig, which = "preview_save", args = list(plot_ref = fig$x$spec$ref))
 }
 
 #' Add "crosshair" tool to a Bokeh figure
@@ -61,7 +61,7 @@ tool_save <- function(fig) {
 #' }
 #' @export
 tool_crosshair <- function(fig) {
-  update_tool(fig, which = "crosshair", args = list(plot_ref = fig$ref))
+  update_tool(fig, which = "crosshair", args = list(plot_ref = fig$x$spec$ref))
 }
 
 #' Add "resize" tool to a Bokeh figure
@@ -73,7 +73,7 @@ tool_crosshair <- function(fig) {
 #' }
 #' @export
 tool_resize <- function(fig) {
-  update_tool(fig, which = "resize", args = list(plot_ref = fig$ref))
+  update_tool(fig, which = "resize", args = list(plot_ref = fig$x$spec$ref))
 }
 
 #' Add "reset" tool to a Bokeh figure
@@ -85,7 +85,7 @@ tool_resize <- function(fig) {
 #' }
 #' @export
 tool_reset <- function(fig) {
-  update_tool(fig, which = "reset", args = list(plot_ref = fig$ref))
+  update_tool(fig, which = "reset", args = list(plot_ref = fig$x$spec$ref))
 }
 
 #' Add "box_select" tool to a Bokeh figure
@@ -98,7 +98,7 @@ tool_reset <- function(fig) {
 #' }
 #' @export
 tool_box_select <- function(fig, select_every_mousemove = TRUE) {
-  update_tool(fig, which = "box_select", args = list(plot_ref = fig$ref,
+  update_tool(fig, which = "box_select", args = list(plot_ref = fig$x$spec$ref,
     select_every_mousemove = select_every_mousemove))
 }
 
@@ -112,7 +112,7 @@ tool_box_select <- function(fig, select_every_mousemove = TRUE) {
 #' }
 #' @export
 tool_lasso_select <- function(fig, select_every_mousemove = TRUE) {
-  update_tool(fig, which = "lasso_select", args = list(plot_ref = fig$ref,
+  update_tool(fig, which = "lasso_select", args = list(plot_ref = fig$x$spec$ref,
     select_every_mousemove = select_every_mousemove))
 }
 
@@ -124,8 +124,8 @@ update_tool <- function(fig, which, args) {
   args$tool_name <- get_tool_name(which)
   model <- do.call(tool_model, args)
 
-  fig$model$plot$attributes$tools[[model$ref$id]] <- model$ref
-  fig$model[[id]] <- model$model
+  fig$x$spec$model$plot$attributes$tools[[model$ref$id]] <- model$ref
+  fig$x$spec$model[[id]] <- model$model
 
   fig <- update_tool_events(fig)
 
@@ -158,8 +158,8 @@ update_tool_events <- function(fig) {
   id <- gen_id(fig, "ToolEvents")
   model <- tool_events(id)
 
-  fig$model$plot$attributes$tool_events <- model$ref
-  fig$model[[id]] <- model$model
+  fig$x$spec$model$plot$attributes$tool_events <- model$ref
+  fig$x$spec$model[[id]] <- model$model
 
   fig
 }

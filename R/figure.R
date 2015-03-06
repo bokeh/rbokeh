@@ -103,7 +103,18 @@ figure <- function(
   for(tl in tool_list)
     fig <- eval(parse(text = paste("tool_", tl, "(fig)", sep = "")))
 
-  fig
+  htmlwidgets::createWidget(
+     name = 'rbokeh',
+     x = list(
+        spec = fig,
+        elementid = digest(Sys.time()),
+        modeltype = "Plot",
+        modelid = id
+     ),
+     width = fig$width,
+     height = fig$height,
+     package = 'rbokeh'
+  )
 }
 
 fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plot") {

@@ -10,15 +10,15 @@
 ## these are all internal functions called from make_glyph
 ## legends are specified through the various layer functions
 
-add_legend <- function(obj, legends) {
-  id <- gen_id(obj, "legend")
+add_legend <- function(fig, legends) {
+  id <- gen_id(fig, "legend")
 
-  leg <- legend_model(id, obj$ref, legends)
+  leg <- legend_model(id, fig$x$spec$ref, legends)
 
-  obj$model$plot$attributes$renderers[[id]] <- leg$ref
-  obj$model[[id]] <- leg$model
+  fig$x$spec$model$plot$attributes$renderers[[id]] <- leg$ref
+  fig$x$spec$model[[id]] <- leg$model
 
-  obj
+  fig
 }
 
 legend_model <- function(id, plot_ref, legends) {

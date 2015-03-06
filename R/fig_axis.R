@@ -29,8 +29,8 @@ x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE, num
   }
 
   if(missing(label))
-    label <- fig$xlab
-  fig$xlab <- label
+    label <- fig$x$spec$xlab
+  fig$x$spec$xlab <- label
   update_axis(fig, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, visible = visible, log = log, ...)
 }
 
@@ -60,8 +60,8 @@ y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_
   }
 
   if(missing(label))
-    label <- fig$ylab
-  fig$ylab <- label
+    label <- fig$x$spec$ylab
+  fig$x$spec$ylab <- label
   update_axis(fig, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, visible = visible, log = log, ...)
 }
 
