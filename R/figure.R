@@ -38,6 +38,14 @@ figure <- function(
   theme = getOption("bokeh_theme"),
   ...
 ) {
+
+  ## figure of another type (like GMapPlot)
+  if("type" %in% names(list(...))) {
+    type <- list(...)$type
+  } else {
+    type <- "Plot"
+  }
+
   if(is.null(xlab) && !missing(xlab))
     xlab <- ""
 
@@ -45,7 +53,14 @@ figure <- function(
     ylab <- ""
 
   tt <- Sys.time()
-  id <- gen_id(list(time = tt), "Plot")
+  id <- gen_id(list(time = tt), type)
+
+  model <- fig_model_skeleton(id, title, width, height, type)
+  ref <- list(
+    type = type,
+    id = id
+  )
+  ref$subtype <- model$plot$subtype
 
   fig <- structure(list(
     width = width, height = height, title = title,
@@ -54,13 +69,9 @@ figure <- function(
     plot_width = plot_width, plot_height = plot_height,
     xgrid = xgrid, ygrid = ygrid, xaxes = xaxes, yaxes = yaxes,
     tools = tools, theme = theme,
-    model = fig_model_skeleton(id, title, width, height),
-    modeltype = "Plot", # not used
-    ref = list(
-      type    = "Plot",
-      subtype = "Figure",
-      id      =  id
-    ),
+    model = model,
+    modeltype = type, # not used
+    ref = ref,
     time = tt,
     ## place to store spec, data, and function for deferred glyphs
     glyph_defer_specs = list(), # not used
@@ -95,10 +106,16 @@ figure <- function(
   fig
 }
 
-fig_model_skeleton <- function(id, title, width = 480, height = 480) {
+fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plot") {
+
+  if(type == "GMapPlot") {
+    subtype <- NULL
+  } else {
+    subtype <- "Figure"
+  }
+
   model <- list(plot = list(
-    type       = "Plot",
-    subtype    = "Figure",
+    type       = type,
     id         =  id,
     attributes = list(
       title = title,
@@ -120,8 +137,9 @@ fig_model_skeleton <- function(id, title, width = 480, height = 480) {
       doc = NULL
     )
   ))
+  model$plot$subtype <- subtype
+  model
 }
-
 
 figure_par_validator_map <- list(
   "background_fill" = "color",

@@ -30,6 +30,19 @@ NULL
 #' @example man-roxygen/ex-flightfreq.R
 NULL
 
+
+#' Hexagon binned counts of NYC taxi pickup locations
+#'
+#' @name nyctaxihex
+#' @docType data
+#' @description
+#' Counts of NYC taxi pickups by location for January 2013, obtained from \href{http://chriswhong.com/open-data/foil_nyc_taxi/}{here}.
+#' @usage nyctaxihex
+#' @keywords data
+#' @example man-roxygen/ex-gmap.R
+NULL
+
+
 #' Pipe figures
 #'
 #' @importFrom magrittr %>%

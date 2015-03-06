@@ -5,7 +5,7 @@
 \title{Add an "image" layer to a Bokeh figure}
 \usage{
 ly_image(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
-  palette = "Spectral-10", dilate = FALSE, lname = NULL, lgroup = NULL)
+  palette = "Spectral10", dilate = FALSE, lname = NULL, lgroup = NULL)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -24,7 +24,7 @@ ly_image(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
 
 \item{dh}{image height distances}
 
-\item{palette}{palette to use for color-mapping}
+\item{palette}{name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
 
 \item{dilate}{logical - whether to dilate pixel distance computations when drawing}
 
