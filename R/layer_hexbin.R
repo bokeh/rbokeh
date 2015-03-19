@@ -60,13 +60,14 @@ ly_hexbin <- function(fig, x, y = NULL, data = NULL,
         stop("'palette' specified in ly_hexbin is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
       palette <- colorRampPalette(bk_palettes[[palette]])
     }
-    if(is.function(palette)) {
-      colorcut <- seq(0, 1, length = 100)
-      nc <- length(colorcut)
-      colgrp <- cut(hbd$rcnt, colorcut, labels = FALSE, include.lowest = TRUE)
-      clrs <- palette(length(colorcut) - 1)
-      col <- clrs[colgrp]
-    }
+  }
+
+  if(is.function(palette)) {
+    colorcut <- seq(0, 1, length = 100)
+    nc <- length(colorcut)
+    colgrp <- cut(hbd$rcnt, colorcut, labels = FALSE, include.lowest = TRUE)
+    clrs <- palette(length(colorcut) - 1)
+    col <- clrs[colgrp]
   }
 
   if(xname == yname) {
