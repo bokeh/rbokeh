@@ -87,7 +87,7 @@ test_that("examples", {
 
   print_model_json(p, file = "/dev/null")
 
-  data(flightFreq, package = "rbokeh")
+  data(flightfreq, package = "rbokeh")
   p <- figure(width = 1000) %>%
     ly_points(date, Freq, data = flightfreq,
       hover = list(date, Freq, dow), size = 5) %>%
