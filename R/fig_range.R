@@ -47,7 +47,7 @@ update_range <- function(fig, axis = "x", dat) {
 
   fig$x$spec$model$plot$attributes[[range_name]] <- model$ref
   fig$x$spec$model[[id]] <- model$model
-  fig[[paste0("has_", axis, "_range")]] <- TRUE
+  fig$x$spec[[paste0("has_", axis, "_range")]] <- TRUE
 
   fig
 }

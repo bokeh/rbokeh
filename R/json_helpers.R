@@ -14,16 +14,12 @@
 #' @export
 print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, file = "", pbcopy = FALSE) {
   if(prepare) {
-    if(inherits(fig, "BokehFigure")) {
-      fig <- prepare_figure(fig)
-    } else if(inherits(fig, "BokehGridPlot")) {
-      fig <- prepare_gridplot(fig)
-    }
+    fig <- rbokeh_prerender(fig)
   }
 
   if(pbcopy)
     file <- pipe("pbcopy")
-  cat(toJSON(remove_model_names(fig$x$spec$model), pretty = pretty), file = file)
+  cat(toJSON(fig$x$all_models, pretty = pretty), file = file)
 }
 
 #' Get the HTML content required to embed a Bokeh figure
@@ -34,17 +30,8 @@ get_bokeh_html <- function(fig) {
   elementid <- digest(Sys.time())
   modelid <- fig$x$spec$model$plot$id
 
-  if(inherits(fig, "BokehFigure")) {
-    type <- "Plot"
-    fig <- prepare_figure(fig)
-  } else if(inherits(fig, "BokehGridPlot")) {
-    type <- "GridPlot"
-    fig <- prepare_gridplot(fig)
-  } else {
-    stop("'fig' is not a valid type", call. = FALSE)
-  }
-
-  fig <- toJSON(remove_model_names(fig$x$spec$model))
+  fig <- rbokeh_prerender(fig)
+  fig <- toJSON(fig$x$all_models)
 
   a <- paste(
   '<head>\n',

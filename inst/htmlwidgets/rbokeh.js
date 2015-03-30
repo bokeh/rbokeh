@@ -17,6 +17,8 @@ HTMLWidgets.widget({
       x.all_models = JSON.parse(x.all_models);
     }
 
+    console.log(x);
+
     // set model size in here based on width, height
 
     Bokeh.logger.info("Realizing plot:")
@@ -37,12 +39,12 @@ HTMLWidgets.widget({
     Bokeh.load_models(x.all_models);
     var model = Bokeh.Collections(x.modeltype).get(x.modelid);
     var view = new model.default_view({model: model, el: '#' + x.elementid});
-    bokeh.instance = view;
+    // Bokeh.instance = view;
     Bokeh.index[x.modelid] = view;
   },
 
   resize: function(el, width, height, instance) {
-    // instance.bokeh (resize code...)
+    // (resize code...)
   }
 
 });

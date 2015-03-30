@@ -77,23 +77,23 @@ y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_
 # ticker model added to object, also referred to in grid
 # also create grid
 
-update_axis <- function(obj, position, label, grid = TRUE,
+update_axis <- function(fig, position, label, grid = TRUE,
   num_minor_ticks = 5, visible = TRUE, log = NULL, ...) {
 
-  f_id <- gen_id(obj, c(position, "formatter"))
-  t_id <- gen_id(obj, c(position, "ticker"))
-  a_id <- gen_id(obj, position)
+  f_id <- gen_id(fig, c(position, "formatter"))
+  t_id <- gen_id(fig, c(position, "ticker"))
+  a_id <- gen_id(fig, position)
 
   is_y <- position %in% c("left", "right")
 
-  axis_type <- ifelse(is_y, obj$y_axis_type, obj$x_axis_type)
+  axis_type <- ifelse(is_y, fig$x$spec$y_axis_type, fig$x$spec$x_axis_type)
   if(axis_type == "numeric") {
     if(!is.null(log)) {
       type_list <- list(format = "LogTickFormatter", tick = "LogTicker", axis = "LogAxis")
       if(is_y) {
-        obj$model$plot$attributes$y_mapper_type <- "log"
+        fig$x$spec$model$plot$attributes$y_mapper_type <- "log"
       } else {
-        obj$model$plot$attributes$x_mapper_type <- "log"
+        fig$x$spec$model$plot$attributes$x_mapper_type <- "log"
       }
     } else {
       type_list <- list(format = "BasicTickFormatter", tick = "BasicTicker", axis = "LinearAxis")
@@ -108,29 +108,29 @@ update_axis <- function(obj, position, label, grid = TRUE,
 
   formatter <- formatter_model(type_list$format, f_id)
   ticker <- ticker_model(type_list$tick, t_id, num_minor_ticks, log)
-  axis <- axis_model(type = type_list$axis, label = label, id = a_id, plot_ref = obj$ref, formatter_ref = formatter$ref, ticker_ref = ticker$ref, visible = visible, extra_pars)
+  axis <- axis_model(type = type_list$axis, label = label, id = a_id, plot_ref = fig$ref, formatter_ref = formatter$ref, ticker_ref = ticker$ref, visible = visible, extra_pars)
 
-  obj$model$plot$attributes[[position]][[1]] <- axis$ref
-  obj$model$plot$attributes$renderers[[axis$ref$id]] <- axis$ref
+  fig$x$spec$model$plot$attributes[[position]][[1]] <- axis$ref
+  fig$x$spec$model$plot$attributes$renderers[[axis$ref$id]] <- axis$ref
 
-  obj$model[[a_id]] <- axis$model
-  obj$model[[f_id]] <- formatter$model
-  obj$model[[t_id]] <- ticker$model
+  fig$x$spec$model[[a_id]] <- axis$model
+  fig$x$spec$model[[f_id]] <- formatter$model
+  fig$x$spec$model[[t_id]] <- ticker$model
 
   if(grid) {
-    g_id <- gen_id(obj, c(position, "grid"))
-    grid <- grid_model(g_id, plot_ref = obj$ref, ticker_ref = ticker$ref, dimension = as.integer(is_y))
-    obj$model$plot$attributes$renderers[[grid$ref$id]] <- grid$ref
-    obj$model[[g_id]] <- grid$model
+    g_id <- gen_id(fig, c(position, "grid"))
+    grid <- grid_model(g_id, plot_ref = fig$ref, ticker_ref = ticker$ref, dimension = as.integer(is_y))
+    fig$x$spec$model$plot$attributes$renderers[[grid$ref$id]] <- grid$ref
+    fig$x$spec$model[[g_id]] <- grid$model
   }
 
   if(is_y) {
-    obj$has_y_axis <- TRUE
+    fig$x$spec$has_y_axis <- TRUE
   } else {
-    obj$has_x_axis <- TRUE
+    fig$x$spec$has_x_axis <- TRUE
   }
 
-  obj
+  fig
 }
 
 axis_model <- function(type = "LinearAxis", label = NULL, id, plot_ref, formatter_ref, ticker_ref, visible, extra_pars) {

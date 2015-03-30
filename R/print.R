@@ -1,89 +1,28 @@
-#' Print a Bokeh figure
-#' @param x BokehFigure object
-#' @param \ldots further arguments - most importantly \code{debug = TRUE}
-#' will print information about the figure in the javascript console in the
-#' web browser
-#'
-#' @export
-print.BokehFigure <- function(x, ...) {
-  print(plot(x, y = NULL, ...))
-}
+rbokeh_prerender <- function(fig) {
+  # dots <- list(...)
+  # debug <- dots$debug
+  # if(is.null(debug))
+  #   debug <- FALSE
 
-plot.BokehFigure <- function(x, y, ...) {
-  dots <- list(...)
-  debug <- dots$debug
-  if(is.null(debug))
-    debug <- FALSE
-
-  if(length(x$layers) == 0 && x$model$plot$type != "GMapPlot") {
-    message("This figure is empty...")
+  if(fig$x$modeltype %in% c("Plot", "GMapPlot")) {
+    if(length(fig$x$spec$layers) == 0 && fig$x$spec$model$plot$type != "GMapPlot") {
+      message("This figure is empty...")
+    } else {
+      fig <- prepare_figure(fig)
+    }
+  } else if(x$modeltype == "GridPlot") {
+    fig <- prepare_gridplot(fig)
   } else {
-    fig <- prepare_figure(x)
-    fig$height <- fig$height + 50
-    fig$width <- fig$width + 50
-
-    type <- fig$model$plot$type
-
-    fig$model <- remove_model_names(fig$model)
-    make_bokeh_widget(fig, type = type, debug)
+    stop("Unsupported model type: ", x$modeltype)
   }
-}
 
-#' Print a Bokeh grid plot
-#' @param x BokehGridPlot object
-#' @param \ldots further arguments - most importantly \code{debug = TRUE}
-#' will print information about the figure in the javascript console in the
-#' web browser
-#'@export
-print.BokehGridPlot <- function(x, ...) {
-  print(plot(x, y = NULL, ...))
-}
+  fig$height <- fig$height + 50
+  fig$width <- fig$width + 50
 
-plot.BokehGridPlot <- function(x, y, ...) {
-  dots <- list(...)
-  debug <- dots$debug
-  if(is.null(debug))
-    debug <- FALSE
-
-  fig <- prepare_gridplot(x)
-
-  make_bokeh_widget(fig, type = "GridPlot", debug)
-}
-
-make_bokeh_widget <- function(fig, type, debug = FALSE) {
-  fig$x$r_debug <- debug
-  fig$x$all_models <- fig$model
+  fig$x$all_models <- fig$x$spec$model
+  fig$x$all_models <- remove_model_names(fig$x$all_models)
   fig$x$spec <- NULL
 
   fig
 }
 
-# Reusable function for registering a set of methods with S3 manually. The
-# methods argument is a list of character vectors, each of which has the form
-# c(package, genname, class).
-registerMethods <- function(methods) {
-  lapply(methods, function(method) {
-    pkg <- method[[1]]
-    generic <- method[[2]]
-    class <- method[[3]]
-    func <- get(paste(generic, class, sep="."))
-    if (pkg %in% loadedNamespaces()) {
-      registerS3method(generic, class, func, envir = asNamespace(pkg))
-    }
-    setHook(
-      packageEvent(pkg, "onLoad"),
-      function(...) {
-        registerS3method(generic, class, func, envir = asNamespace(pkg))
-      }
-    )
-  })
-}
-
-#' @importFrom knitr knit_print
-knit_print.BokehFigure <- function(x, ..., options = NULL) {
-  knitr::knit_print(htmlwidgets:::toHTML(plot(x), standalone = FALSE, knitrOptions = options), options = options,  ...)
-}
-
-knit_print.BokehGridPlot <- function(x, ..., options = NULL) {
-  knitr::knit_print(htmlwidgets:::toHTML(plot(x), standalone = FALSE, knitrOptions = options), options = options,  ...)
-}
