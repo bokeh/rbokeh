@@ -108,7 +108,7 @@ update_axis <- function(fig, position, label, grid = TRUE,
 
   formatter <- formatter_model(type_list$format, f_id)
   ticker <- ticker_model(type_list$tick, t_id, num_minor_ticks, log)
-  axis <- axis_model(type = type_list$axis, label = label, id = a_id, plot_ref = fig$ref, formatter_ref = formatter$ref, ticker_ref = ticker$ref, visible = visible, extra_pars)
+  axis <- axis_model(type = type_list$axis, label = label, id = a_id, plot_ref = fig$x$spec$ref, formatter_ref = formatter$ref, ticker_ref = ticker$ref, visible = visible, extra_pars)
 
   fig$x$spec$model$plot$attributes[[position]][[1]] <- axis$ref
   fig$x$spec$model$plot$attributes$renderers[[axis$ref$id]] <- axis$ref
@@ -119,7 +119,7 @@ update_axis <- function(fig, position, label, grid = TRUE,
 
   if(grid) {
     g_id <- gen_id(fig, c(position, "grid"))
-    grid <- grid_model(g_id, plot_ref = fig$ref, ticker_ref = ticker$ref, dimension = as.integer(is_y))
+    grid <- grid_model(g_id, plot_ref = fig$x$spec$ref, ticker_ref = ticker$ref, dimension = as.integer(is_y))
     fig$x$spec$model$plot$attributes$renderers[[grid$ref$id]] <- grid$ref
     fig$x$spec$model[[g_id]] <- grid$model
   }

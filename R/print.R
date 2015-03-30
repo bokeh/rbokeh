@@ -7,13 +7,14 @@ rbokeh_prerender <- function(fig) {
   if(fig$x$modeltype %in% c("Plot", "GMapPlot")) {
     if(length(fig$x$spec$layers) == 0 && fig$x$spec$model$plot$type != "GMapPlot") {
       message("This figure is empty...")
+      return(NULL)
     } else {
       fig <- prepare_figure(fig)
     }
-  } else if(x$modeltype == "GridPlot") {
+  } else if(fig$x$modeltype == "GridPlot") {
     fig <- prepare_gridplot(fig)
   } else {
-    stop("Unsupported model type: ", x$modeltype)
+    stop("Unsupported model type: ", fig$x$modeltype)
   }
 
   fig$height <- fig$height + 50

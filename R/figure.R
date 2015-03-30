@@ -62,7 +62,7 @@ figure <- function(
   )
   ref$subtype <- model$plot$subtype
 
-  fig <- structure(list(
+  spec <- structure(list(
     width = width, height = height, title = title,
     xlab = xlab, ylab = ylab,
     xlim = xlim, ylim = ylim, padding_factor = padding_factor,
@@ -93,7 +93,21 @@ figure <- function(
 
   extra_pars <- handle_extra_pars(list(...), figure_par_validator_map)
   if(!is.null(extra_pars))
-    fig$model$plot$attributes <- c(fig$model$plot$attributes, extra_pars)
+    spec$model$plot$attributes <- c(spec$model$plot$attributes, extra_pars)
+
+  fig <- htmlwidgets::createWidget(
+     name = 'rbokeh',
+     x = list(
+        spec = spec,
+        elementid = digest(Sys.time()),
+        modeltype = "Plot",
+        modelid = id
+     ),
+     preRenderHook = rbokeh_prerender,
+     width = spec$width,
+     height = spec$height,
+     package = 'rbokeh'
+  )
 
   ## check and add tools
   tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save")]
@@ -103,18 +117,7 @@ figure <- function(
   for(tl in tool_list)
     fig <- eval(parse(text = paste("tool_", tl, "(fig)", sep = "")))
 
-  htmlwidgets::createWidget(
-     name = 'rbokeh',
-     x = list(
-        spec = fig,
-        elementid = digest(Sys.time()),
-        modeltype = "Plot",
-        modelid = id
-     ),
-     width = fig$width,
-     height = fig$height,
-     package = 'rbokeh'
-  )
+  fig
 }
 
 fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plot") {
