@@ -5,19 +5,19 @@ HTMLWidgets.widget({
   type: 'output',
 
   initialize: function(el, width, height) {
-    return {
-
-    }
+    return {}
   },
 
   renderValue: function(el, x, instance) {
-    
+
     //clear el for Shiny/dynamic contexts
     el.innerHTML = "";
 
     if(x.isJSON == true) {
       x.all_models = JSON.parse(x.all_models);
     }
+
+    // set model size in here based on width, height
 
     Bokeh.logger.info("Realizing plot:")
     Bokeh.logger.info(" - modeltype: " + x.modeltype);
@@ -37,11 +37,12 @@ HTMLWidgets.widget({
     Bokeh.load_models(x.all_models);
     var model = Bokeh.Collections(x.modeltype).get(x.modelid);
     var view = new model.default_view({model: model, el: '#' + x.elementid});
+    bokeh.instance = view;
     Bokeh.index[x.modelid] = view;
   },
 
   resize: function(el, width, height, instance) {
-
+    // instance.bokeh (resize code...)
   }
 
 });

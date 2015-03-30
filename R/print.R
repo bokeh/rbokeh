@@ -52,18 +52,20 @@ plot.BokehGridPlot <- function(x, y, ...) {
 
 make_bokeh_widget <- function(fig, type, debug = FALSE) {
   ## create widget
+  id <- digest(Sys.time())
   htmlwidgets::createWidget(
      name = 'rbokeh',
      list(
         r_debug = debug,
         all_models = fig$model,
-        elementid = digest(Sys.time()),
+        elementid = id,
         modeltype = type,
         modelid = fig$id
      ),
      width = fig$width,
      height = fig$height,
-     package = 'rbokeh'
+     package = 'rbokeh',
+     elementId = id
   )
 }
 
