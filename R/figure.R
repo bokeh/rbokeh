@@ -45,7 +45,7 @@
 #' @import methods
 figure <- function(
   width = 480,
-  height = 480,
+  height = 520,
   title = NULL,
   xlab = NULL,
   ylab = NULL,
