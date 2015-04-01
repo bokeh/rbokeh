@@ -105,6 +105,8 @@ update_axis <- function(fig, position, label, grid = TRUE,
   }
 
   extra_pars <- handle_extra_pars(list(...), axis_par_validator_map)
+  if(is.null(extra_pars))
+    extra_pars <- list(axis_label_text_font_size = "12pt")
 
   formatter <- formatter_model(type_list$format, f_id)
   ticker <- ticker_model(type_list$tick, t_id, num_minor_ticks, log)

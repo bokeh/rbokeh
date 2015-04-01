@@ -17,12 +17,10 @@ rbokeh_prerender <- function(fig) {
     stop("Unsupported model type: ", fig$x$modeltype)
   }
 
-  fig$height <- fig$height + 50
-  fig$width <- fig$width + 50
-
   fig$x$all_models <- fig$x$spec$model
   fig$x$all_models <- remove_model_names(fig$x$all_models)
   fig$x$spec <- NULL
+  fig$preRenderHook <- NULL
 
   fig
 }

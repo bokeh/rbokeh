@@ -29,6 +29,7 @@ get_bokeh_html <- function(fig) {
   all_models <- fig$x$spec$model
   elementid <- digest(Sys.time())
   modelid <- fig$x$spec$model$plot$id
+  type <- fig$x$modeltype
 
   fig <- rbokeh_prerender(fig)
   fig <- toJSON(fig$x$all_models)
@@ -78,7 +79,7 @@ base_model_object <- function(type, id) {
 
 #' @importFrom digest digest
 gen_id <- function(obj, name = NULL) {
-  digest(c(name, obj$time))
+  digest(c(name, obj$x$spec$time))
 }
 
 remove_model_names <- function(obj) {

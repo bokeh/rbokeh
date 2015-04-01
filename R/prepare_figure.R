@@ -190,5 +190,24 @@ prepare_figure <- function(fig) {
   fig$x$spec$height <- fig$x$spec$model$plot$attributes$plot_height
   fig$x$spec$id <- fig$x$spec$model$plot$id
 
+  # handle toolbar padding
+  if(!is.null(fig$x$parenttype)) {
+    # parenttype is set when plot is part of GridPlot, which has different padding
+    x_pad <- y_pad <- 4
+  } else {
+    x_pad <- y_pad <- 10
+  }
+  tb <- fig$x$spec$model$plot$attributes$toolbar_location
+  if(is.null(tb)) {
+    x_pad <- 46
+  } else if(tb %in% c("above", "below")) {
+    y_pad <- 46
+  } else if(tb %in% c("left", "right")) {
+    x_pad <- 46
+  }
+
+  fig$x$spec$model$plot$attributes$plot_width <- fig$width - y_pad
+  fig$x$spec$model$plot$attributes$plot_height <- fig$height - x_pad
+
   fig
 }

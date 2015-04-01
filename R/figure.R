@@ -13,9 +13,33 @@
 #' @param ygrid whether to draw y axis grid lines
 #' @param xaxes where to put x axis, or FALSE if no x axis ticks / labels
 #' @param yaxes where to put y axis, or FALSE if no y axis ticks / labels
-#' @param tools interactivity tools options
+#' @param tools character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.
 #' @param theme an rbokeh theme to use (tableau by default)
 #' @template dots-figure
+#' @examples
+#' figure() %>% ly_points(1:10)
+#' @seealso
+#' Layers to add to a figure: \code{\link{ly_abline}};
+#'   \code{\link{ly_annular_wedge}}; \code{\link{ly_annulus}};
+#'   \code{\link{ly_arc}}; \code{\link{ly_bezier}};
+#'   \code{\link{ly_boxplot}}; \code{\link{ly_contour}};
+#'   \code{\link{ly_crect}}; \code{\link{ly_curve}};
+#'   \code{\link{ly_density}}; \code{\link{ly_hist}};
+#'   \code{\link{ly_image_url}}; \code{\link{ly_image}};
+#'   \code{\link{ly_lines}}; \code{\link{ly_map}};
+#'   \code{\link{ly_multi_line}}; \code{\link{ly_oval}};
+#'   \code{\link{ly_patch}}; \code{\link{ly_points}};
+#'   \code{\link{ly_polygons}}; \code{\link{ly_quadratic}};
+#'   \code{\link{ly_quantile}}; \code{\link{ly_ray}};
+#'   \code{\link{ly_segments}}; \code{\link{ly_text}};
+#'   \code{\link{ly_wedge}}
+#' Tools to add to a figure: \code{\link{tool_box_select}};
+#'   \code{\link{tool_box_zoom}};
+#'   \code{\link{tool_crosshair}};
+#'   \code{\link{tool_lasso_select}};
+#'   \code{\link{tool_reset}}; \code{\link{tool_resize}};
+#'   \code{\link{tool_save}}; \code{\link{tool_wheel_zoom}}
+#' Other figure types: \code{\link{grid_plot}}; \code{\link{gmap}}
 #' @export
 #' @import htmlwidgets
 #' @import methods
@@ -53,7 +77,7 @@ figure <- function(
     ylab <- ""
 
   tt <- Sys.time()
-  id <- gen_id(list(time = tt), type)
+  id <- gen_id(list(x = list(spec = list(time = tt))), type)
 
   model <- fig_model_skeleton(id, title, width, height, type)
   ref <- list(
@@ -92,8 +116,13 @@ figure <- function(
   ), class = "BokehFigure")
 
   extra_pars <- handle_extra_pars(list(...), figure_par_validator_map)
-  if(!is.null(extra_pars))
-    spec$model$plot$attributes <- c(spec$model$plot$attributes, extra_pars)
+  if(is.null(extra_pars))
+    extra_pars$min_border <- 4
+
+  if(is.null(tools))
+    extra_pars$toolbar_location <- "None"
+
+  spec$model$plot$attributes <- c(spec$model$plot$attributes, extra_pars)
 
   fig <- htmlwidgets::createWidget(
      name = 'rbokeh',

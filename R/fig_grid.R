@@ -1,6 +1,8 @@
 
 #' Create a Bokeh grid plot from a list of Bokeh figures
 #' @param figs list of Bokeh figures - see details for what is acceptable
+#' @param width width of the entire grid plot in pixels - if \code{NULL}, the sum of the grid widths of columns will be used - if not \code{NULL}, the widths of the plots will be proportionately shrunk to meet the specified width
+#' @param height height of the entire grid plot in pixels - if \code{NULL}, the sum of the grid heights of rows will be used - if not \code{NULL}, the heights of the plots will be proportionately shrunk to meet the specified height
 #' @param nrow number of rows in the grid
 #' @param ncol number of columns in the grid
 #' @param byrow populate the grid by row according to the order of figure elements supplied in \code{params}
@@ -11,7 +13,7 @@
 #'
 #' If \code{link_data} is \code{TRUE}, then an effort will be made to link all data sources that are common among the different figures in the plot.  Note that at this point, only data sources that are specified in the \code{data} argument to the different layer functions are checked.
 #' @export
-grid_plot <- function(figs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE, link_data = FALSE) {
+grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE, link_data = FALSE) {
 
   if(length(same_axes) == 1) {
     same_x <- same_y <- same_axes
@@ -84,17 +86,17 @@ grid_plot <- function(figs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
   if(same_x) {
     x_range <- get_grid_ranges(figs, "x")
     for(ii in seq_along(figs)) {
-      figs[[ii]]$xlim <- x_range$range # prevents prepare_figure() from computing range
-      figs[[ii]]$has_x_range <- TRUE # prevents prepare_figure() from adding range
-      figs[[ii]]$model$plot$attributes$x_range <- x_range$mod$ref
+      figs[[ii]]$x$spec$xlim <- x_range$range # prevents prepare_figure() from computing range
+      figs[[ii]]$x$spec$has_x_range <- TRUE # prevents prepare_figure() from adding range
+      figs[[ii]]$x$spec$model$plot$attributes$x_range <- x_range$mod$ref
     }
   }
   if(same_y) {
     y_range <- get_grid_ranges(figs, "y")
     for(ii in seq_along(figs)) {
-      figs[[ii]]$ylim <- y_range$range # prevents prepare_figure() from computing range
-      figs[[ii]]$has_y_range <- TRUE # prevents prepare_figure() from adding range
-      figs[[ii]]$model$plot$attributes$y_range <- y_range$mod$ref
+      figs[[ii]]$x$spec$ylim <- y_range$range # prevents prepare_figure() from computing range
+      figs[[ii]]$x$spec$has_y_range <- TRUE # prevents prepare_figure() from adding range
+      figs[[ii]]$x$spec$model$plot$attributes$y_range <- y_range$mod$ref
     }
   }
 
@@ -106,7 +108,7 @@ grid_plot <- function(figs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
     link_data = link_data,
     nrow = nrow, ncol = ncol), class = "BokehGridPlot")
 
-  htmlwidgets::createWidget(
+  obj <- htmlwidgets::createWidget(
     name = 'rbokeh',
     x = list(
       spec = spec,
@@ -115,12 +117,69 @@ grid_plot <- function(figs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
       modelid = "asdf"
     ),
     preRenderHook = rbokeh_prerender,
-    # width = spec$width,
-    # height = spec$height,
+    width = width,
+    height = height,
     package = 'rbokeh'
   )
-}
 
+  ## get overall width / height
+  dims <- lapply(obj$x$spec$figs, function(x) {
+    list(
+      id     = x$x$spec$model$plot$id,
+      width  = x$x$spec$model$plot$attributes$plot_width,
+      height = x$x$spec$model$plot$attributes$plot_height
+    )
+  })
+  names(dims) <- sapply(dims, function(x) x$id)
+
+  wmat <- matrix(0, nrow = obj$x$spec$nrow, ncol = obj$x$spec$ncol)
+  hmat <- matrix(0, nrow = obj$x$spec$nrow, ncol = obj$x$spec$ncol)
+  for(ii in seq_along(obj$x$spec$plot_refs)) {
+    for(jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
+      wmat[ii, jj] <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$width
+      hmat[ii, jj] <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$height
+    }
+  }
+
+  width <- sum(apply(wmat, 2, max)) + 46
+  height <- sum(apply(hmat, 1, max))
+
+  update_fig_dims <- FALSE
+  if(is.null(obj$width)) {
+    obj$width <- width
+  } else {
+    # shrink/expand widths
+    wmat <- wmat * obj$width / width
+    update_fig_dims <- TRUE
+  }
+
+  if(is.null(obj$height)) {
+    obj$height <- height
+  } else {
+    # shrink/expand heights
+    hmat <- hmat * obj$height / height
+    update_fig_dims <- TRUE
+  }
+
+  names(obj$x$spec$figs) <- sapply(obj$x$spec$figs, function(x) x$x$spec$model$plot$id)
+  if(update_fig_dims) {
+    for(ii in seq_along(obj$x$spec$plot_refs)) {
+      for(jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
+        cur_id <- obj$x$spec$plot_refs[[ii]][[jj]]$id
+        obj$x$spec$figs[[cur_id]]$width <- wmat[ii, jj]
+        obj$x$spec$figs[[cur_id]]$height <- hmat[ii, jj]
+      }
+    }
+  }
+
+  # set attributes to help set the padding for each individual panel
+  for(ii in seq_along(obj$x$spec$figs)) {
+    obj$x$spec$figs[[ii]]$x$spec$model$plot$attributes$toolbar_location <- "None"
+    obj$x$spec$figs[[ii]]$x$parenttype <- "GridPlot"
+  }
+
+  obj
+}
 
 grid_plot_model <- function(id, plot_refs, tool_event_ref, width, height) {
   res <- base_model_object("GridPlot", id)
@@ -158,27 +217,6 @@ grid_plot_model <- function(id, plot_refs, tool_event_ref, width, height) {
 ## run prepare on all figures in the grid
 ## merge axes and ranges if necessary
 prepare_gridplot <- function(obj) {
-  ## get overall width / height
-  dims <- lapply(obj$x$spec$figs, function(x) {
-    list(
-      id     = x$x$spec$model$plot$id,
-      width  = x$x$spec$model$plot$attributes$plot_width,
-      height = x$x$spec$model$plot$attributes$plot_height
-    )
-  })
-  names(dims) <- sapply(dims, function(x) x$id)
-
-  wmat <- matrix(0, nrow = obj$x$spec$nrow, ncol = obj$x$spec$ncol)
-  hmat <- matrix(0, nrow = obj$x$spec$nrow, ncol = obj$x$spec$ncol)
-  for(ii in seq_along(obj$x$spec$plot_refs)) {
-    for(jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
-      wmat[ii, jj] <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$width
-      hmat[ii, jj] <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$height
-    }
-  }
-  width <- sum(apply(wmat, 2, max))
-  height <- sum(apply(hmat, 1, max))
-
   figs <- lapply(obj$x$spec$figs, prepare_figure)
 
   data_mods <- list()
@@ -251,16 +289,16 @@ prepare_gridplot <- function(obj) {
     }
   }
 
-  mod <- unlist(lapply(figs, function(x) remove_model_names(x$x$spec$model)), recursive = FALSE)
+  mod <- unlist(lapply(figs, function(fig) remove_model_names(fig$x$spec$model)), recursive = FALSE)
 
   id <- gen_id(list(time = Sys.time()), "GridPlot")
   tid <- gen_id(list(time = Sys.time()), c("GridPlot", "tool"))
   tool_evt <- tool_events(tid)
 
-  mod$grid_plot <- grid_plot_model(id, obj$plot_refs, tool_evt$ref, width, height)$model
+  mod$grid_plot <- grid_plot_model(id, obj$x$spec$plot_refs, tool_evt$ref, obj$width, obj$height)$model
   mod$tool_evt <- tool_evt$model
-  mod$x_range <- obj$x_range
-  mod$y_range <- obj$y_range
+  mod$x_range <- obj$x$spec$x_range
+  mod$y_range <- obj$x$spec$y_range
 
   mod$tool_evt <- tool_evt$model
 
@@ -270,8 +308,6 @@ prepare_gridplot <- function(obj) {
 
   names(mod) <- NULL
 
-  obj$width <- width
-  obj$height <- height
   obj$x$spec$model <- mod
   obj$x$modelid <- id
 
