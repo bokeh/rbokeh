@@ -48,7 +48,7 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
-  url <- get_url(substitute(url), data)
+  url <- get_url(url, data)
 
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors

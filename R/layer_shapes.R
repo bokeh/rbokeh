@@ -1,4 +1,3 @@
-
 #' Add a "polygons" layer to a Bokeh figure
 #' @param fig figure to modify
 #' @param xs vector or list of values or field name of polygon x coordinates - see details
@@ -128,7 +127,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
-  url <- get_url(substitute(url), data)
+  url <- get_url(url, data)
 
   xy_names <- get_xy_names(xleft, ybottom, xname, yname, args)
 
@@ -198,7 +197,7 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
-  url <- get_url(substitute(url), data)
+  url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -274,7 +273,7 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
-  url <- get_url(substitute(url), data)
+  url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -335,7 +334,7 @@ ly_patch <- function(fig, x, y, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
-  url <- get_url(substitute(url), data)
+  url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)

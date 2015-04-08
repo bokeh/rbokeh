@@ -107,7 +107,7 @@ ly_image_url <- function(fig, x = 0, y = 0, data = NULL, w = 10, h = 10,
   if(!is.null(data)) {
     x      <- v_eval(substitute(x), data)
     y      <- v_eval(substitute(y), data)
-    url    <- v_eval(substitute(url), data)
+    url    <- v_eval(url, data)
     w      <- v_eval(substitute(w), data)
     h      <- v_eval(substitute(h), data)
     angle  <- v_eval(substitute(angle), data)
