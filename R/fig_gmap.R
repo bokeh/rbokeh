@@ -58,20 +58,20 @@ gmap <- function(lat = 0, lng = 0, zoom = 0,
     ...
   )
 
-  fig$model$plot$type <- "GMapPlot"
-  fig$ref$type <- "GMapPlot"
+  fig$x$spec$model$plot$type <- "GMapPlot"
+  fig$x$spec$ref$type <- "GMapPlot"
 
-  fig$model$plot$attributes$map_options <- list(
+  fig$x$spec$model$plot$attributes$map_options <- list(
     lat      = lat,
     lng      = lng,
     zoom     = zoom,
     map_type = map_type
   )
 
-  fig$glyph_x_ranges[["dummy_map_layer"]] <- c(lng, lat)
-  fig$glyph_y_ranges[["dummy_map_layer"]] <- c(lng, lat)
-  fig$x_axis_type <- "numeric"
-  fig$y_axis_type <- "numeric"
+  fig$x$spec$glyph_x_ranges[["dummy_map_layer"]] <- c(lng, lat)
+  fig$x$spec$glyph_y_ranges[["dummy_map_layer"]] <- c(lng, lat)
+  fig$x$spec$x_axis_type <- "numeric"
+  fig$x$spec$y_axis_type <- "numeric"
 
   fig
 }

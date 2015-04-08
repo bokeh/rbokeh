@@ -1,7 +1,7 @@
 ## internal helper methods
 
 validate_fig <- function(fig, fct) {
-  if(!inherits(fig, "BokehFigure"))
+  if(!inherits(fig$x$spec, "BokehFigure"))
     stop("Error in ", fct, ": first argument must be of type 'BokehFigure'", call. = FALSE)
 }
 
@@ -358,7 +358,7 @@ resolve_glyph_props <- function(glyph, args, lgroup) {
 
 get_lgroup <- function(lgroup, fig) {
   if(is.null(lgroup))
-    lgroup <- gen_layer_name(names(fig$layers))
+    lgroup <- gen_layer_name(names(fig$x$spec$layers))
   lgroup <- as.character(lgroup)
 }
 

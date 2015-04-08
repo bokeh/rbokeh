@@ -4,7 +4,7 @@
 \alias{figure}
 \title{Initialize a Bokeh figure}
 \usage{
-figure(width = 480, height = 480, title = NULL, xlab = NULL,
+figure(width = 480, height = 520, title = NULL, xlab = NULL,
   ylab = NULL, xlim = NULL, ylim = NULL, padding_factor = 0.07,
   plot_width = NULL, plot_height = NULL, xgrid = TRUE, ygrid = TRUE,
   xaxes = "below", yaxes = "left", tools = c("pan", "wheel_zoom",
@@ -38,7 +38,7 @@ figure(width = 480, height = 480, title = NULL, xlab = NULL,
 
 \item{yaxes}{where to put y axis, or FALSE if no y axis ticks / labels}
 
-\item{tools}{interactivity tools options}
+\item{tools}{character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.}
 
 \item{theme}{an rbokeh theme to use (tableau by default)}
 
@@ -78,5 +78,31 @@ Initialize a Bokeh figure
 \code{v_symmetry} \tab (logical) Whether the total vertical padding on both sides of the plot will be made equal (the top or bottom padding amount, whichever is larger). \cr
 \code{logo} \tab ('normal', 'grey') What version of the Bokeh logo to display on the toolbar. If set to None, no logo will be displayed. \cr
  }
+}
+\examples{
+figure() \%>\% ly_points(1:10)
+}
+\seealso{
+Layers to add to a figure: \code{\link{ly_abline}};
+  \code{\link{ly_annular_wedge}}; \code{\link{ly_annulus}};
+  \code{\link{ly_arc}}; \code{\link{ly_bezier}};
+  \code{\link{ly_boxplot}}; \code{\link{ly_contour}};
+  \code{\link{ly_crect}}; \code{\link{ly_curve}};
+  \code{\link{ly_density}}; \code{\link{ly_hist}};
+  \code{\link{ly_image_url}}; \code{\link{ly_image}};
+  \code{\link{ly_lines}}; \code{\link{ly_map}};
+  \code{\link{ly_multi_line}}; \code{\link{ly_oval}};
+  \code{\link{ly_patch}}; \code{\link{ly_points}};
+  \code{\link{ly_polygons}}; \code{\link{ly_quadratic}};
+  \code{\link{ly_quantile}}; \code{\link{ly_ray}};
+  \code{\link{ly_segments}}; \code{\link{ly_text}};
+  \code{\link{ly_wedge}}
+Tools to add to a figure: \code{\link{tool_box_select}};
+  \code{\link{tool_box_zoom}};
+  \code{\link{tool_crosshair}};
+  \code{\link{tool_lasso_select}};
+  \code{\link{tool_reset}}; \code{\link{tool_resize}};
+  \code{\link{tool_save}}; \code{\link{tool_wheel_zoom}}
+Other figure types: \code{\link{grid_plot}}; \code{\link{gmap}}
 }
 

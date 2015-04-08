@@ -4,11 +4,15 @@
 \alias{grid_plot}
 \title{Create a Bokeh grid plot from a list of Bokeh figures}
 \usage{
-grid_plot(figs, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE,
-  link_data = FALSE)
+grid_plot(figs, width = NULL, height = NULL, nrow = 1, ncol = 1,
+  byrow = TRUE, same_axes = FALSE, link_data = FALSE)
 }
 \arguments{
 \item{figs}{list of Bokeh figures - see details for what is acceptable}
+
+\item{width}{width of the entire grid plot in pixels - if \code{NULL}, the sum of the grid widths of columns will be used - if not \code{NULL}, the widths of the plots will be proportionately shrunk to meet the specified width}
+
+\item{height}{height of the entire grid plot in pixels - if \code{NULL}, the sum of the grid heights of rows will be used - if not \code{NULL}, the heights of the plots will be proportionately shrunk to meet the specified height}
 
 \item{nrow}{number of rows in the grid}
 

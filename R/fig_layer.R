@@ -13,7 +13,7 @@
 ## these are all internal functions called from make_glyph
 ## which is called from the various layer functions
 
-add_layer <- function(obj, spec, dat, lname, lgroup) {
+add_layer <- function(fig, spec, dat, lname, lgroup) {
   glyph <- spec$glyph
   glyph <- underscore2camel(glyph)
   spec$glyph <- NULL
@@ -45,13 +45,13 @@ add_layer <- function(obj, spec, dat, lname, lgroup) {
     glyph_attrs$text$field <- glyph_attrs$text$field$field
 
   if(glyph == "Image") {
-    c_id <- gen_id(obj, "ColorMapper")
+    c_id <- gen_id(fig, "ColorMapper")
     cmap <- color_mapper_model(c_id, palette = dat$palette)
     glyph_attrs$color_mapper <- cmap$ref
-    obj$model[[c_id]] <- cmap$model
+    fig$x$spec$model[[c_id]] <- cmap$model
   }
 
-  gl_id <- gen_id(obj, c(glyph, lgroup, lname))
+  gl_id <- gen_id(fig, c(glyph, lgroup, lname))
   glyph_obj <- glyph_model(gl_id, glyph, glyph_attrs)
 
   # nonselection glyph
@@ -64,23 +64,23 @@ add_layer <- function(obj, spec, dat, lname, lgroup) {
       if(!is.na(ns_glyph_attrs[[ii]]$value))
         ns_glyph_attrs[[ii]]$value <- "#e1e1e1"
   }
-  nsgl_id <- gen_id(obj, c("ns", glyph, lgroup, lname))
+  nsgl_id <- gen_id(fig, c("ns", glyph, lgroup, lname))
   ns_glyph_obj <- glyph_model(nsgl_id, glyph, ns_glyph_attrs)
 
-  d_id <- gen_id(obj, digest(dat))
+  d_id <- gen_id(fig, digest(dat))
   dat_mod <- data_model(dat, d_id)
 
-  glr_id <- gen_id(obj, c("glyph_renderer", lgroup, lname))
+  glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
   glyph_rend <- glyph_renderer_model(glr_id, dat_mod$ref, glyph_obj$ref, ns_glyph_obj$ref)
 
-  obj$model$plot$attributes$renderers[[glr_id]] <- glyph_rend$ref
+  fig$x$spec$model$plot$attributes$renderers[[glr_id]] <- glyph_rend$ref
 
-  obj$model[[d_id]] <- dat_mod$model
-  obj$model[[gl_id]] <- glyph_obj$model
-  obj$model[[nsgl_id]] <- ns_glyph_obj$model
-  obj$model[[glr_id]] <- glyph_rend$model
+  fig$x$spec$model[[d_id]] <- dat_mod$model
+  fig$x$spec$model[[gl_id]] <- glyph_obj$model
+  fig$x$spec$model[[nsgl_id]] <- ns_glyph_obj$model
+  fig$x$spec$model[[glr_id]] <- glyph_rend$model
 
-  obj
+  fig
 }
 
 data_model <- function(dd, id = NULL) {

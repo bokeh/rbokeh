@@ -1,4 +1,3 @@
-
 #' Add a "polygons" layer to a Bokeh figure
 #' @param fig figure to modify
 #' @param xs vector or list of values or field name of polygon x coordinates - see details
@@ -73,7 +72,7 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
     stop("For ly_polygons, xs and ys must be lists or specified through a data frame through 'data' argument.")
   }
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
   check_opts(args, "patches", formals = names(formals(ly_polygons)))
@@ -128,7 +127,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
-  url <- get_url(substitute(url), data)
+  url <- get_url(url, data)
 
   xy_names <- get_xy_names(xleft, ybottom, xname, yname, args)
 
@@ -138,7 +137,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
   if(missing(alpha))
     args$alpha <- NULL
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
   check_opts(args, "quad", formals = names(formals(ly_rect)))
@@ -198,7 +197,7 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
-  url <- get_url(substitute(url), data)
+  url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -209,7 +208,7 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
   if(missing(alpha))
     args$alpha <- NULL
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
   check_opts(args, "rect", formals = names(formals(ly_crect)))
@@ -274,7 +273,7 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
-  url <- get_url(substitute(url), data)
+  url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -285,7 +284,7 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
   if(missing(alpha))
     args$alpha <- NULL
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
   check_opts(args, "oval", formals = names(formals(ly_oval)))
@@ -335,7 +334,7 @@ ly_patch <- function(fig, x, y, data = NULL,
   }
 
   hover <- get_hover(substitute(hover), data)
-  url <- get_url(substitute(url), data)
+  url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
   xy <- get_xy_data(x, y)
@@ -345,7 +344,7 @@ ly_patch <- function(fig, x, y, data = NULL,
   if(missing(alpha))
     args$alpha <- NULL
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
 
   ## see if any options won't be used and give a message
   check_opts(args, "patch", formals = names(formals(ly_patch)))

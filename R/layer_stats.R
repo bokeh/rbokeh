@@ -33,7 +33,7 @@ ly_hist <- function(fig, x, data = NULL,
 
   args <- list(color = color, alpha = alpha, ...)
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
 
   y <- if(freq) {
     hh$counts
