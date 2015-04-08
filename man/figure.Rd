@@ -4,7 +4,7 @@
 \alias{figure}
 \title{Initialize a Bokeh figure}
 \usage{
-figure(width = 480, height = 480, title = NULL, xlab = NULL,
+figure(width = 480, height = 520, title = NULL, xlab = NULL,
   ylab = NULL, xlim = NULL, ylim = NULL, padding_factor = 0.07,
   plot_width = NULL, plot_height = NULL, xgrid = TRUE, ygrid = TRUE,
   xaxes = "below", yaxes = "left", tools = c("pan", "wheel_zoom",

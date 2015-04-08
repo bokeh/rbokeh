@@ -1,6 +1,6 @@
 Package: rbokeh
 Title: R Interface for Bokeh
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: "Ryan Hafen <rhafen@gmail.com> [aut, cre]"
 Description: R interface for creating plots in Bokeh.  Bokeh by Continuum Analytics, \url{http://bokeh.pydata.org/en/latest/}.
 License: MIT + file LICENSE
