@@ -129,7 +129,7 @@ figure <- function(
      x = list(
         spec = spec,
         elementid = digest(Sys.time()),
-        modeltype = "Plot",
+        modeltype = type,
         modelid = id
      ),
      preRenderHook = rbokeh_prerender,
