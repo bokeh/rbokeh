@@ -34,7 +34,7 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
   if(is.matrix(z)) {
     cols <- nrow(z)
     rows <- ncol(z)
-    z <- array(z)
+    z <- c(z)  # coerce the matrix to a vector
   }
 
   # really ugly nested if else
