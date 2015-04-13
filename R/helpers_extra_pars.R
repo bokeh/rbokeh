@@ -39,10 +39,10 @@ par_type_validate_fns <- list(
     validate_enum(name, val, c("normal", "italic", "bold"))
   },
   toolbar_location = function(name, val) {
-    validate_enum(name, val, c("above", "below", "left", "right"))
+    validate_enum(name, val, c("above", "below", "left", "right", "None"))
   },
   logo = function(name, val) {
-    validate_enum(name, val, c("normal", "grey"))
+    validate_enum(name, val, c("normal", "grey", "None"))
   },
   color = function(name, val) {
     if(!valid_color(val))
