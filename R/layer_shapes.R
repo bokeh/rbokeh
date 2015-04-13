@@ -118,7 +118,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
     dots    <- substitute(list(...))[-1]
     args    <- lapply(dots, function(x) v_eval(x, data))
     xleft   <- v_eval(substitute(xleft), data)
-    yright  <- v_eval(substitute(yright), data)
+    xright  <- v_eval(substitute(xright), data)
     ybottom <- v_eval(substitute(ybottom), data)
     ytop    <- v_eval(substitute(ytop), data)
     color   <- v_eval(substitute(color), data)
