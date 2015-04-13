@@ -55,10 +55,10 @@ HTMLWidgets.widget({
 
     var box = document.getElementById(instance.elementid).getElementsByTagName("table")[0];
 
-    if(Bokeh.index["c3bcea825e54ec0729458735b959b640"].model.attributes.children) {
+    if(Bokeh.index[instance.modelid].model.attributes.children) {
       // it is a gridplot (TODO)
       // need to get dimensions and set dimensions of all plots
-      // Bokeh.index[instance.modelid].child_views["280e9aeabee465620374997c62fd020b"].canvas._set_dims([300,300])
+      // Bokeh.index[instance.modelid].child_views["_id_"].canvas._set_dims([300,300])
     } else {
       // it's a regular plot
       var bk_canvas = document.getElementById(instance.elementid).getElementsByClassName("bk-canvas-wrapper")[0];
@@ -67,7 +67,6 @@ HTMLWidgets.widget({
 
       // TODO: also shrink font sizes, etc., to a certain degree?
       Bokeh.index[instance.modelid].canvas._set_dims([width - w_pad,height - h_pad]);
-
     }
   }
 
