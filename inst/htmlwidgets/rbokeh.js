@@ -7,7 +7,9 @@ HTMLWidgets.widget({
   initialize: function(el, width, height) {
     return {
       modelid: "",
-      elementid: ""
+      elementid: "",
+      width: width,
+      height: height
     }
   },
 
@@ -16,13 +18,23 @@ HTMLWidgets.widget({
     //clear el for Shiny/dynamic contexts
     el.innerHTML = "";
 
+    // set size from initialize if "figure" (doesn't work for gridplot now)
+    if(x.padding.type == "figure") {
+      if(instance.width) {
+        x.all_models[0].attributes.plot_width = instance.width - x.padding.y_pad;
+      }
+      if(instance.height) {
+        x.all_models[0].attributes.plot_height = instance.height - x.padding.x_pad;
+      }
+    }
+
     if(x.isJSON == true) {
       x.all_models = JSON.parse(x.all_models);
     }
 
     Bokeh.logger.info("Realizing plot:")
     Bokeh.logger.info(" - modeltype: " + x.modeltype);
-    Bokeh.logger.info(" - modelid: " + x.modelid);
+    Bokeh.logger.info(" - modelid:   " + x.modelid);
     Bokeh.logger.info(" - elementid: " + x.elementid);
 
     instance.modelid = x.modelid;
@@ -41,16 +53,17 @@ HTMLWidgets.widget({
     Bokeh.load_models(x.all_models);
     var model = Bokeh.Collections(x.modeltype).get(x.modelid);
     var view = new model.default_view({model: model, el: '#' + x.elementid});
+
     // Bokeh.instance = view;
     Bokeh.index[x.modelid] = view;
   },
 
   resize: function(el, width, height, instance) {
-    // var width = 500;
+    // var width = 800;
     // var height = 500;
     // var instance = {
-    //   modelid: "80e6788671f9703a699d1f9b98a458d2",
-    //   elementid: "1a247d4cb757568cfdf195a517e1f956"
+    //   modelid: "4f205d18bb3373d73ba892f2eac70640",
+    //   elementid: "73b93d6f1c812a87ac5621bc622762e0"
     // };
 
     var box = document.getElementById(instance.elementid).getElementsByTagName("table")[0];

@@ -1,6 +1,7 @@
 Version 0.2.2
 ----------------------------------------------------------------------
 
+- update sizing policy to deal with `renderBokeh()`
 - rbokeh plots are now htmlwidgets from the start
 - fix URL tool
 
