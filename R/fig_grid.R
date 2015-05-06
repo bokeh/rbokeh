@@ -308,6 +308,7 @@ prepare_gridplot <- function(obj) {
 
   names(mod) <- NULL
 
+  obj$x$padding <- list(type = "gridplot")
   obj$x$spec$model <- mod
   obj$x$modelid <- id
 

@@ -206,6 +206,7 @@ prepare_figure <- function(fig) {
     x_pad <- 46
   }
 
+  fig$x$padding <- list(type = "figure", y_pad = y_pad, x_pad = x_pad)
   fig$x$spec$model$plot$attributes$plot_width <- fig$width - y_pad
   fig$x$spec$model$plot$attributes$plot_height <- fig$height - x_pad
 
