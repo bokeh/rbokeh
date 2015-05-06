@@ -12,7 +12,8 @@ Imports:
     RJSONIO,
     digest,
     hexbin,
-    magrittr
+    magrittr,
+    jsonlite
 Suggests:
     testthat,
     knitr (>= 1.8)
