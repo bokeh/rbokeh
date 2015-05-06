@@ -93,6 +93,17 @@ par_type_validate_fns <- list(
       stop(name, " should be one of: ", paste(names(lty_dict), collapse = ", "), call. = FALSE)
 
     lty_dict[[val]]
+  },
+  datetime_format = function(name, val) {
+    if (!is.list(val) || is.null(names(val)))
+      stop(name, " must be a named list", call. = FALSE)
+    
+    vals = c("microseconds", "milliseconds", "seconds", "minsec", "minutes", 
+             "hourmin", "hours", "days", "months", "years")
+    if (any(!(names(val) %in% vals)))
+      stop(name, " must be in: ('", paste(vals, collapse = "', '"), "')", call. = FALSE)
+    
+    toJSON(val)
   }
 )
 
