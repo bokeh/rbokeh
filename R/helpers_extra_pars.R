@@ -103,7 +103,7 @@ par_type_validate_fns <- list(
     if (any(!(names(val) %in% vals)))
       stop(name, " must be in: ('", paste(vals, collapse = "', '"), "')", call. = FALSE)
     
-    toJSON(val)
+    jsonlite::toJSON(val)
   }
 )
 

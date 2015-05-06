@@ -18,7 +18,8 @@ Imports:
     RJSONIO,
     digest,
     hexbin,
-    magrittr
+    magrittr,
+    jsonlite
 Suggests:
     testthat
 Enhances:
