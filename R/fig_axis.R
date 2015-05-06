@@ -6,11 +6,18 @@
 #' @param grid logical - should a reference grid be shown for this axis?
 #' @param num_minor_ticks number of minor ticks
 #' @param visible should axis be shown?
+#' @param number_formatter Bokeh numeric tick label formatter
+#'  (\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.BasicTickFormatter}{"basic"},
+#'  \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{"numeral"}, 
+#'  or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
+#'  ignored if \code{log} is TRUE
 #' @template dots-axis
 #' @family axes
 #' @example man-roxygen/ex-axis.R
 #' @export
-x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE, num_minor_ticks = 5, visible = TRUE, ...) {
+x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE, 
+                   num_minor_ticks = 5, visible = TRUE, 
+                   number_formatter = c("basic", "numeral", "printf"), ...) {
   if(is.null(position))
     position <- "below"
   if(!position %in% c("below", "above")) {
@@ -31,7 +38,9 @@ x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE, num
   if(missing(label))
     label <- fig$x$spec$xlab
   fig$x$spec$xlab <- label
-  update_axis(fig, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, visible = visible, log = log, ...)
+  update_axis(fig, position = position, label = label, grid = grid, 
+              num_minor_ticks = num_minor_ticks, visible = visible, log = log, 
+              number_formatter = match.arg(number_formatter), ...)
 }
 
 #' Add y axis to a Bokeh figure
@@ -41,7 +50,9 @@ x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE, num
 #' @family axes
 #' @example man-roxygen/ex-axis.R
 #' @export
-y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_minor_ticks = 5, visible = TRUE, ...) {
+y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, 
+                   num_minor_ticks = 5, visible = TRUE, 
+                   number_formatter = c("basic", "numeral", "printf"), ...) {
   if(is.null(position))
     position <- "left"
   if(!position %in% c("left", "right")) {
@@ -62,7 +73,9 @@ y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_
   if(missing(label))
     label <- fig$x$spec$ylab
   fig$x$spec$ylab <- label
-  update_axis(fig, position = position, label = label, grid = grid, num_minor_ticks = num_minor_ticks, visible = visible, log = log, ...)
+  update_axis(fig, position = position, label = label, grid = grid, 
+              num_minor_ticks = num_minor_ticks, visible = visible, log = log, 
+              number_formatter = match.arg(number_formatter), ...)
 }
 
 # axis ref needs to be added to plot attributes as "above", "below", "left", or "right"
@@ -78,7 +91,8 @@ y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE, num_
 # also create grid
 
 update_axis <- function(fig, position, label, grid = TRUE,
-  num_minor_ticks = 5, visible = TRUE, log = NULL, ...) {
+  num_minor_ticks = 5, visible = TRUE, log = NULL, 
+  number_formatter = c("basic", "numeral", "printf"), ...) {
 
   f_id <- gen_id(fig, c(position, "formatter"))
   t_id <- gen_id(fig, c(position, "ticker"))
@@ -87,6 +101,7 @@ update_axis <- function(fig, position, label, grid = TRUE,
   is_y <- position %in% c("left", "right")
 
   axis_type <- ifelse(is_y, fig$x$spec$y_axis_type, fig$x$spec$x_axis_type)
+  format_pars <- NULL
   if(axis_type == "numeric") {
     if(!is.null(log)) {
       type_list <- list(format = "LogTickFormatter", tick = "LogTicker", axis = "LogAxis")
@@ -96,10 +111,16 @@ update_axis <- function(fig, position, label, grid = TRUE,
         fig$x$spec$model$plot$attributes$x_mapper_type <- "log"
       }
     } else {
-      type_list <- list(format = "BasicTickFormatter", tick = "BasicTicker", axis = "LinearAxis")
+      type_list <- list(format = paste0(simpleCap(match.arg(number_formatter)),
+                                        "TickFormatter"), 
+                        tick = "BasicTicker", axis = "LinearAxis")
+      format_pars <- handle_extra_pars(list(...), 
+                                       get(paste0(number_formatter, 
+                                                  "_tick_formatter_map")))
     }
   } else if(axis_type == "datetime") {
     type_list <- list(format = "DatetimeTickFormatter", tick = "DatetimeTicker", axis = "DatetimeAxis")
+    format_pars <- handle_extra_pars(list(...), datetime_tick_formatter_map)
   } else {
     type_list <- list(format = "CategoricalTickFormatter", tick = "CategoricalTicker", axis = "CategoricalAxis")
   }
@@ -108,7 +129,7 @@ update_axis <- function(fig, position, label, grid = TRUE,
   if(is.null(extra_pars))
     extra_pars <- list(axis_label_text_font_size = "12pt")
 
-  formatter <- formatter_model(type_list$format, f_id)
+  formatter <- formatter_model(type_list$format, f_id, format_pars)
   ticker <- ticker_model(type_list$tick, t_id, num_minor_ticks, log)
   axis <- axis_model(type = type_list$axis, label = label, id = a_id, plot_ref = fig$x$spec$ref, formatter_ref = formatter$ref, ticker_ref = ticker$ref, visible = visible, extra_pars)
 
@@ -148,8 +169,11 @@ axis_model <- function(type = "LinearAxis", label = NULL, id, plot_ref, formatte
   res
 }
 
-formatter_model <- function(type = "BasicTickFormatter", id) {
-  base_model_object(type, id)
+formatter_model <- function(type = "BasicTickFormatter", id, extra_pars) {
+  res <- base_model_object(type, id)
+  res$model$attributes <- c(res$model$attributes, extra_pars)
+  
+  res
 }
 
 ticker_model <- function(type = "BasicTicker", id, num_minor_ticks = 5, log = NULL) {
@@ -215,7 +239,26 @@ axis_par_validator_map <- list(
   "major_label_orientation" = "label_orientation"
 )
 
+basic_tick_formatter_map <- list(
+  "power_limit_high" = "int",
+  "power_limit_low" = "int",
+  "precision" = "int",
+  "use_scientific" = "logical"
+)
 
+datetime_tick_formatter_map <- list(
+  "formats" = "datetime_format"
+)
+
+numeral_tick_formatter_map <- list(
+  "format" = "string",
+  "language" = "string",
+  "rounding" = "string"
+)
+
+printf_tick_formatter_map <- list(
+  "format" = "string"
+)
 
 
 
