@@ -13,16 +13,16 @@ figure() %>%
   ly_points(rnorm(10), rnorm(10) / 1000) %>%
   y_axis(use_scientific = FALSE)
 
-# Specify datetime tick labels
+# Specify datetime tick labels; the appropriate datetime units are automatically
+#   chosen
 figure() %>%
   ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-12-31"), by="days"), 
            rnorm(366)) %>%
-  x_axis(label = "Date", formats = list(months="%b-%Y"))
-
+  x_axis(label = "Date", formats = list(months="%b-%Y", days="%d"))
 figure() %>%
   ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-02-01"), by="days"), 
-           rnorm(366)) %>%
-  x_axis(label = "Date", formats = list(days="%d", days="%d"))
+           rnorm(32)) %>%
+  x_axis(label = "Date", formats = list(months="%b-%Y", days="%d"))
 
 # Specify numeric tick labels
 figure() %>%
