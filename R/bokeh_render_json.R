@@ -8,13 +8,13 @@
 #'
 #' @seealso \code{\link{print_model_json}}
 #' @import htmlwidgets
-#' @importFrom RJSONIO fromJSON
+#' @importFrom jsonlite fromJSON
 #'
 #' @export
 bokeh_render_json <- function(json_file) {
 
   # extract the id
-  tmp <- RJSONIO::fromJSON(json_file)
+  tmp <- jsonlite::fromJSON(json_file, simplifyVector = FALSE)
   nms <- sapply(tmp, function(x) { x$type })
   if("GridPlot" %in% nms) {
     modeltype <- "GridPlot"
@@ -29,6 +29,7 @@ bokeh_render_json <- function(json_file) {
   # forward options using x
   x = list(
     all_models = paste(readLines(json_file), collapse = "\n"),
+    padding = list(type = "figure", y_pad = 0, x_pad = 0),
     modeltype = modeltype,
     elementid = digest(Sys.time()),
     modelid = id,
