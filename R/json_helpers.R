@@ -1,7 +1,7 @@
 #' Print the JSON of a Bokeh figure
 #' @param fig figure to print
 #' @param prepare logical - should the figure be sent through preparations that need to be done prior to plotting (TRUE), or printed as-is (FALSE)
-#' @param pretty parameter passed on to \code{\link[RJSONIO]{toJSON}}
+#' @param pretty parameter passed on to \code{\link[jsonlite]{toJSON}}
 #' @param file parameter passed on to \code{\link[base]{cat}}
 #' @param pbcopy logical - if on OSX, should the results be passed to the clipboard (TRUE) instead of printed to the screen (FALSE)?
 #' @examples
@@ -10,7 +10,7 @@
 #'  tool_pan(dimensions = "height")
 #' print_model_json(p)
 #' }
-#' @importFrom RJSONIO toJSON
+#' @importFrom jsonlite toJSON
 #' @export
 print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, file = "", pbcopy = FALSE) {
   if(prepare) {
@@ -19,7 +19,8 @@ print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, file = "", pbco
 
   if(pbcopy)
     file <- pipe("pbcopy")
-  cat(toJSON(fig$x$all_models, pretty = pretty), file = file)
+  cat(toJSON(fig$x$all_models, pretty = pretty,
+    auto_unbox = TRUE, null = "null", na = "null"), file = file)
 }
 
 #' Get the HTML content required to embed a Bokeh figure

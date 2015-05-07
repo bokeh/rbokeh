@@ -18,6 +18,10 @@ HTMLWidgets.widget({
     //clear el for Shiny/dynamic contexts
     el.innerHTML = "";
 
+    if(x.isJSON == true) {
+      x.all_models = JSON.parse(x.all_models);
+    }
+
     // set size from initialize if "figure" (doesn't work for gridplot now)
     if(x.padding.type == "figure") {
       if(instance.width) {
@@ -26,10 +30,6 @@ HTMLWidgets.widget({
       if(instance.height) {
         x.all_models[0].attributes.plot_height = instance.height - x.padding.x_pad;
       }
-    }
-
-    if(x.isJSON == true) {
-      x.all_models = JSON.parse(x.all_models);
     }
 
     Bokeh.logger.info("Realizing plot:")
