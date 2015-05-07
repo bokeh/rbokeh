@@ -87,7 +87,7 @@ test_that("examples", {
 
   print_model_json(p, file = "/dev/null")
 
-  data(flightfreq, package = "rbokeh")
+  data(flightFreq, package = "rbokeh")
   p <- figure(width = 1000) %>%
     ly_points(date, Freq, data = flightfreq,
       hover = list(date, Freq, dow), size = 5) %>%
@@ -211,4 +211,32 @@ test_that("examples", {
 
   # google map
   print_model_json(gmap(), file = "/dev/null")
+  
+  # axis tick formatters
+  p <- figure() %>%
+    ly_points(rnorm(10), rnorm(10) / 1000) %>%
+    y_axis(use_scientific = FALSE)
+  print_model_json(p, file = "/dev/null")
+  
+  p <- figure() %>%
+    ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-12-31"), by="days"), 
+             rnorm(366)) %>%
+    x_axis(label = "Date", formats = list(months="%b-%Y", days="%d"))
+  print_model_json(p, file = "/dev/null")
+  p <- figure() %>%
+    ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-02-01"), by="days"), 
+             rnorm(32)) %>%
+    x_axis(label = "Date", formats = list(months="%b-%Y", days="%d"))
+  print_model_json(p, file = "/dev/null")
+  
+  p <- figure() %>%
+    ly_points(rnorm(10), rnorm(10) * 10000) %>%
+    y_axis(number_formatter = "numeral", format = "0,000")
+  print_model_json(p, file = "/dev/null")
+  
+  p <- figure() %>%
+    ly_points(rnorm(10), rnorm(10) * 100) %>%
+    y_axis(number_formatter = "printf", format = "%0.1f%%")
+  print_model_json(p, file = "/dev/null")
+  
 })
