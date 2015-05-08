@@ -1,3 +1,9 @@
+Version 0.2.3
+----------------------------------------------------------------------
+
+- added support for axis tick formatting to `x_axis` and `y_axis`
+- switched to `jsonlite` from `RJSONIO`
+
 Version 0.2.2
 ----------------------------------------------------------------------
 
@@ -8,7 +14,7 @@ Version 0.2.2
 Version 0.2.1
 ----------------------------------------------------------------------
 
-- fix dimension calculation so that resulting div is exactlyt the dimensions specified
+- fix dimension calculation so that resulting div is exactly the dimensions specified
 - update default padding and text sizes
 - fix sizing so that plots and grid plots on are exact dimensions as specified (resize canvas elements to accommodate for things drawn in the margins)
 - fix bug in generating unique id for each plot
