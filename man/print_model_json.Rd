@@ -12,7 +12,7 @@ print_model_json(fig, prepare = TRUE, pretty = TRUE, file = "",
 
 \item{prepare}{logical - should the figure be sent through preparations that need to be done prior to plotting (TRUE), or printed as-is (FALSE)}
 
-\item{pretty}{parameter passed on to \code{\link[RJSONIO]{toJSON}}}
+\item{pretty}{parameter passed on to \code{\link[jsonlite]{toJSON}}}
 
 \item{file}{parameter passed on to \code{\link[base]{cat}}}
 
