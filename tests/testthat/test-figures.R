@@ -239,4 +239,10 @@ test_that("examples", {
     y_axis(number_formatter = "printf", format = "%0.1f%%")
   print_model_json(p, file = "/dev/null")
   
+  # data.table
+  library(data.table)
+  p <- figure() %>%
+    ly_points(Sepal.Length, Sepal.Width, data = as.data.table(iris),
+              color = Species, hover = as.data.table(iris)[, list(Species)])
+  print_model_json(p, file = "/dev/null")
 })

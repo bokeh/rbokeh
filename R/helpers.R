@@ -1,3 +1,6 @@
+#' @export
+.datatable.aware <- TRUE
+
 ## internal helper methods
 
 validate_fig <- function(fig, fct) {
@@ -392,7 +395,7 @@ get_hover <- function(hn, data) {
         message("There were no columns: ", paste(hn, collapse = ", "), " in the data for the hover tool - hover not added")
         return(NULL)
       }
-      data <- data[hn]
+      data <- subset(data, select = hn)
     }
   }
   ## to be safe, give hover columns their own name and format them as strings
@@ -402,7 +405,8 @@ get_hover <- function(hn, data) {
   for(ii in seq_len(ncol(data)))
     data[[ii]] <- format(data[[ii]])
 
-  hdict <- lapply(seq_along(hn), function(ii) list(hn[ii], paste("@", hn2[ii], sep = "")))
+  hdict <- lapply(seq_along(hn), function(ii) list(gsub("hover_", "", hn[ii]), 
+                                                   paste("@", hn2[ii], sep = "")))
 
   return(structure(list(
     data = data,

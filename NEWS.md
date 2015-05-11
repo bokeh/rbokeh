@@ -3,6 +3,7 @@ Version 0.2.3
 
 - added support for axis tick formatting to `x_axis` and `y_axis`
 - switched to `jsonlite` from `RJSONIO`
+- updated the library to be `data.table` aware
 
 Version 0.2.2
 ----------------------------------------------------------------------
