@@ -432,7 +432,7 @@ get_url <- function(url, data) {
         message("url tap tool not added - one or more of the following detected variables are not in the 'data' argument: ", paste(vars, collapse = ", "))
         return(NULL)
       } else {
-        data <- data[vars]
+        data <- subset(data, select = vars)
       }
     } else {
       message("url tap tool not added - 'url' must be a vector of URLs or a string referencing names of 'data' with e.g. @varname")

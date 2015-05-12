@@ -245,4 +245,10 @@ test_that("examples", {
     ly_points(Sepal.Length, Sepal.Width, data = as.data.table(iris),
               color = Species, hover = as.data.table(iris)[, list(Species)])
   print_model_json(p, file = "/dev/null")
+  
+  p <- figure() %>%
+    ly_points(Sepal.Length, Sepal.Width, data = as.data.table(iris),
+              color = Species, hover = as.data.table(iris)[, list(Species)],
+              url = "http://www.google.com?q=@Species")
+  print_model_json(p, file = "/dev/null")
 })
