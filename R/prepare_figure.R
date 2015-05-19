@@ -108,8 +108,8 @@ prepare_figure <- function(fig) {
         # lines below causing an error with bokeh 0.9
         # if(!is.null(spec$size))
         #   spec$size <- NA
-        if(!is.null(spec$radius))
-          spec$radius <- NA
+        # if(!is.null(spec$radius))
+        #   spec$radius <- NA
         fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
 
         # add reference to glyph to legend object
