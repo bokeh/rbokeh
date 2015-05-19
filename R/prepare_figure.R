@@ -105,8 +105,9 @@ prepare_figure <- function(fig) {
         # make it so legend glyph doesn't show up on page
         oox <- ifelse(fig$x$spec$x_axis_type == "categorical", "", NA)
         ooy <- ifelse(fig$x$spec$y_axis_type == "categorical", "", NA)
-        if(!is.null(spec$size))
-          spec$size <- NA
+        # lines below causing an error with bokeh 0.9
+        # if(!is.null(spec$size))
+        #   spec$size <- NA
         if(!is.null(spec$radius))
           spec$radius <- NA
         fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
