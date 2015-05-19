@@ -32,6 +32,9 @@ HTMLWidgets.widget({
       }
     }
 
+    if (HTMLWidgets.shinyMode)
+      this.addActionCallbackShinyInput(el.id, x);
+
     Bokeh.logger.info("Realizing plot:")
     Bokeh.logger.info(" - modeltype: " + x.modeltype);
     Bokeh.logger.info(" - modelid:   " + x.modelid);
@@ -81,7 +84,45 @@ HTMLWidgets.widget({
       // TODO: also shrink font sizes, etc., to a certain degree?
       Bokeh.index[instance.modelid].canvas._set_dims([width - w_pad,height - h_pad]);
     }
+  },
+  
+  addActionCallbackShinyInput : function(id, x) {
+    var ind = -1;
+    for(var i = 0; i < x.all_models.length; i += 1) {
+        if(x.all_models[i].type === "Callback") {
+            ind = i;
+        }
+    }
+
+    if (ind > -1) {
+      // check for an existing actionCallback
+      var prevActionCallback = x.all_models[ind].attributes.code;
+
+      // install the callback
+      if (!prevActionCallback)
+        x.all_models[ind].attributes.code = "rslt = getBokehSelected(cb_obj);" +
+          "var input_id = '" + id + "_action';" +
+          "Bokeh.logger.info('Sending data to shiny: ' + input_id);" +
+          "Shiny.onInputChange(input_id, rslt);";
+    } else {
+      Bokeh.logger.info('No callback model present');
+    }
   }
 
 });
 
+getBokehSelected = function(cb_obj) {
+  var inds = cb_obj.get('selected')['1d'].indices;
+  var data = cb_obj.get('data');
+
+  var rslt = {};
+  for (i = 0; i < inds.length; i++) {
+    for (var key in data) {
+      if (data.hasOwnProperty(key)) {
+        rslt[key] = data[key][inds[i]];
+      }
+    }
+  }
+
+  return(rslt);
+};

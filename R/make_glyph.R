@@ -4,7 +4,8 @@
 # which will ensure that attributes are mapped to glyphs within the layer
 
 make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
-  hover = NULL, url = NULL, legend = NULL, xname = NULL, yname = NULL, data_sig = NA) {
+  hover = NULL, url = NULL, callback = NULL, legend = NULL, 
+  xname = NULL, yname = NULL, data_sig = NA) {
 
   if(is.null(args))
     args <- list()
@@ -152,8 +153,15 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
 
     fig <- fig %>% add_tap_url(url$url, renderer_ref)
     data <- c(data, url$data)
+  } else {
+    renderer_ref <- list(
+      type = "GlyphRenderer",
+      id = glr_id
+    )
+    
+    fig <- fig %>% add_tap_callback(callback, renderer_ref)
   }
-
+  
   args$glyph <- type
 
   if(axis_type_range$x_axis_type == "datetime") {
