@@ -24,4 +24,4 @@ Imports:
 Suggests:
     testthat
 Enhances:
-    shiny (>= 0.10.2.1)
+    shiny (>= 0.11.1)
