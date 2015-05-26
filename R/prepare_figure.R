@@ -78,9 +78,9 @@ prepare_figure <- function(fig) {
               oox <- ifelse(fig$x$spec$x_axis_type == "categorical", "", NA)
               ooy <- ifelse(fig$x$spec$y_axis_type == "categorical", "", NA)
               if(!is.null(spec$size))
-                spec$size <- NA
+                spec$size <- 0
               if(!is.null(spec$radius))
-                spec$radius <- NA
+                spec$radius <- 0
               fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
 
               # add reference to glyph to legend object
@@ -106,9 +106,9 @@ prepare_figure <- function(fig) {
         oox <- ifelse(fig$x$spec$x_axis_type == "categorical", "", NA)
         ooy <- ifelse(fig$x$spec$y_axis_type == "categorical", "", NA)
         if(!is.null(spec$size))
-          spec$size <- NA
+          spec$size <- 0
         if(!is.null(spec$radius))
-          spec$radius <- NA
+          spec$radius <- 0
         fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
 
         # add reference to glyph to legend object

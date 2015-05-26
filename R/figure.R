@@ -62,10 +62,11 @@ figure <- function(
   theme = getOption("bokeh_theme"),
   ...
 ) {
+  dots <- list(...)
 
   ## figure of another type (like GMapPlot)
-  if("type" %in% names(list(...))) {
-    type <- list(...)$type
+  if("type" %in% names(dots)) {
+    type <- dots$type
   } else {
     type <- "Plot"
   }
@@ -115,9 +116,11 @@ figure <- function(
     has_y_range = FALSE
   ), class = "BokehFigure")
 
-  extra_pars <- handle_extra_pars(list(...), figure_par_validator_map)
+  extra_pars <- handle_extra_pars(dots, figure_par_validator_map)
   if(is.null(extra_pars))
     extra_pars$min_border <- 4
+  if(is.null(extra_pars$lod_threshold))
+    extra_pars["lod_threshold"] <- list(NULL)
 
   if(is.null(tools))
     extra_pars$toolbar_location <- "None"
@@ -210,7 +213,11 @@ figure_par_validator_map <- list(
   "toolbar_location" = "toolbar_location",
   "logo" =  "logo",
   "h_symmetry" = "logical",
-  "v_symmetry" = "logical"
+  "v_symmetry" = "logical",
+  "lod_factor" = "int",
+  "lod_interval" = "int",
+  "lod_threshold" = "int",
+  "lod_timeout" = "int"
 )
 
 

@@ -19,8 +19,7 @@ Imports:
     jsonlite,
     digest,
     hexbin,
-    magrittr,
-    jsonlite
+    magrittr
 Suggests:
     testthat
 Enhances:
