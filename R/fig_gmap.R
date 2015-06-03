@@ -18,6 +18,7 @@
 #' @export
 gmap <- function(lat = 0, lng = 0, zoom = 0,
   map_type = "hybrid",
+  map_style = NULL,
   width = 480,
   height = 480,
   title = NULL,
@@ -67,6 +68,11 @@ gmap <- function(lat = 0, lng = 0, zoom = 0,
     zoom     = zoom,
     map_type = map_type
   )
+
+  if(!is.null(map_style)) {
+    fig$x$spec$model$plot$attributes$map_options$map_type <- NULL
+    fig$x$spec$model$plot$attributes$map_options$styles <- map_style
+  }
 
   fig$x$spec$glyph_x_ranges[["dummy_map_layer"]] <- c(lng, lat)
   fig$x$spec$glyph_y_ranges[["dummy_map_layer"]] <- c(lng, lat)
