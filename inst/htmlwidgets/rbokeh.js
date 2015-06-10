@@ -23,7 +23,7 @@ HTMLWidgets.widget({
     }
 
     // set size from initialize if "figure" (doesn't work for gridplot now)
-    if(x.padding.type == "figure") {
+    if(x.padding.type === "figure") {
       if(instance.width) {
         x.all_models[0].attributes.plot_width = instance.width - x.padding.y_pad;
       }
