@@ -4,6 +4,7 @@ Version 0.2.3
 - fix an issue with `grid_plot` and `tool_events` not having unique id
 - added support for axis tick formatting to `x_axis` and `y_axis`
 - switched to `jsonlite` from `RJSONIO`
+- updated the library to be `data.table` aware
 
 Version 0.2.2
 ----------------------------------------------------------------------

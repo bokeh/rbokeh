@@ -1,3 +1,6 @@
+#' @export
+.datatable.aware <- TRUE
+
 ## internal helper methods
 
 validate_fig <- function(fig, fct) {
@@ -392,7 +395,7 @@ get_hover <- function(hn, data) {
         message("There were no columns: ", paste(hn, collapse = ", "), " in the data for the hover tool - hover not added")
         return(NULL)
       }
-      data <- data[hn]
+      data <- subset(data, select = hn)
     }
   }
   ## to be safe, give hover columns their own name and format them as strings
@@ -428,7 +431,7 @@ get_url <- function(url, data) {
         message("url tap tool not added - one or more of the following detected variables are not in the 'data' argument: ", paste(vars, collapse = ", "))
         return(NULL)
       } else {
-        data <- data[vars]
+        data <- subset(data, select = vars)
       }
     } else {
       message("url tap tool not added - 'url' must be a vector of URLs or a string referencing names of 'data' with e.g. @varname")
