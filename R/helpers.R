@@ -405,8 +405,7 @@ get_hover <- function(hn, data) {
   for(ii in seq_len(ncol(data)))
     data[[ii]] <- format(data[[ii]])
 
-  hdict <- lapply(seq_along(hn), function(ii) list(gsub("hover_", "", hn[ii]), 
-                                                   paste("@", hn2[ii], sep = "")))
+  hdict <- lapply(seq_along(hn), function(ii) list(hn[ii], paste("@", hn2[ii], sep = "")))
 
   return(structure(list(
     data = data,
