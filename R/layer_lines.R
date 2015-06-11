@@ -86,7 +86,7 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
         c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)),
           lapply(g_args, function(x) subset_with_attributes(x, cur_idx[1])),
           ng_args[!idx], list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
-            lgroup = lgroup, lname = ii, xlab = xy_names$x, ylab = xy_names$y)))
+            lgroup = lgroup, lname = ii, legend = legend, xlab = xy_names$x, ylab = xy_names$y)))
     }
     return(fig)
   }
