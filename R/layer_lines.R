@@ -67,7 +67,7 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
     ng_args <- args[-groupable]
 
     lns <- sapply(ng_args, length)
-    idx <- which(lns == length(xy$x))
+    idx <- lns == length(xy$x)
 
     df_args <- args[idx]
     df_args$group <- NULL
@@ -85,8 +85,8 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
       fig <- do.call(ly_lines,
         c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)),
           lapply(g_args, function(x) subset_with_attributes(x, cur_idx[1])),
-          ng_args[-idx], list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
-            lgroup = lgroup, lname = ii, xlab = xy_names$x, ylab = xy_names$y)))
+          ng_args[!idx], list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
+            lgroup = lgroup, lname = ii, legend = legend, xlab = xy_names$x, ylab = xy_names$y)))
     }
     return(fig)
   }
