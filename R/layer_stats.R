@@ -28,8 +28,13 @@ ly_hist <- function(fig, x, data = NULL,
 
   lgroup <- get_lgroup(lgroup, fig)
 
-  hh <- graphics::hist.default(x = x, breaks = breaks,
-    include.lowest = include.lowest, right = right, plot = FALSE)
+  if(inherits(x, "histogram")) {
+    hh <- x
+    xname <- hst$xname
+  } else {
+    hh <- graphics::hist.default(x = x, breaks = breaks,
+      include.lowest = include.lowest, right = right, plot = FALSE)
+  }
 
   args <- list(color = color, alpha = alpha, ...)
 
