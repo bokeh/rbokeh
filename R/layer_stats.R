@@ -3,7 +3,8 @@
 #'
 #' Draws a histogram
 #' @param fig figure to modify
-#' @param x,breaks,freq,include.lowest,right parameters passed to \code{\link[graphics]{hist}}
+#' @param x either a vector to be passed to \code{\link[graphics]{hist}} or an object of class "histogram"
+#' @param breaks,freq,include.lowest,right parameters passed to \code{\link[graphics]{hist}}
 #' @param data an optional data frame, providing the source for x
 #' @template par-coloralpha
 #' @template par-lnamegroup
