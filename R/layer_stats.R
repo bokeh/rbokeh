@@ -30,7 +30,7 @@ ly_hist <- function(fig, x, data = NULL,
 
   if(inherits(x, "histogram")) {
     hh <- x
-    xname <- hst$xname
+    xname <- x$xname
   } else {
     hh <- graphics::hist.default(x = x, breaks = breaks,
       include.lowest = include.lowest, right = right, plot = FALSE)
