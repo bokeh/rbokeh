@@ -407,6 +407,9 @@ get_hover <- function(hn, data, envir) {
 
   hdict <- lapply(seq_along(hn), function(ii) list(hn[ii], paste("@", hn2[ii], sep = "")))
 
+  if(nrow(data) == 1)
+    data <- lapply(data, I)
+
   return(structure(list(
     data = data,
     dict = hdict
