@@ -369,8 +369,8 @@ get_lgroup <- function(lgroup, fig) {
 # if a data frame was provided, the arg sould be a
 # list of column names
 # otherwise it should be a named list or data frame
-get_hover <- function(hn, data) {
-  tmp <- try(eval(hn), silent = TRUE)
+get_hover <- function(hn, data, envir) {
+  tmp <- try(eval(hn, envir = envir), silent = TRUE)
   if(is.data.frame(tmp)) {
     data <- tmp
     hn <- names(data)
