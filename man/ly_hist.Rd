@@ -11,9 +11,11 @@ ly_hist(fig, x, data = NULL, breaks = "Sturges", freq = TRUE,
 \arguments{
 \item{fig}{figure to modify}
 
-\item{x,breaks,freq,include.lowest,right}{parameters passed to \code{\link[graphics]{hist}}}
+\item{x}{either a vector to be passed to \code{\link[graphics]{hist}} or an object of class "histogram"}
 
 \item{data}{an optional data frame, providing the source for x}
+
+\item{breaks,freq,include.lowest,right}{parameters passed to \code{\link[graphics]{hist}}}
 
 \item{color}{color for the glyph - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' - for glyphs with both fill and line properties, see "Handling color" below}
 

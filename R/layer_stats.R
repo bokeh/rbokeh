@@ -3,7 +3,8 @@
 #'
 #' Draws a histogram
 #' @param fig figure to modify
-#' @param x,breaks,freq,include.lowest,right parameters passed to \code{\link[graphics]{hist}}
+#' @param x either a vector to be passed to \code{\link[graphics]{hist}} or an object of class "histogram"
+#' @param breaks,freq,include.lowest,right parameters passed to \code{\link[graphics]{hist}}
 #' @param data an optional data frame, providing the source for x
 #' @template par-coloralpha
 #' @template par-lnamegroup
@@ -28,8 +29,13 @@ ly_hist <- function(fig, x, data = NULL,
 
   lgroup <- get_lgroup(lgroup, fig)
 
-  hh <- graphics::hist.default(x = x, breaks = breaks,
-    include.lowest = include.lowest, right = right, plot = FALSE)
+  if(inherits(x, "histogram")) {
+    hh <- x
+    xname <- x$xname
+  } else {
+    hh <- graphics::hist.default(x = x, breaks = breaks,
+      include.lowest = include.lowest, right = right, plot = FALSE)
+  }
 
   args <- list(color = color, alpha = alpha, ...)
 
