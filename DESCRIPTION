@@ -20,6 +20,7 @@ Imports:
     hexbin,
     magrittr
 Suggests:
-    testthat
+    testthat,
+    lattice
 Enhances:
     shiny (>= 0.10.2.1)
