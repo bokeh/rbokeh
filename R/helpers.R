@@ -1,3 +1,6 @@
+#' @export
+.datatable.aware <- TRUE
+
 ## internal helper methods
 
 validate_fig <- function(fig, fct) {
@@ -366,8 +369,8 @@ get_lgroup <- function(lgroup, fig) {
 # if a data frame was provided, the arg sould be a
 # list of column names
 # otherwise it should be a named list or data frame
-get_hover <- function(hn, data) {
-  tmp <- try(eval(hn), silent = TRUE)
+get_hover <- function(hn, data, envir) {
+  tmp <- try(eval(hn, envir = envir), silent = TRUE)
   if(is.data.frame(tmp)) {
     data <- tmp
     hn <- names(data)
@@ -392,7 +395,7 @@ get_hover <- function(hn, data) {
         message("There were no columns: ", paste(hn, collapse = ", "), " in the data for the hover tool - hover not added")
         return(NULL)
       }
-      data <- data[hn]
+      data <- subset(data, select = hn)
     }
   }
   ## to be safe, give hover columns their own name and format them as strings
@@ -403,6 +406,9 @@ get_hover <- function(hn, data) {
     data[[ii]] <- format(data[[ii]])
 
   hdict <- lapply(seq_along(hn), function(ii) list(hn[ii], paste("@", hn2[ii], sep = "")))
+
+  if(nrow(data) == 1)
+    data <- lapply(data, I)
 
   return(structure(list(
     data = data,
@@ -428,7 +434,7 @@ get_url <- function(url, data) {
         message("url tap tool not added - one or more of the following detected variables are not in the 'data' argument: ", paste(vars, collapse = ", "))
         return(NULL)
       } else {
-        data <- data[vars]
+        data <- subset(data, select = vars)
       }
     } else {
       message("url tap tool not added - 'url' must be a vector of URLs or a string referencing names of 'data' with e.g. @varname")

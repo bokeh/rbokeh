@@ -24,9 +24,9 @@ y_axis(fig, label, position = "left", log = FALSE, grid = TRUE,
 \item{visible}{should axis be shown?}
 
 \item{number_formatter}{Bokeh numeric tick label formatter
-(\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.BasicTickFormatter}{"basic"},
-\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
-or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
+(\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.BasicTickFormatter}{"basic"},
+\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
+or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
 ignored if \code{log} is TRUE}
 
 \item{\ldots}{additional parameters for fine control over axes (see "Additional parameters" below)}
@@ -93,17 +93,17 @@ Add y axis to a Bokeh figure
 \subsection{Datetime Tick Format}{
 \tabular{ll}{
 \code{formats} \tab (list) Display tick values from a continuous range as formatted datetimes.
- See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.DatetimeTickFormatter}{DatetimeTickFormatter}. \cr
+ See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.DatetimeTickFormatter}{DatetimeTickFormatter}. \cr
  }}
 \subsection{Numeral Tick Format}{
 \tabular{ll}{
 \code{format} \tab (string) Tick formatter based on a human-readable format string.
- See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{NumeralTickFormatter}. \cr
+ See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.NumeralTickFormatter}{NumeralTickFormatter}. \cr
  }}
 \subsection{Printf Tick Format}{
 \tabular{ll}{
 \code{format} \tab (string) Tick formatter based on a printf-style format string.
- See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{PrintfTickFormatter}. \cr
+ See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.PrintfTickFormatter}{PrintfTickFormatter}. \cr
  }}
 }
 \examples{

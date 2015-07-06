@@ -291,8 +291,9 @@ prepare_gridplot <- function(obj) {
 
   mod <- unlist(lapply(figs, function(fig) remove_model_names(fig$x$spec$model)), recursive = FALSE)
 
-  id <- gen_id(list(time = Sys.time()), "GridPlot")
-  tid <- gen_id(list(time = Sys.time()), c("GridPlot", "tool"))
+  id <- gen_id(list(x = list(spec = list(time = Sys.time()))), "GridPlot")
+
+  tid <- gen_id(list(x = list(spec = list(time = Sys.time()))), c("GridPlot", "tool"))
   tool_evt <- tool_events(tid)
 
   mod$grid_plot <- grid_plot_model(id, obj$x$spec$plot_refs, tool_evt$ref, obj$width, obj$height)$model

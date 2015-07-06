@@ -16,9 +16,9 @@ gmap(lat = 0, lng = 0, zoom = 0, map_type = "hybrid", width = 480,
 
 \item{lng}{longitude where the map should be centered}
 
-\item{zoom}{initial \href{https://developers.google.com/maps/documentation/staticmaps/#Zoomlevels}{zoom level} to use when displaying the map}
+\item{zoom}{initial \href{https://developers.google.com/maps/documentation/staticmaps/\#Zoomlevels}{zoom level} to use when displaying the map}
 
-\item{map_type}{\href{https://developers.google.com/maps/documentation/staticmaps/#MapTypes}{map type} to use for the plot - one of "hybrid", "satellite", "roadmap", "terrain"}
+\item{map_type}{\href{https://developers.google.com/maps/documentation/staticmaps/\#MapTypes}{map type} to use for the plot - one of "hybrid", "satellite", "roadmap", "terrain"}
 
 \item{width}{figure width in pixels}
 
