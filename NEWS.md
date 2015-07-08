@@ -1,6 +1,8 @@
 Version 0.2.3.2
 ----------------------------------------------------------------------
 
+- add `map_style` to `gmap()`
+- update to Bokeh v0.9.1
 - fix issue with hover data frame not being found
 - fix issue JSON encoding with hover data frame with only one row
 - fix an issue with `grid_plot` and `tool_events` not having unique id

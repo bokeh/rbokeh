@@ -121,3 +121,4 @@ ljoin_dict <- list(
 
 marker_pch_types <- setdiff(0:25, c(11, 14))
 marker_names <- c("asterisk", "circle", "circle_cross", "circle_x", "cross", "diamond", "diamond_cross", "inverted_triangle", "square", "square_cross", "square_x", "triangle", "x")
+
