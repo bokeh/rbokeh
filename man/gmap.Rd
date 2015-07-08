@@ -90,7 +90,18 @@ This can be used in the same way as \code{\link{figure}}, adding layers on top o
 \code{h_symmetry} \tab (logical) Whether the total horizontal padding on both sides of the plot will be made equal (the left or right padding amount, whichever is larger). \cr
 \code{v_symmetry} \tab (logical) Whether the total vertical padding on both sides of the plot will be made equal (the top or bottom padding amount, whichever is larger). \cr
 \code{logo} \tab ('normal', 'grey') What version of the Bokeh logo to display on the toolbar. If set to None, no logo will be displayed. \cr
+\code{lod_factor} \tab (integer) Decimation factor to use when applying level-of-detail decimation (see "Controlling level of detail"). \cr
+\code{lod_interval} \tab (integer) Interval (in ms) during which an interactive tool event will enable level-of-detail downsampling (see "Controlling level of detail"). \cr
+\code{lod_threshold} \tab (integer) A number of data points, above which level-of-detail downsampling may be performed by glyph renderers. Set to \code{NULL} to disable any level-of-detail downsampling (see "Controlling level of detail"). \cr
+\code{lod_timeout} \tab (integer) Timeout (in ms) for checking whether interactive tool events are still occurring. Once level-of-detail mode is enabled, a check is made every lod_timeout ms. If no interactive tool events have happened, level-of-detail mode is disabled (see "Controlling level of detail").
  }
+}
+
+\section{Controlling level of detail}{
+
+Although the HTML canvas can comfortably display tens or even hundreds of thousands of glyphs, doing so can have adverse affects on interactive performance. In order to accommodate large-ish (but not enormous) data sizes, Bokeh plots offer "Level of Detail" (LOD) capability in the client.
+
+The basic idea is that during interactive operations (e.g., panning or zooming), the plot only draws some small fraction data points. This hopefully allows the general sense of the interaction to be preserved mid-flight, while maintaining interactive performance. See the \code{lod_} parameters for information on how to control this.
 }
 \examples{
 \donttest{

@@ -13,7 +13,7 @@ Description: R interface for creating plots in Bokeh.  Bokeh by Continuum Analyt
 License: MIT + file LICENSE
 LazyData: true
 Imports:
-    htmlwidgets,
+    htmlwidgets (>= 0.5),
     maps,
     methods,
     jsonlite,
@@ -24,4 +24,4 @@ Suggests:
     testthat,
     data.table
 Enhances:
-    shiny (>= 0.10.2.1)
+    shiny (>= 0.12)
