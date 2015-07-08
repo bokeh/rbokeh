@@ -42,7 +42,6 @@ NULL
 #' @example man-roxygen/ex-gmap.R
 NULL
 
-
 #' Pipe figures
 #'
 #' @importFrom magrittr %>%
