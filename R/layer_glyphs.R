@@ -44,7 +44,7 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
     args <- list(...)
   }
 
-  hover <- get_hover(substitute(hover), data)
+  hover <- get_hover(substitute(hover), data, parent.frame())
   url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
@@ -114,7 +114,7 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
     args <- list(...)
   }
 
-  hover <- get_hover(substitute(hover), data)
+  hover <- get_hover(substitute(hover), data, parent.frame())
   url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
@@ -245,7 +245,7 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
     args <- list(...)
   }
 
-  hover <- get_hover(substitute(hover), data)
+  hover <- get_hover(substitute(hover), data, parent.frame())
   url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors

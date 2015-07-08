@@ -24,9 +24,9 @@ x_axis(fig, label, position = "below", log = FALSE, grid = TRUE,
 \item{visible}{should axis be shown?}
 
 \item{number_formatter}{Bokeh numeric tick label formatter
-(\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.BasicTickFormatter}{"basic"},
-\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
-or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
+(\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.BasicTickFormatter}{"basic"},
+\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
+or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
 ignored if \code{log} is TRUE}
 
 \item{\ldots}{additional parameters for fine control over axes (see "Additional parameters" below)}
@@ -93,17 +93,17 @@ Add x axis to a Bokeh figure
 \subsection{Datetime Tick Format}{
 \tabular{ll}{
 \code{formats} \tab (list) Display tick values from a continuous range as formatted datetimes.
- See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.DatetimeTickFormatter}{DatetimeTickFormatter}. \cr
+ See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.DatetimeTickFormatter}{DatetimeTickFormatter}. \cr
  }}
 \subsection{Numeral Tick Format}{
 \tabular{ll}{
 \code{format} \tab (string) Tick formatter based on a human-readable format string.
- See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{NumeralTickFormatter}. \cr
+ See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.NumeralTickFormatter}{NumeralTickFormatter}. \cr
  }}
 \subsection{Printf Tick Format}{
 \tabular{ll}{
 \code{format} \tab (string) Tick formatter based on a printf-style format string.
- See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{PrintfTickFormatter}. \cr
+ See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.PrintfTickFormatter}{PrintfTickFormatter}. \cr
  }}
 }
 \examples{
@@ -117,23 +117,24 @@ figure() \%>\%
   ly_points(2^(1:10)) \%>\%
   y_axis(log = 2)
 
-# Disable scientific tick labels
+# disable scientific tick labels
 figure() \%>\%
   ly_points(rnorm(10), rnorm(10) / 1000) \%>\%
   y_axis(use_scientific = FALSE)
 
-# Specify datetime tick labels; the appropriate datetime units are automatically
-#   chosen
+# specify datetime tick labels
+# the appropriate datetime units are automatically chosen
+big_range <- seq(as.Date("2012-01-01"), as.Date("2012-12-31"), by="days")
+small_range <- seq(as.Date("2012-01-01"),as.Date("2012-02-01"), by="days")
+
 figure() \%>\%
-  ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-12-31"), by="days"), 
-           rnorm(366)) \%>\%
+  ly_lines(big_range, rnorm(366)) \%>\%
   x_axis(label = "Date", formats = list(months="\%b-\%Y", days="\%d"))
 figure() \%>\%
-  ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-02-01"), by="days"), 
-           rnorm(32)) \%>\%
+  ly_lines(small_range, rnorm(32)) \%>\%
   x_axis(label = "Date", formats = list(months="\%b-\%Y", days="\%d"))
 
-# Specify numeric tick labels
+# specify numeric tick labels
 figure() \%>\%
   ly_points(rnorm(10), rnorm(10) * 10000) \%>\%
   y_axis(number_formatter = "numeral", format = "0,000")

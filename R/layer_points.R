@@ -47,7 +47,7 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
     args <- list(...)
   }
 
-  hover <- get_hover(substitute(hover), data)
+  hover <- get_hover(substitute(hover), data, parent.frame())
   url <- get_url(url, data)
 
   xy_names <- get_xy_names(x, y, xname, yname, args)
@@ -70,7 +70,7 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
     args$glyph <- NULL
 
     lns <- sapply(args, length)
-    idx <- which(lns == length(xy$x))
+    idx <- lns == length(xy$x)
 
     df_args <- args[idx]
 
@@ -86,7 +86,7 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
       cur_hover$data <- cur_hover$data[cur_idx, , drop = FALSE]
 
       fig <- do.call(ly_points,
-        c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)), args[-idx],
+        c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)), args[!idx],
           list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
             glyph = subset_with_attributes(gl, cur_idx[1]), lgroup = lgroup,
             lname = ii, hover = cur_hover, legend = legend,

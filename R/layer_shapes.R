@@ -57,7 +57,7 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
     }
   }
 
-  # hover <- get_hover(substitute(hover), data)
+  # hover <- get_hover(substitute(hover), data, parent.frame())
   xy_names <- get_xy_names(xs, ys, xname, yname, args)
   ## translate different x, y types to vectors
   lgroup <- get_lgroup(lgroup, fig)
@@ -80,7 +80,7 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
   if(is.null(args$fill_alpha))
     args$fill_alpha <- 0.5
 
-  hover <- get_hover(hover)
+  hover <- get_hover(hover, data, parent.frame())
   url <- get_url(url, data)
 
   axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
@@ -126,7 +126,7 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
     args <- list(...)
   }
 
-  hover <- get_hover(substitute(hover), data)
+  hover <- get_hover(substitute(hover), data, parent.frame())
   url <- get_url(url, data)
 
   xy_names <- get_xy_names(xleft, ybottom, xname, yname, args)
@@ -196,7 +196,7 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
     args <- list(...)
   }
 
-  hover <- get_hover(substitute(hover), data)
+  hover <- get_hover(substitute(hover), data, parent.frame())
   url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
@@ -272,7 +272,7 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
     args <- list(...)
   }
 
-  hover <- get_hover(substitute(hover), data)
+  hover <- get_hover(substitute(hover), data, parent.frame())
   url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors
@@ -333,7 +333,7 @@ ly_patch <- function(fig, x, y, data = NULL,
     args <- list(...)
   }
 
-  hover <- get_hover(substitute(hover), data)
+  hover <- get_hover(substitute(hover), data, parent.frame())
   url <- get_url(url, data)
   xy_names <- get_xy_names(x, y, xname, yname, args)
   ## translate different x, y types to vectors

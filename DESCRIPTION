@@ -1,6 +1,6 @@
 Package: rbokeh
 Title: R Interface for Bokeh
-Version: 0.2.3
+Version: 0.2.3.2
 Authors@R: c(
     person("Ryan", "Hafen", email = "rhafen@gmail.com", role = c("aut", "cre")),
     person("Kenton", "Russell", email = "kent.russell@timelyportfolio.com", role = "ctb"),
@@ -13,15 +13,15 @@ Description: R interface for creating plots in Bokeh.  Bokeh by Continuum Analyt
 License: MIT + file LICENSE
 LazyData: true
 Imports:
-    htmlwidgets,
+    htmlwidgets (>= 0.5),
     maps,
     methods,
     jsonlite,
     digest,
     hexbin,
-    magrittr,
-    jsonlite
+    magrittr
 Suggests:
-    testthat
+    testthat,
+    data.table
 Enhances:
-    shiny (>= 0.10.2.1)
+    shiny (>= 0.12)

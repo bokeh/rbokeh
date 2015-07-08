@@ -17,14 +17,26 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
   glyph <- spec$glyph
   glyph <- underscore2camel(glyph)
   spec$glyph <- NULL
-
-  spec_in_data <- names(spec) %in% names(dat)
+  spec_names <- names(spec)
+  spec_in_data <- spec_names %in% names(dat)
 
   glyph_attrs <- lapply(seq_along(spec_in_data), function(ii) {
-    if(spec_in_data[ii]) {
-      list(units = "data", field = spec[[ii]])
+    units <- "data"
+    if(spec_names[ii] == "angle")
+      units <- "rad"
+
+    if(length(spec[[ii]]) != 0) {
+      if(all(is.na(spec[[ii]]))) {
+        return(NULL)
+      } else {
+        if(spec_in_data[ii]) {
+          list(units = units, field = spec[[ii]])
+        } else {
+          list(units = units, value = spec[[ii]])
+        }
+      }
     } else {
-      list(units = "data", value = spec[[ii]])
+      return(NULL)
     }
   })
 
@@ -59,10 +71,12 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
   color_ind <- which(grepl("_color", names(ns_glyph_attrs)))
 
   for(ii in color_ind) {
-    names(ns_glyph_attrs[[ii]])[names(ns_glyph_attrs[[ii]]) == "field"] <- "value"
-    if(!is.null(ns_glyph_attrs[[ii]]$value))
-      if(!is.na(ns_glyph_attrs[[ii]]$value))
-        ns_glyph_attrs[[ii]]$value <- "#e1e1e1"
+    if(!is.null(ns_glyph_attrs[[ii]])) {
+      names(ns_glyph_attrs[[ii]])[names(ns_glyph_attrs[[ii]]) == "field"] <- "value"
+      if(!is.null(ns_glyph_attrs[[ii]]$value))
+        if(!is.na(ns_glyph_attrs[[ii]]$value))
+          ns_glyph_attrs[[ii]]$value <- "#e1e1e1"
+    }
   }
   nsgl_id <- gen_id(fig, c("ns", glyph, lgroup, lname))
   ns_glyph_obj <- glyph_model(nsgl_id, glyph, ns_glyph_attrs)
