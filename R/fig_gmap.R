@@ -11,6 +11,7 @@
 #' @param lng longitude where the map should be centered
 #' @param zoom initial \href{https://developers.google.com/maps/documentation/staticmaps/\#Zoomlevels}{zoom level} to use when displaying the map
 #' @param map_type \href{https://developers.google.com/maps/documentation/staticmaps/\#MapTypes}{map type} to use for the plot - one of "hybrid", "satellite", "roadmap", "terrain"
+#' @param map_style a json string of a Google Maps style - see \code{\link{gmap_style}}
 #' @template dots-figure
 #' @note This can be used in the same way as \code{\link{figure}}, adding layers on top of the Google Map.
 #' @inheritParams figure
