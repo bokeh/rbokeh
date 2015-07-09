@@ -21,6 +21,8 @@ gmap(lat = 0, lng = 0, zoom = 0, map_type = "hybrid",
 
 \item{map_type}{\href{https://developers.google.com/maps/documentation/staticmaps/\#MapTypes}{map type} to use for the plot - one of "hybrid", "satellite", "roadmap", "terrain"}
 
+\item{map_style}{a json string of a Google Maps style - see \code{\link{gmap_style}}}
+
 \item{width}{figure width in pixels}
 
 \item{height}{figure width in pixels}
