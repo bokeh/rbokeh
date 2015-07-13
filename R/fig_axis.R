@@ -7,9 +7,9 @@
 #' @param num_minor_ticks number of minor ticks
 #' @param visible should axis be shown?
 #' @param number_formatter Bokeh numeric tick label formatter
-#'  (\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.BasicTickFormatter}{"basic"},
-#'  \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
-#'  or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html\#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
+#'  (\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.BasicTickFormatter}{"basic"},
+#'  \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
+#'  or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
 #'  ignored if \code{log} is TRUE
 #' @template dots-axis
 #' @family axes
