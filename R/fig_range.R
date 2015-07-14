@@ -33,6 +33,9 @@ range_model <- function(type = "Range1d", id, dat) {
 # range ref needs to be added to plot attributes as "x_range" or "y_range"
 # then range model added to object
 update_range <- function(fig, axis = "x", dat) {
+  if(inherits(dat, c("Date", "POSIXct")))
+    dat <- to_epoch(dat)
+
   if(is.numeric(dat)) {
     type <- "Range1d"
     dat <- range(dat, na.rm = TRUE)
