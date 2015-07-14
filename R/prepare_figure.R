@@ -136,6 +136,8 @@ prepare_figure <- function(fig) {
     xrange <- get_all_glyph_range(fig$x$spec$glyph_x_ranges, fig$x$spec$padding_factor, fig$x$spec$x_axis_type, x_log)
   } else {
     xrange <- fig$x$spec$xlim
+    if(inherits(xrange, c("Date", "POSIXct")))
+      xrange <- to_epoch(xrange)
   }
 
   if(length(fig$x$spec$ylim) == 0) {
@@ -143,6 +145,8 @@ prepare_figure <- function(fig) {
     yrange <- get_all_glyph_range(fig$x$spec$glyph_y_ranges, fig$x$spec$padding_factor, fig$x$spec$y_axis_type, y_log)
   } else {
     yrange <- fig$x$spec$ylim
+    if(inherits(yrange, c("Date", "POSIXct")))
+      yrange <- to_epoch(yrange)
   }
 
   if(!fig$x$spec$has_x_range)
