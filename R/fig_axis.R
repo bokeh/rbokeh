@@ -15,9 +15,9 @@
 #' @family axes
 #' @example man-roxygen/ex-axis.R
 #' @export
-x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE,
-                   num_minor_ticks = 5, visible = TRUE,
-                   number_formatter = c("basic", "numeral", "printf"), ...) {
+x_axis <- function(fig, label, position = "below", log = FALSE,
+  grid = TRUE, num_minor_ticks = 5, visible = TRUE,
+  number_formatter = c("basic", "numeral", "printf"), ...) {
   if(is.null(position))
     position <- "below"
   if(!position %in% c("below", "above")) {
@@ -39,8 +39,8 @@ x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE,
     label <- fig$x$spec$xlab
   fig$x$spec$xlab <- label
   update_axis(fig, position = position, label = label, grid = grid,
-              num_minor_ticks = num_minor_ticks, visible = visible, log = log,
-              number_formatter = match.arg(number_formatter), ...)
+    num_minor_ticks = num_minor_ticks, visible = visible, log = log,
+    number_formatter = match.arg(number_formatter), ...)
 }
 
 #' Add y axis to a Bokeh figure
@@ -50,9 +50,9 @@ x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE,
 #' @family axes
 #' @example man-roxygen/ex-axis.R
 #' @export
-y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE,
-                   num_minor_ticks = 5, visible = TRUE,
-                   number_formatter = c("basic", "numeral", "printf"), ...) {
+y_axis <- function(fig, label, position = "left", log = FALSE,
+  grid = TRUE, num_minor_ticks = 5, visible = TRUE,
+  number_formatter = c("basic", "numeral", "printf"), ...) {
   if(is.null(position))
     position <- "left"
   if(!position %in% c("left", "right")) {
@@ -74,8 +74,8 @@ y_axis <- function(fig, label, position = "left", log = FALSE, grid = TRUE,
     label <- fig$x$spec$ylab
   fig$x$spec$ylab <- label
   update_axis(fig, position = position, label = label, grid = grid,
-              num_minor_ticks = num_minor_ticks, visible = visible, log = log,
-              number_formatter = match.arg(number_formatter), ...)
+    num_minor_ticks = num_minor_ticks, visible = visible, log = log,
+    number_formatter = match.arg(number_formatter), ...)
 }
 
 # axis ref needs to be added to plot attributes as "above", "below", "left", or "right"
@@ -111,18 +111,21 @@ update_axis <- function(fig, position, label, grid = TRUE,
         fig$x$spec$model$plot$attributes$x_mapper_type <- "log"
       }
     } else {
-      type_list <- list(format = paste0(simpleCap(match.arg(number_formatter)),
-                                        "TickFormatter"),
-                        tick = "BasicTicker", axis = "LinearAxis")
+      type_list <- list(
+        format = paste0(simpleCap(match.arg(number_formatter)), "TickFormatter"),
+        tick = "BasicTicker",
+        axis = "LinearAxis")
       format_pars <- handle_extra_pars(list(...),
-                                       get(paste0(number_formatter,
-                                                  "_tick_formatter_map")))
+        get(paste0(number_formatter, "_tick_formatter_map")))
     }
   } else if(axis_type == "datetime") {
-    type_list <- list(format = "DatetimeTickFormatter", tick = "DatetimeTicker", axis = "DatetimeAxis")
-    format_pars <- handle_extra_pars(list(...), datetime_tick_formatter_map)
+    type_list <- list(format = "DatetimeTickFormatter",
+      tick = "DatetimeTicker", axis = "DatetimeAxis")
+    format_pars <- handle_extra_pars(list(...),
+      datetime_tick_formatter_map)
   } else {
-    type_list <- list(format = "CategoricalTickFormatter", tick = "CategoricalTicker", axis = "CategoricalAxis")
+    type_list <- list(format = "CategoricalTickFormatter",
+      tick = "CategoricalTicker", axis = "CategoricalAxis")
   }
 
   extra_pars <- handle_extra_pars(list(...), axis_par_validator_map)
@@ -131,7 +134,10 @@ update_axis <- function(fig, position, label, grid = TRUE,
 
   formatter <- formatter_model(type_list$format, f_id, format_pars)
   ticker <- ticker_model(type_list$tick, t_id, num_minor_ticks, log)
-  axis <- axis_model(type = type_list$axis, label = label, id = a_id, plot_ref = fig$x$spec$ref, formatter_ref = formatter$ref, ticker_ref = ticker$ref, visible = visible, extra_pars)
+  axis <- axis_model(type = type_list$axis, label = label,
+    id = a_id, plot_ref = fig$x$spec$ref,
+    formatter_ref = formatter$ref, ticker_ref = ticker$ref,
+    visible = visible, extra_pars)
 
   fig$x$spec$model$plot$attributes[[position]][[1]] <- axis$ref
   fig$x$spec$model$plot$attributes$renderers[[axis$ref$id]] <- axis$ref
@@ -142,7 +148,8 @@ update_axis <- function(fig, position, label, grid = TRUE,
 
   if(grid) {
     g_id <- gen_id(fig, c(position, "grid"))
-    grid <- grid_model(g_id, plot_ref = fig$x$spec$ref, ticker_ref = ticker$ref, dimension = as.integer(is_y))
+    grid <- grid_model(g_id, plot_ref = fig$x$spec$ref,
+      ticker_ref = ticker$ref, dimension = as.integer(is_y))
     fig$x$spec$model$plot$attributes$renderers[[grid$ref$id]] <- grid$ref
     fig$x$spec$model[[g_id]] <- grid$model
   }
@@ -156,7 +163,8 @@ update_axis <- function(fig, position, label, grid = TRUE,
   fig
 }
 
-axis_model <- function(type = "LinearAxis", label = NULL, id, plot_ref, formatter_ref, ticker_ref, visible, extra_pars) {
+axis_model <- function(type = "LinearAxis", label = NULL, id,
+  plot_ref, formatter_ref, ticker_ref, visible, extra_pars) {
 
   res <- base_model_object(type, id)
   res$model$attributes$plot <- plot_ref
@@ -169,14 +177,16 @@ axis_model <- function(type = "LinearAxis", label = NULL, id, plot_ref, formatte
   res
 }
 
-formatter_model <- function(type = "BasicTickFormatter", id, extra_pars) {
+formatter_model <- function(type = "BasicTickFormatter",
+  id, extra_pars) {
   res <- base_model_object(type, id)
   res$model$attributes <- c(res$model$attributes, extra_pars)
 
   res
 }
 
-ticker_model <- function(type = "BasicTicker", id, num_minor_ticks = 5, log = NULL) {
+ticker_model <- function(type = "BasicTicker", id,
+  num_minor_ticks = 5, log = NULL) {
   res <- base_model_object(type, id)
   res$model$attributes$num_minor_ticks = num_minor_ticks
   if(!is.null(log))
@@ -259,6 +269,3 @@ numeral_tick_formatter_map <- list(
 printf_tick_formatter_map <- list(
   "format" = "string"
 )
-
-
-

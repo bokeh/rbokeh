@@ -18,6 +18,9 @@ handle_extra_pars <- function(pars, map) {
 }
 
 par_type_validate_fns <- list(
+  legend_orientation = function(name, val) {
+    validate_enum(name, val, c("top_right", "top_left", "bottom_left", "bottom_right"))
+  },
   line_cap = function(name, val) {
     validate_enum(name, val, c("butt", "round", "square"))
   },
@@ -97,12 +100,12 @@ par_type_validate_fns <- list(
   datetime_format = function(name, val) {
     if (!is.list(val) || is.null(names(val)))
       stop(name, " must be a named list", call. = FALSE)
-    
-    vals = c("microseconds", "milliseconds", "seconds", "minsec", "minutes", 
+
+    vals = c("microseconds", "milliseconds", "seconds", "minsec", "minutes",
              "hourmin", "hours", "days", "months", "years")
     if (any(!(names(val) %in% vals)))
       stop(name, " must be in: ('", paste(vals, collapse = "', '"), "')", call. = FALSE)
-    
+
     jsonlite::toJSON(val)
   }
 )

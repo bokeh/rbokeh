@@ -1,4 +1,3 @@
-
 #' Create a Bokeh grid plot from a list of Bokeh figures
 #' @param figs list of Bokeh figures - see details for what is acceptable
 #' @param width width of the entire grid plot in pixels - if \code{NULL}, the sum of the grid widths of columns will be used - if not \code{NULL}, the widths of the plots will be proportionately shrunk to meet the specified width
@@ -7,13 +6,15 @@
 #' @param ncol number of columns in the grid
 #' @param byrow populate the grid by row according to the order of figure elements supplied in \code{params}
 #' @param same_axes logical or vector of two logicals specifying whether the x and/or y axis limits should be the same for each plot in the grid
+#' @param simplify_axes logical or vector of logicals specifying whether to simply the x and/or y axes (only show the axes along the bottom and left sides of the grid) - only valid if \code{same_axes} is \code{TRUE} for the axis
+#' @param x_margin,y_margin specify the margin space in pixels to be left for axes when using \code{simplify_axes=TRUE}
 #' @param link_data logical - should an attempt be made to join the data sources of each plot for linked brushing? (see details)
 #' @example man-roxygen/ex-grid.R
 #' @details The \code{figs} parameter can either be a list of figures or a list of lists of figures.  If the latter, the list structure will determine the layout, with each super-list of figures defining a single row of the grid.  If the former, the parameters \code{nrow} and \code{ncol} and \code{byrow} are used to determine the layout.  The grid is from top to bottom left to right.
 #'
 #' If \code{link_data} is \code{TRUE}, then an effort will be made to link all data sources that are common among the different figures in the plot.  Note that at this point, only data sources that are specified in the \code{data} argument to the different layer functions are checked.
 #' @export
-grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE, link_data = FALSE) {
+grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE, simplify_axes = TRUE, y_margin = NULL, x_margin = NULL, link_data = FALSE) {
 
   if(length(same_axes) == 1) {
     same_x <- same_y <- same_axes
@@ -22,15 +23,23 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
     same_y <- same_axes[2]
   }
 
+  if(length(simplify_axes) == 1) {
+    simplify_x <- simplify_y <- simplify_axes
+  } else {
+    simplify_x <- simplify_axes[1]
+    simplify_y <- simplify_axes[2]
+  }
+
   if(!is.list(figs))
     stop("'figs' must be a list")
 
-  figs <- unname(figs)
+  is_fig_list <- sapply(figs, function(x)
+    inherits(x$x$spec, "BokehFigure") || is.null(x))
 
-  if(inherits(figs[[1]]$x$spec, "BokehFigure")) {
+  if(any(is_fig_list)) {
     ## list of BokehFigure objects
-    ok <- sapply(figs, function(fig) inherits(fig$x$spec, "BokehFigure"))
-    if(!all(ok))
+
+    if(!all(is_fig_list))
       stop("'figs' argument to makeGrid must be a list of BokehFigure objects or a list of lists of BokehFigure objects", call. = FALSE)
 
     nn <- length(figs)
@@ -52,20 +61,29 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
       fig$x$spec$model$plot[c("type", "subtype", "id")])
 
     ## arrange plot references for gridplot
-    idx <- seq_along(tmp)
-    idx <- c(idx, rep(NA, nrow * ncol - length(idx)))
+    idx <- rep(NA, length(tmp))
+    cur_fig <- 1
+    for(ii in seq_along(idx)) {
+      if(!is.null(figs[[ii]])) {
+        idx[ii] <- cur_fig
+        cur_fig <- cur_fig + 1
+      }
+    }
+    idx <- c(idx, rep(NA, (nrow * ncol) - length(idx)))
+    tmp[sapply(tmp, is.null)] <- NULL
     idxm <- matrix(idx, nrow = nrow, ncol = ncol, byrow = byrow)
 
     plot_refs <- vector("list", nrow)
     for(ii in seq_len(nrow(idxm))) {
-      cur_idx <- idxm[ii,]
-      cur_idx <- cur_idx[!is.na(cur_idx)]
-      plot_refs[[ii]] <- tmp[cur_idx]
+      plot_refs[[ii]] <- vector("list", ncol)
+      for(jj in seq_len(ncol(idxm)))
+        plot_refs[[ii]][[jj]] <- tmp[[idxm[ii,jj]]]
     }
   } else {
     ## list of lists of BokehFigure objects
     ok <- sapply(figs, function(x) {
-      all(sapply(x, function(y) inherits(y$x$spec, "BokehFigure")))
+      all(sapply(x, function(y)
+        inherits(y$x$spec, "BokehFigure") || is.null(y)))
     })
     if(!all(ok))
       stop("'figs' argument to makeGrid must be a list of BokehFigure objects or a list of lists of BokehFigure objects", call. = FALSE)
@@ -76,9 +94,32 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
         y$x$spec$model$plot[c("type", "subtype", "id")]
       })
     })
-    figs <- unlist(figs, recursive = FALSE)
     nrow <- length(plot_refs)
     ncol <- max(sapply(plot_refs, length))
+    idxm <- matrix(nrow = nrow, ncol = ncol, data = NA)
+    cur_fig <- 1
+    for(ii in seq_along(figs)) {
+      for(jj in seq_along(figs[[ii]])) {
+        if(!is.null(figs[[ii]][[jj]])) {
+          idxm[ii, jj] <- cur_fig
+          cur_fig <- cur_fig + 1
+        }
+      }
+    }
+    figs <- unlist(figs, recursive = FALSE)
+  }
+  figs[sapply(figs, is.null)] <- NULL
+
+  ## give panels names if figs is named list
+  if(!is.null(names(figs))) {
+    fig_names <- names(figs)
+    for(ii in seq_along(figs)) {
+      figs[[ii]]$x$spec$model$plot$attributes$title <- fig_names[ii]
+      figs[[ii]]$x$spec$model$plot$attributes$title_text_align <- "center"
+      figs[[ii]]$x$spec$model$plot$attributes$title_text_baseline = "middle"
+      figs[[ii]]$x$spec$model$plot$attributes$title_text_font <- "Courier New"
+      figs[[ii]]$x$spec$model$plot$attributes$title_text_font_size <- "12pt"
+    }
   }
 
   ## deal with axes
@@ -90,6 +131,25 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
       figs[[ii]]$x$spec$has_x_range <- TRUE # prevents prepare_figure() from adding range
       figs[[ii]]$x$spec$model$plot$attributes$x_range <- x_range$mod$ref
     }
+    if(simplify_x) {
+      idxs <- as.vector(idxm[-nrow(idxm),])
+      idxs <- idxs[!is.na(idxs)]
+      for(ii in idxs)
+        figs[[ii]] <- figs[[ii]] %>% x_axis(visible = FALSE)
+      if(is.null(x_margin))
+        x_margin <- 70
+
+      # add spaces to title on leftmost column of plots
+      idxs <- idxm[,1]
+      idxs <- idxs[!is.na(idxs)]
+      title_pad <- paste(rep(" ", ceiling(x_margin / 10)), collapse = "")
+      for(ii in idxs) {
+        title <- figs[[ii]]$x$spec$model$plot$attributes$title
+        if(!is.null(title)) {
+          figs[[ii]]$x$spec$model$plot$attributes$title <- paste0(title_pad, title)
+        }
+      }
+    }
   }
   if(same_y) {
     y_range <- get_grid_ranges(figs, "y")
@@ -97,6 +157,14 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
       figs[[ii]]$x$spec$ylim <- y_range$range # prevents prepare_figure() from computing range
       figs[[ii]]$x$spec$has_y_range <- TRUE # prevents prepare_figure() from adding range
       figs[[ii]]$x$spec$model$plot$attributes$y_range <- y_range$mod$ref
+    }
+    if(simplify_y) {
+      idxs <- as.vector(idxm[,-1])
+      idxs <- idxs[!is.na(idxs)]
+      for(ii in idxs)
+        figs[[ii]] <- figs[[ii]] %>% y_axis(visible = FALSE)
+      if(is.null(y_margin))
+        y_margin <- 45
     }
   }
 
@@ -106,6 +174,7 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
     x_range = x_range$mod$model,
     y_range = y_range$mod$model,
     link_data = link_data,
+    x_margin = x_margin, y_margin = y_margin,
     nrow = nrow, ncol = ncol), class = "BokehGridPlot")
 
   obj <- htmlwidgets::createWidget(
@@ -114,7 +183,7 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
       spec = spec,
       elementid = digest(Sys.time()),
       modeltype = "GridPlot",
-      modelid = "asdf"
+      modelid = digest(Sys.time())
     ),
     preRenderHook = rbokeh_prerender,
     width = width,
@@ -136,41 +205,30 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
   hmat <- matrix(0, nrow = obj$x$spec$nrow, ncol = obj$x$spec$ncol)
   for(ii in seq_along(obj$x$spec$plot_refs)) {
     for(jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
-      wmat[ii, jj] <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$width
-      hmat[ii, jj] <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$height
-    }
-  }
-
-  width <- sum(apply(wmat, 2, max)) + 46
-  height <- sum(apply(hmat, 1, max))
-
-  update_fig_dims <- FALSE
-  if(is.null(obj$width)) {
-    obj$width <- width
-  } else {
-    # shrink/expand widths
-    wmat <- wmat * obj$width / width
-    update_fig_dims <- TRUE
-  }
-
-  if(is.null(obj$height)) {
-    obj$height <- height
-  } else {
-    # shrink/expand heights
-    hmat <- hmat * obj$height / height
-    update_fig_dims <- TRUE
-  }
-
-  names(obj$x$spec$figs) <- sapply(obj$x$spec$figs, function(x) x$x$spec$model$plot$id)
-  if(update_fig_dims) {
-    for(ii in seq_along(obj$x$spec$plot_refs)) {
-      for(jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
-        cur_id <- obj$x$spec$plot_refs[[ii]][[jj]]$id
-        obj$x$spec$figs[[cur_id]]$width <- wmat[ii, jj]
-        obj$x$spec$figs[[cur_id]]$height <- hmat[ii, jj]
+      if(is.null(obj$x$spec$plot_refs[[ii]][[jj]])) {
+        wmat[ii, jj] <- NA
+        hmat[ii, jj] <- NA
+      } else {
+        wmat[ii, jj] <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$width
+        hmat[ii, jj] <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$height
       }
     }
   }
+
+  obj$x$spec$wmat <- wmat
+  obj$x$spec$hmat <- hmat
+
+  obj_width <- sum(apply(wmat, 2, function(x) max(x, na.rm = TRUE))) + 46
+  obj_height <- sum(apply(hmat, 1, function(x) max(x, na.rm = TRUE)))
+
+  update_fig_dims <- FALSE
+  if(is.null(obj$width))
+    obj$width <- obj_width
+
+  if(is.null(obj$height))
+    obj$height <- obj_height
+
+  names(obj$x$spec$figs) <- sapply(obj$x$spec$figs, function(x) x$x$spec$model$plot$id)
 
   # set attributes to help set the padding for each individual panel
   for(ii in seq_along(obj$x$spec$figs)) {
@@ -217,6 +275,7 @@ grid_plot_model <- function(id, plot_refs, tool_event_ref, width, height) {
 ## run prepare on all figures in the grid
 ## merge axes and ranges if necessary
 prepare_gridplot <- function(obj) {
+  obj <- update_grid_sizes(obj)
   figs <- lapply(obj$x$spec$figs, prepare_figure)
 
   data_mods <- list()
@@ -324,3 +383,50 @@ get_grid_ranges <- function(objs, which = "x") {
   id <- gen_id(objs[[1]]$x$spec, c(which, "GridRange"))
   list(range = rng, mod = range_model(ifelse(is.numeric(rng), "Range1d", "FactorRange"), id, rng))
 }
+
+update_grid_sizes <- function(obj) {
+  width <- obj$width
+  height <- obj$height
+  hmat <- obj$x$spec$hmat
+  wmat <- obj$x$spec$wmat
+  x_margin <- obj$x$spec$x_margin
+  y_margin <- obj$x$spec$y_margin
+  if(is.null(x_margin))
+    x_margin <- 0
+  if(is.null(y_margin))
+    y_margin <- 0
+
+  widths <- apply(wmat, 2, function(x) max(x, na.rm = TRUE))
+  heights <- apply(hmat, 1, function(x) max(x, na.rm = TRUE))
+  full_width <- sum(widths)
+  full_height <- sum(heights)
+
+  new_width_factor <- (width - x_margin - 46) / full_width
+  new_height_factor <- (height - y_margin) / full_height
+
+  new_wmat <- wmat * new_width_factor
+  new_hmat <- hmat * new_height_factor
+  new_wmat[,1] <- new_wmat[,1] + x_margin
+  new_hmat[nrow(new_hmat),] <- new_hmat[nrow(new_hmat),] + y_margin
+
+  obj$width <- sum(apply(new_wmat, 2, function(x) max(x, na.rm = TRUE))) + 46
+  obj$height <- sum(apply(new_hmat, 1, function(x) max(x, na.rm = TRUE)))
+
+  for(ii in seq_along(obj$x$spec$plot_refs)) {
+    for(jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
+      if(!is.null(obj$x$spec$plot_refs[[ii]][[jj]])) {
+        cur_id <- obj$x$spec$plot_refs[[ii]][[jj]]$id
+        obj$x$spec$figs[[cur_id]]$width <- new_wmat[ii, jj]
+        obj$x$spec$figs[[cur_id]]$height <- new_hmat[ii, jj]
+        if(jj == 1) {
+          obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_left <- x_margin
+        }
+        if(ii == length(obj$x$spec$plot_refs)) {
+          obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_bottom <- y_margin
+        }
+      }
+    }
+  }
+  obj
+}
+
