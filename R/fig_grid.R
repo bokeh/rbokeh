@@ -1,4 +1,3 @@
-
 #' Create a Bokeh grid plot from a list of Bokeh figures
 #' @param figs list of Bokeh figures - see details for what is acceptable
 #' @param width width of the entire grid plot in pixels - if \code{NULL}, the sum of the grid widths of columns will be used - if not \code{NULL}, the widths of the plots will be proportionately shrunk to meet the specified width
