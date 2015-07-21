@@ -1,64 +1,37 @@
 \donttest{
-tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "resize", "reset")
+idx <- split(1:150, iris$Species)
+figs <- lapply(idx, function(x) {
+  figure(tools = tools, width = 300, height = 300) %>%
+    ly_points(Sepal.Length, Sepal.Width, data = iris[x,],
+      hover = list(Sepal.Length, Sepal.Width))
+})
 
-p1 <- figure(tools = tools) %>%
-  ly_points(Sepal.Length, Sepal.Width, data = iris,
-    color = Species, hover = list(Sepal.Length, Sepal.Width))
-
-p2 <- figure(tools = tools) %>%
-  ly_points(Petal.Length, Petal.Width, data = iris,
-    color = Species, hover = list(Sepal.Length, Sepal.Width))
-
-# 1 row, 2 columns
-grid_plot(list(p1, p2))
+# 1 row, 3 columns
+grid_plot(figs)
+# unnamed list will remove labels
+grid_plot(unname(figs))
+# 2 rows, 2 columns
+grid_plot(figs, nrow = 2)
 # x and y axis with same (and linked) limits
-grid_plot(list(p1, p2), same_axes = TRUE)
-# x axis has same (and linked) limits
-grid_plot(list(p1, p2), same_axes = c(TRUE, FALSE))
-# same axes and data is linked (try box_select tool)
-grid_plot(list(p1, p2), same_axes = TRUE, link_data = TRUE)
-# 1 column, 2 rows
-grid_plot(list(p1, p2), ncol = 1)
+grid_plot(figs, same_axes = TRUE)
+# x axis with same (and linked) limits
+grid_plot(figs, same_axes = c(TRUE, FALSE))
 # send lists instead of specifying nrow and ncol
-grid_plot(list(c(list(p1), list(p2))))
-grid_plot(list(list(p1), list(p2)))
+grid_plot(list(
+  c(list(figs[[1]]), list(figs[[2]])),
+  list(figs[[3]])
+))
+# a null entry will be skipped in the grid
+figs[1] <- list(NULL)
+grid_plot(figs, nrow = 2)
 
-
-
+# link data across plots in the grid (try box_select tool)
+# (data sources must be the same)
+tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "resize", "reset")
 p1 <- figure(tools = tools) %>%
-  ly_points(Sepal.Length, Sepal.Width, data = iris,
-    color = Species, hover = list(Sepal.Length, Sepal.Width))
-
+  ly_points(Sepal.Length, Sepal.Width, data = iris, color = Species)
 p2 <- figure(tools = tools) %>%
-  ly_points(Sepal.Length, Sepal.Width, data = iris,
-    color = Species, hover = list(Sepal.Length, Sepal.Width))
-
-p3 <- figure(tools = tools) %>%
-  ly_points(Sepal.Length, Sepal.Width, data = iris,
-    color = Species, hover = list(Sepal.Length, Sepal.Width))
-
-p4 <- figure(tools = tools) %>%
-  ly_points(Sepal.Length, Sepal.Width, data = iris,
-    color = Species, hover = list(Sepal.Length, Sepal.Width))
-
-p5 <- figure(tools = tools) %>%
-  ly_points(Sepal.Length, Sepal.Width, data = iris,
-    color = Species, hover = list(Sepal.Length, Sepal.Width))
-
-p6 <- figure(tools = tools) %>%
-  ly_points(Sepal.Length, Sepal.Width, data = iris,
-    color = Species, hover = list(Sepal.Length, Sepal.Width))
-
-grid_plot(list(p1, p2, p3, p4, p5, p6), nrow = 2)
-grid_plot(list(p1, p2, p3, p4, p5, p6), nrow = 2, same_axes = TRUE)
-grid_plot(list(c(list(p1), list(p2), list(p3)), c(list(p4), list(p5), list(p6))), same_axes = TRUE)
-
-grid_plot(list(c(list(p1), list(NULL), list(p3)), c(list(p4), list(p5), list(NULL))), same_axes = TRUE)
-
-grid_plot(list(p1, NULL, p3, p4, p5, p6), nrow = 2, same_axes = TRUE)
-
-grid_plot(list(p1, NULL, p3, p4, p5, p6), nrow = 2, same_axes = TRUE, width = 300)
-
-grid_plot(list(a = p1, b = NULL, c = p3, d = p4, e = p5, f = p6), nrow = 2, same_axes = TRUE, width = 800, height = 600)
-
+  ly_points(Petal.Length, Petal.Width, data = iris, color = Species)
+grid_plot(list(p1, p2), same_axes = TRUE, link_data = TRUE)
 }
+

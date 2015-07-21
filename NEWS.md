@@ -1,6 +1,11 @@
-Version 0.2.3.2
+Version 0.2.3.3
 ----------------------------------------------------------------------
 
+- in `grid_plot()` use `simplify_axes` to automatically size things so panels are same size
+- add automatic labels to a grid plot if given a named list
+- add `update_size` for generically resizing a BokehFigure or BokehGridPlot
+- fix custom date axis issue
+- add experimental phantomjs static export function, `save_figure()`
 - add `map_style` to `gmap()`
 - update to Bokeh v0.9.1
 - fix issue with hover data frame not being found

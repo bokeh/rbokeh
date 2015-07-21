@@ -70,6 +70,7 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
         cur_fig <- cur_fig + 1
       }
     }
+    idx <- c(idx, rep(NA, (nrow * ncol) - length(idx)))
     tmp[sapply(tmp, is.null)] <- NULL
     idxm <- matrix(idx, nrow = nrow, ncol = ncol, byrow = byrow)
 
@@ -115,7 +116,7 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
     fig_names <- names(figs)
     for(ii in seq_along(figs)) {
       figs[[ii]]$x$spec$model$plot$attributes$title <- fig_names[ii]
-      figs[[ii]]$x$spec$model$plot$attributes$title_text_align <- "right"
+      figs[[ii]]$x$spec$model$plot$attributes$title_text_align <- "center"
       figs[[ii]]$x$spec$model$plot$attributes$title_text_baseline = "middle"
       figs[[ii]]$x$spec$model$plot$attributes$title_text_font <- "Courier New"
       figs[[ii]]$x$spec$model$plot$attributes$title_text_font_size <- "12pt"
@@ -138,6 +139,17 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
         figs[[ii]] <- figs[[ii]] %>% x_axis(visible = FALSE)
       if(is.null(x_margin))
         x_margin <- 70
+
+      # add spaces to title on leftmost column of plots
+      idxs <- idxm[,1]
+      idxs <- idxs[!is.na(idxs)]
+      title_pad <- paste(rep(" ", ceiling(x_margin / 10)), collapse = "")
+      for(ii in idxs) {
+        title <- figs[[ii]]$x$spec$model$plot$attributes$title
+        if(!is.null(title)) {
+          figs[[ii]]$x$spec$model$plot$attributes$title <- paste0(title_pad, title)
+        }
+      }
     }
   }
   if(same_y) {
@@ -153,7 +165,7 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
       for(ii in idxs)
         figs[[ii]] <- figs[[ii]] %>% y_axis(visible = FALSE)
       if(is.null(y_margin))
-        y_margin <- 25
+        y_margin <- 45
     }
   }
 
@@ -235,52 +247,6 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
     obj$x$spec$figs[[ii]]$x$parenttype <- "GridPlot"
   }
 
-  obj
-}
-
-update_size <- function(obj, width, height) {
-  if(inherits(obj$x$spec, "BokehGridPlot")) {
-    hmat <- obj$x$spec$hmat
-    wmat <- obj$x$spec$wmat
-    x_margin <- obj$x$spec$x_margin
-    y_margin <- obj$x$spec$y_margin
-    if(is.null(x_margin))
-      x_margin <- 0
-    if(is.null(y_margin))
-      y_margin <- 0
-
-    widths <- apply(wmat, 2, function(x) max(x, na.rm = TRUE))
-    heights <- apply(hmat, 1, function(x) max(x, na.rm = TRUE))
-    full_width <- sum(widths)
-    full_height <- sum(heights)
-
-    new_width_factor <- (width - x_margin - 46) / full_width
-    new_height_factor <- (height - y_margin) / full_height
-
-    new_wmat <- wmat * new_width_factor
-    new_hmat <- hmat * new_height_factor
-    new_wmat[,1] <- new_wmat[,1] + x_margin
-    new_hmat[nrow(new_hmat),] <- new_hmat[nrow(new_hmat),] + y_margin
-
-    obj$width <- sum(apply(new_wmat, 2, function(x) max(x, na.rm = TRUE))) + 46
-    obj$height <- sum(apply(new_hmat, 1, function(x) max(x, na.rm = TRUE)))
-
-    for(ii in seq_along(obj$x$spec$plot_refs)) {
-      for(jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
-        if(!is.null(obj$x$spec$plot_refs[[ii]][[jj]])) {
-          cur_id <- obj$x$spec$plot_refs[[ii]][[jj]]$id
-          obj$x$spec$figs[[cur_id]]$width <- new_wmat[ii, jj]
-          obj$x$spec$figs[[cur_id]]$height <- new_hmat[ii, jj]
-          if(jj == 1) {
-            obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_left <- x_margin
-          }
-          if(ii == length(obj$x$spec$plot_refs)) {
-            obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_bottom <- y_margin
-          }
-        }
-      }
-    }
-  }
   obj
 }
 
