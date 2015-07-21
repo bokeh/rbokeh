@@ -3,7 +3,7 @@ Version 0.2.3.3
 
 - in `grid_plot()` use `simplify_axes` to automatically size things so panels are same size
 - add automatic labels to a grid plot if given a named list
-- add `update_size` for generically resizing a BokehFigure or BokehGridPlot
+- add dynamic sizing (on the R side) BokehGridPlot
 - fix custom date axis issue
 - add experimental phantomjs static export function, `save_figure()`
 - add `map_style` to `gmap()`

@@ -223,23 +223,13 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
   obj_height <- sum(apply(hmat, 1, function(x) max(x, na.rm = TRUE)))
 
   update_fig_dims <- FALSE
-  if(is.null(obj$width)) {
+  if(is.null(obj$width))
     obj$width <- obj_width
-  } else {
-    update_fig_dims <- TRUE
-  }
 
-  if(is.null(obj$height)) {
+  if(is.null(obj$height))
     obj$height <- obj_height
-  } else {
-    update_fig_dims <- TRUE
-  }
 
   names(obj$x$spec$figs) <- sapply(obj$x$spec$figs, function(x) x$x$spec$model$plot$id)
-
-  if(update_fig_dims) {
-    obj <- update_size(obj, width, height)
-  }
 
   # set attributes to help set the padding for each individual panel
   for(ii in seq_along(obj$x$spec$figs)) {
@@ -286,6 +276,7 @@ grid_plot_model <- function(id, plot_refs, tool_event_ref, width, height) {
 ## run prepare on all figures in the grid
 ## merge axes and ranges if necessary
 prepare_gridplot <- function(obj) {
+  obj <- update_grid_sizes(obj)
   figs <- lapply(obj$x$spec$figs, prepare_figure)
 
   data_mods <- list()
@@ -393,3 +384,50 @@ get_grid_ranges <- function(objs, which = "x") {
   id <- gen_id(objs[[1]]$x$spec, c(which, "GridRange"))
   list(range = rng, mod = range_model(ifelse(is.numeric(rng), "Range1d", "FactorRange"), id, rng))
 }
+
+update_grid_sizes <- function(obj) {
+  width <- obj$width
+  height <- obj$height
+  hmat <- obj$x$spec$hmat
+  wmat <- obj$x$spec$wmat
+  x_margin <- obj$x$spec$x_margin
+  y_margin <- obj$x$spec$y_margin
+  if(is.null(x_margin))
+    x_margin <- 0
+  if(is.null(y_margin))
+    y_margin <- 0
+
+  widths <- apply(wmat, 2, function(x) max(x, na.rm = TRUE))
+  heights <- apply(hmat, 1, function(x) max(x, na.rm = TRUE))
+  full_width <- sum(widths)
+  full_height <- sum(heights)
+
+  new_width_factor <- (width - x_margin - 46) / full_width
+  new_height_factor <- (height - y_margin) / full_height
+
+  new_wmat <- wmat * new_width_factor
+  new_hmat <- hmat * new_height_factor
+  new_wmat[,1] <- new_wmat[,1] + x_margin
+  new_hmat[nrow(new_hmat),] <- new_hmat[nrow(new_hmat),] + y_margin
+
+  obj$width <- sum(apply(new_wmat, 2, function(x) max(x, na.rm = TRUE))) + 46
+  obj$height <- sum(apply(new_hmat, 1, function(x) max(x, na.rm = TRUE)))
+
+  for(ii in seq_along(obj$x$spec$plot_refs)) {
+    for(jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
+      if(!is.null(obj$x$spec$plot_refs[[ii]][[jj]])) {
+        cur_id <- obj$x$spec$plot_refs[[ii]][[jj]]$id
+        obj$x$spec$figs[[cur_id]]$width <- new_wmat[ii, jj]
+        obj$x$spec$figs[[cur_id]]$height <- new_hmat[ii, jj]
+        if(jj == 1) {
+          obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_left <- x_margin
+        }
+        if(ii == length(obj$x$spec$plot_refs)) {
+          obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_bottom <- y_margin
+        }
+      }
+    }
+  }
+  obj
+}
+
