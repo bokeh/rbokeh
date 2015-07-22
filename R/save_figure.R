@@ -45,6 +45,7 @@ page.open('file://", ff, "', function() {
   }
 }
 
+#' Instructions for installing phantomjs
 #' @export
 phantom_install <- function() {
   message("Please visit this page to install phantomjs on your system: http://phantomjs.org/download.html")
