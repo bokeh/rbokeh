@@ -79,11 +79,16 @@ When color is \code{NULL} and \code{fill_color} or \code{line_color} are not spe
 }
 \examples{
 \donttest{
-p <- figure() \%>\%
+figure() \%>\%
   ly_points(Sepal.Length, Sepal.Width, data = iris,
     color = Species, glyph = Species,
     hover = list(Sepal.Length, Sepal.Width))
-p
+
+# custom hover
+mtcars$model <- row.names(mtcars)
+figure() \%>\%
+  ly_points(disp, mpg, data = mtcars, color = cyl,
+    hover = "This <strong>@model</strong><br>has @hp horsepower!")
 }
 \donttest{
 z <- lm(dist ~ speed, data = cars)
