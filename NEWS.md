@@ -1,6 +1,7 @@
-Version 0.2.3.3
+Version 0.2.3.4
 ----------------------------------------------------------------------
 
+- add support for custom hover
 - add full control over legend
 - in `grid_plot()` use `simplify_axes` to automatically size things so panels are same size
 - add automatic labels to a grid plot if given a named list

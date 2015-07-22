@@ -366,12 +366,28 @@ get_lgroup <- function(lgroup, fig) {
 }
 
 # get the "hover" argument and turn it into data and dict
+# if a string was provided, parse the @var values
 # if a data frame was provided, the arg sould be a
 # list of column names
 # otherwise it should be a named list or data frame
 get_hover <- function(hn, data, envir) {
   tmp <- try(eval(hn, envir = envir), silent = TRUE)
-  if(is.data.frame(tmp)) {
+
+  # is.character is bad because it's true for try-error
+  if(inherits(tmp, "character")) {
+    # extract variable names
+    tmp_split <- strsplit(tmp, "@")[[1]][-1]
+    hn <- NULL
+    if(length(tmp_split) > 0) {
+      hn <- gsub("^([a-zA-Z0-9_]+).*", "\\1", tmp_split)
+      hn_miss <- setdiff(hn, names(data))
+      if(length(hn_miss) > 0) {
+        message("hover tool couldn't find following variables in the data: ", paste(hn_miss, collapse = ", "), " - ignoring them...")
+        hn <- setdiff(hn, hn_miss)
+      }
+      data <- subset(data, select = hn)
+    }
+  } else if(is.data.frame(tmp)) {
     data <- tmp
     hn <- names(data)
   } else if(inherits(tmp, "hoverSpec")) {
@@ -405,7 +421,13 @@ get_hover <- function(hn, data, envir) {
   for(ii in seq_len(ncol(data)))
     data[[ii]] <- format(data[[ii]])
 
-  hdict <- lapply(seq_along(hn), function(ii) list(hn[ii], paste("@", hn2[ii], sep = "")))
+  if(inherits(tmp, "character")) {
+    for(ii in seq_along(hn))
+      tmp <- gsub(paste0("@", hn[ii]), paste0("@hover_", hn[ii]), tmp)
+    hdict <- tmp
+  } else {
+    hdict <- lapply(seq_along(hn), function(ii) list(hn[ii], paste("@", hn2[ii], sep = "")))
+  }
 
   if(nrow(data) == 1)
     data <- lapply(data, I)
