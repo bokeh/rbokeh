@@ -1,27 +1,8 @@
 #' Finer control over legend
 #'
+#' @param fig figure to modify
 #' @param orientation ('top_right', 'top_left', 'bottom_left', 'bottom_right') The location where the legend should draw itself.
-#' @param border_line_alpha The line alpha for the legend border outline.
-#' @param border_line_cap ('butt', 'round', 'square') The line cap for the legend border outline.
-#' @param border_line_color The line color for the legend border outline.
-#' @param border_line_dash The line dash for the legend border outline.
-#' @param border_line_dash_offset The line dash offset for the legend border outline.
-#' @param border_line_join ('miter', 'round', 'bevel') The line join for the legend border outline.
-#' @param border_line_width The line width for the legend border outline.
-#' @param glyph_height The height (in pixels) that the rendered legend glyph should occupy.
-#' @param glyph_width The width (in pixels) that the rendered legend glyph should occupy.
-#' @param label_height The height (in pixels) of the area that legend labels should occupy.
-#' @param label_standoff The distance (in pixels) to separate the label from its associated glyph.
-#' @param label_text_align ('left', 'right', 'center') The text align for the legend labels.
-#' @param label_text_alpha The text alpha for the legend labels.
-#' @param label_text_baseline ('top', 'middle', 'bottom', 'alphabetic', 'hanging') The text baseline for the legend labels.
-#' @param label_text_color The text color for the legend labels.
-#' @param label_text_font The text font for the legend labels.
-#' @param label_text_font_size The text font size for the legend labels.
-#' @param label_text_font_style ('normal', 'italic', 'bold') The text font style for the legend labels.
-#' @param label_width The width (in pixels) of the area that legend labels should occupy.
-#' @param legend_padding Amount of padding around the legend.
-#' @param legend_spacing Amount of spacing between legend entries.
+#' @template dots-legend
 #' @examples
 #' figure() %>%
 #'   ly_points(Sepal.Length, Sepal.Width, color = Species, data = iris) %>%
