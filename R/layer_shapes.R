@@ -43,6 +43,8 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
     idx <- unname(split(seq_along(group), group))
     xs <- lapply(idx, function(x) xs[x])
     ys <- lapply(idx, function(x) ys[x])
+    # data for hover and url will only be one row for each group
+    data <- data[sapply(idx, "[", 1),]
 
     ns <- lapply(args, length)
     bad_ind <- which(!ns %in% c(0, 1, length(idx), length(group)))
@@ -57,7 +59,6 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
     }
   }
 
-  # hover <- get_hover(substitute(hover), data, parent.frame())
   xy_names <- get_xy_names(xs, ys, xname, yname, args)
   ## translate different x, y types to vectors
   lgroup <- get_lgroup(lgroup, fig)
@@ -80,7 +81,7 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
   if(is.null(args$fill_alpha))
     args$fill_alpha <- 0.5
 
-  hover <- get_hover(hover, data, parent.frame())
+  hover <- get_hover(substitute(hover), data, parent.frame())
   url <- get_url(url, data)
 
   axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
