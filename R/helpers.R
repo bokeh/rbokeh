@@ -160,7 +160,7 @@ check_opts <- function(opts, type, formals = NULL) {
     if(length(idx) > 0) {
       not_used <- setdiff(names(opts)[idx], valid_opts)
       if(length(not_used) > 0)
-        message("note - arguments not used: ", paste(not_used, collapse = ", "))
+        message("note - arguments not used when adding glyph '", type, "': ", paste(not_used, collapse = ", "))
     }
   }
 }
@@ -227,7 +227,7 @@ resolve_line_args <- function(fig, args) {
 
   if(!is.null(args$color)) {
     if(!is.null(args$line_color)) {
-      if(args$color != args$line_color)
+      if(any(args$color != args$line_color))
         message("both color and line_color specified - honoring line_color")
     } else {
       args$line_color <- args$color
@@ -236,7 +236,7 @@ resolve_line_args <- function(fig, args) {
 
   if(!is.null(args$alpha)) {
     if(!is.null(args$line_alpha)) {
-      if(args$alpha != args$line_alpha)
+      if(any(args$alpha != args$line_alpha))
         message("both alpha and line_alpha specified - honoring line_alpha")
     } else {
       args$line_alpha <- args$alpha
@@ -284,13 +284,13 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, soli
 
   if(!is.null(args$color)) {
     if(!is.null(args$line_color)) {
-      if(args$color != args$line_color)
+      if(any(args$color != args$line_color))
         message("both color and line_color specified - honoring line_color")
     } else {
       args$line_color <- args$color
     }
     if(!is.null(args$fill_color)) {
-      if(args$color != args$fill_color)
+      if(any(args$color != args$fill_color))
         message("both color and fill_color specified - honoring fill_color")
     } else {
       args$fill_color <- args$color
@@ -302,13 +302,13 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, soli
 
   if(!is.null(args$alpha)) {
     if(!is.null(args$line_alpha)) {
-      if(args$alpha != args$line_alpha)
+      if(any(args$alpha != args$line_alpha))
         message("both alpha and line_alpha specified - honoring line_alpha")
     } else {
       args$line_alpha <- args$alpha
     }
     if(!is.null(args$fill_alpha)) {
-      if(args$alpha != args$fill_alpha)
+      if(any(args$alpha != args$fill_alpha))
         message("both alpha and fill_alpha specified - honoring fill_alpha")
     } else {
       args$fill_alpha <- args$alpha * 0.5
@@ -327,7 +327,7 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, soli
 ## make sure marker fill and line properties are correct for marker glyphs
 ## (for example, some, such as glyph = 1, must not have fill)
 resolve_glyph_props <- function(glyph, args, lgroup) {
-  if(glyph %in% names(marker_dict)) {
+  if(valid_glyph(glyph)) {
     cur_glyph_props <- marker_dict[[as.character(glyph)]]
     args$glyph <- cur_glyph_props$glyph
     if(cur_glyph_props$fill) {
@@ -477,6 +477,10 @@ v_eval <- function(x, data) {
   res <- try(eval(x, data), silent = TRUE)
 
   if(inherits(res, "try-error")) {
+    res <- try(eval(x), silent = TRUE)
+    if(inherits(res, "try-error")) {
+      stop("argument '", deparse(x), "' cannot be found")
+    }
     ## In this case, the user has specified a 'data' argument
     ## but has also specified an "additional parameter" argument
     ## such as fill_alpha, etc. which has been set to a variable
@@ -488,7 +492,6 @@ v_eval <- function(x, data) {
     ## but right now, we throw an error
     ## and the way around it is to not use the 'data' argument
     ## and specify everything explicitly
-    stop("argument '", deparse(x), "' is not present in the 'data' argument")
   }
 
   ## variable name could have been supplied in quotes
@@ -504,9 +507,12 @@ v_eval <- function(x, data) {
 
   if(is.null(res))
     return(res)
-  dp <- deparse(x)[1]
-  if(dp %in% names(data))
-    attr(res, "nseName") <- dp
+
+  # # if the variable came from the data, give it a name
+  # dp <- deparse(x)
+  # if(dp[1] %in% names(data))
+  #   attr(res, "nseName") <- dp
+
   res
 }
 

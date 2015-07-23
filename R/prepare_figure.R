@@ -8,17 +8,22 @@ prepare_figure <- function(fig) {
   legend <- list()
 
   ## resolve attribute mappings
+  ## step through each layer
   for(ly in fig$x$spec$layers) {
     if(!is.null(ly$maps)) {
+      ## step through each mapped attribute
       for(nm in names(ly$maps)) {
         map_item <- ly$maps[[nm]]
         if(is.numeric(map_item$domain)) {
+          # the continuous domain cuts should be specifiable
+          # and the default number of cuts should be a theme thing
           intervals <- pretty(map_item$domain, 6)
           nl <- length(intervals) - 1
           map_item$domain <- intervals
           map_item$labels <- levels(cut(map_item$domain, intervals, include.lowest = TRUE))
           map_item$values <- (head(intervals, nl) + tail(intervals, nl)) / 2
         } else {
+          ## categorical domain
           map_item$labels <- map_item$domain
           map_item$values <- map_item$domain
         }
@@ -81,6 +86,8 @@ prepare_figure <- function(fig) {
                 spec$size <- 0
               if(!is.null(spec$radius))
                 spec$radius <- 0
+              if(is.null(spec$glyph))
+                spec$glyph <- "Circle"
               fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
 
               # add reference to glyph to legend object
