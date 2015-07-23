@@ -116,6 +116,13 @@ tool_lasso_select <- function(fig, select_every_mousemove = TRUE) {
     select_every_mousemove = select_every_mousemove))
 }
 
+tool_help <- function(fig, redirect = "http://hafen.github.io/rbokeh",
+  help_tooltip = "Click to learn more about rbokeh.") {
+  rbokeh:::update_tool(fig, which = "help",
+    args = list(plot_ref = fig$x$spec$ref, redirect = redirect,
+      help_tooltip = help_tooltip))
+}
+
 ## internal methods
 
 update_tool <- function(fig, which, args) {
