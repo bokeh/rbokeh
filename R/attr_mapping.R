@@ -14,7 +14,7 @@
 # -> id (id of glyph_renderer that needs its variables updated)
 # -> map_args (vector of glyph attribute names that need to be mapped)
 
-get_attr_maps <- function(args, glr_id, has_grouped_glyph) {
+get_attr_maps <- function(args, glr_id) {
   nms <- names(args)
   ## get an index of arguments that need a map
   ## name attribute is used in the legend so we know what variable created the map

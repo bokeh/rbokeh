@@ -88,7 +88,6 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
     df_split <- split(seq_along(gl), gl)
 
     attr(fig, "ly_call") <- mc
-    attr(fig, "grouped_glyph") <- TRUE
     for(ii in seq_along(df_split)) {
       cur_idx <- df_split[[ii]]
 
@@ -103,7 +102,6 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
             xlab = xy_names$x, ylab = xy_names$y)))
     }
     attr(fig, "ly_call") <- NULL
-    attr(fig, "grouped_glyph") <- NULL
     return(fig)
   }
 

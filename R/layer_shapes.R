@@ -40,6 +40,8 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
     args$alpha <- NULL
 
   if(!is.null(group)) {
+    if(is.factor(group))
+      group <- as.character(group)
     idx <- unname(split(seq_along(group), group))
     xs <- lapply(idx, function(x) xs[x])
     ys <- lapply(idx, function(x) ys[x])

@@ -91,8 +91,9 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   ## in which case we need to track its domain
   ## and its range will be filled in from a theme
   ## when the figure is printed
-  has_grouped_glyph <- !is.null(attr(fig, "grouped_glyph"))
-  attr_maps <- get_attr_maps(args, glr_id, has_grouped_glyph)
+  if(is.null(args$glyph))
+    args$glyph <- type
+  attr_maps <- get_attr_maps(args, glr_id)
 
   ## deal with manual legend
   if(!is.null(legend)) {
@@ -155,9 +156,8 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
     data <- list(dummy = list(1))
 
   ## fix spec for "text" glyph
-  if("text" %in% names(args)) {
+  if("text" %in% names(args))
      args$text <- list(field = "text")
-  }
 
   if(!is.null(fig$x$spec$glyph_defer[[lgn]])) {
     fig$x$spec$glyph_defer[[lgn]]$spec <- args
