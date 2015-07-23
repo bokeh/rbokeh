@@ -3,8 +3,9 @@
 # you can add new layers to an existing layer group
 # which will ensure that attributes are mapped to glyphs within the layer
 
-make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
-  hover = NULL, url = NULL, legend = NULL, xname = NULL, yname = NULL, data_sig = NA) {
+make_glyph <- function(fig, type, lname, lgroup, data, args,
+  axis_type_range, hover = NULL, url = NULL, legend = NULL,
+  xname = NULL, yname = NULL, data_sig = NA, ly_call) {
 
   if(is.null(args))
     args <- list()
@@ -47,9 +48,40 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
   fig$x$spec$x_axis_type <- axis_type_range$x_axis_type
   fig$x$spec$y_axis_type <- axis_type_range$y_axis_type
 
+  ## get rid of factors
+  for(ii in seq_along(args)) {
+    if(is.factor(args[[ii]]))
+      args[[ii]] <- as.character(args[[ii]])
+  }
+
+  ## get names of data in args that were specified by user
+  ## and get whether variable is mapped
+  for(nm in names(args)) {
+    if(!is.null(args[[nm]])) {
+      arg_nm <- ly_call[[nm]][1]
+
+      ## deal with 'color' and 'alpha' higher-level parameters
+      if(is.null(arg_nm)) {
+        if(nm %in% c("fill_alpha", "line_alpha"))
+          arg_nm <- ly_call[["alpha"]]
+        if(nm %in% c("fill_color", "line_color"))
+          arg_nm <- ly_call[["color"]]
+      }
+
+      if(!is.null(arg_nm)) {
+        attr(args[[nm]], "name") <- arg_nm
+        ## see if named args are valid
+        ## if they are not, they will be marked as mapped
+        if(!is.null(needs_map_fns[[nm]]))
+          if(needs_map_fns[[nm]](args[[nm]]) && !is.na(args[[nm]]))
+            attr(args[[nm]], "mapped") <- TRUE
+      }
+    }
+  }
+
   ## make sure specified colors are bokeh-valid hex codes (if they are hex codes)
   ## only to ones that don't need to be mapped
-  is_mapped <- sapply(args, function(x) !is.null(attr(x, "nseName")))
+  is_mapped <- sapply(args, function(x) !is.null(attr(x, "mapped")))
   mapped_args <- names(args)[is_mapped]
   ind <- setdiff(names(args), mapped_args)
   args[ind] <- validate_colors(args[ind])
@@ -59,6 +91,8 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
   ## in which case we need to track its domain
   ## and its range will be filled in from a theme
   ## when the figure is printed
+  if(is.null(args$glyph))
+    args$glyph <- type
   attr_maps <- get_attr_maps(args, glr_id)
 
   ## deal with manual legend
@@ -122,9 +156,8 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
     data <- list(dummy = list(1))
 
   ## fix spec for "text" glyph
-  if("text" %in% names(args)) {
+  if("text" %in% names(args))
      args$text <- list(field = "text")
-  }
 
   if(!is.null(fig$x$spec$glyph_defer[[lgn]])) {
     fig$x$spec$glyph_defer[[lgn]]$spec <- args

@@ -29,14 +29,13 @@ y_axis(fig, label, position = "left", log = FALSE, grid = TRUE,
 or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
 ignored if \code{log} is TRUE}
 
-\item{\ldots}{additional parameters for fine control over axes (see "Additional parameters" below)}
+\item{\ldots}{additional parameters for fine control over axes and grids (see additional parameters below)}
 }
 \description{
 Add y axis to a Bokeh figure
 }
-\section{Additional parameters}{
+\section{Axis parameters}{
 
-\subsection{Axis}{
 \tabular{ll}{
 \code{axis_label_standoff} \tab (integer) The distance in pixels that the axis labels should be offset from the tick labels. \cr
 \code{axis_label_text_align} \tab ('left', 'right', 'center') The text align of the axis label. \cr
@@ -80,7 +79,7 @@ Add y axis to a Bokeh figure
 \code{minor_tick_line_join} \tab ('miter', 'round', 'bevel') The line join of the minor ticks. \cr
 \code{minor_tick_line_width} \tab (integer) The line width of the minor ticks. \cr
 \code{minor_tick_out} \tab (integer) The distance in pixels that major ticks should extend out of the main plot area. \cr
- }}
+}
 \subsection{Basic Tick Format}{
 \tabular{ll}{
 \code{power_limit_high} \tab (int) Limit the use of scientific notation to when log(x) >= value. \cr

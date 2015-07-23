@@ -60,9 +60,13 @@ ly_text <- function(fig, x, y = NULL, text = NULL, data = NULL,
     text <- seq_along(xy$x)
 
   axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y)
+
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "text", lname = lname, lgroup = lgroup,
     data = c(xy, list(text = text, angle = angle)),
     legend = legend,
     xname = xy_names$x, yname = xy_names$y,
-    args = args, axis_type_range = axis_type_range)
+    args = args, axis_type_range = axis_type_range,
+    ly_call = mc)
 }

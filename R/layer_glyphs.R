@@ -67,11 +67,13 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
 
   axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "annular_wedge", lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
     hover = hover, url = url, legend = legend,
-    xname = xy_names$x, yname = xy_names$y)
+    xname = xy_names$x, yname = xy_names$y, ly_call = mc)
 }
 
 #' Add an "annulus" layer to a Bokeh figure
@@ -133,11 +135,13 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
 
   axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "annulus", lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
     hover = hover, url = url, legend = legend,
-    xname = xy_names$x, yname = xy_names$y)
+    xname = xy_names$x, yname = xy_names$y, ly_call = mc)
 }
 
 #' Add an "arc" layer to a Bokeh figure
@@ -197,10 +201,13 @@ ly_arc <- function(fig, x, y = NULL, data = NULL,
 
   axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "arc", lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
-    legend = legend, xname = xy_names$x, yname = xy_names$y)
+    legend = legend, xname = xy_names$x, yname = xy_names$y,
+    ly_call = mc)
 }
 
 #' Add a "wedge" layer to a Bokeh figure
@@ -268,10 +275,12 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
 
   axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "wedge", lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
     hover = hover, url = url, legend = legend,
-    xname = xy_names$x, yname = xy_names$y)
+    xname = xy_names$x, yname = xy_names$y, ly_call = mc)
 }
 

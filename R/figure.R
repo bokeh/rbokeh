@@ -13,7 +13,7 @@
 #' @param ygrid whether to draw y axis grid lines
 #' @param xaxes where to put x axis, or FALSE if no x axis ticks / labels
 #' @param yaxes where to put y axis, or FALSE if no y axis ticks / labels
-#' @param tools character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.
+#' @param tools character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.
 #' @param theme an rbokeh theme to use (tableau by default)
 #' @template dots-figure
 #' @examples
@@ -58,7 +58,7 @@ figure <- function(
   ygrid = TRUE,
   xaxes = "below",
   yaxes = "left",
-  tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save"),
+  tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save", "help"),
   theme = getOption("bokeh_theme"),
   ...
 ) {
@@ -142,7 +142,7 @@ figure <- function(
   )
 
   ## check and add tools
-  tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save")]
+  tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help")]
   not_used <- setdiff(tool_list, tools)
   if(length(not_used) > 0)
     message("Note: tools not used: ", paste(not_used, collapse = ", "))

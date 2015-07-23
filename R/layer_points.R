@@ -31,6 +31,10 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
 
   validate_fig(fig, "ly_points")
 
+  mc <- attr(fig, "ly_call")
+  if(is.null(mc))
+    mc <- lapply(match.call(), deparse)
+
   xname <- deparse(substitute(x))
   yname <- deparse(substitute(y))
 
@@ -69,6 +73,10 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
     gl <- args$glyph
     args$glyph <- NULL
 
+    # if color wasn't specified, it should be the same for all glyphs
+    if(is.null(args$color))
+      args$color <- bk_theme[["fill_color"]][["discrete"]](1)
+
     lns <- sapply(args, length)
     idx <- lns == length(xy$x)
 
@@ -78,9 +86,10 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
       gl <- factor(gl)
 
     df_split <- split(seq_along(gl), gl)
+
+    attr(fig, "ly_call") <- mc
     for(ii in seq_along(df_split)) {
       cur_idx <- df_split[[ii]]
-      # cur_glyph <- paste("glyph_")
 
       cur_hover <- hover
       cur_hover$data <- cur_hover$data[cur_idx, , drop = FALSE]
@@ -92,17 +101,19 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
             lname = ii, hover = cur_hover, legend = legend,
             xlab = xy_names$x, ylab = xy_names$y)))
     }
+    attr(fig, "ly_call") <- NULL
     return(fig)
   }
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]],
-    solid = as.character(glyph) %in% as.character(15:20))
+    solid = glyph %in% as.character(15:20))
 
   args <- resolve_glyph_props(glyph, args, lgroup)
+
   args <- fix_args(args, length(xy$x))
 
   ## see if any options won't be used and give a message
-  if(args$glyph %in% names(marker_dict))
+  if(valid_glyph(args$glyph))
     check_opts(args, args$glyph, formals = names(formals(ly_points)))
 
   axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y, glyph = glyph)
@@ -111,5 +122,5 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
     hover = hover, url = url, legend = legend,
-    xname = xy_names$x, yname = xy_names$y)
+    xname = xy_names$x, yname = xy_names$y, ly_call = mc)
 }

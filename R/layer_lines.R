@@ -17,6 +17,11 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_lines")
+
+  mc <- attr(fig, "ly_call")
+  if(is.null(mc))
+    mc <- lapply(match.call(), deparse)
+
   ## see if any options won't be used and give a message
   check_opts(list(...), "line", formals = names(formals(ly_lines)))
 
@@ -79,6 +84,8 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
 
     g_args$group <- NULL
 
+    attr(fig, "ly_call") <- mc
+
     for(ii in seq_along(df_split)) {
       cur_idx <- df_split[[ii]]
 
@@ -88,6 +95,7 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
           ng_args[!idx], list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
             lgroup = lgroup, lname = ii, legend = legend, xlab = xy_names$x, ylab = xy_names$y)))
     }
+    attr(fig, "ly_call") <- NULL
     return(fig)
   }
 
@@ -98,7 +106,7 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
   make_glyph(fig, type = "line", lname = lname, lgroup = lgroup,
     data = xy, legend = legend,
     args = args, axis_type_range = axis_type_range,
-    xname = xy_names$x, yname = xy_names$y)
+    xname = xy_names$x, yname = xy_names$y, ly_call = mc)
 }
 
 #' Add a "segments" layer to a Bokeh figure
@@ -153,11 +161,14 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
   args <- resolve_line_args(fig, args)
 
   axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1))
+
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "segment",
     xname = xy_names$x, yname = xy_names$y,
     legend = legend, lname = lname, lgroup = lgroup,
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1),
-    args = args, axis_type_range = axis_type_range)
+    args = args, axis_type_range = axis_type_range, ly_call = mc)
 }
 
 #' Add an "abline" layer to a Bokeh figure
@@ -273,11 +284,13 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     x_axis_type = x_axis_type, y_axis_type = y_axis_type,
     x_range = NULL, y_range = NULL)
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "segment", legend = legend,
     lname = lname, lgroup = lgroup,
     xname = xy_names$x, yname = xy_names$y,
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, defer = defer_fn),
-    args = args, axis_type_range = axis_type_range)
+    args = args, axis_type_range = axis_type_range, ly_call = mc)
 }
 
 #' Add a "curve" layer to a Bokeh figure
@@ -379,10 +392,12 @@ ly_contour <- function(fig, z,
 
   axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
     xname = xy_names$x, yname = xy_names$y,
     data = list(xs = xs, ys = ys),
-    args = args, axis_type_range = axis_type_range)
+    args = args, axis_type_range = axis_type_range, ly_call = mc)
 }
 
 #' Add a "ray" layer to a Bokeh figure
@@ -436,10 +451,12 @@ ly_ray <- function(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
 
   axis_type_range <- get_glyph_axis_type_range(x, y)
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "ray", lname = lname, lgroup = lgroup,
     xname = xy_names$x, yname = xy_names$y,
     data = xy, legend = legend,
-    args = args, axis_type_range = axis_type_range)
+    args = args, axis_type_range = axis_type_range, ly_call = mc)
 }
 
 
@@ -501,11 +518,13 @@ ly_bezier <- function(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = NULL,
   axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1),
     assert_x = "numeric", assert_y = "numeric")
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "bezier", lname = lname, lgroup = lgroup,
     xname = xy_names$x, yname = xy_names$y,
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1,
       cx0 = cx0, cy0 = cy0, cx1 = cx1, cy1 = cy1),
-    args = args, axis_type_range = axis_type_range)
+    args = args, axis_type_range = axis_type_range, ly_call = mc)
 }
 
 #' Add a "quadratic" layer to a Bokeh figure
@@ -562,10 +581,12 @@ ly_quadratic <- function(fig, x0, y0, x1, y1, cx, cy, data = NULL,
   axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1),
     assert_x = "numeric", assert_y = "numeric")
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "quadratic", lname = lname, lgroup = lgroup,
     xname = xy_names$x, yname = xy_names$y,
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, cx = cx, cy = cy),
-    args = list(...), axis_type_range = axis_type_range)
+    args = list(...), axis_type_range = axis_type_range, ly_call = mc)
 }
 
 ## a common thing to do is make a layer with both points and lines (type = "b")
@@ -605,8 +626,10 @@ ly_multi_line <- function(fig, xs, ys,
 
   axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "multi_line", xname = xname, yname = yname,
     lname = lname, lgroup = lgroup,
     data = list(xs = xs, ys = ys), args = args,
-    axis_type_range = axis_type_range)
+    axis_type_range = axis_type_range, ly_call = mc)
 }

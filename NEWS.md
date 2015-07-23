@@ -1,8 +1,12 @@
-Version 0.2.3.4
+Version 0.2.3.5
 ----------------------------------------------------------------------
 
+- add help tool with redirect to rbokeh docs
+- add grid parameter support for finer control over grid properties
+- major overhaul of input handling to accommodate more data input modes and provide for more robust mapped attributes
+- fix hover for `ly_polygons()`
 - add support for custom hover
-- add full control over legend
+- add full control over legend attributes
 - in `grid_plot()` use `simplify_axes` to automatically size things so panels are same size
 - add automatic labels to a grid plot if given a named list
 - add dynamic sizing (on the R side) BokehGridPlot

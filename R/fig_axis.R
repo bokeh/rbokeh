@@ -12,12 +12,14 @@
 #'  or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
 #'  ignored if \code{log} is TRUE
 #' @template dots-axis
+#' @template dots-grid
 #' @family axes
 #' @example man-roxygen/ex-axis.R
 #' @export
-x_axis <- function(fig, label, position = "below", log = FALSE,
-  grid = TRUE, num_minor_ticks = 5, visible = TRUE,
+x_axis <- function(fig, label, position = "below", log = FALSE, grid = TRUE,
+  num_minor_ticks = 5, visible = TRUE,
   number_formatter = c("basic", "numeral", "printf"), ...) {
+
   if(is.null(position))
     position <- "below"
   if(!position %in% c("below", "above")) {
@@ -53,6 +55,7 @@ x_axis <- function(fig, label, position = "below", log = FALSE,
 y_axis <- function(fig, label, position = "left", log = FALSE,
   grid = TRUE, num_minor_ticks = 5, visible = TRUE,
   number_formatter = c("basic", "numeral", "printf"), ...) {
+
   if(is.null(position))
     position <- "left"
   if(!position %in% c("left", "right")) {
@@ -72,6 +75,7 @@ y_axis <- function(fig, label, position = "left", log = FALSE,
 
   if(missing(label))
     label <- fig$x$spec$ylab
+
   fig$x$spec$ylab <- label
   update_axis(fig, position = position, label = label, grid = grid,
     num_minor_ticks = num_minor_ticks, visible = visible, log = log,
@@ -115,6 +119,7 @@ update_axis <- function(fig, position, label, grid = TRUE,
         format = paste0(simpleCap(match.arg(number_formatter)), "TickFormatter"),
         tick = "BasicTicker",
         axis = "LinearAxis")
+
       format_pars <- handle_extra_pars(list(...),
         get(paste0(number_formatter, "_tick_formatter_map")))
     }
@@ -132,6 +137,8 @@ update_axis <- function(fig, position, label, grid = TRUE,
   if(is.null(extra_pars))
     extra_pars <- list(axis_label_text_font_size = "12pt")
 
+  grid_extra_pars <- handle_extra_pars(list(...), grid_par_validator_map)
+
   formatter <- formatter_model(type_list$format, f_id, format_pars)
   ticker <- ticker_model(type_list$tick, t_id, num_minor_ticks, log)
   axis <- axis_model(type = type_list$axis, label = label,
@@ -148,8 +155,10 @@ update_axis <- function(fig, position, label, grid = TRUE,
 
   if(grid) {
     g_id <- gen_id(fig, c(position, "grid"))
+
     grid <- grid_model(g_id, plot_ref = fig$x$spec$ref,
-      ticker_ref = ticker$ref, dimension = as.integer(is_y))
+      ticker_ref = ticker$ref, dimension = as.integer(is_y), grid_extra_pars)
+
     fig$x$spec$model$plot$attributes$renderers[[grid$ref$id]] <- grid$ref
     fig$x$spec$model[[g_id]] <- grid$model
   }
@@ -187,19 +196,21 @@ formatter_model <- function(type = "BasicTickFormatter",
 
 ticker_model <- function(type = "BasicTicker", id,
   num_minor_ticks = 5, log = NULL) {
+
   res <- base_model_object(type, id)
-  res$model$attributes$num_minor_ticks = num_minor_ticks
+  res$model$attributes$num_minor_ticks <- num_minor_ticks
   if(!is.null(log))
-    res$model$attributes$base = log
+    res$model$attributes$base <- log
 
   res
 }
 
-grid_model <- function(id, dimension = 0, plot_ref, ticker_ref) {
+grid_model <- function(id, dimension = 0, plot_ref, ticker_ref, extra_pars) {
   res <- base_model_object("Grid", id)
-  res$model$attributes$dimension = dimension
-  res$model$attributes$plot = plot_ref
-  res$model$attributes$ticker = ticker_ref
+  res$model$attributes$dimension <- dimension
+  res$model$attributes$plot <- plot_ref
+  res$model$attributes$ticker <- ticker_ref
+  res$model$attributes <- c(res$model$attributes, extra_pars)
 
   res
 }
@@ -247,6 +258,25 @@ axis_par_validator_map <- list(
   "major_tick_line_join" = "line_join",
   "minor_tick_line_join" = "line_join",
   "major_label_orientation" = "label_orientation"
+)
+
+grid_par_validator_map <- list(
+  "band_fill_alpha" = "num_data_spec",
+  "band_fill_color" = "color",
+  "grid_line_alpha" = "num_data_spec",
+  "grid_line_cap" = "line_cap",
+  "grid_line_color" = "color",
+  "grid_line_dash" = "line_dash",
+  "grid_line_dash_offset" = "",
+  "grid_line_join" = "line_join",
+  "grid_line_width" = "num_data_spec",
+  "minor_grid_line_alpha" = "num_data_spec",
+  "minor_grid_line_cap" = "line_cap",
+  "minor_grid_line_color" = "color",
+  "minor_grid_line_dash" = "line_dash",
+  "minor_grid_line_dash_offset" = "int",
+  "minor_grid_line_join" = "line_join",
+  "minor_grid_line_width" = "num_data_spec"
 )
 
 basic_tick_formatter_map <- list(

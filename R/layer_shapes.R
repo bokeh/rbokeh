@@ -40,9 +40,13 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
     args$alpha <- NULL
 
   if(!is.null(group)) {
+    if(is.factor(group))
+      group <- as.character(group)
     idx <- unname(split(seq_along(group), group))
     xs <- lapply(idx, function(x) xs[x])
     ys <- lapply(idx, function(x) ys[x])
+    # data for hover and url will only be one row for each group
+    data <- data[sapply(idx, "[", 1),]
 
     ns <- lapply(args, length)
     bad_ind <- which(!ns %in% c(0, 1, length(idx), length(group)))
@@ -57,7 +61,6 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
     }
   }
 
-  # hover <- get_hover(substitute(hover), data, parent.frame())
   xy_names <- get_xy_names(xs, ys, xname, yname, args)
   ## translate different x, y types to vectors
   lgroup <- get_lgroup(lgroup, fig)
@@ -80,13 +83,17 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
   if(is.null(args$fill_alpha))
     args$fill_alpha <- 0.5
 
-  hover <- get_hover(hover, data, parent.frame())
+  hover <- get_hover(substitute(hover), data, parent.frame())
   url <- get_url(url, data)
 
   axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
+
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "patches", data = list(xs = unname(xs), ys = unname(ys)),
     args = args, axis_type_range = axis_type_range, xname = xy_names$x, yname = xy_names$y,
-    lname = lname, lgroup = lgroup, hover = hover, url = url)
+    lname = lname, lgroup = lgroup, hover = hover, url = url,
+    ly_call = mc)
 }
 
 #' Add a "rect" layer to a Bokeh figure
@@ -146,12 +153,16 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
     args$fill_alpha <- 0.5
 
   axis_type_range <- get_glyph_axis_type_range(c(xleft, xright), c(ybottom, ytop))
+
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "quad", lname = lname, lgroup = lgroup,
     xname = xy_names$x, yname = xy_names$y,
     legend = legend, hover = hover, url = url,
     data = list(left = xleft, right = xright, top = ytop, bottom = ybottom),
     data_sig = ifelse(is.null(data), NA, digest(data)),
-    args = args, axis_type_range = axis_type_range)
+    args = args, axis_type_range = axis_type_range,
+    ly_call = mc)
 }
 
 #' Add a "crect" (centered rectangle) layer to a Bokeh figure
@@ -227,11 +238,14 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
 
   axis_type_range <- get_glyph_axis_type_range(xr, yr)
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "rect", lname = lname, lgroup = lgroup,
     xname = xy_names$x, yname = xy_names$y,
     legend = legend, hover = hover, url = url,
     data_sig = ifelse(is.null(data), NA, digest(data)),
-    data = xy, args = args, axis_type_range = axis_type_range)
+    data = xy, args = args, axis_type_range = axis_type_range,
+    ly_call = mc)
 }
 
 #' Add an "oval" layer to a Bokeh figure
@@ -291,11 +305,14 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
 
   axis_type_range <- get_glyph_axis_type_range(x, y)
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "oval", lname = lname, lgroup = lgroup,
     data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
     hover = hover, url = url, legend = legend,
-    xname = xy_names$x, yname = xy_names$y)
+    xname = xy_names$x, yname = xy_names$y,
+    ly_call = mc)
 }
 
 #' Add a "patch" layer to a Bokeh figure
@@ -351,8 +368,10 @@ ly_patch <- function(fig, x, y, data = NULL,
 
   axis_type_range <- get_glyph_axis_type_range(x, y)
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "patch", data = xy, args = args,
     legend = legend, hover = hover, url = url,
     lname = lname, lgroup = lgroup,
-    axis_type_range = axis_type_range)
+    axis_type_range = axis_type_range, ly_call = mc)
 }

@@ -59,10 +59,12 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
     stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
   }
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "image", lname = lname, lgroup = lgroup,
     data = list(image = list(z), rows = rows, cols = cols,
       x = x, y = y, dw = dw, dh = dh, palette = palette, dilate = dilate),
-    args = NULL, axis_type_range = axis_type_range)
+    args = NULL, axis_type_range = axis_type_range, ly_call = mc)
 }
 
 #' Add an "image_url" layer to a Bokeh figure
@@ -139,11 +141,13 @@ ly_image_url <- function(fig, x = 0, y = 0, data = NULL, w = 10, h = 10,
   # can this have "categorical" axes?
   axis_type_range <- get_glyph_axis_type_range(c(x, x2), c(y, y2))
 
+  mc <- lapply(match.call(), deparse)
+
   make_glyph(fig, type = "image_URL",
     xname = xy_names$x, yname = xy_names$y,
     lname = lname, lgroup = lgroup,
     data = xy, args = args,
-    axis_type_range = axis_type_range)
+    axis_type_range = axis_type_range, ly_call = mc)
 }
 
 
