@@ -1,6 +1,7 @@
-Version 0.2.3.5
+Version 0.2.3.6
 ----------------------------------------------------------------------
 
+- add headers to groups of legend entries from mapped attributes
 - add help tool with redirect to rbokeh docs
 - add grid parameter support for finer control over grid properties
 - major overhaul of input handling to accommodate more data input modes and provide for more robust mapped attributes

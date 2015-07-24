@@ -12,7 +12,8 @@ prepare_figure <- function(fig) {
   for(ly in fig$x$spec$layers) {
     if(!is.null(ly$maps)) {
       ## step through each mapped attribute
-      for(nm in names(ly$maps)) {
+      mapnames <- names(ly$maps)
+      for(nm in mapnames) {
         map_item <- ly$maps[[nm]]
         if(is.numeric(map_item$domain)) {
           # the continuous domain cuts should be specifiable
@@ -65,11 +66,16 @@ prepare_figure <- function(fig) {
 
         ## add legend glyphs and build legend element
         if(is.null(ly$do_legend)) {
+          ## add a header to this entry of the legend
+          # ## spacer if it's not the first legend group
+          # if(nm != mapnames[1])
+          #   legend[[paste0("lgnd_spacer_", nm)]] <- list(list("", list()))
+          legend[[paste0("lgnd_header_", nm)]] <- list(list(nm, list()))
           for(ii in seq_along(map_item$labels)) {
             cur_val <- map_item$values[[ii]]
             cur_lab <- map_item$labels[[ii]]
             lgnd_id <- paste(nm, cur_lab, sep = "_")
-            legend[[lgnd_id]] <- list(list(cur_lab, list()))
+            legend[[lgnd_id]] <- list(list(paste0(" ", cur_lab), list()))
 
             for(glph in map_item$legend_glyphs) {
               for(mrg in glph$map_args)
