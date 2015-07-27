@@ -134,7 +134,7 @@ prepare_figure <- function(fig) {
   if(length(legend) > 0)
     fig <- fig %>%
       add_legend(unname(unlist(legend, recursive = FALSE)),
-        fig$spec$legend_attrs)
+        fig$x$spec$legend_attrs)
 
   ## see if there is a log axis so we can compute padding appropriately
   ## log axis is only available if explicitly specified through x_axis()

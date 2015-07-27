@@ -12,7 +12,6 @@
 #' @param zoom initial \href{https://developers.google.com/maps/documentation/staticmaps/\#Zoomlevels}{zoom level} to use when displaying the map
 #' @param map_type \href{https://developers.google.com/maps/documentation/staticmaps/\#MapTypes}{map type} to use for the plot - one of "hybrid", "satellite", "roadmap", "terrain"
 #' @param map_style a json string of a Google Maps style - see \code{\link{gmap_style}}
-#' @template dots-figure
 #' @note This can be used in the same way as \code{\link{figure}}, adding layers on top of the Google Map.
 #' @inheritParams figure
 #' @seealso \code{\link{gmap_style}}
@@ -36,8 +35,7 @@ gmap <- function(lat = 0, lng = 0, zoom = 0,
   xaxes = "below",
   yaxes = "left",
   tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save"),
-  theme = getOption("bokeh_theme"),
-  ...) {
+  theme = getOption("bokeh_theme")) {
 
   fig <- figure(
     map_type = map_type,
@@ -57,8 +55,7 @@ gmap <- function(lat = 0, lng = 0, zoom = 0,
     yaxes = yaxes,
     tools = tools,
     theme = theme,
-    type = "GMapPlot",
-    ...
+    type = "GMapPlot"
   )
 
   fig$x$spec$model$plot$type <- "GMapPlot"

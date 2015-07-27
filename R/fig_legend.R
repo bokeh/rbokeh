@@ -1,20 +1,3 @@
-#' Finer control over legend
-#'
-#' @param fig figure to modify
-#' @param orientation ('top_right', 'top_left', 'bottom_left', 'bottom_right') The location where the legend should draw itself.
-#' @template dots-legend
-#' @examples
-#' figure() %>%
-#'   ly_points(Sepal.Length, Sepal.Width, color = Species, data = iris) %>%
-#'   legend_control(orientation = "top_left", label_width = 2,
-#'     border_line_alpha = 0.5, border_line_cap = "butt")
-#' @export
-legend_control <- function(fig, orientation = "top_right", ...) {
-  extra_pars <- handle_extra_pars(list(orientation = orientation, ...), legend_par_validator_map)
-  fig$spec$legend_attrs <- extra_pars
-  fig
-}
-
 # to add a legend:
 # - create a legend model
 #   - add a model reference
@@ -28,12 +11,13 @@ legend_control <- function(fig, orientation = "top_right", ...) {
 ## legends are specified through the various layer functions
 
 add_legend <- function(fig, legends, extra_pars) {
-  id <- gen_id(fig, "legend")
+  leg_id <- gen_id(fig, "legend")
+  leg_name <- "legend"
 
-  leg <- legend_model(id, fig$x$spec$ref, legends, extra_pars)
+  leg <- legend_model(leg_id, fig$x$spec$ref, legends, extra_pars)
 
-  fig$x$spec$model$plot$attributes$renderers[[id]] <- leg$ref
-  fig$x$spec$model[[id]] <- leg$model
+  fig$x$spec$model$plot$attributes$renderers[[leg_id]] <- leg$ref
+  fig$x$spec$model[[leg_name]] <- leg$model
 
   fig
 }
