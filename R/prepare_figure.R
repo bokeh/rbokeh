@@ -7,6 +7,9 @@
 prepare_figure <- function(fig) {
   legend <- list()
 
+  if(is.null(fig$x$spec$theme))
+    fig$x$spec$theme <- bk_default_theme()
+
   ## resolve attribute mappings
   ## step through each layer
   for(ly in fig$x$spec$layers) {
@@ -38,7 +41,8 @@ prepare_figure <- function(fig) {
           for(attr in entry$map_args) {
             ## handle glyph type
             if(attr == "glyph") {
-              new_type <- underscore2camel(get_theme_value(underscore2camel(map_item$domain), gl$type, attr))
+              new_type <- underscore2camel(get_theme_value(underscore2camel(map_item$domain), gl$type, attr,
+                fig$x$spec$theme))
               ## should check things in resolve_glyph_props() with new glyph
               fig$x$spec$model[[entry$id]]$attributes$glyph$type <- new_type
               fig$x$spec$model[[gl$id]]$type <- new_type
@@ -50,14 +54,17 @@ prepare_figure <- function(fig) {
             } else {
               if(attr %in% data_attr_names) {
                 cur_dat <- fig$x$spec$model[[did]]$attributes$data[[attr]]
-                fig$x$spec$model[[did]]$attributes$data[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr)
+                fig$x$spec$model[[did]]$attributes$data[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr,
+                  fig$x$spec$theme)
               } else if(attr %in% glyph_attr_names) {
                 if(attr == "line_dash") {
                   cur_dat <- fig$x$spec$model[[gl$id]]$attributes[[attr]]
-                  fig$x$spec$model[[gl$id]]$attributes[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr)
+                  fig$x$spec$model[[gl$id]]$attributes[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr,
+                    fig$x$spec$theme)
                 } else {
                   cur_dat <- fig$x$spec$model[[gl$id]]$attributes[[attr]]$value
-                  fig$x$spec$model[[gl$id]]$attributes[[attr]]$value <- get_theme_value(map_item$domain, cur_dat, attr)
+                  fig$x$spec$model[[gl$id]]$attributes[[attr]]$value <- get_theme_value(map_item$domain, cur_dat, attr,
+                    fig$x$spec$theme)
                 }
               }
             }
@@ -79,7 +86,7 @@ prepare_figure <- function(fig) {
 
             for(glph in map_item$legend_glyphs) {
               for(mrg in glph$map_args)
-                glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg)
+                glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg, fig$x$spec$theme)
               # render legend glyph
               spec <- c(glph$args, list(x = "x", y = "y"))
               lgroup <- paste("legend_", nm, "_", cur_lab, sep = "")
@@ -228,6 +235,16 @@ prepare_figure <- function(fig) {
   fig$x$padding <- list(type = "figure", y_pad = y_pad, x_pad = x_pad)
   fig$x$spec$model$plot$attributes$plot_width <- fig$width - y_pad
   fig$x$spec$model$plot$attributes$plot_height <- fig$height - x_pad
+
+  # handle plot/axis/grid/legend themes
+  if(!is.null(fig$x$spec$theme$plot))
+    fig <- fig %>% theme_plot(pars = fig$x$spec$theme$plot)
+  if(!is.null(fig$x$spec$theme$axis))
+    fig <- fig %>% theme_axis(c("x", "y"), pars = fig$x$spec$theme$axis)
+  if(!is.null(fig$x$spec$theme$grid))
+    fig <- fig %>% theme_grid(c("x", "y"), pars = fig$x$spec$theme$grid)
+  if(!is.null(fig$x$spec$theme$legend))
+    fig <- fig %>% theme_legend(pars = fig$x$spec$theme$legend)
 
   fig
 }

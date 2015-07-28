@@ -45,6 +45,7 @@
 #' @param minor_tick_line_join ('miter', 'round', 'bevel') The line join of the minor ticks.
 #' @param minor_tick_line_width (integer) The line width of the minor ticks.
 #' @param minor_tick_out (integer) The distance in pixels that major ticks should extend out of the main plot area.
+#' @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
 #' @example man-roxygen/ex-theme.R
 #' @export
 theme_axis <- function(fig,
@@ -91,13 +92,16 @@ theme_axis <- function(fig,
   minor_tick_line_dash_offset = 0,
   minor_tick_line_join = "miter",
   minor_tick_line_width = 1,
-  minor_tick_out = NULL
+  minor_tick_out = NULL,
+  pars = NULL
 ) {
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  specified <- names(as.list(match.call())[-1])
-  pars <- as.list(environment())[specified]
+  if(is.null(pars)) {
+    specified <- names(as.list(match.call())[-1])
+    pars <- as.list(environment())[specified]
+  }
   pars <- pars[names(pars) %in% names(axis_par_validator_map)]
 
   pars <- handle_extra_pars(pars, axis_par_validator_map)
@@ -111,16 +115,16 @@ theme_axis <- function(fig,
       fig <- fig %>% x_axis()
     for(nm in parnames)
       fig$x$spec$model[["x_axis"]]$attributes[[nm]] <- pars[[nm]]
-    if(!missing(num_minor_ticks))
-      fig$x$spec$model$x_tickformatter$attributes$num_minor_ticks <- num_minor_ticks
+    if(!is.null(pars$num_minor_ticks))
+      fig$x$spec$model$x_tickformatter$attributes$num_minor_ticks <- pars$num_minor_ticks
   }
   if("y" %in% which && fig$x$spec$yaxes != FALSE) {
     if(is.null(fig$x$spec$model[["y_axis"]]))
       fig <- fig %>% y_axis()
     for(nm in parnames)
       fig$x$spec$model[["y_axis"]]$attributes[[nm]] <- pars[[nm]]
-    if(!missing(num_minor_ticks))
-      fig$x$spec$model$y_tickformatter$attributes$num_minor_ticks <- num_minor_ticks
+    if(!is.null(pars$num_minor_ticks))
+      fig$x$spec$model$y_tickformatter$attributes$num_minor_ticks <- pars$num_minor_ticks
   }
 
   fig

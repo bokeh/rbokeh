@@ -6,13 +6,12 @@
 \usage{
 figure(width = 480, height = 520, title = NULL, xlab = NULL,
   ylab = NULL, xlim = NULL, ylim = NULL, padding_factor = 0.07,
-  plot_width = NULL, plot_height = NULL, xgrid = TRUE, ygrid = TRUE,
-  xaxes = "below", yaxes = "left", legend_location = "top_right",
-  tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save",
-  "help"), theme = getOption("bokeh_theme"), toolbar_location = "above",
-  h_symmetry = TRUE, v_symmetry = FALSE, logo = "normal",
-  lod_factor = 10, lod_interval = 300, lod_threshold = NULL,
-  lod_timeout = 500, ...)
+  xgrid = TRUE, ygrid = TRUE, xaxes = "below", yaxes = "left",
+  legend_location = "top_right", tools = c("pan", "wheel_zoom", "box_zoom",
+  "resize", "reset", "save", "help"), theme = getOption("bokeh_theme"),
+  toolbar_location = "above", h_symmetry = TRUE, v_symmetry = FALSE,
+  logo = "normal", lod_factor = 10, lod_interval = 300,
+  lod_threshold = NULL, lod_timeout = 500, ...)
 }
 \arguments{
 \item{width}{figure width in pixels}
@@ -31,8 +30,6 @@ figure(width = 480, height = 520, title = NULL, xlab = NULL,
 
 \item{padding_factor}{if limits are not specified, by what factor should the extents of the data be padded}
 
-\item{plot_width,plot_height}{width and height of the entire plot in pixels, including border space}
-
 \item{xgrid}{whether to draw x axis grid lines}
 
 \item{ygrid}{whether to draw y axis grid lines}
@@ -45,7 +42,7 @@ figure(width = 480, height = 520, title = NULL, xlab = NULL,
 
 \item{tools}{character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.}
 
-\item{theme}{an rbokeh theme to use (tableau by default)}
+\item{theme}{an rbokeh theme to use}
 
 \item{toolbar_location}{('above', 'below', 'left', 'right') Where the toolbar will be located. If set to None, no toolbar will be attached to the plot.}
 
@@ -63,7 +60,7 @@ figure(width = 480, height = 520, title = NULL, xlab = NULL,
 
 \item{lod_timeout}{(integer) Timeout (in ms) for checking whether interactive tool events are still occurring. Once level-of-detail mode is enabled, a check is made every lod_timeout ms. If no interactive tool events have happened, level-of-detail mode is disabled (see "Controlling level of detail").}
 
-\item{\ldots}{additional parameters}
+\item{\ldots}{parameters can be specified here that are available in \code{\link{theme_plot}}}
 }
 \description{
 Initialize a Bokeh figure

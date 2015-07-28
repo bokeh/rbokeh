@@ -22,6 +22,7 @@
 #' @param label_width The width (in pixels) of the area that legend labels should occupy.
 #' @param legend_padding Amount of padding around the legend.
 #' @param legend_spacing Amount of spacing between legend entries.
+#' @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
 #' @examples
 #' figure(legend_location = "top_left") %>%
 #'   ly_points(1:10, legend = "a") %>%
@@ -48,13 +49,16 @@ theme_legend <- function(fig,
   label_text_font_style = "normal",
   label_width = 50,
   legend_padding = 10,
-  legend_spacing = 3
+  legend_spacing = 3,
+  pars = NULL
 ) {
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  specified <- names(as.list(match.call())[-1])
-  pars <- as.list(environment())[specified]
+  if(is.null(pars)) {
+    specified <- names(as.list(match.call())[-1])
+    pars <- as.list(environment())[specified]
+  }
   pars <- pars[names(pars) %in% names(legend_par_validator_map)]
 
   pars <- handle_extra_pars(pars, legend_par_validator_map)

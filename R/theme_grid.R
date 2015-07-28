@@ -18,6 +18,7 @@
 #' @param minor_grid_line_dash_offset The line dash offset of the minor Grid lines.
 #' @param minor_grid_line_join ('miter', 'round', 'bevel') The line join of the minor Grid lines.
 #' @param minor_grid_line_width The line width of the minor Grid lines.
+#' @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
 #' @example man-roxygen/ex-theme.R
 #' @export
 theme_grid <- function(fig,
@@ -37,13 +38,16 @@ theme_grid <- function(fig,
   minor_grid_line_dash = NULL,
   minor_grid_line_dash_offset = 0,
   minor_grid_line_join = "miter",
-  minor_grid_line_width = 1
+  minor_grid_line_width = 1,
+  pars = NULL
 ) {
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  specified <- names(as.list(match.call())[-1])
-  pars <- as.list(environment())[specified]
+  if(is.null(pars)) {
+    specified <- names(as.list(match.call())[-1])
+    pars <- as.list(environment())[specified]
+  }
   pars <- pars[names(pars) %in% names(grid_par_validator_map)]
 
   pars <- handle_extra_pars(pars, grid_par_validator_map)

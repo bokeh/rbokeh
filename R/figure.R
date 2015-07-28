@@ -8,14 +8,13 @@
 #' @param xlim the extent of the plotting area in the x-dimension (will be computed automatically if not specified).
 #' @param ylim the extent of the plotting area in the y-dimension (will be computed automatically if not specified).
 #' @param padding_factor if limits are not specified, by what factor should the extents of the data be padded
-#' @param plot_width,plot_height width and height of the entire plot in pixels, including border space
 #' @param xgrid whether to draw x axis grid lines
 #' @param ygrid whether to draw y axis grid lines
 #' @param xaxes where to put x axis, or FALSE if no x axis ticks / labels
 #' @param yaxes where to put y axis, or FALSE if no y axis ticks / labels
 #' @param legend_location ('top_right', 'top_left', 'bottom_left', 'bottom_right') the location where the legend should draw itself.
 #' @param tools character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.
-#' @param theme an rbokeh theme to use (tableau by default)
+#' @param theme an rbokeh theme to use
 #' @param toolbar_location ('above', 'below', 'left', 'right') Where the toolbar will be located. If set to None, no toolbar will be attached to the plot.
 #' @param h_symmetry (logical) Whether the total horizontal padding on both sides of the plot will be made equal (the left or right padding amount, whichever is larger).
 #' @param v_symmetry (logical) Whether the total vertical padding on both sides of the plot will be made equal (the top or bottom padding amount, whichever is larger).
@@ -65,8 +64,6 @@ figure <- function(
   xlim = NULL,
   ylim = NULL,
   padding_factor = 0.07,
-  plot_width = NULL,
-  plot_height = NULL,
   xgrid = TRUE,
   ygrid = TRUE,
   xaxes = "below",
@@ -112,6 +109,9 @@ figure <- function(
     id = id
   )
   ref$subtype <- model$plot$subtype
+
+  if(is.function(theme))
+    theme <- theme()
 
   spec <- structure(list(
     width = width, height = height, title = title,

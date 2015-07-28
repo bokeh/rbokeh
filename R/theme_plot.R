@@ -22,9 +22,11 @@
 #' @param min_border_left (integer) Minimum size in pixels of the padding region to the left of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.
 #' @param min_border_right (integer) Minimum size in pixels of the padding region to the right of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.
 #' @param min_border_top (integer) Minimum size in pixels of the padding region above the top of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.
+#' @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
 #' @example man-roxygen/ex-theme.R
 #' @export
 theme_plot <- function(fig,
+  pars = NULL,
   background_fill = "white",
   border_fill = "white",
   outline_line_alpha = 1,
@@ -50,11 +52,11 @@ theme_plot <- function(fig,
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-
-  specified <- names(as.list(match.call())[-1])
-  pars <- as.list(environment())[specified]
+  if(is.null(pars)) {
+    specified <- names(as.list(match.call())[-1])
+    pars <- as.list(environment())[specified]
+  }
   pars <- pars[names(pars) %in% names(figure_par_validator_map)]
-  parnames <- names(pars)
 
   pars <- handle_extra_pars(pars, figure_par_validator_map)
   parnames <- names(pars)

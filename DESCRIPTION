@@ -1,6 +1,6 @@
 Package: rbokeh
 Title: R Interface for Bokeh
-Version: 0.2.3.6
+Version: 0.2.3.7
 Authors@R: c(
     person("Ryan", "Hafen", email = "rhafen@gmail.com", role = c("aut", "cre")),
     person("Kenton", "Russell", email = "kent.russell@timelyportfolio.com", role = "ctb"),
@@ -18,7 +18,9 @@ Imports:
     jsonlite,
     digest,
     hexbin,
-    magrittr
+    magrittr,
+    ggplot2,
+    scales
 Suggests:
     testthat,
     data.table,

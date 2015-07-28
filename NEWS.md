@@ -1,6 +1,8 @@
 Version 0.2.3.6
 ----------------------------------------------------------------------
 
+- initial support for themes
+- move plot/axis/grid/legend themes to theme_ functions
 - add headers to groups of legend entries from mapped attributes
 - add help tool with redirect to rbokeh docs
 - add grid parameter support for finer control over grid properties

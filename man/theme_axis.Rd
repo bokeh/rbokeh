@@ -24,7 +24,7 @@ theme_axis(fig, which = c("x", "y"), num_minor_ticks = 5,
   minor_tick_line_alpha = 1, minor_tick_line_cap = "butt",
   minor_tick_line_color = "black", minor_tick_line_dash = NULL,
   minor_tick_line_dash_offset = 0, minor_tick_line_join = "miter",
-  minor_tick_line_width = 1, minor_tick_out = NULL)
+  minor_tick_line_width = 1, minor_tick_out = NULL, pars = NULL)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -116,6 +116,8 @@ theme_axis(fig, which = c("x", "y"), num_minor_ticks = 5,
 \item{minor_tick_line_width}{(integer) The line width of the minor ticks.}
 
 \item{minor_tick_out}{(integer) The distance in pixels that major ticks should extend out of the main plot area.}
+
+\item{pars}{optionally specify a named list of all parameters - useful when dealing with theme lists}
 }
 \description{
 Override theme parameters for axis attributes

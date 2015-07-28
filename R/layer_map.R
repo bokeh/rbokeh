@@ -25,7 +25,7 @@ ly_map <- function(fig, database = "world", regions = ".",
 
   args <- list(color = color, alpha = alpha, ...)
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]], theme = fig$x$spec$theme)
 
   do.call(ly_polygons, c(list(fig = fig, xs = dd$lon, ys = dd$lat, group = dd$group,
     lname = lname, lgroup = lgroup, xlab = xname, ylab = yname), args))

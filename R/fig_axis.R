@@ -287,7 +287,8 @@ axis_par_validator_map <- list(
   "axis_line_join" = "line_join",
   "major_tick_line_join" = "line_join",
   "minor_tick_line_join" = "line_join",
-  "major_label_orientation" = "label_orientation"
+  "major_label_orientation" = "label_orientation",
+  "num_minor_ticks" = "int" # this is in ticker
 )
 
 grid_par_validator_map <- list(

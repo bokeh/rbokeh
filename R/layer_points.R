@@ -75,7 +75,7 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
 
     # if color wasn't specified, it should be the same for all glyphs
     if(is.null(args$color))
-      args$color <- bk_theme[["fill_color"]][["discrete"]](1)
+      args$color <- fig$x$spec$theme[["discrete"]][["fill_color"]](1)
 
     lns <- sapply(args, length)
     idx <- lns == length(xy$x)
@@ -106,7 +106,8 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
   }
 
   args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]],
-    solid = glyph %in% as.character(15:20))
+    solid = glyph %in% as.character(15:20),
+    theme = fig$x$spec$theme)
 
   args <- resolve_glyph_props(glyph, args, lgroup)
 

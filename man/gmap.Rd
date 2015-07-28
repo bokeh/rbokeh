@@ -7,10 +7,9 @@
 gmap(lat = 0, lng = 0, zoom = 0, map_type = "hybrid",
   map_style = NULL, width = 480, height = 480, title = NULL,
   xlab = NULL, ylab = NULL, xlim = NULL, ylim = NULL,
-  padding_factor = 0.07, plot_width = NULL, plot_height = NULL,
-  xgrid = FALSE, ygrid = FALSE, xaxes = "below", yaxes = "left",
-  tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save"),
-  theme = getOption("bokeh_theme"))
+  padding_factor = 0.07, xgrid = FALSE, ygrid = FALSE, xaxes = "below",
+  yaxes = "left", tools = c("pan", "wheel_zoom", "box_zoom", "resize",
+  "reset", "save"), theme = getOption("bokeh_theme"))
 }
 \arguments{
 \item{lat}{latitude where the map should be centered}
@@ -39,10 +38,6 @@ gmap(lat = 0, lng = 0, zoom = 0, map_type = "hybrid",
 
 \item{padding_factor}{if limits are not specified, by what factor should the extents of the data be padded}
 
-\item{plot_width}{width and height of the entire plot in pixels, including border space}
-
-\item{plot_height}{width and height of the entire plot in pixels, including border space}
-
 \item{xgrid}{whether to draw x axis grid lines}
 
 \item{ygrid}{whether to draw y axis grid lines}
@@ -53,7 +48,7 @@ gmap(lat = 0, lng = 0, zoom = 0, map_type = "hybrid",
 
 \item{tools}{character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.}
 
-\item{theme}{an rbokeh theme to use (tableau by default)}
+\item{theme}{an rbokeh theme to use}
 }
 \description{
 Initialize a Bokeh Google Map plot

@@ -4,11 +4,12 @@
 \alias{theme_plot}
 \title{Override theme parameters for general plot attributes}
 \usage{
-theme_plot(fig, background_fill = "white", border_fill = "white",
-  outline_line_alpha = 1, outline_line_cap = "butt",
-  outline_line_color = "black", outline_line_dash = NULL,
-  outline_line_dash_offset = 0, outline_line_join = "miter",
-  outline_line_width = 1, title_text_align = "left", title_text_alpha = 1,
+theme_plot(fig, pars = NULL, background_fill = "white",
+  border_fill = "white", outline_line_alpha = 1,
+  outline_line_cap = "butt", outline_line_color = "black",
+  outline_line_dash = NULL, outline_line_dash_offset = 0,
+  outline_line_join = "miter", outline_line_width = 1,
+  title_text_align = "left", title_text_alpha = 1,
   title_text_baseline = "bottom", title_text_color = "#444444",
   title_text_font = "Helvetica", title_text_font_size = "12pt",
   title_text_font_style = "normal", min_border = 50,
@@ -17,6 +18,8 @@ theme_plot(fig, background_fill = "white", border_fill = "white",
 }
 \arguments{
 \item{fig}{figure to modify}
+
+\item{pars}{optionally specify a named list of all parameters - useful when dealing with theme lists}
 
 \item{background_fill}{(color) background color of plot}
 
