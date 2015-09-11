@@ -22,6 +22,9 @@ rbokeh_prerender <- function(fig) {
   fig$x$spec <- NULL
   fig$preRenderHook <- NULL
 
+  ## we need to preserve "NaN" (which is NA in R) for bokeh to render properly
+  attr(fig$x, "TOJSON_ARGS") <- list(na = "string")
+
   fig
 }
 

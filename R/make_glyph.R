@@ -144,7 +144,9 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   }
   args[long_ind] <- NULL
 
-  ## remove NAs in data at this point?
+  ## NAs must be changed to NaN for bokeh to be happy
+  for(ii in seq_along(data))
+    data[[ii]][is.na(data[[ii]])] <- NaN
 
   ## spec needs to point to corresponding data
   data_names <- names(data)

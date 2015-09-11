@@ -179,14 +179,21 @@ reduce_saturation <- function(col, factor = 0.5) {
 get_xy_data <- function(x, y) {
   if(is.null(y)) {
     if(is.ts(x)) {
-      return(list(x = as.vector(time(x)), y = as.vector(x)))
+      res <- list(x = as.vector(time(x)), y = as.vector(x))
     } else if(is.list(x)) {
-      return(list(x = x[[1]], y = x[[2]]))
+      res <- list(x = x[[1]], y = x[[2]])
     } else {
-      return(list(x = seq_along(x), y = x))
+      res <- list(x = seq_along(x), y = x)
     }
+  } else {
+    res <- list(x = x, y = y)
   }
-  list(x = x, y = y)
+  ## deal with singleton x or y
+  if(length(res$x) == 1)
+    res$x <- rep(res$x, length(res$y))
+  if(length(res$y) == 1)
+    res$y <- rep(res$y, length(res$x))
+  res
 }
 
 get_xy_names <- function(x, y, xname, yname, dots) {
