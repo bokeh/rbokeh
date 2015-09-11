@@ -9,6 +9,8 @@ Authors@R: c(
       comment = "Bokeh library in htmlwidgets/lib, http://bokeh.pydata.org"
     ))
 Description: R interface for creating plots in Bokeh.  Bokeh by Continuum Analytics, \url{http://bokeh.pydata.org/en/latest/}.
+URL: https://hafen.github.io/rbokeh
+BugReports: https://github.com/hafen/rbokeh/issues
 License: MIT + file LICENSE
 LazyData: true
 Imports:
