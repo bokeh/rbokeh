@@ -117,7 +117,6 @@ figure <- function(
     width = width, height = height, title = title,
     xlab = xlab, ylab = ylab,
     xlim = xlim, ylim = ylim, padding_factor = padding_factor,
-    plot_width = plot_width, plot_height = plot_height,
     xgrid = xgrid, ygrid = ygrid, xaxes = xaxes, yaxes = yaxes,
     tools = tools, theme = theme,
     model = model,
