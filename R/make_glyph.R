@@ -144,9 +144,14 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   }
   args[long_ind] <- NULL
 
-  ## NAs must be changed to NaN for bokeh to be happy
-  for(ii in seq_along(data))
-    data[[ii]][is.na(data[[ii]])] <- NaN
+  # ## NAs must be changed to NaN for bokeh to be happy
+  # for(ii in seq_along(data)) {
+  #   if(inherits(data[[ii]], c("Date", "POSIXct")))
+  #     data[[ii]] <- as.character(data[[ii]])
+  #   data[[ii]][which(is.na(data[[ii]]))] <- NaN
+  # }
+  ## actually this causes problems with categorical and date data
+  ## se we'll handle it in the js prior to rendering
 
   ## spec needs to point to corresponding data
   data_names <- names(data)

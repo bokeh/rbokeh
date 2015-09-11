@@ -17,13 +17,19 @@ rbokeh_prerender <- function(fig) {
     stop("Unsupported model type: ", fig$x$modeltype)
   }
 
+  sapply(fig$x$spec$model, function(x) {
+    x$type
+  })
   fig$x$all_models <- fig$x$spec$model
   fig$x$all_models <- remove_model_names(fig$x$all_models)
   fig$x$spec <- NULL
   fig$preRenderHook <- NULL
 
+
   ## we need to preserve "NaN" (which is NA in R) for bokeh to render properly
-  attr(fig$x, "TOJSON_ARGS") <- list(na = "string")
+  # attr(fig$x, "TOJSON_ARGS") <- list(na = "string")
+  ## actually this causes problems with categorical and date data
+  ## se we'll handle it in the js prior to rendering
 
   fig
 }
