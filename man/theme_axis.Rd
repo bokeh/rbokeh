@@ -124,7 +124,7 @@ Override theme parameters for axis attributes
 }
 \examples{
 \donttest{
-# ggplot-like grid and background
+# manually specify a ggplot-like grid and background
 figure() \%>\%
   ly_points(1:10) \%>\%
   theme_plot(background_fill = "#E6E6E6",
@@ -136,6 +136,21 @@ figure() \%>\%
     major_label_text_color = "#7F7F7F",
     major_tick_line_color = "#7F7F7F",
     minor_tick_line_alpha = 0, num_minor_ticks = 2)
+
+# or use the built in ggplot theme (under development)
+figure() \%>\%
+  ly_points(1:10) \%>\%
+  set_theme(bk_ggplot_theme)
+
+# or to set the theme for all future plots
+options(bokeh_theme = bk_ggplot_theme)
+
+figure() \%>\%
+  ly_points(1:10)
+
+figure() \%>\%
+  ly_boxplot(1:10)
+
 }
 }
 
