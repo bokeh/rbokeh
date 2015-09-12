@@ -40,23 +40,6 @@ test_that("examples", {
 
   # prepare data
   data(elements, package = "rbokeh")
-  elements <- subset(elements, !is.na(group))
-  elements$group <- as.character(elements$group)
-  elements$period <- as.character(elements$period)
-
-  # add colors for groups
-  metals <- c("alkali metal", "alkaline earth metal", "halogen",
-    "metal", "metalloid", "noble gas", "nonmetal", "transition metal")
-  colors <- c("#a6cee3", "#1f78b4", "#fdbf6f", "#b2df8a", "#33a02c",
-    "#bbbb88", "#baa2a6", "#e08e79")
-  elements$color <- colors[match(elements$metal, metals)]
-  elements$type <- elements$metal
-
-  # make coordinates for labels
-  elements$symx <- paste(elements$group, ":0.1", sep = "")
-  elements$numbery <- paste(elements$period, ":0.8", sep = "")
-  elements$massy <- paste(elements$period, ":0.15", sep = "")
-  elements$namey <- paste(elements$period, ":0.3", sep = "")
 
   # create figure
   p <- figure(title = "Periodic Table", tools = c("resize", "hover"),
@@ -101,7 +84,7 @@ test_that("examples", {
     ly_points(Sepal.Length, Sepal.Width, data = iris,
       color = Species, hover = list(Sepal.Length, Sepal.Width))
 
-  p2 <- figure(tools = tools) %>%
+  p2 <- figure(tools = tools, legend_location = "top_left") %>%
     ly_points(Petal.Length, Petal.Width, data = iris,
       color = Species, hover = list(Sepal.Length, Sepal.Width))
 
@@ -132,36 +115,26 @@ test_that("examples", {
   print_model_json(p, file = fname)
 
   # check palette with ly_image
-  #  should reject a single color
-   expect_error(
-     ly_image(
-       figure( width = 700, height = 400 )
-       ,volcano
-       ,palette = "#FF00FF"
-     )
-   )
+  # should reject a single color
+  expect_error(
+    p <- figure(width = 700, height = 400) %>%
+      ly_image(volcano, palette = "#FF00FF")
+  )
+
   #  should accept no palette and use default
-  p <- ly_image(
-    figure( width = 700, height = 400 )
-    ,volcano
-  )
+  p <- figure(width = 700, height = 400) %>%
+    ly_image(volcano)
   print_model_json(p, file = fname)
+
   #  should accept a Bokeh palette name
-  p <- ly_image(
-    figure( width = 700, height = 400 )
-    ,volcano
-    ,palette = "Greys9"
-  )
+  p <- figure(width = 700, height = 400) %>%
+    ly_image(volcano, palette = "Greys9")
   print_model_json(p, file = fname)
+
   #  should accept a vector of colors
-  p <- ly_image(
-    figure( width = 700, height = 400 )
-    ,volcano
-    ,palette = blues9
-  )
+  p <- figure(width = 700, height = 400) %>%
+    ly_image(volcano, palette = blues9)
   print_model_json(p, file = fname)
-
-
 
   url <- c("http://bokeh.pydata.org/en/latest/_static/bokeh-transparent.png",
     "http://developer.r-project.org/Logo/Rlogo-4.png")
@@ -223,12 +196,12 @@ test_that("examples", {
   p <- figure() %>%
     ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-12-31"), by="days"),
              rnorm(366)) %>%
-    x_axis(label = "Date", formats = list(months="%b-%Y", days="%d"))
+    x_axis(label = "Date", format = list(months="%b-%Y", days="%d"))
   print_model_json(p, file = "/dev/null")
   p <- figure() %>%
     ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-02-01"), by="days"),
              rnorm(32)) %>%
-    x_axis(label = "Date", formats = list(months="%b-%Y", days="%d"))
+    x_axis(label = "Date", format = list(months="%b-%Y", days="%d"))
   print_model_json(p, file = "/dev/null")
 
   p <- figure() %>%

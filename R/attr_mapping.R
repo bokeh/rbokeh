@@ -124,15 +124,15 @@ get_domain <- function(x) {
   }
 }
 
-get_theme_value <- function(domain, values, type) {
+get_theme_value <- function(domain, values, type, theme) {
   is_discrete <- ifelse(is.numeric(domain), FALSE, TRUE)
-  subtype <- ifelse(is_discrete, "discrete", "continuous")
+  mode <- ifelse(is_discrete, "discrete", "continuous")
   if(is_discrete) {
     idx <- match(values, domain)
-    vals <- bk_theme[[type]][[subtype]](length(domain))
+    vals <- theme[[mode]][[type]](length(domain))
   } else {
     ct <- cut(values, domain, include.lowest = TRUE)
-    vals <- bk_theme[[type]][[subtype]](length(levels(ct)))
+    vals <- theme[[mode]][[type]](length(levels(ct)))
     idx <- as.integer(ct)
   }
   if(length(idx) == 1) {

@@ -26,8 +26,8 @@ validate_colors <- function(opts) {
 }
 
 ## should make this return something that will be evaluated at render time
-get_next_color <- function(lgroupobj, which = "fill_color", type = "discrete") {
-  cur_theme <- bk_theme[[which]][[type]](10)
+get_next_color <- function(lgroupobj, which = "fill_color", type = "discrete", theme) {
+  cur_theme <- theme[[type]][[which]](10)
   n_layers <- length(lgroupobj$glyph_ids) + 1
   next_color_idx <- (n_layers - 1) %% length(cur_theme) + 1
   cur_theme[next_color_idx]
@@ -179,14 +179,21 @@ reduce_saturation <- function(col, factor = 0.5) {
 get_xy_data <- function(x, y) {
   if(is.null(y)) {
     if(is.ts(x)) {
-      return(list(x = as.vector(time(x)), y = as.vector(x)))
+      res <- list(x = as.vector(time(x)), y = as.vector(x))
     } else if(is.list(x)) {
-      return(list(x = x[[1]], y = x[[2]]))
+      res <- list(x = x[[1]], y = x[[2]])
     } else {
-      return(list(x = seq_along(x), y = x))
+      res <- list(x = seq_along(x), y = x)
     }
+  } else {
+    res <- list(x = x, y = y)
   }
-  list(x = x, y = y)
+  ## deal with singleton x or y
+  if(length(res$x) == 1)
+    res$x <- rep(res$x, length(res$y))
+  if(length(res$y) == 1)
+    res$y <- rep(res$y, length(res$x))
+  res
 }
 
 get_xy_names <- function(x, y, xname, yname, dots) {
@@ -267,7 +274,7 @@ resolve_line_args <- function(fig, args) {
     args$line_cap <- ljoin_dict[[as.character(args$line_cap)]]
 
   if(is.null(args$line_color))
-    args$line_color <- get_next_color(fig)
+    args$line_color <- get_next_color(fig, theme = fig$x$spec$theme)
 
   args$color <- NULL
   args$alpha <- NULL
@@ -276,11 +283,11 @@ resolve_line_args <- function(fig, args) {
 }
 
 ## take args color and alpha and translate them to f
-resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, solid = FALSE) {
+resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, solid = FALSE, theme = NULL) {
 
   ## if no color at all is specified, choose from the theme
   if(is.null(args$color) && is.null(args$fill_color) && is.null(args$line_color))
-    args$color <- get_next_color(ly)
+    args$color <- get_next_color(ly, theme = theme)
 
   if(!is.null(args$color)) {
     if(!is.null(args$line_color)) {
@@ -568,7 +575,7 @@ subset_with_attributes <- function(x, ...) {
 }
 
 # http://stackoverflow.com/questions/6364783/capitalize-the-first-letter-of-both-words-in-a-two-word-string
-simpleCap <- function(x) {
+simple_cap <- function(x) {
   s <- strsplit(x, " ")[[1]]
   paste(toupper(substring(s, 1,1)), substring(s, 2),
         sep="", collapse=" ")

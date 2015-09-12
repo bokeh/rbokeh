@@ -22,7 +22,7 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
 
   glyph_attrs <- lapply(seq_along(spec_in_data), function(ii) {
     units <- "data"
-    if(spec_names[ii] == "angle")
+    if(grepl("angle$", spec_names[ii]))
       units <- "rad"
 
     if(length(spec[[ii]]) != 0) {

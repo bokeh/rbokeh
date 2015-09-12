@@ -20,10 +20,11 @@ small_range <- seq(as.Date("2012-01-01"),as.Date("2012-02-01"), by="days")
 
 figure() %>%
   ly_lines(big_range, rnorm(366)) %>%
-  x_axis(label = "Date", formats = list(months="%b-%Y", days="%d"))
+  x_axis(label = "Date", format = list(months="%b-%Y", days="%d"))
+
 figure() %>%
   ly_lines(small_range, rnorm(32)) %>%
-  x_axis(label = "Date", formats = list(months="%b-%Y", days="%d"))
+  x_axis(label = "Date", format = list(months="%b-%Y", days="%d"))
 
 # specify numeric tick labels
 figure() %>%

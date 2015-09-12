@@ -44,10 +44,10 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
     if(valid_color(palette)) {
       stop("'palette' specified in ly_image is a single color; please supply a vector of colors or name of a bokeh palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
     } else {
-      if(!palette %in% bk_palette_names){
+      if(!palette %in% bk_gradient_palette_names){
         stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
       } else {
-        palette <- bk_palettes[[palette]]
+        palette <- bk_gradient_palettes[[palette]]
       }
     }
   } else if( is.character(palette) && length(palette) > 1 ) {

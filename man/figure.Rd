@@ -6,10 +6,12 @@
 \usage{
 figure(width = 480, height = 520, title = NULL, xlab = NULL,
   ylab = NULL, xlim = NULL, ylim = NULL, padding_factor = 0.07,
-  plot_width = NULL, plot_height = NULL, xgrid = TRUE, ygrid = TRUE,
-  xaxes = "below", yaxes = "left", tools = c("pan", "wheel_zoom",
-  "box_zoom", "resize", "reset", "save"), theme = getOption("bokeh_theme"),
-  ...)
+  xgrid = TRUE, ygrid = TRUE, xaxes = "below", yaxes = "left",
+  legend_location = "top_right", tools = c("pan", "wheel_zoom", "box_zoom",
+  "resize", "reset", "save", "help"), theme = getOption("bokeh_theme"),
+  toolbar_location = "above", h_symmetry = TRUE, v_symmetry = FALSE,
+  logo = "normal", lod_factor = 10, lod_interval = 300,
+  lod_threshold = NULL, lod_timeout = 500, ...)
 }
 \arguments{
 \item{width}{figure width in pixels}
@@ -28,8 +30,6 @@ figure(width = 480, height = 520, title = NULL, xlab = NULL,
 
 \item{padding_factor}{if limits are not specified, by what factor should the extents of the data be padded}
 
-\item{plot_width,plot_height}{width and height of the entire plot in pixels, including border space}
-
 \item{xgrid}{whether to draw x axis grid lines}
 
 \item{ygrid}{whether to draw y axis grid lines}
@@ -38,52 +38,33 @@ figure(width = 480, height = 520, title = NULL, xlab = NULL,
 
 \item{yaxes}{where to put y axis, or FALSE if no y axis ticks / labels}
 
-\item{tools}{character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.}
+\item{legend_location}{('top_right', 'top_left', 'bottom_left', 'bottom_right') the location where the legend should draw itself.}
 
-\item{theme}{an rbokeh theme to use (tableau by default)}
+\item{tools}{character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.}
 
-\item{\ldots}{additional parameters for fine control figure properties (see "Additional parameters" below)}
+\item{theme}{an rbokeh theme to use}
+
+\item{toolbar_location}{('above', 'below', 'left', 'right') Where the toolbar will be located. If set to None, no toolbar will be attached to the plot.}
+
+\item{h_symmetry}{(logical) Whether the total horizontal padding on both sides of the plot will be made equal (the left or right padding amount, whichever is larger).}
+
+\item{v_symmetry}{(logical) Whether the total vertical padding on both sides of the plot will be made equal (the top or bottom padding amount, whichever is larger).}
+
+\item{logo}{('normal', 'grey') What version of the Bokeh logo to display on the toolbar. If set to None, no logo will be displayed.}
+
+\item{lod_factor}{(integer) Decimation factor to use when applying level-of-detail decimation (see "Controlling level of detail").}
+
+\item{lod_interval}{(integer) Interval (in ms) during which an interactive tool event will enable level-of-detail downsampling (see "Controlling level of detail").}
+
+\item{lod_threshold}{(integer) A number of data points, above which level-of-detail downsampling may be performed by glyph renderers. Set to \code{NULL} to disable any level-of-detail downsampling (see "Controlling level of detail").}
+
+\item{lod_timeout}{(integer) Timeout (in ms) for checking whether interactive tool events are still occurring. Once level-of-detail mode is enabled, a check is made every lod_timeout ms. If no interactive tool events have happened, level-of-detail mode is disabled (see "Controlling level of detail").}
+
+\item{\ldots}{parameters can be specified here that are available in \code{\link{theme_plot}}}
 }
 \description{
 Initialize a Bokeh figure
 }
-\section{Additional parameters}{
-
-\tabular{ll}{
-\code{background_fill} \tab (color) background color of plot \cr
-\code{border_fill} \tab (color) fill color of border area of plot \cr
-\code{min_border} \tab (integer) A convenience property to set all all the min_X_border properties to the same value. If an individual border property is explicitly set, it will override min_border. \cr
-\code{min_border_bottom} \tab (integer) Minimum size in pixels of the padding region below the bottom of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc. \cr
-\code{min_border_left} \tab (integer) Minimum size in pixels of the padding region to the left of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc. \cr
-\code{min_border_right} \tab (integer) Minimum size in pixels of the padding region to the right of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc. \cr
-\code{min_border_top} \tab (integer) Minimum size in pixels of the padding region above the top of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc. \cr
-\code{outline_line_alpha} \tab (numeric) The line alpha for the plot border outline. \cr
-\code{outline_line_cap} \tab ('butt', 'round', 'square') The line cap for the plot border outline. \cr
-\code{outline_line_color} \tab (color) The line color for the plot border outline. \cr
-\code{outline_line_dash} \tab The line dash for the plot border outline. \cr
-\code{outline_line_dash_offset} \tab (integer) The line dash offset for the plot border outline. \cr
-\code{outline_line_join} \tab ('miter', 'round', 'bevel') The line join for the plot border outline. \cr
-\code{outline_line_width} \tab (integer) The line width for the plot border outline. \cr
-\code{plot_height} \tab (integer) Total height of the entire plot (including any axes, titles, border padding, etc.) This corresponds directly to the height of the HTML canvas that will be used. \cr
-\code{plot_width} \tab (integer) Total width of the entire plot (including any axes, titles, border padding, etc.) This corresponds directly to the width of the HTML canvas that will be used. \cr
-\code{title_text_align} \tab ('left', 'right', 'center') The text align for the plot title. \cr
-\code{title_text_alpha} \tab The text alpha for the plot title. \cr
-\code{title_text_baseline} \tab ('top', 'middle', 'bottom', 'alphabetic', 'hanging') The text baseline for the plot title. \cr
-\code{title_text_color} \tab (color) The text color for the plot title. \cr
-\code{title_text_font} \tab (string) The text font for the plot title. \cr
-\code{title_text_font_size} \tab (string - e.g. '12pt') The text font size for the plot title. \cr
-\code{title_text_font_style} \tab ('normal', 'italic', 'bold') The text font style for the plot title. \cr
-\code{toolbar_location} \tab ('above', 'below', 'left', 'right') Where the toolbar will be located. If set to None, no toolbar will be attached to the plot. \cr
-\code{h_symmetry} \tab (logical) Whether the total horizontal padding on both sides of the plot will be made equal (the left or right padding amount, whichever is larger). \cr
-\code{v_symmetry} \tab (logical) Whether the total vertical padding on both sides of the plot will be made equal (the top or bottom padding amount, whichever is larger). \cr
-\code{logo} \tab ('normal', 'grey') What version of the Bokeh logo to display on the toolbar. If set to None, no logo will be displayed. \cr
-\code{lod_factor} \tab (integer) Decimation factor to use when applying level-of-detail decimation (see "Controlling level of detail"). \cr
-\code{lod_interval} \tab (integer) Interval (in ms) during which an interactive tool event will enable level-of-detail downsampling (see "Controlling level of detail"). \cr
-\code{lod_threshold} \tab (integer) A number of data points, above which level-of-detail downsampling may be performed by glyph renderers. Set to \code{NULL} to disable any level-of-detail downsampling (see "Controlling level of detail"). \cr
-\code{lod_timeout} \tab (integer) Timeout (in ms) for checking whether interactive tool events are still occurring. Once level-of-detail mode is enabled, a check is made every lod_timeout ms. If no interactive tool events have happened, level-of-detail mode is disabled (see "Controlling level of detail").
- }
-}
-
 \section{Controlling level of detail}{
 
 Although the HTML canvas can comfortably display tens or even hundreds of thousands of glyphs, doing so can have adverse affects on interactive performance. In order to accommodate large-ish (but not enormous) data sizes, Bokeh plots offer "Level of Detail" (LOD) capability in the client.

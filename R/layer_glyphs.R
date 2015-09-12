@@ -58,7 +58,7 @@ ly_annular_wedge <- function(fig, x, y = NULL, data = NULL,
   if(missing(alpha))
     args$alpha <- NULL
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args, "annular_wedge", names(formals(ly_annular_wedge)))
@@ -128,7 +128,7 @@ ly_annulus <- function(fig, x, y = NULL, data = NULL,
   if(missing(alpha))
     args$alpha <- NULL
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args, "annulus", formals = names(formals(ly_annulus)))
@@ -266,7 +266,7 @@ ly_wedge <- function(fig, x, y = NULL, data = NULL, radius = 0.3,
   if(missing(alpha))
     args$alpha <- NULL
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
+  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args, "wedge", formals = names(formals(ly_wedge)))

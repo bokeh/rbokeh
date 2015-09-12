@@ -1,6 +1,6 @@
 Package: rbokeh
 Title: R Interface for Bokeh
-Version: 0.2.3.5
+Version: 0.2.3.7
 Authors@R: c(
     person("Ryan", "Hafen", email = "rhafen@gmail.com", role = c("aut", "cre")),
     person("Kenton", "Russell", email = "kent.russell@timelyportfolio.com", role = "ctb"),
@@ -9,6 +9,8 @@ Authors@R: c(
       comment = "Bokeh library in htmlwidgets/lib, http://bokeh.pydata.org"
     ))
 Description: R interface for creating plots in Bokeh.  Bokeh by Continuum Analytics, \url{http://bokeh.pydata.org/en/latest/}.
+URL: https://hafen.github.io/rbokeh
+BugReports: https://github.com/hafen/rbokeh/issues
 License: MIT + file LICENSE
 LazyData: true
 Imports:
@@ -18,7 +20,9 @@ Imports:
     jsonlite,
     digest,
     hexbin,
-    magrittr
+    magrittr,
+    ggplot2,
+    scales
 Suggests:
     testthat,
     data.table,

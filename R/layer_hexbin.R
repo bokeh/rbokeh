@@ -56,9 +56,9 @@ ly_hexbin <- function(fig, x, y = NULL, data = NULL,
     if(valid_color(palette)) {
       col <- palette
     } else {
-      if(!palette %in% bk_palette_names)
+      if(!palette %in% bk_gradient_palette_names)
         stop("'palette' specified in ly_hexbin is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
-      palette <- colorRampPalette(bk_palettes[[palette]])
+      palette <- colorRampPalette(bk_gradient_palettes[[palette]])
     }
   }
 
