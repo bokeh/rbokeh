@@ -24,7 +24,7 @@ range_model <- function(type = "Range1d", id, dat) {
     res$model$attributes$start <- dat[1]
     res$model$attributes$end <- dat[2]
   } else if(type == "FactorRange") {
-    res$model$attributes$factors <- dat
+    res$model$attributes$factors <- I(dat)
   }
 
   res
