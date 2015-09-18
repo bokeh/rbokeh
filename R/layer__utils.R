@@ -36,3 +36,53 @@ grab <- function(...) {
   # )
   argVals
 }
+b_xy_data_and_names = function(x, y, xName, yName, xLab, yLab) {
+  if(length(xName) > 1)
+    xName <- NULL
+  if(length(yName) > 1)
+    yName <- NULL
+
+  if(!is.null(attr(x, "stringName")))
+    xName <- attr(x, "stringName")
+  if(!is.null(attr(y, "stringName")))
+    yName <- attr(y, "stringName")
+
+  if(is.null(y)) {
+    if(is.ts(x)) {
+      y = as.vector(x)
+      x = as.vector(time(x))
+      yName <- xName
+      xName <- "time"
+    } else if(is.list(x)) {
+      nms <- names(ret$x)
+      y = x[[2]]
+      x = x[[1]]
+      xName = nms[1]
+      yName = nms[2]
+    } else {
+      y = x
+      x = seq_along(x)
+      yName = xName
+      xName = "index"
+    }
+  }
+
+  # manual specification trumps
+
+  if(!is.null(xLab)) {
+    xName <- xLab
+  }
+  if(!is.null(yLab)) {
+    yName <- yLab
+  }
+
+  ## deal with singleton x or y
+  if(length(x) == 1)
+    x <- rep(x, length(y))
+  if(length(y) == 1) {
+    y <- rep(y, length(x))
+  }
+
+
+  list(x = x, y = y, xName = xName, yName = yName)
+}
