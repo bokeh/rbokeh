@@ -36,6 +36,92 @@ grab <- function(...) {
   # )
   argVals
 }
+
+
+# @example
+# col = "blue"
+# x <- sub_names(
+#   data = iris
+#   x = 5,
+#   b = col,
+#   col = "Species",
+#   col2 = Species,
+#   el = NULL
+# )
+# x
+sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
+  # , matchCall = match.call(parent.frame(2L))
+  if (missing(data)) {
+    stop(paste0("data was not supplied to ", match.call()[1]))
+  }
+
+  argNames <- names(argObj)
+  if (any(argNames == "")) {
+    stop("all arguments must be named arguments")
+  }
+
+  # retrieve the data with best guess
+  dataNames <- names(data)
+
+  if(!is.null(data)) {
+    dataHasLength <- (nrow(data) > 1)
+    dataLength <- nrow(data)
+  } else {
+    dataHasLength <- FALSE
+    dataLength <- 1
+  }
+
+  handle_value <- function(val) {
+    if(is.null(val)) { return(val) }
+    if(length(val) == 1 && is.character(val) && dataHasLength) {
+      if(val %in% dataNames) {
+        ret <- data[[val]]
+        attr(ret, "stringName") <- val
+      } else {
+        ret <- rep(val, dataLength)
+      }
+    } else {
+      ret <- rep(val, dataLength)
+    }
+    ret
+  }
+
+  # get the unevaled values
+  ret <- lapply(seq_along(argObj), function(argPos) {
+    argName = argNames[argPos]
+    argVal = argObj[[argPos]]
+
+    ans <- switch(argName,
+      hover = get_hover(argVal, data, parentFrame),
+      lgroup = get_lgroup(argVal, fig),
+      url = get_url(as.character(argVal), data),
+      dots = print(argVal),
+      switch(typeof(argVal),
+        symbol = handle_value(deparse(argVal)),
+        handle_value(argVal)
+      )
+    )
+    if(inherits(ans, "try-error")) {
+      stop("argument '", deparse(x), "' cannot be found")
+    }
+    ans
+  })
+  names(ret) <- argNames
+
+
+  # get the x and y names and data
+  ret[c("x", "y", "xName", "yName")] <- b_xy_data_and_names(
+    ret$x, ret$y,
+    argObj[["x"]], argObj[["y"]],
+    ret$xLab, ret$yLab
+  )
+
+  return(ret)
+  # return(list(ret, nameValList))
+}
+
+
+
 b_xy_data_and_names = function(x, y, xName, yName, xLab, yLab) {
   if(length(xName) > 1)
     xName <- NULL
@@ -85,4 +171,12 @@ b_xy_data_and_names = function(x, y, xName, yName, xLab, yLab) {
 
 
   list(x = x, y = y, xName = xName, yName = yName)
+}
+
+
+
+if(FALSE) {
+  load_all()
+  col = "blue"
+  sub_names(x = 5, b = col, col = "Species", col2 = Species, el = NULL, data = iris) -> x; x
 }
