@@ -80,6 +80,7 @@ get_glyph_axis_type_range <- function(x, y, assert_x = NULL, assert_y = NULL, gl
     y_range = get_glyph_range(y, y_axis_type)
   )
 }
+# attr(get_glyph_axis_type_range, "keys") <- c("x_axis_type", "y_axis_type", "x_range", "y_range")
 
 ## determine whether axis is "numeric" or "categorical"
 get_glyph_axis_type <- function(a) {
@@ -230,6 +231,7 @@ get_xy_names <- function(x, y, xname, yname, dots) {
   res
 }
 
+
 resolve_line_args <- function(fig, args) {
 
   if(!is.null(args$color)) {
@@ -330,6 +332,7 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, soli
 
   args
 }
+# attr(resolve_color_alpha, "keys") <- c("color", "line_color", "fill_color", "alpha", "line_alpha", "fill_alpha")
 
 ## make sure marker fill and line properties are correct for marker glyphs
 ## (for example, some, such as glyph = 1, must not have fill)
@@ -365,6 +368,7 @@ resolve_glyph_props <- function(glyph, args, lgroup) {
   }
   args
 }
+# attr(resolve_glyph_props, "keys") <- c("glyph", "line_color", "fill_color", "line_width", "line_alpha")
 
 get_lgroup <- function(lgroup, fig) {
   if(is.null(lgroup))
