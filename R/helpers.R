@@ -145,6 +145,8 @@ get_all_glyph_range <- function(ranges, padding_factor, axis_type = "numeric", l
 
 ## give a little warning if any options are specified that won't be used
 check_opts <- function(opts, type, formals = NULL) {
+  opts <- opts[! names(opts) %in% c("xName", "yName")]
+
   cur_glyph_props <- glyph_props[[type]]
 
   valid_opts <- c("glyph", "xlab", "ylab", formals)
@@ -528,8 +530,11 @@ v_eval <- function(x, data) {
 }
 
 fix_args <- function(args, n) {
-  lns <- sapply(args, length)
   nms <- names(args)
+  goodPos <- ! (nms %in% c("url"))
+  nms <- nms[goodPos]
+
+  lns <- sapply(args[goodPos], length)
   idx <- which(!lns %in% c(0, 1, n))
 
   if(length(idx) > 0)
