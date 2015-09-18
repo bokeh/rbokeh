@@ -37,35 +37,55 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
   if(is.null(mc))
     mc <- lapply(match.call(), deparse)
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  # dots  <- substitute(list(...))[-1]
+  dots <- substitute(list(...))
+  args <- sub_names(fig, data,
+    grab(
+      sb(x),
+      sb(y),
+      sb(glyph),
+      sb(color),
+      sb(alpha),
+      sb(size),
+      sb(hover),
+      sb(url),
+      sb(legend),
+      sb(lname),
+      sb(lgroup),
+      dots
+    )
+  )
+  cat("\n\n"); print(args)
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots  <- substitute(list(...))[-1]
-    args  <- lapply(dots, function(x) v_eval(x, data))
-    x     <- v_eval(substitute(x), data)
-    y     <- v_eval(substitute(y), data)
-    size  <- v_eval(substitute(size), data)
-    glyph <- v_eval(substitute(glyph), data)
-    color <- v_eval(substitute(color), data)
-  } else {
-    args <- list(...)
-  }
 
-  hover <- get_hover(substitute(hover), data, parent.frame())
-  url <- get_url(url, data)
+  # ## deal with possible named inputs from a data source
+  # if(!is.null(data)) {
+  #   dots  <- substitute(list(...))[-1]
+  #   args  <- lapply(dots, function(x) v_eval(x, data))
+  #   x     <- v_eval(substitute(x), data)
+  #   y     <- v_eval(substitute(y), data)
+  #   size  <- v_eval(substitute(size), data)
+  #   glyph <- v_eval(substitute(glyph), data)
+  #   color <- v_eval(substitute(color), data)
+  # } else {
+  #   args <- list(...)
+  # }
 
-  xy_names <- get_xy_names(x, y, xname, yname, args)
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
+  # hover <- get_hover(substitute(hover), data, parent.frame())
+  # url <- get_url(url, data)
 
-  if(is.null(glyph))
-    glyph <- "circle"
+  # xy_names <- get_xy_names(x, y, xname, yname, args)
+  # ## translate different x, y types to vectors
+  # xy <- get_xy_data(x, y)
+  # lgroup <- get_lgroup(lgroup, fig)
 
-  args <- c(args, list(glyph = glyph, color = color,
-    alpha = alpha, size = size))
+  # if(is.null(glyph))
+  #   glyph <- "circle"
+  if(is.null(args$glyph))
+    args$glyph <- "circle"
+
+  # args <- c(args, list(glyph = glyph, color = color,
+  #   alpha = alpha, size = size))
 
   # if glyph is not unique, we need to split the data
   # and call make_glyph several times
@@ -107,23 +127,32 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
     return(fig)
   }
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]],
-    solid = glyph %in% as.character(15:20),
-    theme = fig$x$spec$theme)
 
-  args <- resolve_glyph_props(glyph, args, lgroup)
+  # glyphs are unique at this point, only keep the one glyph type
+  args$glyph <- args$glyph[1]
 
-  args <- fix_args(args, length(xy$x))
+  args <- resolve_color_alpha(
+    args,
+    has_line = TRUE, has_fill = TRUE,
+    ly    = fig$x$spec$layers[[args$lgroup]],
+    solid = args$glyph %in% as.character(15:20),
+    theme = fig$x$spec$theme
+  )
+
+  args <- resolve_glyph_props(args$glyph, args, args$lgroup)
+
+  # args <- fix_args(args, length(xy$x))
+  args <- fix_args(args, length(args$x))
 
   ## see if any options won't be used and give a message
   if(valid_glyph(args$glyph))
     check_opts(args, args$glyph, formals = names(formals(ly_points)))
 
-  axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y, glyph = glyph)
+  axis_type_range <- get_glyph_axis_type_range(args$x, args$y, glyph = args$glyph)
 
-  make_glyph(fig, args$glyph, lname = lname, lgroup = lgroup,
-    data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
+  make_glyph(fig, args$glyph, lname = args$lname, lgroup = args$lgroup,
+    data = args[c("x", "y")], data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args, axis_type_range = axis_type_range,
-    hover = hover, url = url, legend = legend,
-    xname = xy_names$x, yname = xy_names$y, ly_call = mc)
+    hover = args$hover, url = args$url, legend = args$legend,
+    xname = args$xName, yname = args$yName, ly_call = mc)
 }
