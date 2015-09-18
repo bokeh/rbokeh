@@ -22,7 +22,8 @@ Imports:
     hexbin,
     magrittr,
     ggplot2,
-    scales
+    scales,
+    stringr
 Suggests:
     testthat,
     data.table,
