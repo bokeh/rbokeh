@@ -29,6 +29,8 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
   hover = NULL, url = NULL, legend = NULL,
   lname = NULL, lgroup = NULL, ...) {
 
+  # figure() %>% ly_points(1:10)
+
   validate_fig(fig, "ly_points")
 
   mc <- attr(fig, "ly_call")
