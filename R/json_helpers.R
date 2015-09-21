@@ -20,7 +20,7 @@ print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, file = "", pbco
   if(pbcopy)
     file <- pipe("pbcopy")
   cat(toJSON(fig$x$all_models, pretty = pretty,
-    auto_unbox = TRUE, null = "null", na = "null"), file = file)
+    auto_unbox = TRUE, null = "null", na = "null"), "\n", file = file)
 }
 
 #' Get the HTML content required to embed a Bokeh figure
