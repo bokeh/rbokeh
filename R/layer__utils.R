@@ -95,7 +95,10 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
       hover = get_hover(argVal, data, parentFrame),
       lgroup = get_lgroup(argVal, fig),
       url = get_url(as.character(argVal), data),
+      legend = get_legend(argVal),
       dots = print(argVal),
+      xlab = as.character(argVal),
+      ylab = as.character(argVal),
       switch(typeof(argVal),
         symbol = handle_value(deparse(argVal)),
         handle_value(argVal)
@@ -113,7 +116,7 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
   ret[c("x", "y", "xName", "yName")] <- b_xy_data_and_names(
     ret$x, ret$y,
     argObj[["x"]], argObj[["y"]],
-    ret$xLab, ret$yLab
+    ret$xlab, ret$ylab
   )
 
   return(ret)
@@ -122,7 +125,7 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
 
 
 
-b_xy_data_and_names = function(x, y, xName, yName, xLab, yLab) {
+b_xy_data_and_names = function(x, y, xName, yName, xlab, ylab) {
   if(length(xName) > 1)
     xName <- NULL
   if(length(yName) > 1)
@@ -155,11 +158,11 @@ b_xy_data_and_names = function(x, y, xName, yName, xLab, yLab) {
 
   # manual specification trumps
 
-  if(!is.null(xLab)) {
-    xName <- xLab
+  if(!is.null(xlab)) {
+    xName <- xlab
   }
-  if(!is.null(yLab)) {
-    yName <- yLab
+  if(!is.null(ylab)) {
+    yName <- ylab
   }
 
   ## deal with singleton x or y
@@ -171,6 +174,18 @@ b_xy_data_and_names = function(x, y, xName, yName, xLab, yLab) {
 
 
   list(x = x, y = y, xName = xName, yName = yName)
+}
+
+get_legend <- function(val) {
+  valType = typeof(val)
+  if (!is.null(val)) {
+    if (valType != "logical") {
+      if (valType != "character") {
+        stop("'legend' must be a logical value or a character string")
+      }
+    }
+  }
+  val
 }
 
 
