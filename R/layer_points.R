@@ -24,10 +24,12 @@
 #' @example man-roxygen/ex-lines.R
 #' @family layer functions
 #' @export
-ly_points <- function(fig, x, y = NULL, data = NULL,
+ly_points <- function(
+  fig, x, y = NULL, data = NULL,
   glyph = 21, color = NULL, alpha = 1, size = 10,
   hover = NULL, url = NULL, legend = NULL,
-  lname = NULL, lgroup = NULL, ...) {
+  lname = NULL, lgroup = NULL, ...
+) {
 
   # figure() %>% ly_points(1:10)
 
