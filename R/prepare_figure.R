@@ -77,6 +77,7 @@ prepare_figure <- function(fig) {
           # ## spacer if it's not the first legend group
           # if(nm != mapnames[1])
           #   legend[[paste0("lgnd_spacer_", nm)]] <- list(list("", list()))
+          nm <- gsub("^\"|\"$", "", nm)
           legend[[paste0("lgnd_header_", nm)]] <- list(list(nm, list()))
           for(ii in seq_along(map_item$labels)) {
             cur_val <- map_item$values[[ii]]
