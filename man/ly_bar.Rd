@@ -4,7 +4,7 @@
 \alias{ly_bar}
 \title{Add a "barchart" layer to a Bokeh figure}
 \usage{
-ly_bar(fig, x, y, data = NULL, color = NULL, alpha = 1,
+ly_bar(fig, x, y = NULL, data = NULL, color = NULL, alpha = 1,
   position = c("stack", "fill", "dodge"), width = 0.9, origin = NULL,
   breaks = NULL, right = FALSE, binwidth = NULL, lname = NULL,
   lgroup = NULL, legend = NULL, ...)
@@ -14,7 +14,7 @@ ly_bar(fig, x, y, data = NULL, color = NULL, alpha = 1,
 
 \item{x}{values or field name for x variable}
 
-\item{y}{values or field name for y variable}
+\item{y}{values or field name for y variable, or if NULL, y-axis will be counts of x}
 
 \item{data}{an optional data frame, providing the source for inputs x, y, and color properties}
 
@@ -40,7 +40,7 @@ ly_bar(fig, x, y, data = NULL, color = NULL, alpha = 1,
 Draws a bar chart
 }
 \details{
-The y variable is summed for each x variable and bars are plotted.  Within each x variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each x, stacking the bars.  The "dodge" choice will plot the bars for each x side by side.
+The y variable is summed for each x variable and bars are plotted.  If no y variable is supplied, the unique values of x will be tabulated.  Within each x variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each x, stacking the bars.  The "dodge" choice will plot the bars for each x side by side.
 
 Note that currently x cannot be numeric but support will soon be added for numeric x by first binning the x values.
 }
@@ -80,6 +80,27 @@ When color is \code{NULL} and \code{fill_color} or \code{line_color} are not spe
   \code{line_dash} \tab array of integer pixel distances that describe the on-off pattern of dashing to use \cr
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
+}
+\examples{
+\donttest{
+figure() \%>\%
+  ly_bar(variety, yield, data = lattice::barley) \%>\%
+  theme_axis("x", major_label_orientation = 90)
+
+figure() \%>\%
+  ly_bar(variety, yield, color = year, data = lattice::barley) \%>\%
+  theme_axis("x", major_label_orientation = 90)
+
+figure() \%>\%
+  ly_bar(variety, yield, color = year,
+    data = lattice::barley, position = "fill", width = 1) \%>\%
+  theme_axis("x", major_label_orientation = 90)
+
+figure() \%>\%
+  ly_bar(variety, yield, color = year,
+    data = lattice::barley, position = "dodge") \%>\%
+  theme_axis("x", major_label_orientation = 90)
+}
 }
 \seealso{
 Other layer functions: \code{\link{ly_abline}};
