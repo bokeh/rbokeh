@@ -58,17 +58,6 @@ grab <- function(...) {
 }
 
 
-# @example
-# col = "blue"
-# x <- sub_names(
-#   data = iris
-#   x = 5,
-#   b = col,
-#   col = "Species",
-#   col2 = Species,
-#   el = NULL
-# )
-# x
 sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
   # , matchCall = match.call(parent.frame(2L))
   if (missing(data)) {
@@ -117,7 +106,6 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
       lgroup = get_lgroup(argVal, fig),
       url = get_url(as.character(argVal), data),
       legend = get_legend(argVal),
-      dots = print(argVal),
       xlab = as.character(argVal),
       ylab = as.character(argVal),
       switch(typeof(argVal),

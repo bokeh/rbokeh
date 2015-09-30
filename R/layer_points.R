@@ -24,6 +24,11 @@
 #' @example man-roxygen/ex-lines.R
 #' @family layer functions
 #' @export
+# @example
+# ir <- iris
+# ir$glyphVal <- as.numeric(ir$Species)
+# ir$glyphCol <- c("red", "green", "blue")[ ir$glyphVal ]
+# load_all(); a <- figure() %>% ly_points(Sepal.Length, data = ir, fill_color = glyphCol); a
 ly_points <- function(
   fig, x, y = NULL, data = NULL,
   glyph = 21, color = NULL, alpha = 1, size = 10,
@@ -31,21 +36,12 @@ ly_points <- function(
   lname = NULL, lgroup = NULL, ...
 ) {
 
-  # ir <- iris
-  # ir$glyphVal <- as.numeric(ir$Species)
-  # ir$glyphCol <- c("red", "green", "blue")[ ir$glyphVal ]
-  # load_all(); figure() %>% ly_points(Sepal.Length, data = ir, fill_color = glyphCol) -> a
-
-
-  # figure() %>% ly_points(1:10)
-
   validate_fig(fig, "ly_points")
 
   mc <- attr(fig, "ly_call")
   if(is.null(mc))
     mc <- lapply(match.call(), deparse)
 
-  # dots  <- substitute(list(...))[-1]
   dots <- substitute(list(...))
   args <- sub_names(fig, data,
     grab(
@@ -63,33 +59,8 @@ ly_points <- function(
       dots
     )
   )
-  cat("\n\n"); print(args)
+  # cat("\n\n"); print(args)
 
-
-  # ## deal with possible named inputs from a data source
-  # if(!is.null(data)) {
-  #   dots  <- substitute(list(...))[-1]
-  #   args  <- lapply(dots, function(x) v_eval(x, data))
-  #   x     <- v_eval(substitute(x), data)
-  #   y     <- v_eval(substitute(y), data)
-  #   size  <- v_eval(substitute(size), data)
-  #   glyph <- v_eval(substitute(glyph), data)
-  #   color <- v_eval(substitute(color), data)
-  # } else {
-  #   args <- list(...)
-  # }
-
-  # hover <- get_hover(substitute(hover), data, parent.frame())
-  # url <- get_url(url, data)
-
-  # xy_names <- get_xy_names(x, y, xname, yname, args)
-  # ## translate different x, y types to vectors
-  # xy <- get_xy_data(x, y)
-  # lgroup <- get_lgroup(lgroup, fig)
-
-  # if(is.null(glyph))
-  #   glyph <- "circle"
-  if(is.null(args$glyph))
     args$glyph <- "circle"
 
   # args <- c(args, list(glyph = glyph, color = color,
