@@ -37,6 +37,26 @@ grab <- function(...) {
   argVals
 }
 
+`[.substituted_value` <- function(x, ...) {
+  # remove .substituted_value class
+  xClasses <- class(x)
+  substitutedValuePos <- which(xClasses == "substituted_value")
+  class(x) <- xClasses[-1 * substitutedValuePos]
+
+  # subset data
+  ret <- x[...]
+
+  # transfer attrs
+  attr.names <- names(attributes(x))
+  attr.names <- attr.names[attr.names != 'names']
+  attributes(ret)[attr.names] <- attributes(x)[attr.names]
+
+  # return classes
+  class(ret) <- xClasses
+
+  ret
+}
+
 
 # @example
 # col = "blue"
