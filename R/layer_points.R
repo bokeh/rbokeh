@@ -61,77 +61,55 @@ ly_points <- function(
   )
   # cat("\n\n"); print(args)
 
+  if(is.null(args$glyph)) {
     args$glyph <- "circle"
-
-  # args <- c(args, list(glyph = glyph, color = color,
-  #   alpha = alpha, size = size))
-
-  # if glyph is not unique, we need to split the data
-  # and call make_glyph several times
-  # otherwise we can just vary the values of things
-  # and call make_glyph just once...
-  if(length(unique(glyph)) > 1) {
-    gl <- args$glyph
-    args$glyph <- NULL
-
-    # if color wasn't specified, it should be the same for all glyphs
-    if(is.null(args$color))
-      args$color <- fig$x$spec$theme[["discrete"]][["fill_color"]](1)
-
-    lns <- sapply(args, length)
-    idx <- lns == length(xy$x)
-
-    df_args <- args[idx]
-
-    if(is.character(gl))
-      gl <- factor(gl)
-
-    df_split <- split(seq_along(gl), gl)
-
-    attr(fig, "ly_call") <- mc
-    for(ii in seq_along(df_split)) {
-      cur_idx <- df_split[[ii]]
-
-      cur_hover <- hover
-      cur_hover$data <- cur_hover$data[cur_idx, , drop = FALSE]
-
-      fig <- do.call(ly_points,
-        c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)), args[!idx],
-          list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
-            glyph = subset_with_attributes(gl, cur_idx[1]), lgroup = lgroup,
-            lname = ii, hover = cur_hover, legend = legend,
-            xlab = xy_names$x, ylab = xy_names$y)))
-    }
-    attr(fig, "ly_call") <- NULL
-    return(fig)
   }
 
+  # #TODO
+  # # if color wasn't specified, it should be the same for all glyphs
+  # if(length(unique(args$glyph)) != 1) {
+  #   # if color wasn't specified, it should be the same for all glyphs
+  #   if(is.null(args$color))
+  #     args$color <- fig$x$spec$theme[["discrete"]][["fill_color"]](1)
+  # }
+  if(length(args$glyph) == 1) {
+    args$glyph <- rep(args$glyph, length(args$x))
+  }
+  if(is.character(args$glyph)) {
+    args$glyph <- factor(args$glyph)
+  }
 
-  # glyphs are unique at this point, only keep the one glyph type
-  args$glyph <- args$glyph[1]
+  # split data up for each glyph
+  splitList <- split(seq_along(args$glyph), args$glyph)
+  for (ii in seq_along(splitList)) {
+    argObj <- subset_arg_obj(args, splitList[[ii]])
 
-  args <- resolve_color_alpha(
-    args,
-    has_line = TRUE, has_fill = TRUE,
-    ly    = fig$x$spec$layers[[args$lgroup]],
-    solid = args$glyph %in% as.character(15:20),
-    theme = fig$x$spec$theme
-  )
+    argObj$glyph <- argObj$glyph[1]
 
-  args <- resolve_glyph_props(args$glyph, args, args$lgroup)
+    argObj <- resolve_color_alpha(
+      argObj,
+      has_line = TRUE, has_fill = TRUE,
+      ly    = fig$x$spec$layers[[argObj$lgroup]],
+      solid = argObj$glyph %in% as.character(15:20),
+      theme = fig$x$spec$theme
+    )
 
-  # args <- fix_args(args, length(xy$x))
-  args <- fix_args(args, length(args$x))
+    argObj <- resolve_glyph_props(argObj$glyph, argObj, argObj$lgroup)
 
-  ## see if any options won't be used and give a message
-  if(valid_glyph(args$glyph))
-    check_opts(args, args$glyph, formals = names(formals(ly_points)))
+    ## see if any options won't be used and give a message
+    if(valid_glyph(argObj$glyph)) {
+      check_opts(argObj, argObj$glyph, formals = names(formals(ly_points)))
+    }
 
-  axis_type_range <- get_glyph_axis_type_range(args$x, args$y, glyph = args$glyph)
+    axis_type_range <- get_glyph_axis_type_range(argObj$x, argObj$y, glyph = argObj$glyph)
 
-  make_glyph(fig, args$glyph, lname = args$lname, lgroup = args$lgroup,
-    data = args[c("x", "y")], data_sig = ifelse(is.null(data), NA, digest(data)),
-    args = args, axis_type_range = axis_type_range,
-    hover = args$hover, url = args$url, legend = args$legend,
-    xname = args$xName, yname = args$yName, ly_call = mc)
+    fig <- make_glyph(
+      fig, argObj$glyph, lname = argObj$lname, lgroup = argObj$lgroup,
+      data = argObj[c("x", "y")], data_sig = ifelse(is.null(data), NA, digest(data)),
+      args = argObj, axis_type_range = axis_type_range,
+      hover = argObj$hover, url = argObj$url, legend = argObj$legend,
+      xname = argObj$xName, yname = argObj$yName, ly_call = mc
+    )
+  }
+  fig
 }
