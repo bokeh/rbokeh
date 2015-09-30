@@ -197,6 +197,35 @@ get_legend <- function(val) {
   val
 }
 
+nonSubsetableNames = c("hover", "lgroup", "lname", "url", "legend", "xlab", "ylab", "xName", "yName")
+
+subset_arg_obj = function(argObj, idxs) {
+
+  argNames <- names(argObj)
+  ret <- lapply(argNames, function(key) {
+    val <- argObj[[key]]
+    if (key %in% nonSubsetableNames) {
+      return(val)
+    }
+
+    if (is.null(val)) {
+      return(val)
+    }
+    if (length(val) == 1) {
+      return(val)
+    }
+
+    if (length(val) < max(idxs)) {
+      print(list(val = val, key = key, idxs = idxs))
+      stop("bad key val for subset")
+    }
+
+    val[idxs]
+  })
+  names(ret) <- argNames
+
+  fix_args(ret, length(ret$x))
+}
 
 
 if(FALSE) {
