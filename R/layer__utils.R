@@ -97,6 +97,7 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
       if(val %in% dataNames) {
         ret <- data[[val]]
         attr(ret, "stringName") <- val
+        class(ret) <- "substituted_value"
       } else {
         ret <- rep(val, dataLength)
       }
