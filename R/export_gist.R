@@ -1,4 +1,3 @@
-
 #' Export rbokeh plot to a gist
 #'
 #' @param fig a string containing R code to create an rbokeh figure

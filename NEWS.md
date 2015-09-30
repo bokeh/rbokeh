@@ -1,6 +1,23 @@
-Version 0.2.3.6
+Version 0.2.4.0
 ----------------------------------------------------------------------
 
+
+
+Version 0.2.4
+----------------------------------------------------------------------
+
+- add rbokeh2gist
+- update to bokeh v0.10.0
+- change `get_bokeh_html()` to `rbokeh2html()`
+- modify `save_figure()` to use rbokeh2html instead of saveWidget
+- fix small issues with `rbokeh2html()`
+- allow null y for `ly_bar()`
+- remove quotes that can appear in legend group headers
+- fix issue with resolving character column names
+- fix issue with single entry factorRange json encoding
+- add initial barchart support
+- fix JSON handling to make NAs render properly
+- update to Bokeh v0.9.3
 - initial support for themes
 - move plot/axis/grid/legend themes to theme_ functions
 - add headers to groups of legend entries from mapped attributes
