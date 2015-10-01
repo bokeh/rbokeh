@@ -3,6 +3,10 @@ ir <- iris
 ir$glyphVal <- as.numeric(ir$Species)
 ir$glyphCol <- c("red", "green", "blue")[ ir$glyphVal ]
 
+rescale <- function(x) {
+  (x - min(x)) / diff(range(x))
+}
+
 bFig <- figure(width = 480*1.5,height = 520*1.5)
 
 # ly_points
@@ -18,3 +22,7 @@ load_all(); bFig %>% ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris, en
 # Hover does not work.  It did not work beforehand
 load_all(); bFig %>% ly_annulus(Sepal.Length, Sepal.Width, data = ir, inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5, hover = Species) -> a; a
 load_all(); bFig %>% ly_annulus(Sepal.Length, Sepal.Width, data = ir, inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5, hover = Species, color = Species) -> a; a
+
+
+# ly_arc
+load_all(); bFig %>% ly_arc(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, alpha = 0.5) -> a

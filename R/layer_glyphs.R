@@ -63,14 +63,9 @@ ly_annular_wedge <- function(
   ## see if any options won't be used and give a message
   check_opts(args$params, "annular_wedge", names(formals(ly_annular_wedge)))
 
-  check_arc_direction(direction)
-
   axis_type_range <- get_glyph_axis_type_range(args$x, args$y, assert_x = "numeric", assert_y = "numeric")
 
   mc <- lapply(match.call(), deparse)
-
-  aa <<- args
-  print(args)
 
   make_glyph(fig, type = "annular_wedge", lname = args$lname, lgroup = args$lgroup,
     data = args[c("x", "y")], data_sig = ifelse(is.null(data), NA, digest(data)),
@@ -160,54 +155,56 @@ ly_annulus <- function(
 #' @example man-roxygen/ex-annwedge.R
 #' @family layer functions
 #' @export
-ly_arc <- function(fig, x, y = NULL, data = NULL,
+ly_arc <- function(
+  fig, x, y = NULL, data = NULL,
   color = NULL, alpha = 1, width = 2, type = 1,
   radius = 0.2,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_arc")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  glyph = "arc"
+  dots <- substitute(list(...))
+  args <- sub_names(fig, data,
+    grab(
+      sb(x),
+      sb(y),
+      p_sb(glyph),
+      p_sb(color),
+      p_sb(alpha),
+      p_sb(width),
+      p_sb(type),
+      p_sb(radius),
+      p_sb(start_angle),
+      p_sb(end_angle),
+      p_sb(direction),
+      # sb(hover), # no hover?
+      sb(url),
+      sb(legend),
+      sb(lname),
+      sb(lgroup),
+      dots
+    )
+  )
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x           <- v_eval(substitute(x), data)
-    y           <- v_eval(substitute(y), data)
-    color       <- v_eval(substitute(color), data)
-    radius      <- v_eval(substitute(radius), data)
-    start_angle <- v_eval(substitute(start_angle), data)
-    end_angle   <- v_eval(substitute(end_angle), data)
-    width       <- v_eval(substitute(width), data)
-  }
-
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- list(glyph = "arc", color = color, alpha = alpha,
-    radius = radius, start_angle = start_angle, end_angle = end_angle,
-    direction = direction, start_angle = start_angle, end_angle = end_angle,
-    width = width, type = type, ...)
-
-  args <- resolve_line_args(fig, args)
+  args$params <- resolve_line_args(fig, args$params)
 
   ## see if any options won't be used and give a message
-  check_opts(args, "arc", formals = names(formals(ly_arc)))
+  check_opts(args$params, "arc", formals = names(formals(ly_arc)))
 
-  check_arc_direction(direction)
-
-  axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(args$x, args$y, assert_x = "numeric", assert_y = "numeric")
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "arc", lname = lname, lgroup = lgroup,
-    data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
-    args = args, axis_type_range = axis_type_range,
-    legend = legend, xname = xy_names$x, yname = xy_names$y,
-    ly_call = mc)
+  make_glyph(
+    fig, type = "arc", lname = args$lname, lgroup = args$lgroup,
+    data = args[c("x", "y")], data_sig = ifelse(is.null(data), NA, digest(data)),
+    args = args$params, axis_type_range = axis_type_range,
+    legend = args$legend, xname = args$xName, yname = args$yName,
+    ly_call = mc
+  )
 }
 
 #' Add a "wedge" layer to a Bokeh figure
