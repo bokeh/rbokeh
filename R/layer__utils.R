@@ -140,7 +140,7 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
 
         hover = get_hover(argVal, data, parentFrame),
         lgroup = get_lgroup(argVal, fig),
-        url = get_url(as.character(argVal), data),
+        url = get_url(argVal, data),
         legend = get_legend(argVal),
         xlab = as.character(argVal),
         ylab = as.character(argVal),

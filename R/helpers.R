@@ -457,6 +457,7 @@ get_hover <- function(hn, data, envir) {
 get_url <- function(url, data) {
   if(is.null(url))
     return(NULL)
+  url <- as.character(url)
   if(length(url) == 1) {
     if(!grepl("@", url)) {
       message("url tap tool not added - 'url' must be a vector of URLs or a string referencing names of 'data' with e.g. @varname")
