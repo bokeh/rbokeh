@@ -1,32 +1,47 @@
 
-sb <- substitute
+p_sb <- sb <- substitute
 
 #' @import stringr
 grab <- function(...) {
   nameVals <- structure(as.list(match.call()[-1]), class = "uneval") %>%
     unlist() %>%
-    as.character() %>%
-    lapply(function(arg) {
-      if (str_detect(arg, "^sb\\(") && str_detect(arg, "\\)$")) {
-        arg <- arg %>% str_replace("^sb\\(", "") %>% str_replace("\\)", "")
-      }
-      arg
+    as.character()
+
+  paramIdx <- nameVals %>%
+    lapply(function(nameVal) {
+      str_detect(nameVal, "^p_sb\\(") && str_detect(nameVal, "\\)$")
     }) %>% unlist()
+  paramNames <- nameVals[paramIdx] %>%
+    lapply(function(nameVal) {
+      nameVal %>%
+        str_replace("^p\\_sb\\(", "") %>%
+        str_replace("\\)$", "")
+    }) %>% unlist()
+  nameVals[paramIdx] <- paramNames
+
+  regularIdx <- seq_along(nameVals)[! (nameVals %in% c(paramNames, "dots"))]
+  regularNames <- nameVals[regularIdx] %>%
+    lapply(function(nameVal) {
+      nameVal %>% str_replace("^sb\\(", "") %>% str_replace("\\)", "")
+    }) %>% unlist()
+
+  nameVals[regularIdx] <- regularNames
 
   argVals <- list(...)
   names(argVals) <- nameVals
+
+  ret <- argVals[regularNames]
+  ret$params <- argVals[paramNames]
 
   if(length(argVals$dots) > 1) {
     dots <- argVals$dots[-1]
     dotVals <- as.character(dots)
     dotNames <- names(dots)
     for (i in seq_along(dots)) {
-      argVals[[dotNames[i]]] <- dotVals[i]
+      ret$params[[dotNames[i]]] <- dotVals[i]
     }
   }
-  argVals$dots <- NULL
 
-  # print(argVals)
   # eval(deparse(args))
   # args[[1]] <- eval(args[[1]])
   # list(
@@ -34,28 +49,33 @@ grab <- function(...) {
   #   match.call(),
   #   sys.calls()
   # )
-  argVals
-}
-
-`[.substituted_value` <- function(x, ...) {
-  # remove .substituted_value class
-  xClasses <- class(x)
-  substitutedValuePos <- which(xClasses == "substituted_value")
-  class(x) <- xClasses[-1 * substitutedValuePos]
-
-  # subset data
-  ret <- x[...]
-
-  # transfer attrs
-  attr.names <- names(attributes(x))
-  attr.names <- attr.names[attr.names != 'names']
-  attributes(ret)[attr.names] <- attributes(x)[attr.names]
-
-  # return classes
-  class(ret) <- xClasses
-
   ret
 }
+
+# #' @export
+# asJSON.substituted_value <- function(x, ...) {
+#   class(x) <- NULL
+#   asJSON(x)
+# }
+# `[.substituted_value` <- function(x, ...) {
+#   # remove .substituted_value class
+#   xClasses <- class(x)
+#   substitutedValuePos <- which(xClasses == "substituted_value")
+#   class(x) <- xClasses[-1 * substitutedValuePos]
+#
+#   # subset data
+#   ret <- x[...]
+#
+#   # transfer attrs
+#   attr.names <- names(attributes(x))
+#   attr.names <- attr.names[attr.names != 'names']
+#   attributes(ret)[attr.names] <- attributes(x)[attr.names]
+#
+#   # return classes
+#   class(ret) <- xClasses
+#
+#   ret
+# }
 
 
 sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
@@ -86,39 +106,83 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
       if(val %in% dataNames) {
         ret <- data[[val]]
         attr(ret, "stringName") <- val
-        class(ret) <- "substituted_value"
+        # class(ret) <- "substituted_value"
       } else {
         ret <- rep(val, dataLength)
       }
     } else {
-      ret <- rep(val, dataLength)
+      ret <- val
+    }
+    ret
+  }
+
+  handle_language = function(argVal) {
+    ret <- try(eval(argVal, data), silent = TRUE)
+
+    if(inherits(ret, "try-error")) {
+      ret <- try(eval(argVal), silent = TRUE)
+      if(inherits(res, "try-error")) {
+        stop("argument '", deparse(x), "' cannot be found")
+      }
     }
     ret
   }
 
   # get the unevaled values
-  ret <- lapply(seq_along(argObj), function(argPos) {
-    argName = argNames[argPos]
-    argVal = argObj[[argPos]]
+  parse_values <- function(x) {
+    xNames <- names(x)
+    res <- lapply(seq_along(x), function(argPos) {
+      argName = xNames[argPos]
+      argVal = x[[argPos]]
 
-    ans <- switch(argName,
-      hover = get_hover(argVal, data, parentFrame),
-      lgroup = get_lgroup(argVal, fig),
-      url = get_url(as.character(argVal), data),
-      legend = get_legend(argVal),
-      xlab = as.character(argVal),
-      ylab = as.character(argVal),
-      switch(typeof(argVal),
-        symbol = handle_value(deparse(argVal)),
-        handle_value(argVal)
+      ans <- switch(argName,
+        params = parse_values(argVal),
+
+        hover = get_hover(argVal, data, parentFrame),
+        lgroup = get_lgroup(argVal, fig),
+        url = get_url(as.character(argVal), data),
+        legend = get_legend(argVal),
+        xlab = as.character(argVal),
+        ylab = as.character(argVal),
+
+        switch(typeof(argVal),
+          language = handle_language(argVal),
+          symbol = handle_value(deparse(argVal)),
+          handle_value(argVal)
+        )
       )
-    )
-    if(inherits(ans, "try-error")) {
-      stop("argument '", deparse(x), "' cannot be found")
-    }
-    ans
-  })
-  names(ret) <- argNames
+      if(inherits(ans, "try-error")) {
+        stop("argument '", deparse(x), "' cannot be found")
+      }
+      ans
+    })
+    names(res) <- xNames
+    res
+  }
+  ret <- parse_values(argObj)
+  # ret <- lapply(seq_along(argObj), function(argPos) {
+  #   argName = argNames[argPos]
+  #   argVal = argObj[[argPos]]
+  #
+  #   ans <- switch(argName,
+  #     hover = get_hover(argVal, data, parentFrame),
+  #     lgroup = get_lgroup(argVal, fig),
+  #     url = get_url(as.character(argVal), data),
+  #     legend = get_legend(argVal),
+  #     xlab = as.character(argVal),
+  #     ylab = as.character(argVal),
+  #     switch(typeof(argVal),
+  #       language = handle_language(argVal),
+  #       symbol = handle_value(deparse(argVal)),
+  #       handle_value(argVal)
+  #     )
+  #   )
+  #   if(inherits(ans, "try-error")) {
+  #     stop("argument '", deparse(x), "' cannot be found")
+  #   }
+  #   ans
+  # })
+  # names(ret) <- argNames
 
 
   # get the x and y names and data
@@ -129,7 +193,6 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
   )
 
   return(ret)
-  # return(list(ret, nameValList))
 }
 
 
@@ -197,34 +260,57 @@ get_legend <- function(val) {
   val
 }
 
-nonSubsetableNames = c("hover", "lgroup", "lname", "url", "legend", "xlab", "ylab", "xName", "yName")
 
 subset_arg_obj = function(argObj, idxs) {
+  nonSubsetableNames = c("lgroup", "lname", "url", "legend", "xlab", "ylab", "xName", "yName")
+  n = length(idxs)
+  subset_obj <- function(x) {
+    argNames <- names(x)
+    ret <- lapply(argNames, function(key) {
+      val <- x[[key]]
 
-  argNames <- names(argObj)
-  ret <- lapply(argNames, function(key) {
-    val <- argObj[[key]]
-    if (key %in% nonSubsetableNames) {
-      return(val)
-    }
+      if (key == "params") {
+        return(subset_obj(val))
+      }
+      if (key %in% nonSubsetableNames) {
+        return(val)
+      }
 
-    if (is.null(val)) {
-      return(val)
-    }
-    if (length(val) == 1) {
-      return(val)
-    }
+      if (key == "hover") {
+        val$data <- subset(val$data, 1:nrow(val$data) %in% idxs)
+        return(val)
+      }
 
-    if (length(val) < max(idxs)) {
-      print(list(val = val, key = key, idxs = idxs))
-      stop("bad key val for subset")
-    }
+      if (is.null(val)) {
+        return(val)
+      }
+      if (length(val) == 1) {
+        return(val)
+      }
 
-    val[idxs]
-  })
-  names(ret) <- argNames
+      if (length(val) < max(idxs)) {
+        print(list(val = val, key = key, idxs = idxs))
+        stop("bad key val for subset")
+      }
 
-  fix_args(ret, length(ret$x))
+      if (length(attributes(val)) > 1) {
+        return(subset_with_attributes(val, idxs))
+      } else {
+        return(val[idxs])
+      }
+    })
+    names(ret) <- argNames
+
+    ret
+  }
+
+  subsetArgObj <- subset_obj(argObj)
+
+  ret <- fix_args(subsetArgObj[names(subsetArgObj) != "params"], n)
+  ret$params <- fix_args(subsetArgObj$params, n)
+
+  print(ret)
+  ret
 }
 
 

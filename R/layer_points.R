@@ -47,10 +47,10 @@ ly_points <- function(
     grab(
       sb(x),
       sb(y),
-      sb(glyph),
-      sb(color),
-      sb(alpha),
-      sb(size),
+      p_sb(glyph),
+      p_sb(color),
+      p_sb(alpha),
+      p_sb(size),
       sb(hover),
       sb(url),
       sb(legend),
@@ -60,9 +60,10 @@ ly_points <- function(
     )
   )
   # cat("\n\n"); print(args)
-
-  if(is.null(args$glyph)) {
-    args$glyph <- "circle"
+  # args <- c(args, list(glyph = glyph, color = color,
+      # alpha = alpha, size = size))
+  if(is.null(args$params$glyph)) {
+    args$params$glyph <- "circle"
   }
 
   # #TODO
@@ -72,41 +73,42 @@ ly_points <- function(
   #   if(is.null(args$color))
   #     args$color <- fig$x$spec$theme[["discrete"]][["fill_color"]](1)
   # }
-  if(length(args$glyph) == 1) {
-    args$glyph <- rep(args$glyph, length(args$x))
+  if(length(args$params$glyph) == 1) {
+    args$params$glyph <- rep(args$params$glyph, length(args$x))
   }
-  if(is.character(args$glyph)) {
-    args$glyph <- factor(args$glyph)
+  if(is.character(args$params$glyph)) {
+    args$params$glyph <- factor(args$params$glyph)
   }
 
+
   # split data up for each glyph
-  splitList <- split(seq_along(args$glyph), args$glyph)
+  splitList <- split(seq_along(args$params$glyph), args$params$glyph)
   for (ii in seq_along(splitList)) {
     argObj <- subset_arg_obj(args, splitList[[ii]])
 
-    argObj$glyph <- argObj$glyph[1]
+    argObj$params$glyph <- argObj$params$glyph[1]
 
-    argObj <- resolve_color_alpha(
-      argObj,
+    argObj$params <- resolve_color_alpha(
+      argObj$params,
       has_line = TRUE, has_fill = TRUE,
       ly    = fig$x$spec$layers[[argObj$lgroup]],
-      solid = argObj$glyph %in% as.character(15:20),
+      solid = argObj$params$glyph %in% as.character(15:20),
       theme = fig$x$spec$theme
     )
 
-    argObj <- resolve_glyph_props(argObj$glyph, argObj, argObj$lgroup)
+    argObj$params <- resolve_glyph_props(argObj$params$glyph, argObj$params, argObj$lgroup)
 
     ## see if any options won't be used and give a message
-    if(valid_glyph(argObj$glyph)) {
-      check_opts(argObj, argObj$glyph, formals = names(formals(ly_points)))
+    if(valid_glyph(argObj$params$glyph)) {
+      check_opts(argObj$params, argObj$params$glyph, formals = names(formals(ly_points)))
     }
 
-    axis_type_range <- get_glyph_axis_type_range(argObj$x, argObj$y, glyph = argObj$glyph)
+    axis_type_range <- get_glyph_axis_type_range(argObj$x, argObj$y, glyph = argObj$params$glyph)
 
     fig <- make_glyph(
-      fig, argObj$glyph, lname = argObj$lname, lgroup = argObj$lgroup,
+      fig, argObj$params$glyph, lname = argObj$lname, lgroup = argObj$lgroup,
       data = argObj[c("x", "y")], data_sig = ifelse(is.null(data), NA, digest(data)),
-      args = argObj, axis_type_range = axis_type_range,
+      args = argObj$params, axis_type_range = axis_type_range,
       hover = argObj$hover, url = argObj$url, legend = argObj$legend,
       xname = argObj$xName, yname = argObj$yName, ly_call = mc
     )

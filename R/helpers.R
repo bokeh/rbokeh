@@ -530,15 +530,29 @@ v_eval <- function(x, data) {
 }
 
 fix_args <- function(args, n) {
-  nms <- names(args)
-  goodPos <- ! (nms %in% c("url"))
-  nms <- nms[goodPos]
+  # print(args); cat("\n\n\n\n\n\n\n\n\n\n\n")
 
-  lns <- sapply(args[goodPos], length)
+  lns <- sapply(names(args), function(itemName) {
+    itemVal = args[[itemName]]
+
+    switch(itemName,
+      url = 1,
+      hover = ifelse(is.data.frame(itemVal$data), nrow(itemVal$data), length(itemVal$data)),
+
+      if (is.data.frame(itemVal) || is.matrix(itemVal)) {
+        nrow(itemVal)
+      } else {
+        length(itemVal)
+      }
+
+    )
+  })
   idx <- which(!lns %in% c(0, 1, n))
 
-  if(length(idx) > 0)
-    stop("Arguments do not have correct length: ", paste(nms[idx], " (", lns[idx],")", sep = "", collapse = ", "))
+  if(length(idx) > 0) {
+    nms <- names(args)
+    stop("Arguments do not have correct length of ", n, ": ", paste(nms[idx], " (", lns[idx],")", sep = "", collapse = ", "))
+  }
 
   # scl_idx <- which(lns == 1)
   # split_idx <- which(lns == n)
@@ -546,6 +560,7 @@ fix_args <- function(args, n) {
   if(length(null_idx) > 0)
     args[null_idx] <- NULL
 
+  # print(args); cat("\n\n\n\n")
   args
 }
 
