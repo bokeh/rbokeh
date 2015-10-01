@@ -19,11 +19,13 @@
 #'
 #' @family layer functions
 #' @export
-ly_bar <- function(fig, x, y, data = NULL,
+ly_bar <- function(
+  fig, x, y, data = NULL,
   color = NULL, alpha = 1,
   position = c("stack", "fill", "dodge"), width = 0.9,
   origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
-  lname = NULL, lgroup = NULL, legend = NULL, ...) {
+  lname = NULL, lgroup = NULL, legend = NULL, ...
+) {
 
   position <- match.arg(position)
 
