@@ -535,6 +535,14 @@ fix_args <- function(args, n) {
   lns <- sapply(names(args), function(itemName) {
     itemVal = args[[itemName]]
 
+    if (is.null(itemVal)) {
+      return(0)
+    }
+
+    if (itemName == "hover") {
+      pritn(itemVal)
+    }
+
     switch(itemName,
       url = 1,
       hover = ifelse(is.data.frame(itemVal$data), nrow(itemVal$data), length(itemVal$data)),

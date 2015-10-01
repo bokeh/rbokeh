@@ -269,11 +269,15 @@ subset_arg_obj = function(argObj, idxs) {
     ret <- lapply(argNames, function(key) {
       val <- x[[key]]
 
-      if (key == "params") {
-        return(subset_obj(val))
-      }
       if (key %in% nonSubsetableNames) {
         return(val)
+      }
+      if (is.null(val)) {
+        return(val)
+      }
+
+      if (key == "params") {
+        return(subset_obj(val))
       }
 
       if (key == "hover") {
@@ -281,9 +285,6 @@ subset_arg_obj = function(argObj, idxs) {
         return(val)
       }
 
-      if (is.null(val)) {
-        return(val)
-      }
       if (length(val) == 1) {
         return(val)
       }
