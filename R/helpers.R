@@ -34,7 +34,7 @@ get_next_color <- function(lgroupobj, which = "fill_color", type = "discrete", t
 }
 
 check_arc_direction <- function(direction) {
-  if(!direction %in% c("clock", "anticlock"))
+  if(! all(direction %in% c("clock", "anticlock")))
     stop("'direction' must be 'clock' or 'anticlock'", call. = FALSE)
 }
 

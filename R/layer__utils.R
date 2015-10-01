@@ -160,6 +160,10 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
     res
   }
   ret <- parse_values(argObj)
+
+  if (!is.null(ret$direction)) {
+    check_arc_direction(ret$direction)
+  }
   # ret <- lapply(seq_along(argObj), function(argPos) {
   #   argName = argNames[argPos]
   #   argVal = argObj[[argPos]]
