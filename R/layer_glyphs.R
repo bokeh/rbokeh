@@ -28,13 +28,11 @@ ly_annular_wedge <- function(
 
   validate_fig(fig, "ly_annular_wedge")
 
-  glyph = "annular_wedge"
   dots <- substitute(list(...))
   args <- sub_names(fig, data,
     grab(
       sb(x),
       sb(y),
-      p_sb(glyph),
       p_sb(inner_radius),
       p_sb(outer_radius),
       p_sb(start_angle),
@@ -50,6 +48,7 @@ ly_annular_wedge <- function(
       dots
     )
   )
+  args$params$glyph <- "annular_wedge"
 
   # args <- c(args, list(glyph = "annular_wedge", color = color, alpha = alpha,
   #   inner_radius = inner_radius, outer_radius = outer_radius,
@@ -100,13 +99,11 @@ ly_annulus <- function(
 
   validate_fig(fig, "ly_annulus")
 
-  glyph = "annulus"
   dots <- substitute(list(...))
   args <- sub_names(fig, data,
     grab(
       sb(x),
       sb(y),
-      p_sb(glyph),
       p_sb(inner_radius),
       p_sb(outer_radius),
       p_sb(color),
@@ -119,6 +116,7 @@ ly_annulus <- function(
       dots
     )
   )
+  args$params$glyph <- "annulus"
 
   if(missing(alpha))
     args$params$alpha <- NULL
@@ -165,13 +163,11 @@ ly_arc <- function(
 
   validate_fig(fig, "ly_arc")
 
-  glyph = "arc"
   dots <- substitute(list(...))
   args <- sub_names(fig, data,
     grab(
       sb(x),
       sb(y),
-      p_sb(glyph),
       p_sb(color),
       p_sb(alpha),
       p_sb(width),
@@ -188,7 +184,7 @@ ly_arc <- function(
       dots
     )
   )
-
+  args$params$glyph <- "arc"
   args$params <- resolve_line_args(fig, args$params)
 
   ## see if any options won't be used and give a message
