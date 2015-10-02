@@ -31,3 +31,12 @@ load_all(); bFig %>% ly_arc(Sepal.Length, Sepal.Width, data = ir, end_angle = re
 load_all(); bFig %>% ly_wedge(Sepal.Length, Sepal.Width, data = ir) -> a; a
 load_all(); bFig %>% bly_wedge(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, radius = 0.15, alpha = 0.5, hover = Species) -> a; a
 load_all(); bFig %>% ly_wedge(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, radius = 0.15, alpha = 0.5, hover = Species) -> a; a
+
+
+
+
+xx <- rnorm(10000)
+yy <- rnorm(10000)
+
+# ly_polygon
+load_all(); bFig %>% ly_hexbin(xx, yy) -> a; a

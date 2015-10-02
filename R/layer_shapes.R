@@ -12,88 +12,96 @@
 #' @template dots-fillline
 #' @family layer functions
 #' @export
-ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
+ly_polygons <- function(
+  fig, xs, ys, group = NULL, data = NULL,
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, # legend = NULL,
-  lname = NULL, lgroup = NULL, ...) {
+  lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_polygons")
 
-  xname <- deparse(substitute(xs))
-  yname <- deparse(substitute(ys))
+  dots <- substitute(list(...))
+  args <- sub_names(fig, data,
+    grab(
+      sb(xs),
+      sb(ys),
+      sb(group),
+      p_sb(color),
+      p_sb(alpha),
+      sb(hover),
+      sb(url),
+      sb(lname),
+      sb(lgroup),
+      dots
+    )
+  )
+  # pull out manually, as they are repeated customized
+  xs <- args$xs
+  ys <- args$ys
+  group <- args$group
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots  <- substitute(list(...))[-1]
-    args  <- lapply(dots, function(x) v_eval(x, data))
-    xs    <- v_eval(substitute(xs), data)
-    ys    <- v_eval(substitute(ys), data)
-    group <- v_eval(substitute(group), data)
-    color <- v_eval(substitute(color), data)
-  } else {
-    args <- list(...)
+  if(missing(alpha)) {
+    args$params$alpha <- NULL
   }
 
-  args$color <- color
-  args$alpha <- alpha
-  if(missing(alpha))
-    args$alpha <- NULL
-
   if(!is.null(group)) {
-    if(is.factor(group))
+    if(is.factor(group)) {
       group <- as.character(group)
+    }
     idx <- unname(split(seq_along(group), group))
     xs <- lapply(idx, function(x) xs[x])
     ys <- lapply(idx, function(x) ys[x])
+
     # data for hover and url will only be one row for each group
     data <- data[sapply(idx, "[", 1),]
 
-    ns <- lapply(args, length)
+    ns <- lapply(args$params, length)
     bad_ind <- which(!ns %in% c(0, 1, length(idx), length(group)))
     if(length(bad_ind) > 0) {
-      message("The following arguments do not have length the same as the number of groups or the total number of observations for ly_polygons() and will be ignored: ", paste(names(args[bad_ind]), collapse = ", "))
-      args[bad_ind] <- NULL
+      message("The following arguments do not have length the same as the number of groups or the total number of observations for ly_polygons() and will be ignored: ", paste(names(args$params[bad_ind]), collapse = ", "))
+      args$params[bad_ind] <- NULL
     }
 
     full_length <- which(ns == length(group))
     for(ii in full_length) {
-      args[[ii]] <- sapply(idx, function(x) args[[ii]][x[1]])
+      args$params[[ii]] <- sapply(idx, function(x) args$params[[ii]][x[1]])
     }
   }
 
-  xy_names <- get_xy_names(xs, ys, xname, yname, args)
   ## translate different x, y types to vectors
-  lgroup <- get_lgroup(lgroup, fig)
-
-  if(is.atomic(xs) && !is.list(xs))
+  if(is.atomic(xs) && !is.list(xs)) {
     xs <- list(xs)
+  }
 
-  if(is.atomic(ys) && !is.list(ys))
+  if(is.atomic(ys) && !is.list(ys)) {
     ys <- list(ys)
+  }
 
   if(!(is.list(xs) && is.list(ys))) {
     stop("For ly_polygons, xs and ys must be lists or specified through a data frame through 'data' argument.")
   }
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
-  check_opts(args, "patches", formals = names(formals(ly_polygons)))
+  check_opts(args$params, "patches", formals = names(formals(ly_polygons)))
 
-  if(is.null(args$fill_alpha))
-    args$fill_alpha <- 0.5
-
-  hover <- get_hover(substitute(hover), data, parent.frame())
-  url <- get_url(url, data)
+  if(is.null(args$params$fill_alpha)) {
+    args$params$fill_alpha <- 0.5
+  }
 
   axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "patches", data = list(xs = unname(xs), ys = unname(ys)),
-    args = args, axis_type_range = axis_type_range, xname = xy_names$x, yname = xy_names$y,
-    lname = lname, lgroup = lgroup, hover = hover, url = url,
-    ly_call = mc)
+  make_glyph(
+    fig, type = "patches", data = list(xs = unname(xs), ys = unname(ys)),
+    args = args$params, axis_type_range = axis_type_range,
+    xname = args$xName, yname = args$yName,
+    lname = args$lname, lgroup = args$lgroup, hover = args$hover, url = args$url,
+    ly_call = mc
+  )
 }
 
 #' Add a "rect" layer to a Bokeh figure
