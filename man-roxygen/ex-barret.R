@@ -26,3 +26,8 @@ load_all(); bFig %>% ly_annulus(Sepal.Length, Sepal.Width, data = ir, inner_radi
 
 # ly_arc
 load_all(); bFig %>% ly_arc(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, alpha = 0.5) -> a
+
+# ly_wedge
+load_all(); bFig %>% ly_wedge(Sepal.Length, Sepal.Width, data = ir) -> a; a
+load_all(); bFig %>% bly_wedge(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, radius = 0.15, alpha = 0.5, hover = Species) -> a; a
+load_all(); bFig %>% ly_wedge(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, radius = 0.15, alpha = 0.5, hover = Species) -> a; a
