@@ -144,7 +144,7 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
         legend = get_legend(argVal),
         xlab = as.character(argVal),
         ylab = as.character(argVal),
-
+        direction = as.character(argVal),
         switch(typeof(argVal),
           language = handle_language(argVal),
           symbol = handle_value(deparse(argVal)),
