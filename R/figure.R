@@ -23,6 +23,7 @@
 #' @param lod_interval (integer) Interval (in ms) during which an interactive tool event will enable level-of-detail downsampling (see "Controlling level of detail").
 #' @param lod_threshold (integer) A number of data points, above which level-of-detail downsampling may be performed by glyph renderers. Set to \code{NULL} to disable any level-of-detail downsampling (see "Controlling level of detail").
 #' @param lod_timeout (integer) Timeout (in ms) for checking whether interactive tool events are still occurring. Once level-of-detail mode is enabled, a check is made every lod_timeout ms. If no interactive tool events have happened, level-of-detail mode is disabled (see "Controlling level of detail").
+#' @param webgl (logical) should webgl be used for rendering?
 #' @param \ldots parameters can be specified here that are available in \code{\link{theme_plot}}
 #' @section Controlling level of detail:
 #' Although the HTML canvas can comfortably display tens or even hundreds of thousands of glyphs, doing so can have adverse affects on interactive performance. In order to accommodate large-ish (but not enormous) data sizes, Bokeh plots offer "Level of Detail" (LOD) capability in the client.
@@ -79,6 +80,7 @@ figure <- function(
   lod_interval = 300,
   lod_threshold = NULL,
   lod_timeout = 500,
+  webgl = FALSE,
   ...
 ) {
   specified <- names(as.list(match.call())[-1])
@@ -243,7 +245,8 @@ figure_par_validator_map <- list(
   "lod_factor" = "int",
   "lod_interval" = "int",
   "lod_threshold" = "int",
-  "lod_timeout" = "int"
+  "lod_timeout" = "int",
+  "webgl" = "logical"
 )
 
 
