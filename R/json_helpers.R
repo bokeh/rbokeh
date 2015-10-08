@@ -27,45 +27,64 @@ print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, file = "", pbco
 #' @param fig figure
 #' @export
 rbokeh2html <- function(fig) {
-  all_models <- fig$x$spec$model
-  elementid <- digest(Sys.time())
-  modelid <- fig$x$spec$model$plot$id
+  fig <- rbokeh_prerender(fig)
+  modelid <- fig$x$modelid
+  elementid <- fig$x$elementid
   type <- fig$x$modeltype
 
-  fig <- rbokeh_prerender(fig)
   fig <- toJSON(fig$x$all_models, pretty = pretty,
     auto_unbox = TRUE, null = "null", na = "null")
 
   ver <- get_bokeh_version()
 
-  a <- paste0(
-  '<!DOCTYPE html>\n',
-  '<html>\n',
-  '<head>\n',
-  '<script src="http://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.js"></script>\n',
-  '<link href="http://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.css" rel="stylesheet">\n',
-  '</head>\n\n',
-  '<body>\n',
-  '<div id="', elementid, '" class="plotdiv"></div>\n\n',
-  '<script type="text/javascript">\n',
-  'Bokeh.$(function() {\n',
-  'var modelid = "', modelid, '";\n',
-  'var modeltype = "', type,'";\n',
-  'var elementid = "', elementid,'";\n',
-  'Bokeh.logger.info("Realizing plot:");\n',
-  'Bokeh.logger.info(" - modeltype: ', type, '");\n',
-  'Bokeh.logger.info(" - modelid: ', modelid, '");\n',
-  'Bokeh.logger.info(" - elementid: ', elementid, '");\n',
-  'var all_models = ', fig, ';\n',
-  'Bokeh.load_models(all_models);\n',
-  'var model = Bokeh.Collections(modeltype).get(modelid);\n',
-  'var view = new model.default_view({model: model, el: \'#', elementid, '\'});\n',
-  'Bokeh.index[modelid] = view;\n',
-  '});\n',
-  '</script>\n',
-  '</body>\n',
-  '</html>')
+  a <- paste0('<!DOCTYPE html>
+<html>
+<head>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.js"></script>
+<link href="http://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.css" rel="stylesheet">
+</head>
+<body>
+<div id="', elementid, '" class="plotdiv"></div>
+<script type="text/javascript">
+Bokeh.$(function() {
+  var modelid = "', modelid, '";
+  var modeltype = "', type, '";
+  var elementid = "', elementid, '";
+  Bokeh.logger.info("Realizing plot:");
+  Bokeh.logger.info(" - modeltype: ', type, '");
+  Bokeh.logger.info(" - modelid: ', modelid, '");
+  Bokeh.logger.info(" - elementid: ', elementid, '");
+  var all_models = ', fig, ';
+  // change "nulls" in data to NaN
+  function traverseObject(obj) {
+    for(var key in obj) {
+      if(obj[key].constructor === Object) {
+        traverseObject(obj[key]);
+      } else if(obj[key].constructor === Array) {
+        for (var i = 0; i < obj[key].length; i++) {
+          if(obj[key][i] === null)
+            obj[key][i] = NaN;
+        };
+      }
+    };
+  }
+  for(var i = 0; i < all_models.length; i++) {
+    if(all_models[i].type === "ColumnDataSource")
+      traverseObject(all_models[i].attributes.data);
+  };
+  Bokeh.load_models(all_models);
+  var model = Bokeh.Collections(modeltype).get(modelid);
+  var view = new model.default_view({model: model, el: "#" + elementid});
+  // Bokeh.instance = view;
+  Bokeh.index[modelid] = view;
+});
+</script>
+</body>
+</html>')
 }
+
+
+
 
 get_bokeh_version <- function() {
   # assumes there is only one listed dependency here
