@@ -11,7 +11,7 @@ figure(width = 480, height = 520, title = NULL, xlab = NULL,
   "resize", "reset", "save", "help"), theme = getOption("bokeh_theme"),
   toolbar_location = "above", h_symmetry = TRUE, v_symmetry = FALSE,
   logo = "normal", lod_factor = 10, lod_interval = 300,
-  lod_threshold = NULL, lod_timeout = 500, ...)
+  lod_threshold = NULL, lod_timeout = 500, webgl = FALSE, ...)
 }
 \arguments{
 \item{width}{figure width in pixels}
@@ -59,6 +59,8 @@ figure(width = 480, height = 520, title = NULL, xlab = NULL,
 \item{lod_threshold}{(integer) A number of data points, above which level-of-detail downsampling may be performed by glyph renderers. Set to \code{NULL} to disable any level-of-detail downsampling (see "Controlling level of detail").}
 
 \item{lod_timeout}{(integer) Timeout (in ms) for checking whether interactive tool events are still occurring. Once level-of-detail mode is enabled, a check is made every lod_timeout ms. If no interactive tool events have happened, level-of-detail mode is disabled (see "Controlling level of detail").}
+
+\item{webgl}{(logical) should webgl be used for rendering?}
 
 \item{\ldots}{parameters can be specified here that are available in \code{\link{theme_plot}}}
 }
