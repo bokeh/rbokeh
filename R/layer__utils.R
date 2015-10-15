@@ -405,6 +405,7 @@ get_legend <- function(val) {
 subset_arg_obj = function(argObj, idxs) {
   nonSubsetableNames = c("lgroup", "lname", "url", "legend", "xlab", "ylab", "xName", "yName")
   n = length(idxs)
+
   subset_obj <- function(x) {
     argNames <- names(x)
     ret <- lapply(argNames, function(key) {
@@ -415,10 +416,6 @@ subset_arg_obj = function(argObj, idxs) {
       }
       if (is.null(val)) {
         return(val)
-      }
-
-      if (key == "params") {
-        return(subset_obj(val))
       }
 
       if (key == "hover") {
@@ -446,12 +443,10 @@ subset_arg_obj = function(argObj, idxs) {
     ret
   }
 
-  subsetArgObj <- subset_obj(argObj)
+  subsetArgObj <- lapply(argObj, subset_obj)
 
-  ret <- fix_args(subsetArgObj[names(subsetArgObj) != "params"], n)
-  ret$params <- fix_args(subsetArgObj$params, n)
+  ret <- lapply(subsetArgObj, fix_args, n)
 
-  print(ret)
   ret
 }
 
