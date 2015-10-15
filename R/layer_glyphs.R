@@ -162,25 +162,24 @@ ly_arc <- function(
 
   validate_fig(fig, "ly_arc")
 
-  dots <- substitute(list(...))
-  args <- sub_names(fig, data,
-    grab(
-      sb(x),
-      sb(y),
-      p_sb(color),
-      p_sb(alpha),
-      p_sb(width),
-      p_sb(type),
-      p_sb(radius),
-      p_sb(start_angle),
-      p_sb(end_angle),
-      p_sb(direction),
-      # sb(hover), # no hover?
-      sb(url),
-      sb(legend),
-      sb(lname),
-      sb(lgroup),
-      dots
+  args <- sub_names2(fig, data,
+    grab2(
+      x,
+      y,
+      color,
+      alpha,
+      width,
+      type,
+      radius,
+      start_angle,
+      end_angle,
+      direction,
+      # hover, # no hover?
+      # url, # no url?
+      legend,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
     )
   )
   args$params$glyph <- "arc"
@@ -189,15 +188,15 @@ ly_arc <- function(
   ## see if any options won't be used and give a message
   check_opts(args$params, "arc", formals = names(formals(ly_arc)))
 
-  axis_type_range <- get_glyph_axis_type_range(args$x, args$y, assert_x = "numeric", assert_y = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y, assert_x = "numeric", assert_y = "numeric")
 
   mc <- lapply(match.call(), deparse)
 
   make_glyph(
-    fig, type = "arc", lname = args$lname, lgroup = args$lgroup,
-    data = args[c("x", "y")], data_sig = ifelse(is.null(data), NA, digest(data)),
+    fig, type = "arc", lname = args$info$lname, lgroup = args$info$lgroup,
+    data = args$data, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args$params, axis_type_range = axis_type_range,
-    legend = args$legend, xname = args$xName, yname = args$yName,
+    legend = args$info$legend, xname = args$info$xName, yname = args$info$yName,
     ly_call = mc
   )
 }
