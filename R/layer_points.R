@@ -42,26 +42,22 @@ ly_points <- function(
   if(is.null(mc))
     mc <- lapply(match.call(), deparse)
 
-  dots <- substitute(list(...))
-  args <- sub_names(fig, data,
-    grab(
-      sb(x),
-      sb(y),
-      p_sb(glyph),
-      p_sb(color),
-      p_sb(alpha),
-      p_sb(size),
-      sb(hover),
-      sb(url),
-      sb(legend),
-      sb(lname),
-      sb(lgroup),
-      dots
+  args <- sub_names2(fig, data,
+    grab2(
+      x,
+      y,
+      glyph,
+      color,
+      alpha,
+      size,
+      hover,
+      url,
+      legend,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
     )
   )
-  # cat("\n\n"); print(args)
-  # args <- c(args, list(glyph = glyph, color = color,
-      # alpha = alpha, size = size))
   if(is.null(args$params$glyph)) {
     args$params$glyph <- "circle"
   }
@@ -73,8 +69,9 @@ ly_points <- function(
   #   if(is.null(args$color))
   #     args$color <- fig$x$spec$theme[["discrete"]][["fill_color"]](1)
   # }
+
   if(length(args$params$glyph) == 1) {
-    args$params$glyph <- rep(args$params$glyph, length(args$x))
+    args$params$glyph <- rep(args$params$glyph, length(args$data$x))
   }
   if(is.character(args$params$glyph)) {
     args$params$glyph <- factor(args$params$glyph)
@@ -91,26 +88,26 @@ ly_points <- function(
     argObj$params <- resolve_color_alpha(
       argObj$params,
       has_line = TRUE, has_fill = TRUE,
-      ly    = fig$x$spec$layers[[argObj$lgroup]],
+      ly    = fig$x$spec$layers[[argObj$info$lgroup]],
       solid = argObj$params$glyph %in% as.character(15:20),
       theme = fig$x$spec$theme
     )
 
-    argObj$params <- resolve_glyph_props(argObj$params$glyph, argObj$params, argObj$lgroup)
+    argObj$params <- resolve_glyph_props(argObj$params$glyph, argObj$params, argObj$info$lgroup)
 
     ## see if any options won't be used and give a message
     if(valid_glyph(argObj$params$glyph)) {
       check_opts(argObj$params, argObj$params$glyph, formals = names(formals(ly_points)))
     }
 
-    axis_type_range <- get_glyph_axis_type_range(argObj$x, argObj$y, glyph = argObj$params$glyph)
+    axis_type_range <- get_glyph_axis_type_range(argObj$data$x, argObj$data$y, glyph = argObj$params$glyph)
 
     fig <- make_glyph(
-      fig, argObj$params$glyph, lname = argObj$lname, lgroup = argObj$lgroup,
-      data = argObj[c("x", "y")], data_sig = ifelse(is.null(data), NA, digest(data)),
+      fig, argObj$params$glyph, lname = argObj$info$lname, lgroup = argObj$info$lgroup,
+      data = argObj$data, data_sig = ifelse(is.null(data), NA, digest(data)),
       args = argObj$params, axis_type_range = axis_type_range,
-      hover = argObj$hover, url = argObj$url, legend = argObj$legend,
-      xname = argObj$xName, yname = argObj$yName, ly_call = mc
+      hover = argObj$info$hover, url = argObj$info$url, legend = argObj$info$legend,
+      xname = argObj$info$xName, yname = argObj$info$yName, ly_call = mc
     )
   }
   fig
