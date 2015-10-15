@@ -20,6 +20,7 @@ Imports:
     jsonlite,
     digest,
     hexbin,
+    lazyeval,
     magrittr,
     ggplot2,
     scales,

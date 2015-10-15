@@ -13,7 +13,7 @@ bFig <- figure(width = 480*1.5,height = 520*1.5)
 (test_b_eval = function(){
   matchVal = ir$Species
   attr(matchVal, "stringName") <- "Species"
-  load_all(); require(testthat);
+  load_all(); require(testthat); require(lazyeval)
   b <- b_eval(ir); a <- function(x){ b(lazy(x)) };
   col = 5; expect_equivalent(a(col), 5)
   expect_equivalent(a("Species"), matchVal)
