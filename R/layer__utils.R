@@ -1,6 +1,143 @@
 
 p_sb <- sb <- substitute
 
+b_eval <- function(data, parentHeight = 2) {
+
+  get_symbol = function(x) {
+    eval(parse(text = paste0("substitute(", x$expr, ", x$env)")))
+  }
+
+  if (is.null(data)) {
+    fn <- function(x) {
+      variableUsed = as.character(match.call()[-1])
+      # ans = eval(x, envir = parent.frame(parentHeight))
+
+      ans = lazy_eval(x)
+
+      # if it is an "data" variable name, set the stringName to the value used, such as "xVal"
+      if(!is.null(ans)) {
+        if (deparse(x$expr) %in% data_name_list_c()) {
+          attr(ans, "stringName") <- deparse(get_symbol(x))
+        }
+      }
+
+      return(ans)
+    }
+  } else {
+    if (! is.data.frame(data)) {
+      stop("data must be NULL or a data.frame")
+    }
+
+    # cat("\n\nData Rows: ");print(nrow(data));cat("\n")
+    fn <- function(x) {
+
+      if (! inherits(x, "lazy")) {
+        stop("argument is not of class 'lazy'")
+      }
+
+      xSymbol <- get_symbol(x)
+      xName <- deparse(xSymbol)
+
+      return_ans <- function(ans) {
+        if (!is.null(ans)) {
+          if (deparse(x$expr) %in% data_name_list_c()) {
+            attr(ans, "stringName") <- deparse(get_symbol(x))
+          } else if (xName %in% names(data)) {
+            attr(ans, "stringName") <- deparse(get_symbol(x))
+          }
+        }
+        ans
+      }
+      # cat("\n\n First\n");print(x)
+
+      # check for "as is"
+      # resClass <- try(class(eval(xSymbol, parent.frame(parentHeight))), silent = TRUE)
+      plainLazyEval = try(lazy_eval(x), silent = TRUE)
+
+      # couldn't evaluate, therefore in data?
+      if (inherits(plainLazyEval, "try-error")) {
+        # assuming it is an expression that fails when evaluated
+        # must retrieve the symbol from the envir
+        # then retrieve the data with that symbol
+
+        # include the global env so things link "*" and "+" or global user functions work
+        res <- try(eval(xSymbol, data, globalenv()), silent = TRUE)
+        if(inherits(res, "try-error")) {
+          # print(str(data))
+          # browser()
+          stop("argument '", xName, "' cannot be found in data")
+        }
+
+        return(return_ans(res))
+      }
+
+      # object exists as evaluated
+      res <- plainLazyEval
+
+      if (is.null(res)) {
+        return(return_ans(res))
+      }
+
+      resClass <- class(res)
+      if (identical(resClass, "AsIs")) {
+        # this means it evaluated properly and is suppose to be "as is"
+        return(return_ans(res))
+      }
+
+      ## In this case, the user has specified a 'data' argument
+      ## but has also specified an "additional parameter" argument
+      ## such as fill_alpha, etc. which has been set to a variable
+      ## in the calling frame
+      ## for example:
+      ##  col <- "blue"
+      ##  figure() %>% ly_polygon(..., data = d, fill_color = col)
+      ## it is looking for "col" in 'data' but instead should get it from the calling frame
+      ## but right now, we throw an error
+      ## and the way around it is to not use the 'data' argument
+      ## and specify everything explicitly
+
+      ## variable name could have been supplied in quotes
+      if(length(res) == 1 && is.character(res) && nrow(data) > 1) {
+        if(res %in% names(data)) {
+          nm <- res
+          res <- data[[res]]
+          attr(res, "stringName") <- nm
+        } else {
+          res <- rep(res, nrow(data))
+        }
+      }
+
+      if (is.null(res)) {
+        return(return_ans(res))
+      }
+
+      # # if the variable came from the data, give it a name
+      # dp <- deparse(x)
+      # if(dp[1] %in% names(data))
+      #   attr(res, "nseName") <- dp
+
+      # return(return_ans(res))
+      return(res)
+    }
+  }
+
+  fn
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #' @import stringr
 grab <- function(...) {
   nameVals <- structure(as.list(match.call()[-1]), class = "uneval") %>%
@@ -319,8 +456,252 @@ subset_arg_obj = function(argObj, idxs) {
 }
 
 
-if(FALSE) {
-  load_all()
-  col = "blue"
-  sub_names(x = 5, b = col, col = "Species", col2 = Species, el = NULL, data = iris) -> x; x
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+data_name_list = function() {
+  list(
+    c("x", "y"),
+    c("xleft", "ybottom", "xright", "ytop"),
+    c("xs", "ys")
+  )
+}
+data_name_list_c = function() {
+  unlist(data_name_list())
+}
+grab_data_index = function(nameVals) {
+  dataNameList = data_name_list()
+  dataNameIdx = lapply(dataNameList, function(dataNames) {
+    all(dataNames %in% nameVals)
+  }) %>% unlist() %>% which()
+
+  if (length(dataNameIdx) == 0) {
+    stop("invalid data names supplied to 'grab'")
+  }
+  if (length(dataNameIdx) > 1) {
+    stop("too many data names were supplied to 'grab'")
+  }
+
+  dataIdx <- nameVals %in% dataNameList[[dataNameIdx]]
+
+}
+
+grab_regular_index = function(nameVals) {
+  nameVals %in% c("hover", "group", "lname", "lgroup", "legend", "xlab", "ylab")
+}
+
+grab_param_index = function(dataIdx, regularIdx) {
+  !(dataIdx | regularIdx)
+}
+
+grab2 <- function(..., dots) {
+
+  if (missing(dots)) {
+    stop("'dots' must be supplied")
+  }
+
+  nameVals <- structure(as.list(match.call()[-1]), class = "uneval") %>%
+    unlist() %>%
+    as.character() %>%
+    head(-1) %>% # remove dots
+    append(names(dots))
+
+  argVals <- lazy_dots(...)
+  names(argVals) <- nameVals
+
+  for (key in names(dots)) {
+    argVals[[key]] <- dots[[key]]
+  }
+
+  dataIdx    <- grab_data_index(nameVals)
+  regularIdx <- grab_regular_index(nameVals)
+  paramIdx   <- grab_param_index(dataIdx, regularIdx)
+
+
+  params <- argVals[paramIdx]
+  names(params) <- nameVals[paramIdx]
+  dt <- argVals[dataIdx]; names(dt) <- nameVals[dataIdx]
+  info <- argVals[regularIdx]; names(info) <- nameVals[regularIdx]
+
+  list(data = dt, info = info, params = params)
+}
+
+
+
+
+
+sub_names2 <- function(fig, data, argObj, parentFrame = parent.frame()) {
+  # , matchCall = match.call(parent.frame(2L))
+  if (missing(fig)) {
+    stop(paste0("'fig' was not supplied to ", match.call()[1]))
+  }
+  if (missing(data)) {
+    stop(paste0("'data' was not supplied to ", match.call()[1]))
+  }
+  if (missing(argObj)) {
+    stop(paste0("'data' was not supplied to ", match.call()[1]))
+  }
+
+  sub_fn <- b_eval(data, 4)
+
+  # retrieve the data with best guess
+  dataNames <- names(data)
+
+  # get the unevaled values
+  parse_values <- function(x) {
+    xNames <- names(x)
+    res <- lapply(seq_along(x), function(argPos) {
+      argName = xNames[argPos]
+      argVal = x[[argPos]]
+
+      # print(list(argName, argVal, typeof(argVal)))
+      ans <- switch(argName,
+        params    = parse_values(argVal),
+        hover     = get_hover(argVal, data, parentFrame),
+        lgroup    = get_lgroup(lazy_eval(argVal), fig),
+        url       = get_url(lazy_eval(argVal), data),
+        legend    = get_legend(lazy_eval(argVal)),
+        xlab      = as.character(lazy_eval(argVal)),
+        ylab      = as.character(lazy_eval(argVal)),
+        direction = as.character(lazy_eval(argVal)),
+        sub_fn(argVal)
+      )
+      ans
+    })
+    names(res) <- xNames
+    res
+  }
+
+  # parse all values for
+  ret = lapply(argObj, parse_values)
+
+  if (!is.null(ret$params$direction)) {
+    check_arc_direction(ret$params$direction)
+  }
+
+  # get the x and y names and data
+  # print(ret)
+  # print(ret$x)
+  # print(ret$y)
+  # browser()
+  d2AndNames <- b_xy_data_and_names2(
+    ret$data[1:2],
+    ret$info$xlab, ret$info$ylab
+  )
+
+  ret$data[1:2] <- d2AndNames$d2
+  ret$info[c("xName", "yName")] <- d2AndNames$xyName
+
+  return(ret)
+}
+
+
+
+b_xy_data_and_names2 = function(d2, xlab, ylab) {
+  x = d2[[1]]
+  y = d2[[2]]
+
+  xName <- "x"
+  yName <- "y"
+
+
+  if(!is.null(attr(x, "stringName")))
+    xName <- attr(x, "stringName")
+  if(!is.null(attr(y, "stringName")))
+    yName <- attr(y, "stringName")
+
+
+
+  if(is.null(y)) {
+    if(is.ts(x)) {
+      y = as.vector(x)
+      x = as.vector(time(x))
+      yName <- xName
+      xName <- "time"
+    } else if(is.list(x)) {
+      nms <- names(x)
+      y = x[[2]]
+      x = x[[1]]
+      xName = nms[1]
+      yName = nms[2]
+    } else {
+      y = x
+      x = seq_along(x)
+      yName = xName
+      xName = "index"
+    }
+  }
+
+  # manual specification trumps
+
+  if(!is.null(xlab)) {
+    xName <- xlab
+  }
+  if(!is.null(ylab)) {
+    yName <- ylab
+  }
+
+  ## deal with singleton x or y
+  if(length(x) == 1)
+    x <- rep(x, length(y))
+  if(length(y) == 1) {
+    y <- rep(y, length(x))
+  }
+
+  d2[[1]] = x
+  d2[[2]] = y
+
+
+  list(d2 = d2, xyNames = list(xName = xName, yName = yName))
 }
