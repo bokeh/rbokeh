@@ -1,6 +1,7 @@
 
 p_sb <- sb <- substitute
 
+#' @import lazyeval
 b_eval <- function(data, parentHeight = 2) {
 
   get_symbol = function(x) {
