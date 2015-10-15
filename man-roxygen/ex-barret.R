@@ -9,7 +9,25 @@ rescale <- function(x) {
 
 bFig <- figure(width = 480*1.5,height = 520*1.5)
 
+# test evaluation function
+(test_b_eval = function(){
+  matchVal = ir$Species
+  attr(matchVal, "stringName") <- "Species"
+  load_all(); require(testthat);
+  b <- b_eval(ir); a <- function(x){ b(lazy(x)) };
+  col = 5; expect_equivalent(a(col), 5)
+  expect_equivalent(a("Species"), matchVal)
+  z = "Species"; expect_equivalent(a(z), matchVal)
+  z = I("Species"); expect_equivalent(a(z), I("Species"))
+  expect_equivalent(a(Species), matchVal)
+  expect_error(a(DOES_NOT_EXIST))
+
+  invisible(TRUE)
+})()
+
+
 # ly_points
+load_all(); bFig %>% ly_points(ir$Sepal.Length) -> a; a
 load_all(); bFig %>% ly_points(Sepal.Length, data = ir) -> a; a
 load_all(); bFig %>% ly_points(Sepal.Length, data = ir, color = glyphCol) -> a; a
 load_all(); bFig %>% ly_points(Sepal.Length, data = ir, glyph = glyphVal, hover = Species) -> a; a
