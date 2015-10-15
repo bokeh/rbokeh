@@ -22,7 +22,7 @@ bFig <- figure(width = 480*1.5,height = 520*1.5)
   expect_equivalent(a(Species), matchVal)
   expect_error(a(DOES_NOT_EXIST))
 
-  invisible(TRUE)
+  TRUE
 })()
 
 
