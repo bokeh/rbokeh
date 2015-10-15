@@ -384,7 +384,8 @@ get_lgroup <- function(lgroup, fig) {
 # list of column names
 # otherwise it should be a named list or data frame
 get_hover <- function(hn, data, envir) {
-  tmp <- try(eval(hn, envir = envir), silent = TRUE)
+  # tmp <- try(eval(hn, envir = envir), silent = TRUE)
+  tmp <- try(lazy_eval(hn), silent = TRUE)
 
   # is.character is bad because it's true for try-error
   if(inherits(tmp, "character")) {
@@ -519,7 +520,7 @@ v_eval <- function(x, data) {
     }
   }
 
-  if(is.null(res))
+  if (is.null(res))
     return(res)
 
   # # if the variable came from the data, give it a name
@@ -541,7 +542,7 @@ fix_args <- function(args, n) {
     }
 
     if (itemName == "hover") {
-      pritn(itemVal)
+      print(itemVal)
     }
 
     switch(itemName,
@@ -560,6 +561,7 @@ fix_args <- function(args, n) {
 
   if(length(idx) > 0) {
     nms <- names(args)
+    print(args[idx])
     stop("Arguments do not have correct length of ", n, ": ", paste(nms[idx], " (", lns[idx],")", sep = "", collapse = ", "))
   }
 
