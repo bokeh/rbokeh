@@ -1,6 +1,4 @@
 
-p_sb <- sb <- substitute
-
 #' @import lazyeval
 b_eval_get_symbol = function(x) {
   eval(parse(text = paste0("substitute(", x$expr, ", x$env)")))
