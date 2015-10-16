@@ -2,11 +2,11 @@
 p_sb <- sb <- substitute
 
 #' @import lazyeval
+b_eval_get_symbol = function(x) {
+  eval(parse(text = paste0("substitute(", x$expr, ", x$env)")))
+}
 b_eval <- function(data, parentHeight = 2) {
 
-  get_symbol = function(x) {
-    eval(parse(text = paste0("substitute(", x$expr, ", x$env)")))
-  }
 
   if (is.null(data)) {
     fn <- function(x) {
@@ -18,7 +18,7 @@ b_eval <- function(data, parentHeight = 2) {
       # if it is an "data" variable name, set the stringName to the value used, such as "xVal"
       if(!is.null(ans)) {
         if (deparse(x$expr) %in% data_name_list_c()) {
-          attr(ans, "stringName") <- deparse(get_symbol(x))
+          attr(ans, "stringName") <- deparse(b_eval_get_symbol(x))
         }
       }
 
@@ -36,15 +36,15 @@ b_eval <- function(data, parentHeight = 2) {
         stop("argument is not of class 'lazy'")
       }
 
-      xSymbol <- get_symbol(x)
+      xSymbol <- b_eval_get_symbol(x)
       xName <- deparse(xSymbol)
 
       return_ans <- function(ans) {
         if (!is.null(ans)) {
           if (deparse(x$expr) %in% data_name_list_c()) {
-            attr(ans, "stringName") <- deparse(get_symbol(x))
+            attr(ans, "stringName") <- deparse(b_eval_get_symbol(x))
           } else if (xName %in% names(data)) {
-            attr(ans, "stringName") <- deparse(get_symbol(x))
+            attr(ans, "stringName") <- deparse(b_eval_get_symbol(x))
           }
         }
         ans
@@ -589,7 +589,7 @@ sub_names2 <- function(fig, data, argObj, parentFrame = parent.frame()) {
     stop(paste0("'data' was not supplied to ", match.call()[1]))
   }
 
-  sub_fn <- b_eval(data, 4)
+  sub_fn <- b_eval(data)
 
   # retrieve the data with best guess
   dataNames <- names(data)
@@ -604,7 +604,9 @@ sub_names2 <- function(fig, data, argObj, parentFrame = parent.frame()) {
       # print(list(argName, argVal, typeof(argVal)))
       ans <- switch(argName,
         params    = parse_values(argVal),
-        hover     = get_hover(argVal, data, parentFrame),
+
+        # send symbol to hover; also sending "data finding" function
+        hover     = get_hover(b_eval_get_symbol(argVal), data, parentFrame, sub_fn),
         lgroup    = get_lgroup(lazy_eval(argVal), fig),
         url       = get_url(lazy_eval(argVal), data),
         legend    = get_legend(lazy_eval(argVal)),
