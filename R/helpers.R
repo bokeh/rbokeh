@@ -399,7 +399,12 @@ get_hover <- function(hn, data, envir, sub_fn) {
   # if failed, it's a "fancy symbol", so retrieve and eval that
   if (inherits(tmp, "try-error")) {
     # tmp <- try(eval(hn, envir = envir), silent = TRUE)
-    tmp <- try(eval(b_eval_get_symbol(hn), envir = envir), silent = TRUE)
+    # tmp <- try(eval(b_eval_get_symbol(hn), envir = envir), silent = TRUE)
+
+    tmp <- sub_fn(hn)
+    # to work with code below
+    hn <- b_eval_get_symbol(hn)
+
     # there is also a sub_fn to retrieve data, but didn't want to mess with code
   }
 
