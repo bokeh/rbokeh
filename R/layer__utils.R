@@ -545,18 +545,17 @@ grab2 <- function(..., dots) {
     stop("'dots' must be supplied")
   }
 
-  nameVals <- structure(as.list(match.call()[-1]), class = "uneval") %>%
-    unlist() %>%
-    as.character() %>%
-    head(-1) %>% # remove dots
-    append(names(dots))
-
   argVals <- lazy_dots(...)
-  names(argVals) <- nameVals
+
+  names(argVals) <- lapply(argVals, "[[", "expr") %>%
+    unlist() %>%
+    as.character()
 
   for (key in names(dots)) {
     argVals[[key]] <- dots[[key]]
   }
+
+  nameVals <- names(argVals)
 
   dataIdx    <- grab_data_index(nameVals)
   regularIdx <- grab_regular_index(nameVals)
