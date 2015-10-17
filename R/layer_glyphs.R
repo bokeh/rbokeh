@@ -228,47 +228,46 @@ ly_wedge <- function(
 
   validate_fig(fig, "ly_wedge")
 
-  dots <- substitute(list(...))
-  args <- sub_names(fig, data,
-    grab(
-      sb(x),
-      sb(y),
-      # p_sb(glyph),
-      p_sb(color),
-      p_sb(alpha),
-      p_sb(radius),
-      p_sb(start_angle),
-      p_sb(end_angle),
-      p_sb(direction),
-      sb(hover),
-      sb(url),
-      sb(legend),
-      sb(lname),
-      sb(lgroup),
-      dots
+  args <- sub_names2(fig, data,
+    grab2(
+      x,
+      y,
+      color,
+      alpha,
+      radius,
+      start_angle,
+      end_angle,
+      direction,
+      hover,
+      url,
+      legend,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
     )
   )
   args$params$glyph <- "wedge"
 
-  if(missing(alpha))
+  if (missing(alpha)) {
     args$params$alpha <- NULL
+  }
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args$params, "wedge", formals = names(formals(ly_wedge)))
 
   check_arc_direction(direction)
 
-  axis_type_range <- get_glyph_axis_type_range(args$x, args$y, assert_x = "numeric", assert_y = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y, assert_x = "numeric", assert_y = "numeric")
 
   mc <- lapply(match.call(), deparse)
 
   make_glyph(
-    fig, type = "wedge", lname = args$lname, lgroup = args$lgroup,
-    data = args[c("x", "y")], data_sig = ifelse(is.null(data), NA, digest(data)),
+    fig, type = "wedge", lname = args$info$lname, lgroup = args$info$lgroup,
+    data = args$data, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args$params, axis_type_range = axis_type_range,
-    hover = args$hover, url = args$url, legend = args$legend,
-    xname = args$xName, yname = args$yName, ly_call = mc
+    hover = args$info$hover, url = args$info$url, legend = args$info$legend,
+    xname = args$info$xName, yname = args$info$yName, ly_call = mc
   )
 }
