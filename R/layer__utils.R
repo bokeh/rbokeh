@@ -604,7 +604,7 @@ sub_names2 <- function(fig, data, argObj, parentFrame = parent.frame()) {
         params    = parse_values(argVal),
 
         # send symbol to hover; also sending "data finding" function
-        hover     = get_hover(b_eval_get_symbol(argVal), data, parentFrame, sub_fn),
+        hover     = get_hover(argVal, data, parentFrame, sub_fn),
         lgroup    = get_lgroup(lazy_eval(argVal), fig),
         url       = get_url(lazy_eval(argVal), data),
         legend    = get_legend(lazy_eval(argVal)),

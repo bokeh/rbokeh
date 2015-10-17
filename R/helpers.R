@@ -388,7 +388,17 @@ get_hover <- function(hn, data, envir, sub_fn) {
   # tmp <- sub_fn(hn)
   # browser()
   # hn <- b_eval_get_symbol(hn)
-  tmp <- try(eval(hn, envir = envir), silent = TRUE)
+
+  # try to get the raw data
+  tmp <- try(lazy_eval(hn), silent = TRUE)
+
+  # if failed, it's a "fancy symbol", so retrieve and eval that
+  if (inherits(tmp, "try-error")) {
+    # tmp <- try(eval(hn, envir = envir), silent = TRUE)
+    tmp <- try(eval(b_eval_get_symbol(hn), envir = envir), silent = TRUE)
+    # there is also a sub_fn to retrieve data, but didn't want to mess with code
+  }
+
 
   # is.character is bad because it's true for try-error
   if(inherits(tmp, "character")) {
