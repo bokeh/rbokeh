@@ -119,58 +119,69 @@ ly_polygons <- function(
 #' @template dots-fillline
 #' @family layer functions
 #' @export
-ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
+ly_rect <- function(
+  fig,
+  xleft, ybottom, xright, ytop,
+  data = NULL,
   color = NULL, alpha = 1,
-  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  hover = NULL, url = NULL, legend = NULL,
+  lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_rect")
 
-  xname <- deparse(substitute(xleft))
-  yname <- deparse(substitute(ybottom))
+  # do for xName,yName purposes
+  args <- sub_names2(fig, data,
+    grab2(
+      xleft,
+      ybottom,
+      xright,
+      ytop,
+      color,
+      alpha,
+      hover,
+      url,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
+    )
+  )
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots    <- substitute(list(...))[-1]
-    args    <- lapply(dots, function(x) v_eval(x, data))
-    xleft   <- v_eval(substitute(xleft), data)
-    xright  <- v_eval(substitute(xright), data)
-    ybottom <- v_eval(substitute(ybottom), data)
-    ytop    <- v_eval(substitute(ytop), data)
-    color   <- v_eval(substitute(color), data)
-  } else {
-    args <- list(...)
+
+  if (missing(alpha)) {
+    args$params$alpha <- NULL
   }
 
-  hover <- get_hover(substitute(hover), data, parent.frame())
-  url <- get_url(url, data)
-
-  xy_names <- get_xy_names(xleft, ybottom, xname, yname, args)
-
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- c(args, list(color = color, alpha = alpha))
-  if(missing(alpha))
-    args$alpha <- NULL
-
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
-  check_opts(args, "quad", formals = names(formals(ly_rect)))
+  check_opts(args$params, "quad", formals = names(formals(ly_rect)))
 
-  if(is.null(args$fill_alpha))
-    args$fill_alpha <- 0.5
+  if(is.null(args$params$fill_alpha)) {
+    args$params$fill_alpha <- 0.5
+  }
 
-  axis_type_range <- get_glyph_axis_type_range(c(xleft, xright), c(ybottom, ytop))
+  axis_type_range <- get_glyph_axis_type_range(
+    c(args$data$xleft, args$data$xright),
+    c(args$data$ybottom, args$data$ytop)
+  )
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "quad", lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
-    legend = legend, hover = hover, url = url,
-    data = list(left = xleft, right = xright, top = ytop, bottom = ybottom),
+  make_glyph(
+    fig, type = "quad", lname = args$info$lname, lgroup = args$info$lgroup,
+    xname = args$info$xName, yname = args$info$yName,
+    legend = args$info$legend, hover = args$info$hover, url = args$info$url,
+    data = list(
+      left = args$data$xleft,
+      right = args$data$xright,
+      top = args$data$ytop,
+      bottom = args$data$ybottom
+    ),
     data_sig = ifelse(is.null(data), NA, digest(data)),
-    args = args, axis_type_range = axis_type_range,
-    ly_call = mc)
+    args = args$params, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
 
 #' Add a "crect" (centered rectangle) layer to a Bokeh figure
