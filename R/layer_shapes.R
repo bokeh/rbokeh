@@ -21,25 +21,25 @@ ly_polygons <- function(
 
   validate_fig(fig, "ly_polygons")
 
-  dots <- substitute(list(...))
-  args <- sub_names(fig, data,
-    grab(
-      sb(xs),
-      sb(ys),
-      sb(group),
-      p_sb(color),
-      p_sb(alpha),
-      sb(hover),
-      sb(url),
-      sb(lname),
-      sb(lgroup),
-      dots
+  args <- sub_names2(fig, data,
+    grab2(
+      xs,
+      ys,
+      group,
+      color,
+      alpha,
+      hover,
+      url,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
     )
   )
-  # pull out manually, as they are repeated customized
-  xs <- args$xs
-  ys <- args$ys
-  group <- args$group
+
+  # pull out manually, as they are repeatedly customized
+  xs <- args$data$xs
+  ys <- args$data$ys
+  group <- args$info$group
 
   if(missing(alpha)) {
     args$params$alpha <- NULL
@@ -82,7 +82,7 @@ ly_polygons <- function(
     stop("For ly_polygons, xs and ys must be lists or specified through a data frame through 'data' argument.")
   }
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args$params, "patches", formals = names(formals(ly_polygons)))
@@ -98,8 +98,8 @@ ly_polygons <- function(
   make_glyph(
     fig, type = "patches", data = list(xs = unname(xs), ys = unname(ys)),
     args = args$params, axis_type_range = axis_type_range,
-    xname = args$xName, yname = args$yName,
-    lname = args$lname, lgroup = args$lgroup, hover = args$hover, url = args$url,
+    xname = args$info$xName, yname = args$info$yName,
+    lname = args$info$lname, lgroup = args$info$lgroup, hover = args$info$hover, url = args$info$url,
     ly_call = mc
   )
 }

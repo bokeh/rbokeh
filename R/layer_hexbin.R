@@ -82,10 +82,12 @@ ly_hexbin <- function(fig, x, y = NULL, data = NULL,
     line_color <- col
   }
 
-  fig %>% ly_polygons(xs = hbd$xs, ys = hbd$ys, color = NULL,
+  fig %>% ly_polygons(
+    xs = hbd$xs, ys = hbd$ys, color = NULL,
     fill_color = col, alpha = NULL,
     fill_alpha = alpha, line_color = line_color,
-    hover = hbd$data, xlab = xname, ylab = yname)
+    hover = hbd$data, xlab = xname, ylab = yname
+  )
 }
 
 
