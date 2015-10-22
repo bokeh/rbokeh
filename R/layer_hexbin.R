@@ -16,36 +16,48 @@
 #' figure() %>% ly_hexbin(rnorm(10000), rnorm(10000))
 #' }
 #' @export
-ly_hexbin <- function(fig, x, y = NULL, data = NULL,
+ly_hexbin <- function(
+  fig, x, y = NULL, data = NULL,
   xbins = 30, shape = 1, style = "colorscale",
   trans = NULL, inv = NULL,
-  palette = "RdYlGn11", line = FALSE, alpha = 1, hover = TRUE) {
+  palette = "RdYlGn11", line = FALSE, alpha = 1, hover = TRUE
+) {
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x <- v_eval(substitute(x), data)
-    y <- v_eval(substitute(y), data)
-  }
+  args <- sub_names2(fig, data,
+    grab2(
+      x,
+      y,
+      xbins,
+      shape,
+      # style,
+      # trans,
+      # inv,
+      # palette,
+      line,
+      alpha,
+      hover,
+      dots = lazy_dots()
+    ),
+    processDataAndNames = FALSE
+  )
 
   minarea <- 0.04; maxarea <- 0.8; mincnt <- 1; maxcnt <- NULL
-  if(!inherits(x, "hexbin")) {
-    xy_names <- get_xy_names(x, y, xname, yname, NULL)
-    xy <- get_xy_data(x, y)
-    x <- xy$x
-    y <- xy$y
-    xname <- xy_names$x
-    yname <- xy_names$y
 
-    hbd <- get_hexbin_data(x = x, y = y, xbins = xbins,
+  if(!inherits(args$data$x, "hexbin")) {
+    xy_names <- get_xy_names(args$data$x, args$data$y, deparse(substitute(x)), deparse(substitute(y)), NULL)
+    xy <- get_xy_data(args$data$x, args$data$y)
+    args$data$x <- xy$x
+    args$data$y <- xy$y
+    args$info$xName <- xy_names$x
+    args$info$yName <- xy_names$y
+
+    hbd <- get_hexbin_data(x = xy$x, y = xy$y, xbins = xbins,
       shape = shape)
   } else {
-    xname <- "x"
-    yname <- "y"
+    args$info$xName <- "x"
+    args$info$yName <- "y"
 
-    hbd <- x
+    hbd <- args$data$x
   }
 
   hbd <- get_from_hexbin(hbd, maxcnt = maxcnt,
@@ -70,23 +82,25 @@ ly_hexbin <- function(fig, x, y = NULL, data = NULL,
     col <- clrs[colgrp]
   }
 
-  if(xname == yname) {
-    xname <- paste(xname, "(x)")
-    yname <- paste(yname, "(y)")
+  if(args$info$xName == args$info$yName) {
+    args$info$xName <- paste(args$info$xName, "(x)")
+    args$info$yName <- paste(args$info$yName, "(y)")
   }
-  names(hbd$data)[1:2] <- c(xname, yname)
+  names(hbd$data)[1:2] <- c(args$info$xName, args$info$yName)
 
   if(!line) {
     line_color <- NA
   } else {
+    # TODO
+    # this could be reached and never have been set
     line_color <- col
   }
 
   fig %>% ly_polygons(
     xs = hbd$xs, ys = hbd$ys, color = NULL,
     fill_color = col, alpha = NULL,
-    fill_alpha = alpha, line_color = line_color,
-    hover = hbd$data, xlab = xname, ylab = yname
+    fill_alpha = args$params$alpha, line_color = line_color,
+    hover = hbd$data, xlab = args$info$xName, ylab = args$info$yName
   )
 }
 
