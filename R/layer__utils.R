@@ -34,6 +34,10 @@ b_eval <- function(data, parentHeight = 2) {
         stop("argument is not of class 'lazy'")
       }
 
+      if (is.null(x$expr)) {
+        return(NULL)
+      }
+
       xSymbol <- b_eval_get_symbol(x)
       xName <- deparse(xSymbol)
 
@@ -607,6 +611,7 @@ sub_names2 <- function(fig, data, argObj, parentFrame = parent.frame()) {
         lgroup    = get_lgroup(lazy_eval(argVal), fig),
         url       = get_url(lazy_eval(argVal), data),
         legend    = get_legend(lazy_eval(argVal)),
+        position  = as.character(lazy_eval(argVal)),
         xlab      = as.character(lazy_eval(argVal)),
         ylab      = as.character(lazy_eval(argVal)),
         direction = as.character(lazy_eval(argVal)),
