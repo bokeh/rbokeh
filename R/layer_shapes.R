@@ -130,7 +130,6 @@ ly_rect <- function(
 
   validate_fig(fig, "ly_rect")
 
-  # do for xName,yName purposes
   args <- sub_names2(fig, data,
     grab2(
       xleft,
@@ -202,69 +201,67 @@ ly_rect <- function(
 #' @example man-roxygen/ex-elements.R
 #' @family layer functions
 #' @export
-ly_crect <- function(fig, x, y = NULL, data = NULL,
+ly_crect <- function(
+  fig, x, y = NULL, data = NULL,
   width = 1, height = 1, angle = 0, dilate = FALSE,
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_crect")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  args <- sub_names2(fig, data,
+    grab2(
+      x,
+      y,
+      width,
+      height,
+      angle,
+      dilate,
+      color,
+      alpha,
+      hover,
+      url,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$info$glyph <- "rect"
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots   <- substitute(list(...))[-1]
-    args   <- lapply(dots, function(x) v_eval(x, data))
-    x      <- v_eval(substitute(x), data)
-    y      <- v_eval(substitute(y), data)
-    width  <- v_eval(substitute(width), data)
-    height <- v_eval(substitute(height), data)
-    angle  <- v_eval(substitute(angle), data)
-    color  <- v_eval(substitute(color), data)
-  } else {
-    args <- list(...)
+  if(missing(alpha)) {
+    args$info$alpha <- NULL
   }
 
-  hover <- get_hover(substitute(hover), data, parent.frame())
-  url <- get_url(url, data)
-  xy_names <- get_xy_names(x, y, xname, yname, args)
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- c(args, list(glyph = "rect", color = color, alpha = alpha,
-    width = width, height = height, angle = angle, dilate = dilate))
-  if(missing(alpha))
-    args$alpha <- NULL
-
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$params$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
-  check_opts(args, "rect", formals = names(formals(ly_crect)))
+  check_opts(args$params, "rect", formals = names(formals(ly_crect)))
 
-  if(is.null(args$fill_alpha))
-    args$fill_alpha <- 0.5
-
-  xr <- xy$x
-  if(is.numeric(xy$x)) {
-    xr <- c(xy$x - width / 2, xy$x + width / 2)
+  if(is.null(args$params$fill_alpha)) {
+    args$params$fill_alpha <- 0.5
   }
-  yr <- xy$y
-  if(is.numeric(xy$y)) {
-    yr <- c(xy$y - height / 2, xy$y + height / 2)
+
+  xr <- args$data$x
+  if(is.numeric(xr)) {
+    xr <- c(xr - width / 2, xr + width / 2)
+  }
+  yr <- args$data$y
+  if(is.numeric(yr)) {
+    yr <- c(yr - height / 2, yr + height / 2)
   }
 
   axis_type_range <- get_glyph_axis_type_range(xr, yr)
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "rect", lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
-    legend = legend, hover = hover, url = url,
+  make_glyph(
+    fig, type = "rect", lname = lname, lgroup = lgroup,
+    xname = args$info$xName, yname = args$info$yName,
+    legend = args$info$legend, hover = args$info$hover, url = args$info$url,
     data_sig = ifelse(is.null(data), NA, digest(data)),
-    data = xy, args = args, axis_type_range = axis_type_range,
-    ly_call = mc)
+    data = args$data, args = args$params, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
 
 #' Add an "oval" layer to a Bokeh figure
