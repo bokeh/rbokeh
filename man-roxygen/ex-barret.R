@@ -2,6 +2,7 @@
 ir <- iris
 ir$glyphVal <- as.numeric(ir$Species)
 ir$glyphCol <- c("red", "green", "blue")[ ir$glyphVal ]
+ir$randomGroup <- sample(c("A", "B"), nrow(ir), replace = TRUE)
 
 rescale <- function(x) {
   (x - min(x)) / diff(range(x))
@@ -43,11 +44,10 @@ load_all(); bFig %>% ly_annulus(Sepal.Length, Sepal.Width, data = ir, inner_radi
 
 
 # ly_arc
-load_all(); bFig %>% ly_arc(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, alpha = 0.5) -> a
+load_all(); bFig %>% ly_arc(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, alpha = 0.5) -> a; a
 
 # ly_wedge
-load_all(); bFig %>% ly_wedge(Sepal.Length, Sepal.Width, data = ir) -> a; a
-load_all(); bFig %>% bly_wedge(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, radius = 0.15, alpha = 0.5, hover = Species) -> a; a
+load_all(); bFig %>% ly_wedge(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, radius = 0.15, alpha = 0.5, hover = Species) -> a; a
 load_all(); bFig %>% ly_wedge(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, radius = 0.15, alpha = 0.5, hover = Species) -> a; a
 
 
@@ -58,3 +58,128 @@ yy <- rnorm(10000)
 
 # ly_polygon
 load_all(); bFig %>% ly_hexbin(xx, yy) -> a; a
+
+
+# ly_crect, # ly_text
+a <- function() {
+  warnOriginal <- options()$warn
+
+  options(warn = 1)
+  load_all()
+  options(warn = 2)
+
+  p <- figure(title = "Periodic Table", tools = c("resize", "hover"),
+    ylim = as.character(c(7:1)), xlim = as.character(1:18),
+    xgrid = FALSE, ygrid = FALSE, xlab = "", ylab = "",
+    height = 600, width = 1200) %>%
+
+  # plot rectangles
+  ly_crect(group, period, data = elements, 0.9, 0.9,
+    fill_color = color, line_color = color, fill_alpha = 0.6,
+    hover = list(name, atomic.number, type, atomic.mass,
+      electronic.configuration)) %>%
+
+  # add symbol text
+  ly_text(symx, period, text = symbol, data = elements,
+    font_style = "bold", font_size = "15pt",
+    align = "left", baseline = "middle") %>%
+
+  # add atomic number text
+  ly_text(symx, numbery, text = atomic.number, data = elements,
+    font_size = "9pt", align = "left", baseline = "middle") %>%
+
+  # add name text
+  ly_text(symx, namey, text = name, data = elements,
+    font_size = "6pt", align = "left", baseline = "middle") %>%
+
+  # add atomic mass text
+  ly_text(symx, massy, text = atomic.mass, data = elements,
+    font_size = "6pt", align = "left", baseline = "middle")
+
+  options(warn = warnOriginal)
+
+  p
+}
+
+
+# ly_oval
+# legend looks funny
+load_all(); bFig %>% ly_oval(Sepal.Length, Sepal.Width, data = ir, color = Species, alpha = 0.5) -> a; a
+
+# ly_patch
+# color doesn't work
+load_all(); bFig %>% ly_patch(Sepal.Length, Sepal.Width, data = ir, color = Species, alpha = 0.5) -> a; a
+
+
+
+
+
+# ly_bar
+load_all(); bFig %>% ly_bar(variety, yield, data = lattice::barley) %>% theme_axis("x", major_label_orientation = 90) -> a; a
+
+
+
+# ly_image_url
+a <- function() {
+  load_all()
+  url <- c("http://bokeh.pydata.org/en/latest/_static/bokeh-transparent.png",
+    "http://developer.r-project.org/Logo/Rlogo-4.png")
+
+  ss <- seq(0, 2*pi, length = 13)[-1]
+  ws <- runif(12, 2.5, 5) * rep(c(1, 0.8), 6)
+
+  imgdat <- data.frame(
+    x = sin(ss) * 10, y = cos(ss) * 10,
+    w = ws, h = ws * rep(c(1, 0.76), 6),
+    imageUrl = rep(url, 6)
+  )
+
+  print(imgdat)
+
+  p <- figure(xlab = "x", ylab = "y") %>%
+    ly_image_url(x, y, w = w, h = h, imageUrl = imageUrl, data = imgdat,
+      anchor = "center")
+      # %>%
+    # ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
+      # width = 15, alpha = 0.1)
+  p
+}; a()
+
+
+# ly_image
+load_all(); figure(xlim = c(0, 1), ylim = c(0, 1), title = "Volcano") %>% ly_image(volcano) %>% ly_contour(volcano) -> a; a
+
+
+# ly_lines, ly_abline
+a <- function() {
+  load_all()
+  z <- lm(dist ~ speed, data = cars)
+  bFig %>%
+    ly_points(cars, hover = cars) %>%
+    ly_lines(lowess(cars), legend = "lowess") %>%
+    ly_abline(z, type = 2, legend = "lm", width = 2)
+}; a()
+a <- function() {
+  load_all()
+  z <- lm(Sepal.Width ~ Sepal.Length, data = ir)
+  irLowess <- list(
+    lowess(ir[ir$Species == "setosa" & ir$randomGroup == "A", c("Sepal.Length", "Sepal.Width")]),
+    lowess(ir[ir$Species == "setosa" & ir$randomGroup == "B", c("Sepal.Length", "Sepal.Width")]),
+    lowess(ir[ir$Species == "versicolor" & ir$randomGroup == "A", c("Sepal.Length", "Sepal.Width")]),
+    lowess(ir[ir$Species == "versicolor" & ir$randomGroup == "B", c("Sepal.Length", "Sepal.Width")]),
+    lowess(ir[ir$Species == "virginica" & ir$randomGroup == "A", c("Sepal.Length", "Sepal.Width")]),
+    lowess(ir[ir$Species == "virginica" & ir$randomGroup == "B", c("Sepal.Length", "Sepal.Width")])
+  )
+  lowessDt <- data.frame(
+    x = unlist(lapply(irLowess, "[[", "x")),
+    y = unlist(lapply(irLowess, "[[", "y")),
+    Species = rep(rep(c("setosa", "versicolor", "virginica"), each = 2), times = unlist(lapply(lapply(irLowess, "[[", "x"), length))),
+    randomGroup = rep(rep(c("A", "B"), 3), times = unlist(lapply(lapply(irLowess, "[[", "x"), length)))
+  )
+  lowessDt$lowessColor <- paste(lowessDt$Species, lowessDt$randomGroup, sep = ":")
+
+  bFig %>%
+    ly_points(Sepal.Length, Sepal.Width, color = Species, hover = Species, glyph = randomGroup, data = ir) %>%
+    ly_lines(x, y, color = Species, group = randomGroup, data = lowessDt) %>%
+    ly_abline(z, type = 2, legend = "lm", width = 2)
+}; a()
