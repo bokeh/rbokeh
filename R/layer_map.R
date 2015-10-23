@@ -15,19 +15,32 @@ ly_map <- function(fig, database = "world", regions = ".",
 
   validate_fig(fig, "ly_map")
 
-  lgroup <- get_lgroup(lgroup, fig)
-
-  xname <- "longitude"
-  yname <- "latitude"
+  args <- sub_names2(fig, data = NULL,
+    grab2(
+      color,
+      alpha,
+      lname, lgroup,
+      dots = lazy_dots(...),
+      nullData = TRUE
+    )
+  )
+  args$info$xName <- "longitude"
+  args$info$yName <- "latitude"
 
   dd <- map2df(map(database = database,
     regions = regions, fill = TRUE, plot = FALSE))
 
-  args <- list(color = color, alpha = alpha, ...)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]], theme = fig$x$spec$theme)
-
-  do.call(ly_polygons, c(list(fig = fig, xs = dd$lon, ys = dd$lat, group = dd$group,
-    lname = lname, lgroup = lgroup, xlab = xname, ylab = yname), args))
+  do.call(ly_polygons,
+    c(
+      list(
+        fig = fig,
+        xs = dd$lon, ys = dd$lat, group = dd$group,
+        lname = args$info$lname, lgroup = args$info$lgroup,
+        xlab = args$info$xName, ylab = args$info$yName
+      ),
+      args$params
+    )
+  )
 }
-

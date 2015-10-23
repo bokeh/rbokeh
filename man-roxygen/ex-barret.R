@@ -248,3 +248,7 @@ a <- function() {
       xs = xs, ys = ys
     )
 }; a()
+
+
+# ly_map
+load_all(); bFig %>% ly_map()
