@@ -20,53 +20,66 @@
 #' @example man-roxygen/ex-elements.R
 #' @family layer functions
 #' @export
-ly_text <- function(fig, x, y = NULL, text = NULL, data = NULL,
+ly_text <- function(
+  fig,
+  x, y = NULL,
+  text = NULL, data = NULL,
   color = "black", alpha = 1,
   angle = 0, align = NULL, baseline = NULL,
   font = NULL, font_size = NULL, font_style = NULL,
   x_offset = NULL, y_offset = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL) {
+  legend = NULL, lname = NULL, lgroup = NULL
+) {
 
   validate_fig(fig, "ly_text")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  args <- sub_names2(fig, data,
+    grab2(
+      x, y, text,
+      color,
+      alpha,
+      angle,
+      align,
+      baseline,
+      font,
+      font_size,
+      font_style,
+      x_offset,
+      y_offset,
+      legend, lname, lgroup,
+      dots = lazy_dots()
+    )
+  )
 
-  if(!is.null(data)) {
-    x           <- v_eval(substitute(x), data)
-    y           <- v_eval(substitute(y), data)
-    text        <- v_eval(substitute(text), data)
-    color       <- v_eval(substitute(color), data)
-    angle       <- v_eval(substitute(angle), data)
-    font_size   <- v_eval(substitute(font_size), data)
+  argParams <- list(glyph = "text")
+
+  argParams$glyph <- "text"
+  argParams$text_color <- args$params$color
+  argParams$angle <- args$params$angle
+  argParams$text_align <- args$params$align
+  argParams$text_alpha <- args$params$alpha
+  argParams$text_baseline <- args$params$baseline
+  argParams$text_font <- args$params$font
+  argParams$text_font_size <- args$params$font_size
+  argParams$text_font_style <- args$params$font_style
+  argParams$x_offset <- args$params$x_offset
+  argParams$y_offset <- args$params$y_offset
+
+  if(is.null(args$params$text)) {
+    args$params$text <- seq_along(args$data$x)
   }
-  xy_names <- get_xy_names(x, y, xname, yname, NULL)
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
 
-  args <- list(glyph = "text")
-  args$text_color <- color
-  args$angle <- angle
-  args$text_align <- align
-  args$text_alpha <- alpha
-  args$text_baseline <- baseline
-  args$text_font <- font
-  args$text_font_size <- font_size
-  args$text_font_style <- font_style
-  args$x_offset <- x_offset
-  args$y_offset <- y_offset
-
-  if(is.null(text))
-    text <- seq_along(xy$x)
-
-  axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y)
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y)
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "text", lname = lname, lgroup = lgroup,
-    data = c(xy, list(text = text, angle = angle)),
-    legend = legend,
-    xname = xy_names$x, yname = xy_names$y,
-    args = args, axis_type_range = axis_type_range,
-    ly_call = mc)
+  make_glyph(
+    fig, type = "text",
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    data = c(args$data, list(text = args$params$text, angle = args$params$angle)),
+    legend = args$info$legend,
+    xname = args$info$xName, yname = args$info$yName,
+    args = argParams, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }

@@ -99,7 +99,7 @@ a <- function() {
   options(warn = warnOriginal)
 
   p
-}
+}; a()
 
 
 # ly_oval
