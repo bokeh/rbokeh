@@ -148,6 +148,7 @@ b_eval <- function(data, parentHeight = 2) {
 
 #' @import stringr
 grab <- function(...) {
+
   nameVals <- structure(as.list(match.call()[-1]), class = "uneval") %>%
     unlist() %>%
     as.character()
@@ -225,8 +226,11 @@ grab <- function(...) {
 
 sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
   # , matchCall = match.call(parent.frame(2L))
+  if (missing(fig)) {
+    stop(paste0("'fig' was not supplied to ", match.call()[1]))
+  }
   if (missing(data)) {
-    stop(paste0("data was not supplied to ", match.call()[1]))
+    stop(paste0("'data' was not supplied to ", match.call()[1]))
   }
 
   argNames <- names(argObj)
@@ -261,17 +265,50 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
     ret
   }
 
+  handle_symbol = function(argVal) {
+    argValChar <- as.character(argVal)
+    # print(argValChar)
+    if (argValChar %in% names(data)) {
+      return(data[, argValChar])
+    }
+
+    # IF YOU MOVE THIS CODE !!!!!
+    ## it must be checked with something like hexbin which calls polygon
+    ret <- eval(argVal, envir = parent.frame(5))
+    if(inherits(ret, "try-error")) {
+      stop("argument '", deparse(argVal), "' cannot be found")
+    }
+    ret
+  }
+
   handle_language = function(argVal) {
     ret <- try(eval(argVal, data), silent = TRUE)
-
     if(inherits(ret, "try-error")) {
-      ret <- try(eval(argVal), silent = TRUE)
-      if(inherits(res, "try-error")) {
-        stop("argument '", deparse(x), "' cannot be found")
+      ret <- eval(argVal, envir = parent.frame(1))
+
+      if(inherits(ret, "try-error")) {
+        stop("argument '", deparse(argVal), "' cannot be found")
       }
     }
     ret
   }
+
+  #   if(inherits(ret, "try-error")) {
+  #     print("second attempt")
+  #     print(argVal)
+  #     ret <- try(eval(argVal, envir = parentFrame), silent = TRUE)
+  #
+  #     if(inherits(ret, "try-error")) {
+  #       print("last attempt")
+  #       ret <- try(eval(argVal, envir = parent.frame(1)), silent = TRUE)
+  #
+  #       if(inherits(ret, "try-error")) {
+  #         stop("argument '", deparse(argVal), "' cannot be found")
+  #       }
+  #     }
+  #   }
+  #   ret
+  # }
 
   # get the unevaled values
   parse_values <- function(x) {
@@ -279,6 +316,8 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
     res <- lapply(seq_along(x), function(argPos) {
       argName = xNames[argPos]
       argVal = x[[argPos]]
+
+      # print(list(argName, argVal, typeof(argVal)))
 
       ans <- switch(argName,
         params = parse_values(argVal),
@@ -292,49 +331,31 @@ sub_names <- function(fig, data, argObj, ..., parentFrame = parent.frame()) {
         direction = as.character(argVal),
         switch(typeof(argVal),
           language = handle_language(argVal),
-          symbol = handle_value(deparse(argVal)),
+          # symbol = handle_value(deparse(argVal)),
+          symbol = handle_symbol(argVal),
+          # symbol = v_eval(argVal, data),
           handle_value(argVal)
         )
       )
-      if(inherits(ans, "try-error")) {
-        stop("argument '", deparse(x), "' cannot be found")
-      }
       ans
     })
     names(res) <- xNames
     res
   }
   ret <- parse_values(argObj)
+  # print(argObj)
+  # print(ret)
+  # print(ls(envir = sys.frame(-3)))
+  # print(evalq(x, envir = sys.frame(-3)))
 
   if (!is.null(ret$direction)) {
     check_arc_direction(ret$direction)
   }
-  # ret <- lapply(seq_along(argObj), function(argPos) {
-  #   argName = argNames[argPos]
-  #   argVal = argObj[[argPos]]
-  #
-  #   ans <- switch(argName,
-  #     hover = get_hover(argVal, data, parentFrame),
-  #     lgroup = get_lgroup(argVal, fig),
-  #     url = get_url(as.character(argVal), data),
-  #     legend = get_legend(argVal),
-  #     xlab = as.character(argVal),
-  #     ylab = as.character(argVal),
-  #     switch(typeof(argVal),
-  #       language = handle_language(argVal),
-  #       symbol = handle_value(deparse(argVal)),
-  #       handle_value(argVal)
-  #     )
-  #   )
-  #   if(inherits(ans, "try-error")) {
-  #     stop("argument '", deparse(x), "' cannot be found")
-  #   }
-  #   ans
-  # })
-  # names(ret) <- argNames
-
 
   # get the x and y names and data
+  # print(ret)
+  # print(ret$x)
+  # print(ret$y)
   ret[c("x", "y", "xName", "yName")] <- b_xy_data_and_names(
     ret$x, ret$y,
     argObj[["x"]], argObj[["y"]],
@@ -364,7 +385,7 @@ b_xy_data_and_names = function(x, y, xName, yName, xlab, ylab) {
       yName <- xName
       xName <- "time"
     } else if(is.list(x)) {
-      nms <- names(ret$x)
+      nms <- names(x)
       y = x[[2]]
       x = x[[1]]
       xName = nms[1]
