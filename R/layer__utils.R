@@ -514,7 +514,10 @@ subset_arg_obj = function(argObj, idxs) {
 
 
 data_name_list = function() {
+  # order from most specific to least specific
   list(
+    c("x0", "y0", "x1", "y1", "cx0", "cy0", "cx1", "cy1"),
+    c("x0", "y0", "x1", "y1", "cx", "cy"),
     c("x0", "y0", "x1", "y1"),
     c("xleft", "ybottom", "xright", "ytop"),
     c("xs", "ys"),
@@ -534,7 +537,8 @@ grab_data_index = function(nameVals) {
     stop("invalid data names supplied to 'grab'")
   }
   if (length(dataNameIdx) > 1) {
-    stop("too many data names were supplied to 'grab'")
+    dataNameIdx <- min(dataNameIdx)
+    # stop("too many data names were supplied to 'grab'")
   }
 
   dataIdx <- nameVals %in% dataNameList[[dataNameIdx]]
