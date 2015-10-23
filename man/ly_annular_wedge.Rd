@@ -86,8 +86,9 @@ When color is \code{NULL} and \code{fill_color} or \code{line_color} are not spe
 }
 \examples{
 \donttest{
-rescale <- function(x)
+rescale <- function(x) {
   (x - min(x)) / diff(range(x))
+}
 
 figure() \%>\%
   ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris,

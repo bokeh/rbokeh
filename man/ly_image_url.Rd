@@ -4,7 +4,7 @@
 \alias{ly_image_url}
 \title{Add an "image_url" layer to a Bokeh figure}
 \usage{
-ly_image_url(fig, x = 0, y = 0, data = NULL, w = 10, h = 10, url,
+ly_image_url(fig, x = 0, y = 0, data = NULL, w = 10, h = 10, imageUrl,
   dilate = TRUE, anchor = "top_left", angle = 0, lname = NULL,
   lgroup = NULL)
 }
@@ -19,7 +19,7 @@ ly_image_url(fig, x = 0, y = 0, data = NULL, w = 10, h = 10, url,
 
 \item{w,h}{values or field names of width and height of image}
 
-\item{url}{values or field name of image URLs}
+\item{imageUrl}{values or field name of image URLs}
 
 \item{dilate}{logical - whether to dilate pixel distance computations when drawing}
 

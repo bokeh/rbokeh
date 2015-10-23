@@ -198,7 +198,7 @@ grab <- function(...) {
   ret
 }
 
-# #' @export
+# 
 # asJSON.substituted_value <- function(x, ...) {
 #   class(x) <- NULL
 #   asJSON(x)
