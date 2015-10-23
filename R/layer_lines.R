@@ -517,52 +517,54 @@ ly_ray <- function(
 #' @template dots-line
 #' @family layer functions
 #' @export
-ly_bezier <- function(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = NULL,
+ly_bezier <- function(
+  fig,
+  x0, y0, x1, y1, cx0, cy0, cx1, cy1,
+  data = NULL,
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_bezier")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "bezier", formals = names(formals(ly_bezier)))
 
-  xname <- deparse(substitute(x0))
-  yname <- deparse(substitute(y0))
+  args <- sub_names2(fig, data,
+    grab2(
+      x0, y0, x1, y1, cx0, cy0, cx1, cy1,
+      color,
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$params$glyph = "bezier"
 
-  if(!is.null(data)) {
-    x0    <- v_eval(substitute(x0), data)
-    y0    <- v_eval(substitute(y0), data)
-    x1    <- v_eval(substitute(x1), data)
-    y1    <- v_eval(substitute(y1), data)
-    cx0   <- v_eval(substitute(cx0), data)
-    cy0   <- v_eval(substitute(cy0), data)
-    cx1   <- v_eval(substitute(cx1), data)
-    cy1   <- v_eval(substitute(cy1), data)
-    color <- v_eval(substitute(color), data)
-    type  <- v_eval(substitute(type), data)
-    width <- v_eval(substitute(width), data)
+  if(missing(color) && !is.null(args$params$line_color)) {
+    args$params$color <- NULL
   }
 
-  xy_names <- get_xy_names(x0, y0, xname, yname, list(...))
-  lgroup <- get_lgroup(lgroup, fig)
+  ## see if any options won't be used and give a message
+  check_opts(args$params, "bezier", formals = names(formals(ly_bezier)))
 
-  args <- list(glyph = "bezier", color = color, type = type,
-    width = width, alpha = alpha, ...)
+  args$params <- resolve_line_args(fig, args$params)
 
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
-
-  args <- resolve_line_args(fig, args)
-
-  axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1),
-    assert_x = "numeric", assert_y = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(
+    c(args$data$x0, args$data$x1),
+    c(args$data$y0, args$data$y1),
+    assert_x = "numeric", assert_y = "numeric"
+  )
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "bezier", lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
-    data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1,
-      cx0 = cx0, cy0 = cy0, cx1 = cx1, cy1 = cy1),
-    args = args, axis_type_range = axis_type_range, ly_call = mc)
+  make_glyph(
+    fig, type = "bezier",
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    xname = args$info$xName, yname = args$info$yName,
+    data = args$data,
+    args = args$params, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
 
 #' Add a "quadratic" layer to a Bokeh figure
