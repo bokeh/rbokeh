@@ -207,3 +207,21 @@ a <- function() {
     ly_points(Sepal.Length, Sepal.Width, data = ir, color = Species)
 
 }; a()
+
+# ly_quadratic
+a <- function() {
+  load_all()
+  bFig %>%
+    ly_quadratic(
+      x0 = Sepal.Length,
+      x1 = Sepal.Length + runif(150),
+      cx = Sepal.Length + runif(150),
+      y0 = Sepal.Width,
+      y1 = Sepal.Width + runif(150),
+      cy = Sepal.Width + runif(150),
+      color = Species,
+      data = ir,
+    ) %>%
+    ly_points(Sepal.Length, Sepal.Width, data = ir, color = Species)
+
+}; a()
