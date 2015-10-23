@@ -181,27 +181,39 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
 #' @example man-roxygen/ex-lines.R
 #' @family layer functions
 #' @export
-ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
+ly_abline <- function(
+  fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   color = "black", alpha = NULL, width = 1, type = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_abline")
+
+  args <- sub_names2(fig, data = NULL,
+    grab2(
+      color,
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...),
+      nullData = TRUE
+    )
+  )
+  args$params$glyph <- "segment"
+
+  if(missing(color) && !is.null(args$params$line_color)) {
+    args$params$color <- NULL
+  }
+
   ## see if any options won't be used and give a message
-  check_opts(list(...), "segment", formals = names(formals(ly_abline)))
+  check_opts(args$params, "segment", formals = names(formals(ly_abline)))
 
-  xy_names <- get_xy_names(NULL, NULL, "x", "y", list(...))
+  args$params <- resolve_line_args(fig, args$params)
 
-  lgroup <- get_lgroup(lgroup, fig)
+  x_axis_type <- "numeric"
+  y_axis_type <- "numeric"
 
-  args <- list(glyph = "segment", color = color,
-    alpha = alpha, width = width,
-    type = type, ...)
-
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
-
-  args <- resolve_line_args(fig, args)
-
+  # manage data
   if(!is.null(coef) || inherits(a, "lm")) {
     if(is.null(coef))
       coef <- a
@@ -211,9 +223,6 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     a <- coef[1]
     b <- coef[2]
   }
-
-  x_axis_type <- "numeric"
-  y_axis_type <- "numeric"
 
   if(!is.null(a) && !is.null(b)) {
     nn <- max(c(length(a), length(b)))
@@ -281,11 +290,15 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "segment", legend = legend,
-    lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
+  make_glyph(
+    fig, type = "segment",
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, defer = defer_fn),
-    args = args, axis_type_range = axis_type_range, ly_call = mc)
+    legend = args$info$legend,
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    xname = args$info$xName, yname = args$info$yName,
+    args = args$params, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
 
 #' Add a "curve" layer to a Bokeh figure
