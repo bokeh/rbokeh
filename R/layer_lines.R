@@ -451,48 +451,50 @@ ly_contour <- function(
 #' @template dots-line
 #' @family layer functions
 #' @export
-ly_ray <- function(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
+ly_ray <- function(
+  fig, x, y = NULL, data = NULL,
+  length = NULL, angle = 0,
   color = "black", type = 1, width = 1, alpha = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_ray")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "ray", formals = names(formals(ly_ray)))
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  args <- sub_names2(fig, data,
+    grab2(
+      x, y,
+      length,
+      angle,
+      color,
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x     <- v_eval(substitute(x), data)
-    y     <- v_eval(substitute(y), data)
-    color <- v_eval(substitute(color), data)
-    type  <- v_eval(substitute(type), data)
-    width <- v_eval(substitute(width), data)
+  if(missing(color) && !is.null(args$params$line_color)) {
+    args$params$color <- NULL
   }
 
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
+  ## see if any options won't be used and give a message
+  check_opts(args$params, "ray", formals = names(formals(ly_ray)))
 
-  args <- list(glyph = "ray", color = color,
-    alpha = alpha, width = width, type = type,
-    length = length, angle = angle, ...)
+  args$params <- resolve_line_args(fig, args$params)
 
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
-
-  args <- resolve_line_args(fig, args)
-
-  axis_type_range <- get_glyph_axis_type_range(x, y)
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y)
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "ray", lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
-    data = xy, legend = legend,
-    args = args, axis_type_range = axis_type_range, ly_call = mc)
+  make_glyph(
+    fig, type = "ray",
+    xname = args$info$xName, yname = args$info$yName,
+    data = args$data, legend = args$info$legend,
+    args = args$params, axis_type_range = axis_type_range,
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    ly_call = mc
+  )
 }
 
 
