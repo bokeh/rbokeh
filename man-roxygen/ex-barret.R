@@ -146,19 +146,11 @@ a <- function() {
 }; a()
 
 
-# ly_image
+# ly_image, ly_contour
 load_all(); figure(xlim = c(0, 1), ylim = c(0, 1), title = "Volcano") %>% ly_image(volcano) %>% ly_contour(volcano) -> a; a
 
 
 # ly_lines, ly_abline
-a <- function() {
-  load_all()
-  z <- lm(dist ~ speed, data = cars)
-  bFig %>%
-    ly_points(cars, hover = cars) %>%
-    ly_lines(lowess(cars), legend = "lowess") %>%
-    ly_abline(z, type = 2, legend = "lm", width = 2)
-}; a()
 a <- function() {
   load_all()
   z <- lm(Sepal.Width ~ Sepal.Length, data = ir)
@@ -182,4 +174,36 @@ a <- function() {
     ly_points(Sepal.Length, Sepal.Width, color = Species, hover = Species, glyph = randomGroup, data = ir) %>%
     ly_lines(x, y, color = Species, group = randomGroup, data = lowessDt) %>%
     ly_abline(z, type = 2, legend = "lm", width = 2)
+}; a()
+
+
+# ly_segments
+load_all(); bFig %>% ly_boxplot(voice.part, height, data = lattice::singer) %>% theme_axis("x", major_label_orientation = 90) -> a; a
+
+# ly_curve
+chippy <- function(x) sin(cos(x)*exp(-x/2))
+load_all(); bFig %>% ly_curve(chippy, -8, 7, n = 2001) -> a; a
+
+# ly_ray
+load_all(); bFig %>% ly_ray(Sepal.Length, Sepal.Width, data = ir, length = runif(150), angle = runif(150, max = 2 * pi), color = Species) %>% ly_points(Sepal.Length, Sepal.Width, data = ir, color = Species) -> a; a
+
+# ly_bezier
+a <- function() {
+  load_all()
+
+  bFig %>%
+    ly_bezier(
+      x0 = Sepal.Length,
+      x1 = Sepal.Length + runif(150),
+      cx0 = Sepal.Length + runif(150),
+      cx1 = Sepal.Length + runif(150),
+      y0 = Sepal.Width,
+      y1 = Sepal.Width + runif(150),
+      cy0 = Sepal.Width + runif(150),
+      cy1 = Sepal.Width + runif(150),
+      color = Species,
+      data = ir,
+    ) %>%
+    ly_points(Sepal.Length, Sepal.Width, data = ir, color = Species)
+
 }; a()
