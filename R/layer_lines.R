@@ -64,7 +64,7 @@ ly_lines <- function(
     )
   } else {
     # no groups to split on.  will split on "one" group
-    splitList <- list(seq_along(args$params$x))
+    splitList <- list(seq_along(args$data$x))
   }
 
 
@@ -318,18 +318,15 @@ ly_abline <- function(
 #' }
 #' @family layer functions
 #' @export
-ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
+ly_curve <- function(
+  fig, expr, from = NULL, to = NULL, n = 101,
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_curve")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "line", formals = names(formals(ly_curve)))
 
   xname <- "x"
-
-  lgroup <- get_lgroup(lgroup, fig)
-
   sexpr <- substitute(expr)
   if (is.name(sexpr)) {
     yname <- paste(deparse(sexpr), "(x)", sep = "")
@@ -347,17 +344,37 @@ ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
   names(ll) <- xname
   y <- eval(expr, envir = ll, enclos = parent.frame())
 
-  args <- list(color = color,
-    alpha = alpha, width = width,
-    type = type, ...)
+  args <- sub_names2(fig, data = NULL,
+    grab2(
+      color,
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...),
+      nullData = TRUE
+    )
+  )
 
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
+  ## see if any options won't be used and give a message
+  check_opts(args$params, "line", formals = names(formals(ly_curve)))
 
-  args <- resolve_line_args(fig, args)
+  if(missing(color) && !is.null(args$params$line_color))
+    args$params$color <- NULL
 
-  do.call(ly_lines, c(list(fig = fig, x = x, y = y, legend = legend,
-    lname = lname, lgroup = lgroup, xlab = xname, ylab = yname), args))
+  args$params <- resolve_line_args(fig, args$params)
+
+  do.call(ly_lines,
+    c(
+      list(
+        fig = fig,
+        x = x, y = y,
+        legend = args$info$legend, lname = args$info$lname, lgroup = args$info$lgroup,
+        xlab = xname, ylab = yname
+      ),
+      args$params
+    )
+  )
 }
 
 #' Add a "contour" layer to a Bokeh figure
