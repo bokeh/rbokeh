@@ -12,101 +12,96 @@
 #' @example man-roxygen/ex-lines.R
 #' @family layer functions
 #' @export
-ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
+ly_lines <- function(
+  fig, x, y = NULL, data = NULL, group = NULL,
   color = "black", type = 1, width = 1, alpha = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_lines")
 
-  mc <- attr(fig, "ly_call")
-  if(is.null(mc))
-    mc <- lapply(match.call(), deparse)
-
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "line", formals = names(formals(ly_lines)))
-
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-
   ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x     <- v_eval(substitute(x), data)
-    y     <- v_eval(substitute(y), data)
-    group <- v_eval(substitute(group), data)
-    color <- v_eval(substitute(color), data)
-    type  <- v_eval(substitute(type), data)
-    width <- v_eval(substitute(width), data)
-  }
+  bv <- b_eval(data)
+  args <- sub_names2(fig, data,
+    grab2(
+      x,
+      y,
+      group,
+      color,
+      type,
+      width,
+      alpha,
+      legend, lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$params$glyph <- "line"
 
-  ## v_eval will repeat these, but the line glyph doesn't like this
-  if(length(unique(color)) == 1)
-    color <- subset_with_attributes(color, 1)
-  if(length(unique(type)) == 1)
-    type <- type[1]
-  if(length(unique(width)) == 1)
-    width <- width[1]
+  if(missing(color) && !is.null(args$params$line_color))
+    args$params$color <- NULL
 
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- list(glyph = "line", group = group, color = color,
-    width = width, type = type, ...)
-
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
-
-  args$alpha <- alpha
+  # args$params$alpha <- alpha
 
   # if any of group, type, width, or color are not unique, we need to split the data
   # and call make_glyph several times
   # otherwise we can just vary the values of things
   # and call make_glyph just once...
+  groupDt <- args$params
+  groupDt$group <- args$info$group
   group_vars <- c("group", "type", "width", "color")
-  groupable <- which(names(args) %in% group_vars &
-    sapply(args, function(x) length(unique(x)) > 1))
-  if(length(groupable) > 0) {
+  groupable <- which(
+    (names(groupDt) %in% group_vars) &
+    sapply(groupDt, function(x) length(unique(x)) > 1)
+  )
 
-    g_args <- args[groupable]
-    ng_args <- args[-groupable]
+  if (length(groupable) > 0) {
+    # there are groups to split on
 
-    lns <- sapply(ng_args, length)
-    idx <- lns == length(xy$x)
-
-    df_args <- args[idx]
-    df_args$group <- NULL
-
-    ## much more efficient way to do this but would probably require more dependencies...
-    lvls <- apply(as.matrix(data.frame(g_args)), 1,
-      function(x) paste(x, collapse = ""))
-    df_split <- split(seq_along(lvls), lvls)
-
-    g_args$group <- NULL
-
-    attr(fig, "ly_call") <- mc
-
-    for(ii in seq_along(df_split)) {
-      cur_idx <- df_split[[ii]]
-
-      fig <- do.call(ly_lines,
-        c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)),
-          lapply(g_args, function(x) subset_with_attributes(x, cur_idx[1])),
-          ng_args[!idx], list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
-            lgroup = lgroup, lname = ii, legend = legend, xlab = xy_names$x, ylab = xy_names$y)))
-    }
-    attr(fig, "ly_call") <- NULL
-    return(fig)
+    # split works with a data.frame as the groups.
+    splitList <- split(
+      seq_along(args$data$x),
+      as.data.frame(groupDt[names(groupable)])
+    )
+  } else {
+    # no groups to split on.  will split on "one" group
+    splitList <- list(seq_along(args$params$x))
   }
 
-  args <- resolve_line_args(fig, args)
 
-  axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y)
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y)
+  mc <- attr(fig, "ly_call")
+  if(is.null(mc)) {
+    mc <- lapply(match.call(), deparse)
+  }
 
-  make_glyph(fig, type = "line", lname = lname, lgroup = lgroup,
-    data = xy, legend = legend,
-    args = args, axis_type_range = axis_type_range,
-    xname = xy_names$x, yname = xy_names$y, ly_call = mc)
+  for (ii in seq_along(splitList)) {
+    argObj <- subset_arg_obj(args, splitList[[ii]])
+
+    ## b_eval will repeat these, but the line glyph doesn't like this
+    if(length(unique(argObj$params$color)) == 1)
+      argObj$params$color <- subset_with_attributes(argObj$params$color, 1)
+    if(length(unique(args$params$type)) == 1)
+      argObj$params$type <- subset_with_attributes(argObj$params$type, 1)
+    if(length(unique(args$params$width)) == 1)
+      argObj$params$width <- subset_with_attributes(argObj$params$width, 1)
+
+    argObj$params <- resolve_line_args(fig, argObj$params)
+
+    ## see if any options won't be used and give a message
+    check_opts(argObj$params, "line", formals = names(formals(ly_lines)))
+
+    fig <- make_glyph(
+      fig, type = "line", data = argObj$data,
+      legend = argObj$info$legend,
+      args = argObj$params, axis_type_range = axis_type_range,
+      xname = argObj$info$xName, yname = argObj$info$yName,
+      lname = argObj$info$lname, lgroup = argObj$info$lgroup,
+      ly_call = mc
+    )
+
+  }
+
+  return(fig)
 }
 
 #' Add a "segments" layer to a Bokeh figure
