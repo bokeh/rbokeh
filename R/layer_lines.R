@@ -648,33 +648,51 @@ ly_quadratic <- function(
 #' @template dots-line
 #' @family layer functions
 #' @export
-ly_multi_line <- function(fig, xs, ys,
+ly_multi_line <- function(
+  fig,
+  xs, ys,
   color = "black", alpha = 1, width = 1, type = 1,
-  lname = NULL, lgroup = NULL, ...) {
-
-  xname <- deparse(substitute(xs))
-  yname <- deparse(substitute(ys))
+  lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_multi_line")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "multi_line")
 
-  args <- list(glyph = "line", color = color,
-    width = width, type = type, ...)
+  args <- sub_names2(fig, data = NULL,
+    grab2(
+      xs, ys,
+      color,
+      alpha,
+      width,
+      type,
+      # no legend?
+      lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$params$glyph <- "line"
 
-  if(missing(color) && !is.null(args$line_color))
+  if(missing(color) && !is.null(args$params$line_color)) {
     args$color <- NULL
+  }
 
-  args$alpha <- alpha
+  ## see if any options won't be used and give a message
+  # can't pass in color, alpha, width, or type
+  goodNames = names(args$params)
+  goodNames = goodNames[! (goodNames %in% c("color", "alpha", "width", "type"))]
+  check_opts(args$params[goodNames], "multi_line")
 
-  args <- resolve_line_args(fig, args)
+  args$params <- resolve_line_args(fig, args$params)
 
-  axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
+  axis_type_range <- get_glyph_axis_type_range(unlist(args$data$xs), unlist(args$data$ys))
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "multi_line", xname = xname, yname = yname,
-    lname = lname, lgroup = lgroup,
-    data = list(xs = xs, ys = ys), args = args,
-    axis_type_range = axis_type_range, ly_call = mc)
+  make_glyph(
+    fig, type = "multi_line",
+    data = args$data, args = args$params,
+    xname = args$info$xName, yname = args$info$yName,
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }

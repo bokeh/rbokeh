@@ -225,3 +225,26 @@ a <- function() {
     ly_points(Sepal.Length, Sepal.Width, data = ir, color = Species)
 
 }; a()
+
+
+# ly_multi_line
+a <- function() {
+  load_all()
+
+  xs <- list()
+  ys <- list()
+  for (i in 1:500) {
+    count <- sample(1:10, 1)
+    angles <- runif(count + 1, 0, 2*pi)
+    xDists <- (1/2)^(0:count) * cos(angles)
+    yDists <- (1/2)^(0:count) * sin(angles)
+
+    xs[[length(xs) + 1]] <- c(cumsum(xDists))
+    ys[[length(ys) + 1]] <- c(cumsum(yDists))
+  }
+
+  bFig %>%
+    ly_multi_line(
+      xs = xs, ys = ys
+    )
+}; a()
