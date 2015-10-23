@@ -515,9 +515,10 @@ subset_arg_obj = function(argObj, idxs) {
 
 data_name_list = function() {
   list(
-    c("x", "y"),
+    c("x0", "y0", "x1", "y1"),
     c("xleft", "ybottom", "xright", "ytop"),
-    c("xs", "ys")
+    c("xs", "ys"),
+    c("x", "y")
   )
 }
 data_name_list_c = function() {
