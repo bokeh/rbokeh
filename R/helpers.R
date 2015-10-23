@@ -564,10 +564,6 @@ fix_args <- function(args, n) {
       return(0)
     }
 
-    if (itemName == "hover") {
-      print(itemVal)
-    }
-
     switch(itemName,
       url = 1,
       hover = ifelse(is.data.frame(itemVal$data), nrow(itemVal$data), length(itemVal$data)),
