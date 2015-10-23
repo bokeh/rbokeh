@@ -23,8 +23,13 @@ b_eval <- function(data, parentHeight = 2) {
       return(ans)
     }
   } else {
+
     if (! is.data.frame(data)) {
-      stop("data must be NULL or a data.frame")
+      data <- tryCatch(as.data.frame(data),
+        error = function(e) {
+          stop("data must be NULL or be able to pass as.data.frame")
+        }
+      )
     }
 
     # cat("\n\nData Rows: ");print(nrow(data));cat("\n")
