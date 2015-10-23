@@ -578,7 +578,11 @@ grab2 <- function(..., dots) {
 
 
 
-sub_names2 <- function(fig, data, argObj, parentFrame = parent.frame()) {
+sub_names2 <- function(
+  fig, data, argObj,
+  parentFrame = parent.frame(),
+  processDataAndNames = TRUE
+) {
   # , matchCall = match.call(parent.frame(2L))
   if (missing(fig)) {
     stop(paste0("'fig' was not supplied to ", match.call()[1]))
@@ -609,7 +613,7 @@ sub_names2 <- function(fig, data, argObj, parentFrame = parent.frame()) {
         # send symbol to hover; also sending "data finding" function
         hover     = get_hover(argVal, data, parentFrame, sub_fn),
         lgroup    = get_lgroup(lazy_eval(argVal), fig),
-        url       = get_url(lazy_eval(argVal), data),
+        url       = get_url(argVal, data, sub_fn),
         legend    = get_legend(lazy_eval(argVal)),
         position  = as.character(lazy_eval(argVal)),
         xlab      = as.character(lazy_eval(argVal)),
@@ -635,13 +639,15 @@ sub_names2 <- function(fig, data, argObj, parentFrame = parent.frame()) {
   # print(ret$x)
   # print(ret$y)
   # browser()
-  d2AndNames <- b_xy_data_and_names2(
-    ret$data[1:2],
-    ret$info$xlab, ret$info$ylab
-  )
+  if (processDataAndNames) {
+    d2AndNames <- b_xy_data_and_names2(
+      ret$data[1:2],
+      ret$info$xlab, ret$info$ylab
+    )
 
-  ret$data[1:2] <- d2AndNames$d2
-  ret$info[c("xName", "yName")] <- d2AndNames$xyName
+    ret$data[1:2] <- d2AndNames$d2
+    ret$info[c("xName", "yName")] <- d2AndNames$xyName
+  }
 
   return(ret)
 }

@@ -476,7 +476,9 @@ get_hover <- function(hn, data, envir, sub_fn) {
 
 # get the "url" argument and turn it into data and "dict"
 # must be a vector or a string referencing variables in data
-get_url <- function(url, data) {
+get_url <- function(url, data, sub_fn) {
+  url <- lazy_eval(url)
+
   if(is.null(url))
     return(NULL)
   url <- as.character(url)
