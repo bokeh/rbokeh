@@ -549,7 +549,7 @@ grab_param_index = function(dataIdx, regularIdx) {
   !(dataIdx | regularIdx)
 }
 
-grab2 <- function(..., dots) {
+grab2 <- function(..., dots, nullData = FALSE) {
 
   if (missing(dots)) {
     stop("'dots' must be supplied")
@@ -567,15 +567,24 @@ grab2 <- function(..., dots) {
 
   nameVals <- names(argVals)
 
-  dataIdx    <- grab_data_index(nameVals)
+  if (nullData) {
+    dataIdx <- rep(FALSE, length(nameVals))
+    dt = list()
+
+  } else {
+    dataIdx <- grab_data_index(nameVals)
+
+    dt <- argVals[dataIdx];
+    names(dt) <- nameVals[dataIdx]
+  }
+
   regularIdx <- grab_regular_index(nameVals)
+  info <- argVals[regularIdx];
+  names(info) <- nameVals[regularIdx]
+
   paramIdx   <- grab_param_index(dataIdx, regularIdx)
-
-
   params <- argVals[paramIdx]
   names(params) <- nameVals[paramIdx]
-  dt <- argVals[dataIdx]; names(dt) <- nameVals[dataIdx]
-  info <- argVals[regularIdx]; names(info) <- nameVals[regularIdx]
 
   list(data = dt, info = info, params = params)
 }
