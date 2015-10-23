@@ -390,39 +390,50 @@ ly_curve <- function(
 #' @example man-roxygen/ex-image.R
 #' @family layer functions
 #' @export
-ly_contour <- function(fig, z,
+ly_contour <- function(
+  fig, z,
   x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1, length.out = ncol(z)),
   nlevels = 10, levels = pretty(range(z, na.rm = TRUE), nlevels),
   color = "black", alpha = 1, width = 1, type = 1,
-  lname = NULL, lgroup = NULL, ...) {
+  lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_contour")
   ## see if any options won't be used and give a message
-  check_opts(list(...), "multi_line", formals = names(formals(ly_contour)))
 
-  xy_names <- get_xy_names(NULL, NULL, "x", "y", list(...))
+  args <- sub_names2(fig, data = NULL,
+    grab2(
+      color,
+      alpha,
+      width,
+      type,
+      lname, lgroup,
+      dots = lazy_dots(...),
+      nullData = TRUE
+    )
+  )
 
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- list(color = color,
-    alpha = alpha, width = width,
-    type = type, ...)
-
-  args <- resolve_line_args(fig, args)
+  args$params <- resolve_line_args(fig, args$params)
 
   contr <- do.call(contourLines, list(x = x, y = y, z = z, nlevels = nlevels, levels = levels))
 
   xs <- lapply(contr, "[[", 2)
   ys <- lapply(contr, "[[", 3)
 
+  check_opts(args$params, "multi_line", formals = names(formals(ly_contour)))
+
   axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
+  make_glyph(
+    fig, type = "multi_line",
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    xname = args$info$xName, yname = args$info$yName,
     data = list(xs = xs, ys = ys),
-    args = args, axis_type_range = axis_type_range, ly_call = mc)
+    args = args$params, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
 
 #' Add a "ray" layer to a Bokeh figure
