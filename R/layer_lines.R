@@ -123,47 +123,47 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
   color = "black", alpha = 1, width = 1, type = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "segment", formals = names(formals(ly_segments)))
-
   validate_fig(fig, "ly_segments")
 
-  xname <- deparse(substitute(x0))
-  yname <- deparse(substitute(y0))
+  args <- sub_names2(fig, data,
+    grab2(
+      x0,
+      y0,
+      x1,
+      y1,
+      color,
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$params$glyph <- "segment"
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x0    <- v_eval(substitute(x0), data)
-    y0    <- v_eval(substitute(y0), data)
-    x1    <- v_eval(substitute(x1), data)
-    y1    <- v_eval(substitute(y1), data)
-    color <- v_eval(substitute(color), data)
-    type  <- v_eval(substitute(type), data)
-    width <- v_eval(substitute(width), data)
-  }
+  if(missing(color) && !is.null(args$params$line_color))
+    args$params$color <- NULL
 
-  xy_names <- get_xy_names(x0, y0, xname, yname, list(...))
+  args$params <- resolve_line_args(fig, args$params)
 
-  lgroup <- get_lgroup(lgroup, fig)
+  axis_type_range <- get_glyph_axis_type_range(
+    c(args$data$x0, args$data$x1),
+    c(args$data$y0, args$data$y1)
+  )
 
-  args <- list(glyph = "segment", color = color,
-    alpha = alpha, width = width,
-    type = type, ...)
-
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
-
-  args <- resolve_line_args(fig, args)
-
-  axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1))
+  ## see if any options won't be used and give a message
+  check_opts(args$params, "segment", formals = names(formals(ly_segments)))
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "segment",
-    xname = xy_names$x, yname = xy_names$y,
-    legend = legend, lname = lname, lgroup = lgroup,
-    data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1),
-    args = args, axis_type_range = axis_type_range, ly_call = mc)
+  make_glyph(
+    fig, type = "segment",
+    data = args$data,
+    xname = args$info$xName, yname = args$info$yName,
+    args = args$params, axis_type_range = axis_type_range,
+    legend = args$info$legend, lname = args$info$lname, lgroup = args$info$lgroup,
+    ly_call = mc
+  )
 }
 
 #' Add an "abline" layer to a Bokeh figure
