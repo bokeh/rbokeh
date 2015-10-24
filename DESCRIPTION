@@ -24,8 +24,7 @@ Imports:
     lazyeval,
     magrittr,
     ggplot2,
-    scales,
-    stringr
+    scales
 Suggests:
     testthat,
     data.table,
