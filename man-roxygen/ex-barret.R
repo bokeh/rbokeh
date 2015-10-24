@@ -177,9 +177,6 @@ a <- function() {
 }; a()
 
 
-# ly_segments
-load_all(); bFig %>% ly_boxplot(voice.part, height, data = lattice::singer) %>% theme_axis("x", major_label_orientation = 90) -> a; a
-
 # ly_curve
 chippy <- function(x) sin(cos(x)*exp(-x/2))
 load_all(); bFig %>% ly_curve(chippy, -8, 7, n = 2001) -> a; a
@@ -252,3 +249,17 @@ a <- function() {
 
 # ly_map
 load_all(); bFig %>% ly_map()
+
+
+# ly_hist
+load_all(); bFig %>% ly_hist(Sepal.Length, data = ir)
+
+
+# ly_density
+load_all(); bFig %>% ly_density(Sepal.Length, data = ir)
+
+# ly_quantile
+load_all(); bFig %>% ly_quantile(Sepal.Length, data = ir)
+
+# ly_segments, ly_boxplot
+load_all(); bFig %>% ly_boxplot(voice.part, height, data = lattice::singer) %>% theme_axis("x", major_label_orientation = 90) -> a; a

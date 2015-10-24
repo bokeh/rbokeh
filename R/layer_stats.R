@@ -11,35 +11,40 @@
 #' @template dots-fillline
 #' @family layer functions
 #' @export
-ly_hist <- function(fig, x, data = NULL,
+ly_hist <- function(
+  fig, x, data = NULL,
   breaks = "Sturges", freq = TRUE, include.lowest = TRUE, right = TRUE,
   color = NULL, alpha = 1,
-  lname = NULL, lgroup = NULL, ...) {
-
-  xname <- deparse(substitute(x))
-  yname <- ifelse(freq, "Frequency", "Density")
+  lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_hist")
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x     <- v_eval(substitute(x), data)
-    # group <- v_eval(substitute(group), data)
-  }
+  args <- sub_names2(fig, data,
+    grab2(
+      x,
+      color, # TODO If i supply color, it should stack or dodge by default
+      alpha,
+      # no legend?
+      lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
 
-  lgroup <- get_lgroup(lgroup, fig)
 
-  if(inherits(x, "histogram")) {
-    hh <- x
-    xname <- x$xname
+  if(inherits(args$data$x, "histogram")) {
+    hh <- args$data$x
+    args$info$xName <- args$data$x$xname
   } else {
-    hh <- graphics::hist.default(x = x, breaks = breaks,
+    # was moved to position of "y" as only "x" was supplied.  (inside sub_names)
+    # moving values from "y" to "x"
+    hh <- graphics::hist.default(x = args$data[[2]], breaks = breaks,
       include.lowest = include.lowest, right = right, plot = FALSE)
+    args$info$xName <- args$info$yName
   }
+  args$info$yName <- ifelse(freq, "Frequency", "Density")
 
-  args <- list(color = color, alpha = alpha, ...)
-
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   y <- if(freq) {
     hh$counts
@@ -47,11 +52,16 @@ ly_hist <- function(fig, x, data = NULL,
     hh$density
   }
 
-  do.call(ly_rect, c(list(fig = fig,
-    xleft = hh$breaks[-length(hh$breaks)],
-    xright = hh$breaks[-1], ytop = y, ybottom = 0,
-    xlab = xname, ylab = yname,
-    lname = lname, lgroup = lgroup), args))
+  do.call(ly_rect, c(
+    list(
+      fig = fig,
+      xleft = hh$breaks[-length(hh$breaks)],
+      xright = hh$breaks[-1], ytop = y, ybottom = 0,
+      xlab = args$info$xName, ylab = args$info$yName,
+      lname = args$info$lname, lgroup = args$info$lgroup
+    ),
+    args$params
+  ))
 }
 
 
@@ -67,39 +77,55 @@ ly_hist <- function(fig, x, data = NULL,
 #' @template dots-line
 #' @family layer functions
 #' @export
-ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
+ly_density <- function(
+  fig, x, data = NULL,
+  bw = "nrd0", adjust = 1,
   kernel = c("gaussian", "epanechnikov", "rectangular", "triangular",
     "biweight", "cosine", "optcosine"),
   weights = NULL, window = kernel, n = 512, cut = 3, na.rm = FALSE,
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_density")
 
-  xname <- deparse(substitute(x))
-  yname <- "Density"
+  args <- sub_names2(fig, data,
+    grab2(
+      x,
+      color, # TODO If I supply color, it should stack or dodge by default
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x     <- v_eval(substitute(x), data)
-    # group <- v_eval(substitute(group), data)
-  }
+  # data was moved to 'y' position as only 'x' was supplied to sub_names
+  args$data$x <- args$data[[2]]; args$data[[2]] <- NULL
+  args$info$xName <- args$info$yName
+  args$info$yName <- "Density"
 
-  xy_names <- get_xy_names(NULL, NULL, xname, yname, list(...))
 
-  lgroup <- get_lgroup(lgroup, fig)
+  ## b_eval will repeat these, but the line glyph doesn't like this
+  if(length(unique(args$params$color)) == 1)
+    args$params$color <- subset_with_attributes(args$params$color, 1)
+  if(length(unique(args$params$type)) == 1)
+    args$params$type <- subset_with_attributes(args$params$type, 1)
+  if(length(unique(args$params$width)) == 1)
+    args$params$width <- subset_with_attributes(args$params$width, 1)
 
-  if(!is.null(data))
-    x <- eval(substitute(x), data)
+  args$params <- resolve_line_args(fig, args$params)
 
-  args <- list(color = color, alpha = alpha, width = width,
-    type = type, ...)
+  dd <- stats::density.default(x = args$data$x, bw = bw, adjust = adjust, kernel = kernel, n = n, cut = 3, na.rm = na.rm)
 
-  args <- resolve_line_args(fig, args)
-
-  dd <- stats::density.default(x = x, bw = bw, adjust = adjust, kernel = kernel, n = n, cut = 3, na.rm = na.rm)
-
-  do.call(ly_lines, c(list(fig = fig, x = dd$x, y = dd$y, xlab = xname, ylab = yname), args))
+  do.call(ly_lines, c(
+    list(
+      fig = fig,
+      x = dd$x, y = dd$y,
+      xlab = args$info$xName, ylab = args$info$yName
+    ), args$params)
+  )
 }
 
 # ly_rug
@@ -121,41 +147,46 @@ ly_density <- function(fig, x, data = NULL, bw = "nrd0", adjust = 1,
 #' @template dots-fillline
 #' @family layer functions
 #' @export
-ly_quantile <- function(fig, x, group = NULL, data = NULL,
+ly_quantile <- function(
+  fig, x, group = NULL, data = NULL,
   probs = NULL, distn = qunif, ncutoff = 200,
   color = NULL, alpha = 1,
-  legend = TRUE, lname = NULL, lgroup = NULL, ...) {
+  legend = TRUE, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_quantile")
 
-  xname <- "f-value"
-  yname <- deparse(substitute(x))
+  args <- sub_names2(fig, data,
+    grab2(
+      x,
+      group,
+      color,
+      alpha,
+      legend, lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  # sub_names moves data into 'y' position as only 'x' is supplied
+  args$data$x <- args$data[[2]]
+  args$info$xName <- "f-value"
+  # args$info$yName <- deparse(substitute(x)) # already done!
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x     <- v_eval(substitute(x), data)
-    group <- v_eval(substitute(group), data)
+  if(is.null(args$info$group)) {
+    args$info$group <- rep(1, length(args$data$x))
   }
 
-  lgroup <- get_lgroup(lgroup, fig)
+  na_idx <- is.na(args$data$x)
+  args$data$x <- args$data$x[!na_idx]
+  args$info$group <- args$info$group[!na_idx]
 
-  args <- list(color = color, alpha = alpha, ...)
-
-  if(is.null(group))
-    group <- rep(1, length(x))
-
-  na_idx <- is.na(x)
-  x <- x[!na_idx]
-  group <- group[!na_idx]
-
-  idx <- split(seq_along(x), group)
+  idx <- split(seq_along(args$data$x), args$info$group)
 
   ## quantile plot with no groups needs explicit legend
   ## but with groups, legend can simply be "TRUE" in which case
   ## an entry is automatically added for each group
   if(length(idx) == 1) {
-    if(is.logical(legend))
-      legend <- NULL
+    if(is.logical(args$info$legend))
+      args$info$legend <- NULL
   }
 
   for(ii in idx) {
@@ -165,28 +196,34 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
         ## to some length, like 1000
         if(length(ii) > ncutoff) {
           cur_probs <- ppoints(ncutoff)
-          qq <- quantile(x[ii], cur_probs, names = FALSE, na.rm = TRUE)
+          qq <- quantile(args$data$x[ii], cur_probs, names = FALSE, na.rm = TRUE)
         } else {
-          cur_probs <- ppoints(length(x[ii]))
-          qq <- sort(x[ii])
+          cur_probs <- ppoints(length(args$data$x[ii]))
+          qq <- sort(args$data$x[ii])
         }
       } else {
         cur_probs <- probs
-        qq <- quantile(x[ii], cur_probs, names = FALSE, na.rm = TRUE)
+        qq <- quantile(args$data$x[ii], cur_probs, names = FALSE, na.rm = TRUE)
       }
       ff <- distn(cur_probs)
 
       cur_legend <- NULL
-      if(is.logical(legend)) {
-        if(legend)
-          cur_legend <- group[[ii[1]]]
+      if(is.logical(args$info$legend)) {
+        if(args$info$legend) {
+          cur_legend <- args$info$group[[ii[1]]]
+        }
       } else {
-        cur_legend <- legend
+        cur_legend <- args$info$legend
       }
 
-      fig <- do.call(ly_points, c(list(fig = fig, x = ff, y = qq,
-        xlab = xname, ylab = yname,
-        lgroup = lgroup, legend = cur_legend), args))
+      fig <- do.call(ly_points, c(
+        list(
+          fig = fig, x = ff, y = qq,
+          xlab = args$info$xName, ylab = args$info$yName,
+          lgroup = args$info$lgroup, legend = cur_legend
+        ),
+        args$params
+      ))
     }
   }
   fig
@@ -203,71 +240,67 @@ ly_quantile <- function(fig, x, group = NULL, data = NULL,
 #' @template dots-fillline
 #' @family layer functions
 #' @export
-ly_boxplot <- function(fig, x, y = NULL, data = NULL,
+ly_boxplot <- function(
+  fig, x, y = NULL, data = NULL,
   coef = 1.5,
   color = "blue", alpha = 1,
-  lname = NULL, lgroup = NULL, ...) {
+  lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_boxplot")
 
-  xnm <- deparse(substitute(x))
-  ynm <- deparse(substitute(y))
+  args <- sub_names2(fig, data,
+    grab2(
+      x, y,
+      color,
+      alpha,
+      # legend, # no legend?
+      lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x <- v_eval(substitute(x), data)
-    y <- v_eval(substitute(y), data)
-    if(is.factor(x))
-      x <- as.character(x)
-    if(is.factor(y))
-      y <- as.character(y)
+  if (is.factor(args$data$x)) {
+    args$data$x <- as.character(args$data$x)
+  }
+  if (is.factor(args$data$y)) {
+    args$data$y <- as.character(args$data$y)
   }
 
-  ## translate different x, y types to vectors
-  lgroup <- get_lgroup(lgroup, fig)
-
-  ## deal with vector inputs from a data source
-  if(!is.null(data)) {
-    x <- eval(substitute(x), data)
-    y <- eval(substitute(y), data)
-    if(is.factor(x))
-      x <- as.character(x)
-    if(is.factor(y))
-      y <- as.character(y)
-  }
-
-  args <- list(color = color, alpha = alpha, ...)
-
-  args <- resolve_color_alpha(args, has_line = TRUE,
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE,
     has_fill = TRUE, theme = fig$x$spec$theme)
 
-  fill_ind <- grepl("^fill_", names(args))
+  fill_ind <- grepl("^fill_", names(args$params))
+
+  # pull out x and y as they are used a lot
+  x <- args$data$x
+  y <- args$data$y
 
   if(is.null(y)) {
-    xname <- " "
-    yname <- xnm
-    group <- rep(xname, length(x))
+    xName <- " "
+    yName <- args$info$xName
+    group <- rep(xName, length(x))
   } else {
     num_ind <- c(is.numeric(x), is.numeric(y))
     if(all(num_ind)) {
       message("both x and y are numeric -- choosing numeric variable based on which has the most unique values")
       if(length(unique(x)) > length(unique(y))) {
-        xname <- ynm
-        yname <- xnm
+        xName <- args$info$yName
+        yName <- args$info$xName
         group <- y
       } else {
-        xname <- xnm
-        yname <- ynm
+        xName <- args$info$xName
+        yName <- args$info$yName
         group <- x
         x <- y
       }
     } else if(num_ind[1]) {
-      xname <- ynm
-      yname <- xnm
+      xName <- args$info$yName
+      yName <- args$info$xName
       group <- y
     } else if(num_ind[2]) {
-      xname <- xnm
-      yname <- ynm
+      xName <- args$info$xName
+      yName <- args$info$yName
       group <- x
       x <- y
     } else {
@@ -288,11 +321,34 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
     hgt2 <- bp$stats[4] - bp$stats[3]
     md2 <- hgt2 / 2 + bp$stats[3]
 
-    fig <- do.call(ly_crect, c(list(fig = fig, x = rep(gp, 2), y = c(md1, md2), width = 0.9, height = c(hgt1, hgt2), xlab = xname, ylab = yname), args))
-    fig <- do.call(ly_segments, c(list(fig = fig, x0 = c(gp, gp, gpr, gpr), y0 = c(bp$stats[1], bp$stats[4], bp$stats[1], bp$stats[5]), x1 = c(gp, gp, gpl, gpl), y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5])), args[!fill_ind]))
+    fig <- do.call(ly_crect, c(
+      list(
+        fig = fig, x = rep(gp, 2), y = c(md1, md2),
+        width = 0.9, height = c(hgt1, hgt2),
+        xlab = xName, ylab = yName
+      ),
+      args$params
+    ))
+    fig <- do.call(ly_segments, c(
+      list(
+        fig = fig,
+        x0 = c(gp, gp, gpr, gpr),
+        y0 = c(bp$stats[1], bp$stats[4], bp$stats[1], bp$stats[5]),
+        x1 = c(gp, gp, gpl, gpl),
+        y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5])
+      ),
+      args$params[!fill_ind])
+    )
 
     if(length(bp$out) > 0) {
-      fig <- do.call(ly_points, c(list(fig = fig, x = rep(gp, length(bp$out)), y = bp$out, type = 1), args))
+      fig <- do.call(ly_points, c(
+        list(
+          fig = fig,
+          x = rep(gp, length(bp$out)), y = bp$out,
+          type = 1
+        ),
+        args$params
+      ))
     }
   }
 
@@ -306,4 +362,3 @@ ly_boxplot <- function(fig, x, y = NULL, data = NULL,
 # ly_dotplot
 
 # ly_rug
-
