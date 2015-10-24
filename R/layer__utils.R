@@ -15,7 +15,9 @@ b_eval <- function(data, parentHeight = 2) {
 
       # if it is an "data" variable name, set the stringName to the value used, such as "xVal"
       if(!is.null(ans)) {
-        if (deparse(x$expr) %in% data_name_list_c()) {
+        if (
+          paste0(deparse(x$expr), collapse = "") %in% data_name_list_c()
+        ) {
           attr(ans, "stringName") <- deparse(b_eval_get_symbol(x))
         }
       }
@@ -36,6 +38,7 @@ b_eval <- function(data, parentHeight = 2) {
     fn <- function(x) {
 
       if (! inherits(x, "lazy")) {
+        # print(x)
         stop("argument is not of class 'lazy'")
       }
 
@@ -198,7 +201,7 @@ grab <- function(...) {
   ret
 }
 
-# 
+#
 # asJSON.substituted_value <- function(x, ...) {
 #   class(x) <- NULL
 #   asJSON(x)
@@ -542,7 +545,8 @@ data_name_list = function() {
     c("x0", "y0", "x1", "y1"),
     c("xleft", "ybottom", "xright", "ytop"),
     c("xs", "ys"),
-    c("x", "y")
+    c("x", "y"),
+    c("x")
   )
 }
 data_name_list_c = function() {
