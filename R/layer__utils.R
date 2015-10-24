@@ -250,7 +250,7 @@ grab_param_index = function(dataIdx, regularIdx) {
 #' @param dots output from \code{lazy_dots()} from the parent function
 #' @param nullData boolen to determine if data args are being passed in
 #' @return list of three groups: data, info, and params
-grab2 <- function(..., dots, nullData = FALSE) {
+grab <- function(..., dots, nullData = FALSE) {
 
   if (missing(dots)) {
     stop("'dots' must be supplied")
@@ -300,7 +300,7 @@ grab2 <- function(..., dots, nullData = FALSE) {
 #' @param argObj args object supplied by \code{grab}
 #' @param processDataAndNames boolean to determine if the data and xName and yName should be post processed
 #' @return list of three groups: data, info, and params.
-sub_names2 <- function(
+sub_names <- function(
   fig, data, argObj,
   processDataAndNames = TRUE
 ) {

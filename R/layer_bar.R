@@ -31,8 +31,8 @@ ly_bar <- function(
 
   validate_fig(fig, "ly_bar")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       color,

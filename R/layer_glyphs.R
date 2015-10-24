@@ -28,8 +28,8 @@ ly_annular_wedge <- function(
 
   validate_fig(fig, "ly_annular_wedge")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       inner_radius,
@@ -94,8 +94,8 @@ ly_annulus <- function(
 
   validate_fig(fig, "ly_annulus")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       inner_radius,
@@ -158,8 +158,8 @@ ly_arc <- function(
 
   validate_fig(fig, "ly_arc")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       color,
@@ -224,8 +224,8 @@ ly_wedge <- function(
 
   validate_fig(fig, "ly_wedge")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       color,

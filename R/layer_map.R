@@ -15,8 +15,8 @@ ly_map <- function(fig, database = "world", regions = ".",
 
   validate_fig(fig, "ly_map")
 
-  args <- sub_names2(fig, data = NULL,
-    grab2(
+  args <- sub_names(fig, data = NULL,
+    grab(
       color,
       alpha,
       lname, lgroup,

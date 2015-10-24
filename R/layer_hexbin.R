@@ -23,8 +23,8 @@ ly_hexbin <- function(
   palette = "RdYlGn11", line = FALSE, alpha = 1, hover = TRUE
 ) {
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       xbins,

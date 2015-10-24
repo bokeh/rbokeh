@@ -21,8 +21,8 @@ ly_polygons <- function(
 
   validate_fig(fig, "ly_polygons")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       xs,
       ys,
       group,
@@ -130,8 +130,8 @@ ly_rect <- function(
 
   validate_fig(fig, "ly_rect")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       xleft,
       ybottom,
       xright,
@@ -209,8 +209,8 @@ ly_crect <- function(
 
   validate_fig(fig, "ly_crect")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       width,
@@ -287,8 +287,8 @@ ly_oval <- function(
 
   validate_fig(fig, "ly_oval")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       width,
@@ -351,8 +351,8 @@ ly_patch <- function(
 
   validate_fig(fig, "ly_patch")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       color,

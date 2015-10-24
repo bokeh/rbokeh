@@ -42,8 +42,8 @@ ly_points <- function(
   if(is.null(mc))
     mc <- lapply(match.call(), deparse)
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       glyph,

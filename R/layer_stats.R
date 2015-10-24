@@ -20,8 +20,8 @@ ly_hist <- function(
 
   validate_fig(fig, "ly_hist")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       color, # TODO If i supply color, it should stack or dodge by default
       alpha,
@@ -89,8 +89,8 @@ ly_density <- function(
 
   validate_fig(fig, "ly_density")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       color, # TODO If I supply color, it should stack or dodge by default
       alpha,
@@ -156,8 +156,8 @@ ly_quantile <- function(
 
   validate_fig(fig, "ly_quantile")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       group,
       color,
@@ -249,8 +249,8 @@ ly_boxplot <- function(
 
   validate_fig(fig, "ly_boxplot")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x, y,
       color,
       alpha,

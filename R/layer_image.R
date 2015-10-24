@@ -24,8 +24,8 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
   ## see if any options won't be used and give a message
   # check_opts(list(...), "image")
 
-  args <- sub_names2(fig, data = NULL,
-    grab2(
+  args <- sub_names(fig, data = NULL,
+    grab(
       x,
       y,
       lname,
@@ -105,8 +105,8 @@ ly_image_url <- function(
     stop("anchor must be one of: ", paste(anchor_opts, collapse = ", "), call. = FALSE)
   }
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       w,

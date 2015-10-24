@@ -33,8 +33,8 @@ ly_text <- function(
 
   validate_fig(fig, "ly_text")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x, y, text,
       color,
       alpha,

@@ -22,8 +22,8 @@ ly_lines <- function(
 
   ## deal with possible named inputs from a data source
   bv <- b_eval(data)
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x,
       y,
       group,
@@ -125,8 +125,8 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
 
   validate_fig(fig, "ly_segments")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x0,
       y0,
       x1,
@@ -188,8 +188,8 @@ ly_abline <- function(
 
   validate_fig(fig, "ly_abline")
 
-  args <- sub_names2(fig, data = NULL,
-    grab2(
+  args <- sub_names(fig, data = NULL,
+    grab(
       color,
       alpha,
       width,
@@ -344,8 +344,8 @@ ly_curve <- function(
   names(ll) <- xname
   y <- eval(expr, envir = ll, enclos = parent.frame())
 
-  args <- sub_names2(fig, data = NULL,
-    grab2(
+  args <- sub_names(fig, data = NULL,
+    grab(
       color,
       alpha,
       width,
@@ -401,8 +401,8 @@ ly_contour <- function(
   validate_fig(fig, "ly_contour")
   ## see if any options won't be used and give a message
 
-  args <- sub_names2(fig, data = NULL,
-    grab2(
+  args <- sub_names(fig, data = NULL,
+    grab(
       color,
       alpha,
       width,
@@ -460,8 +460,8 @@ ly_ray <- function(
 
   validate_fig(fig, "ly_ray")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x, y,
       length,
       angle,
@@ -527,8 +527,8 @@ ly_bezier <- function(
 
   validate_fig(fig, "ly_bezier")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x0, y0, x1, y1, cx0, cy0, cx1, cy1,
       color,
       alpha,
@@ -594,8 +594,8 @@ ly_quadratic <- function(
 
   validate_fig(fig, "ly_quadratic")
 
-  args <- sub_names2(fig, data,
-    grab2(
+  args <- sub_names(fig, data,
+    grab(
       x0, y0, x1, y1, cx, cy,
       color,
       alpha,
@@ -657,8 +657,8 @@ ly_multi_line <- function(
 
   validate_fig(fig, "ly_multi_line")
 
-  args <- sub_names2(fig, data = NULL,
-    grab2(
+  args <- sub_names(fig, data = NULL,
+    grab(
       xs, ys,
       color,
       alpha,
