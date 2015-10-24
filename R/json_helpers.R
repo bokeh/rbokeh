@@ -26,38 +26,72 @@ print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, file = "", pbco
 #' Get the HTML content required to embed a Bokeh figure
 #' @param fig figure
 #' @export
-get_bokeh_html <- function(fig) {
-  all_models <- fig$x$spec$model
-  elementid <- digest(Sys.time())
-  modelid <- fig$x$spec$model$plot$id
+rbokeh2html <- function(fig) {
+  fig <- rbokeh_prerender(fig)
+  modelid <- fig$x$modelid
+  elementid <- fig$x$elementid
   type <- fig$x$modeltype
 
-  fig <- rbokeh_prerender(fig)
-  fig <- toJSON(fig$x$all_models)
+  fig <- toJSON(fig$x$all_models, pretty = pretty,
+    auto_unbox = TRUE, null = "null", na = "null")
 
-  a <- paste(
-  '<head>\n',
-  '<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.1.min.js"></script>\n',
-  '<link href="http://cdn.pydata.org/bokeh/release/bokeh-0.8.1.min.css" rel="stylesheet">\n',
-  '</head>\n\n',
-  '<div id=', elementid, ' class="plotdiv"></div>\n\n',
-  '<script type="text/javascript">\n',
-  'Bokeh.$(function() {\n',
-  'var modelid = "', modelid, '";\n',
-  'var modeltype = "', type,'";\n',
-  'var elementid = "', elementid,'";\n',
-  'Bokeh.logger.info("Realizing plot:");\n',
-  'Bokeh.logger.info(" - modeltype: ', type, '");\n',
-  'Bokeh.logger.info(" - modelid: ', modelid, '");\n',
-  'Bokeh.logger.info(" - elementid: ', elementid, '");\n',
-  'var all_models = ', fig, ';\n',
-  'Bokeh.load_models(all_models);\n',
-  'var model = Bokeh.Collections(modeltype).get(modelid);\n',
-  'var view = new model.default_view({model: model, el: \'#', elementid, '\'});\n',
-  'Bokeh.index[modelid] = view;\n',
-  '});\n',
-  '</script>\n',
-  sep = "")
+  ver <- get_bokeh_version()
+
+  a <- paste0('<!DOCTYPE html>
+<html>
+<head>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.js"></script>
+<link href="http://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.css" rel="stylesheet">
+</head>
+<body>
+<div id="', elementid, '" class="plotdiv"></div>
+<script type="text/javascript">
+Bokeh.$(function() {
+  var modelid = "', modelid, '";
+  var modeltype = "', type, '";
+  var elementid = "', elementid, '";
+  Bokeh.logger.info("Realizing plot:");
+  Bokeh.logger.info(" - modeltype: ', type, '");
+  Bokeh.logger.info(" - modelid: ', modelid, '");
+  Bokeh.logger.info(" - elementid: ', elementid, '");
+  var all_models = ', fig, ';
+  // change "nulls" in data to NaN
+  function traverseObject(obj) {
+    for(var key in obj) {
+      if(obj[key].constructor === Object) {
+        traverseObject(obj[key]);
+      } else if(obj[key].constructor === Array) {
+        for (var i = 0; i < obj[key].length; i++) {
+          if(obj[key][i] === null)
+            obj[key][i] = NaN;
+        };
+      }
+    };
+  }
+  for(var i = 0; i < all_models.length; i++) {
+    if(all_models[i].type === "ColumnDataSource")
+      traverseObject(all_models[i].attributes.data);
+  };
+  Bokeh.load_models(all_models);
+  var model = Bokeh.Collections(modeltype).get(modelid);
+  var view = new model.default_view({model: model, el: "#" + elementid});
+  // Bokeh.instance = view;
+  Bokeh.index[modelid] = view;
+});
+</script>
+</body>
+</html>')
+}
+
+
+
+
+get_bokeh_version <- function() {
+  # assumes there is only one listed dependency here
+  # (don't want dependency on yaml package just for this)
+  yaml <- readLines(file.path(system.file(package = "rbokeh"), "htmlwidgets", "rbokeh.yaml"))
+  yaml <- yaml[grepl("version:", yaml)]
+  gsub(" +version: +(.*)", "\\1", yaml)
 }
 
 base_model_object <- function(type, id) {
@@ -94,3 +128,43 @@ underscore2camel <- function(x) {
   x <- gsub("^([a-zA-Z])", "\\U\\1", x, perl = TRUE)
   gsub("_([a-zA-Z])", "\\U\\1", x, perl = TRUE)
 }
+
+# bokeh2codepen <- function(fig, title = "rbokeh plot", description = "rbokeh plot", private = FALSE, tags = c("bokeh", "rbokeh")) {
+
+#   all_models <- fig$x$spec$model
+#   elementid <- digest(Sys.time())
+#   modelid <- fig$x$spec$model$plot$id
+#   type <- fig$x$modeltype
+
+#   fig <- rbokeh_prerender(fig)
+#   fig <- toJSON(fig$x$all_models, pretty = pretty,
+#     auto_unbox = TRUE, null = "null", na = "null")
+
+#   ver <- get_bokeh_version()
+
+#   data <- list(
+#     title = title,
+#     description = description,
+#     private = private,
+#     tags = I(tags),
+#     html = paste0('<div id="', elementid, '" class="plotdiv"></div>'),
+#     js = paste0('Bokeh.$(function() {\n',
+#       'var modelid = "', modelid, '";\n',
+#       'var modeltype = "', type,'";\n',
+#       'var elementid = "', elementid,'";\n',
+#       'Bokeh.logger.info("Realizing plot:");\n',
+#       'Bokeh.logger.info(" - modeltype: ', type, '");\n',
+#       'Bokeh.logger.info(" - modelid: ', modelid, '");\n',
+#       'Bokeh.logger.info(" - elementid: ', elementid, '");\n',
+#       'var all_models = ', fig, ';\n',
+#       'Bokeh.load_models(all_models);\n',
+#       'var model = Bokeh.Collections(modeltype).get(modelid);\n',
+#       'var view = new model.default_view({model: model, el: \'#', elementid, '\'});\n',
+#       'Bokeh.index[modelid] = view;\n'),
+#     css_external = paste0("http://cdn.pydata.org/bokeh/release/bokeh-", ver, ".min.css"),
+#     js_external = paste0("http://cdn.pydata.org/bokeh/release/bokeh-", ver, ".min.js")
+#   )
+#   library(httr)
+#   a <- POST("http://codepen.io/pen/define/", body = list(data = data), encode = "json")
+# }
+

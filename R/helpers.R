@@ -526,7 +526,7 @@ v_eval <- function(x, data) {
   }
 
   ## variable name could have been supplied in quotes
-  if(length(res) == 1 && is.character(res) && nrow(data) > 1) {
+  if(length(res) == 1 && is.character(res) && nrow(data) > 0) {
     if(res %in% names(data)) {
       nm <- res
       res <- data[[res]]

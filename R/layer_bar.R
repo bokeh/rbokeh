@@ -3,7 +3,7 @@
 #' Draws a bar chart
 #' @param fig figure to modify
 #' @param x values or field name for x variable
-#' @param y values or field name for y variable
+#' @param y values or field name for y variable, or if NULL, y-axis will be counts of x
 #' @param data an optional data frame, providing the source for inputs x, y, and color properties
 #' @template par-coloralpha
 #' @param position either "stack", "fill", or "dodge" (see details)
@@ -13,11 +13,12 @@
 #' @template par-legend
 #' @template dots-fillline
 #' @details
-#' The y variable is summed for each x variable and bars are plotted.  Within each x variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each x, stacking the bars.  The "dodge" choice will plot the bars for each x side by side.
+#' The y variable is summed for each x variable and bars are plotted.  If no y variable is supplied, the unique values of x will be tabulated.  Within each x variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each x, stacking the bars.  The "dodge" choice will plot the bars for each x side by side.
 #'
 #' Note that currently x cannot be numeric but support will soon be added for numeric x by first binning the x values.
 #'
 #' @family layer functions
+#' @example man-roxygen/ex-bar.R
 #' @export
 ly_bar <- function(
   fig, x, y, data = NULL,
@@ -58,11 +59,16 @@ ly_bar <- function(
     colorname <- deparse(substitute(color))
   }
 
+  if(is.null(args$data$y)) {
+    args$data$y <- rep(1, length(args$data$x))
+    args$info$yName <- "count"
+  }
+
   if(is.numeric(args$data$x)) {
     stop("numeric values for x in ly_bar are not yet supported", call. = FALSE)
   }
 
-  if(is.null(args$params$color)) {
+  if(is.null(args$params$color) || length(args$params$color) == 1) {
     res <- aggregate(y ~ x, data = args$data, sum)
   } else {
     dataAndColor <- args$data
@@ -124,6 +130,11 @@ ly_bar <- function(
   badParamNames = c("color", "origin","breaks","right","binwidth", "position")
   remainingArgs = args$params
   remainingArgs = remainingArgs[! (names(remainingArgs) %in% badParamNames)]
+
+  # get rid of x and y as they are no longer needed
+  # and may conflict with xname, yname
+  res$x <- NULL
+  res$y <- NULL
 
   do.call(ly_rect, c(list(fig = fig,
     xleft = args$info$xName, ybottom = args$info$yName, xright = "xright", ytop = "ytop",
