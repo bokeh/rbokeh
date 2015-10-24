@@ -383,11 +383,7 @@ get_lgroup <- function(lgroup, fig) {
 # if a data frame was provided, the arg sould be a
 # list of column names
 # otherwise it should be a named list or data frame
-get_hover <- function(hn, data, envir, sub_fn) {
-
-  # tmp <- sub_fn(hn)
-  # browser()
-  # hn <- b_eval_get_symbol(hn)
+get_hover <- function(hn, data, sub_fn) {
 
   # try to get the raw data
   tmp <- try(lazy_eval(hn), silent = TRUE)
@@ -398,9 +394,6 @@ get_hover <- function(hn, data, envir, sub_fn) {
 
   # if failed, it's a "fancy symbol", so retrieve and eval that
   if (inherits(tmp, "try-error")) {
-    # tmp <- try(eval(hn, envir = envir), silent = TRUE)
-    # tmp <- try(eval(b_eval_get_symbol(hn), envir = envir), silent = TRUE)
-
     tmp <- sub_fn(hn)
     # to work with code below
     hn <- b_eval_get_symbol(hn)

@@ -48,7 +48,6 @@ load_all(); bFig %>% ly_arc(Sepal.Length, Sepal.Width, data = ir, end_angle = re
 
 # ly_wedge
 load_all(); bFig %>% ly_wedge(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, radius = 0.15, alpha = 0.5, hover = Species) -> a; a
-load_all(); bFig %>% ly_wedge(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, radius = 0.15, alpha = 0.5, hover = Species) -> a; a
 
 
 
@@ -109,6 +108,7 @@ load_all(); bFig %>% ly_oval(Sepal.Length, Sepal.Width, data = ir, color = Speci
 # ly_patch
 # color doesn't work
 load_all(); bFig %>% ly_patch(Sepal.Length, Sepal.Width, data = ir, color = Species, alpha = 0.5) -> a; a
+load_all(); bFig %>% ly_patch(Sepal.Length, Sepal.Width, data = ir, color = "blue", alpha = 0.5) -> a; a
 
 
 
@@ -120,6 +120,7 @@ load_all(); bFig %>% ly_bar(variety, yield, data = lattice::barley) %>% theme_ax
 
 
 # ly_image_url
+# the top half of the R is being cut off. :-(
 a <- function() {
   load_all()
   url <- c("http://bokeh.pydata.org/en/latest/_static/bokeh-transparent.png",
@@ -134,14 +135,11 @@ a <- function() {
     imageUrl = rep(url, 6)
   )
 
-  print(imgdat)
-
   p <- figure(xlab = "x", ylab = "y") %>%
     ly_image_url(x, y, w = w, h = h, imageUrl = imageUrl, data = imgdat,
-      anchor = "center")
-      # %>%
-    # ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
-      # width = 15, alpha = 0.1)
+      anchor = "center") %>%
+    ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
+      width = 15, alpha = 0.1)
   p
 }; a()
 
@@ -248,6 +246,7 @@ a <- function() {
 
 
 # ly_map
+# this doesn't work unless you "library(maps)" first
 load_all(); bFig %>% ly_map()
 
 

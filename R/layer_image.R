@@ -113,6 +113,7 @@ ly_image_url <- function(
       h,
       imageUrl,
       dilate,
+      anchor,
       angle,
       lname,
       lgroup,
@@ -124,9 +125,6 @@ ly_image_url <- function(
   args$params$url <- args$params$imageUrl
   args$params$imageUrl <- NULL
 
-
-  browser()
-
   if(missing(x)) {
     args$info$xName <- "x"
   }
@@ -134,7 +132,7 @@ ly_image_url <- function(
     args$info$yName <- "y"
   }
 
-
+  # pull out values, as they are used a lot
   x <- args$data$x
   y <- args$data$y
   h <- args$params$h

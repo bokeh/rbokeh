@@ -49,10 +49,6 @@ ly_annular_wedge <- function(
   )
   args$params$glyph <- "annular_wedge"
 
-  # args <- c(args, list(glyph = "annular_wedge", color = color, alpha = alpha,
-  #   inner_radius = inner_radius, outer_radius = outer_radius,
-  #   start_angle = start_angle, end_angle = end_angle,
-  #   direction = direction))
   if(missing(alpha))
     args$params$alpha <- NULL
 
