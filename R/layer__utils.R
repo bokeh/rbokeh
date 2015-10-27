@@ -130,7 +130,7 @@ get_legend <- function(val) {
   valType = typeof(val)
   if (!is.null(val)) {
     if (valType != "logical") {
-      if (valType != "character") {
+      if (!(valType == "character" || is.factor(val))) {
         stop("'legend' must be a logical value or a character string")
       }
     }
@@ -175,6 +175,7 @@ subset_arg_obj = function(argObj, idxs) {
       }
 
       if (length(attributes(val)) > 1) {
+        # browser()
         return(subset_with_attributes(val, idxs))
       } else {
         return(val[idxs])
