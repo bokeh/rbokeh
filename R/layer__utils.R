@@ -51,6 +51,7 @@ b_eval <- function(data) {
         return(NULL)
       }
 
+
       xSymbol <- b_eval_get_symbol(x)
       xName <- deparse(xSymbol)
 
@@ -68,6 +69,12 @@ b_eval <- function(data) {
         ans
       }
       # cat("\n\n First\n");print(x)
+
+      # if the single item is in the data names, return that column
+      if (xName %in% names(data)) {
+        res <- eval(xSymbol, data, globalenv())
+        return(return_ans(res))
+      }
 
       # check for "as is"
       plainLazyEval = try(lazy_eval(x), silent = TRUE)
