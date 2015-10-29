@@ -615,9 +615,25 @@ to_epoch <- function(x) {
 
 subset_with_attributes <- function(x, ...) {
   res <- x[...]
-  attr.names <- names(attributes(x))
-  attr.names <- attr.names[attr.names != 'names']
-  attributes(res)[attr.names] <- attributes(x)[attr.names]
+  attrs <- attributes(x)
+  attrNames <- names(attrs)
+  attrNames <- attrNames[! (attrNames %in% c("names", "class"))]
+
+  ans <- try({
+    attributes(res)[attrNames] <- attributes(x)[attrNames]
+  }, silent = TRUE)
+
+  # if there's trouble setting the attributes,
+  # (like in Time-Series data, 'tsp' attr)
+  # try doing them one at a time
+  if (inherits(ans, "try-error")) {
+    for (attrName in attrNames) {
+      try({
+        attributes(res)[attrName] <- attributes(x)[attrName]
+      }, silent = TRUE)
+    }
+  }
+
   res
 }
 
