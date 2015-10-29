@@ -394,19 +394,31 @@ get_hover2 <- function(lazyHoverVal, data, sub_fn) {
 
   isListOrC <- deparse(hoverSymbolList[[1]]) %in% c("list", "c")
   isParseable <- FALSE
+  isAtString <- FALSE
 
-  # try to eval the arg to a char string
-  # if it evals, check to see if it's full of
-  maybeVar <- try(lazy_eval(lazyHoverVal), silent = TRUE)
-  if (!inherits(maybeVar, "try-error")) {
-    if (is.vector(maybeVar) || is.list(maybeVar)) {
-      if (all(unlist(maybeVar) %in% names(data))) {
-        hoverSymbolList <- lapply(maybeVar, as.symbol)
-        isListOrC <- FALSE
-        isParseable <- TRUE
+  if (inherits(hoverSymbol, "character")) {
+    if (grepl("@", hoverSymbol)) {
+      isAtString <- TRUE
+      tmp_split <- strsplit(hoverSymbol, "@")[[1]][-1]
+      tmpNames <- gsub("^([a-zA-Z0-9_]+).*", "\\1", tmp_split)
+      hoverSymbolList <- lapply(tmpNames, as.symbol)
+      isParseable <- TRUE
+    }
+  } else {
+    # try to eval the arg to a char string
+    # if it evals, check to see if it's full of
+    maybeVar <- try(lazy_eval(lazyHoverVal), silent = TRUE)
+    if (!inherits(maybeVar, "try-error")) {
+      if (is.vector(maybeVar) || is.list(maybeVar)) {
+        if (all(unlist(maybeVar) %in% names(data))) {
+          hoverSymbolList <- lapply(maybeVar, as.symbol)
+          isListOrC <- FALSE
+          isParseable <- TRUE
+        }
       }
     }
   }
+
 
   isSingleSymbol <- (length(hoverSymbolList) == 1)
   if (isListOrC || isSingleSymbol || isParseable) {
@@ -441,37 +453,12 @@ get_hover2 <- function(lazyHoverVal, data, sub_fn) {
 
 
   } else {
-    # hover value is not a deparse-able list
+    # hover value is not a interperable
     print("HOVER - IDK!")
     browser()
-    if(deparse(hoverSymbol)[1] == "NULL") {
-      return(NULL)
-    }
-
-    hoverVal <- lazy_eval(lazyHoverVal)
-
-    if(inherits(hoverVal, "hoverSpec")) {
-      return(hoverVal)
-    }
-
-    if (inherits(hoverVal, "character")) {
-      # extract variable names
-      tmp_split <- strsplit(tmp, "@")[[1]][-1]
-      hn <- NULL
-      if(length(tmp_split) > 0) {
-        hn <- gsub("^([a-zA-Z0-9_]+).*", "\\1", tmp_split)
-        hn_miss <- setdiff(hn, names(data))
-        if(length(hn_miss) > 0) {
-          message("hover tool couldn't find following variables in the data: ", paste(hn_miss, collapse = ", "), " - ignoring them...")
-          hn <- setdiff(hn, hn_miss)
-        }
-        data <- subset(data, select = hn)
-      }
-
-    }
-
-    hoverValList <- lapply(hoverValList, format)
   }
+
+  hoverValList <- lapply(hoverValList, format)
 
   # make the hover list into a dataframe
   hoverValDt <- as.data.frame(hoverValList)
@@ -487,9 +474,22 @@ get_hover2 <- function(lazyHoverVal, data, sub_fn) {
 
 
   # list of list(pretty name, key name)
-  hdict <- lapply(seq_along(hoverDtNames), function(i) {
-    list(hoverDtNames[i], paste0("@", hoverDtKey[i]))
-  })
+  if (isAtString) {
+    tmp <- hoverSymbol
+    for(ii in seq_along(hoverDtKey)) {
+      tmp <- gsub(
+        paste0("@", hoverDtNames[ii]),
+        paste0("@", hoverDtKey[ii]),
+        tmp
+      )
+    }
+    hdict <- tmp
+
+  } else {
+    hdict <- lapply(seq_along(hoverDtNames), function(i) {
+      list(hoverDtNames[i], paste0("@", hoverDtKey[i]))
+    })
+  }
 
   return(structure(list(
     data = hoverValDt,
