@@ -454,20 +454,27 @@ get_hover2 <- function(lazyHoverVal, data, sub_fn) {
 
   } else {
     # hover value is not a interperable
-    print("HOVER - IDK!")
-    browser()
+    hoverVal <- try(lazy_eval(lazyHoverVal), silent = TRUE)
+
+    if (inherits(hoverVal, "try-error")) {
+      print("HOVER - IDK!")
+      browser()
+    }
+
+    hoverValList <- as.list(hoverVal)
   }
+
+  # keep the original names
+  hoverDtNames <- names(hoverValList)
 
   hoverValList <- lapply(hoverValList, format)
 
   # make the hover list into a dataframe
   hoverValDt <- as.data.frame(hoverValList)
+
   if(nrow(hoverValDt) == 1) {
     hoverValDt <- lapply(hoverValDt, I)
   }
-
-  # keep the original names
-  hoverDtNames <- names(hoverValDt)
 
   # make fake, easy to use key names "hover_col_1", "hover_col_2",...
   names(hoverValDt) <- hoverDtKey <- paste0("hover_col_", seq_along(hoverDtNames))
