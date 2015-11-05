@@ -262,3 +262,9 @@ load_all(); bFig %>% ly_quantile(Sepal.Length, data = ir)
 
 # ly_segments, ly_boxplot
 load_all(); bFig %>% ly_boxplot(voice.part, height, data = lattice::singer) %>% theme_axis("x", major_label_orientation = 90) -> a; a
+
+
+
+# hover with data.frame
+d <- data.frame(x = 1:10, y = 1:10, random = rnorm(10))
+load_all(); bFig %>% ly_points(x, y, data = d[,c("x","y")], hover = d) -> a

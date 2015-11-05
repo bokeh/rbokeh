@@ -395,6 +395,7 @@ get_hover2 <- function(lazyHoverVal, data, sub_fn) {
   isListOrC <- deparse(hoverSymbolList[[1]]) %in% c("list", "c")
   isParseable <- FALSE
   isAtString <- FALSE
+  isDataFrame <- FALSE
 
   if (inherits(hoverSymbol, "character")) {
     if (grepl("@", hoverSymbol)) {
@@ -409,7 +410,12 @@ get_hover2 <- function(lazyHoverVal, data, sub_fn) {
     # if it evals, check to see if it's full of
     maybeVar <- try(lazy_eval(lazyHoverVal), silent = TRUE)
     if (!inherits(maybeVar, "try-error")) {
-      if (is.vector(maybeVar) || is.list(maybeVar)) {
+      if (is.data.frame(maybeVar)) {
+        hoverSymbolList <- as.list(maybeVar)
+        isDataFrame <- TRUE
+        isParseable <- FALSE
+        isListOrC <- FALSE
+      } else if (is.vector(maybeVar) || is.list(maybeVar)) {
         if (all(unlist(maybeVar) %in% names(data))) {
           hoverSymbolList <- lapply(maybeVar, as.symbol)
           isListOrC <- FALSE
@@ -451,6 +457,9 @@ get_hover2 <- function(lazyHoverVal, data, sub_fn) {
       sub_fn(lazyVal)
     })
 
+
+  } else if (isDataFrame) {
+    hoverValList <- hoverSymbolList
 
   } else {
     # hover value is not a interperable
