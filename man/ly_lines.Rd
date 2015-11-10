@@ -5,9 +5,9 @@
 \title{Add a "lines" layer to a Bokeh figure
 Draws lines with the given coordinates.}
 \usage{
-ly_lines(fig, x, y = NULL, data = NULL, group = NULL, color = "black",
-  type = 1, width = 1, alpha = 1, legend = NULL, lname = NULL,
-  lgroup = NULL, ...)
+ly_lines(fig, x, y = NULL, data = figure_data(fig), group = NULL,
+  color = "black", type = 1, width = 1, alpha = 1, legend = NULL,
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

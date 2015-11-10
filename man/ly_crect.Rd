@@ -4,9 +4,10 @@
 \alias{ly_crect}
 \title{Add a "crect" (centered rectangle) layer to a Bokeh figure}
 \usage{
-ly_crect(fig, x, y = NULL, data = NULL, width = 1, height = 1,
-  angle = 0, dilate = FALSE, color = NULL, alpha = 1, hover = NULL,
-  url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...)
+ly_crect(fig, x, y = NULL, data = figure_data(fig), width = 1,
+  height = 1, angle = 0, dilate = FALSE, color = NULL, alpha = 1,
+  hover = NULL, url = NULL, legend = NULL, lname = NULL,
+  lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

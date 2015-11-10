@@ -4,8 +4,8 @@
 \alias{ly_boxplot}
 \title{Add a "boxplot" layer to a Bokeh figure}
 \usage{
-ly_boxplot(fig, x, y = NULL, data = NULL, coef = 1.5, color = "blue",
-  alpha = 1, lname = NULL, lgroup = NULL, ...)
+ly_boxplot(fig, x, y = NULL, data = figure_data(fig), coef = 1.5,
+  color = "blue", alpha = 1, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

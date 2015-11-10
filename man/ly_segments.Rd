@@ -4,9 +4,9 @@
 \alias{ly_segments}
 \title{Add a "segments" layer to a Bokeh figure}
 \usage{
-ly_segments(fig, x0, y0, x1, y1, data = NULL, color = "black", alpha = 1,
-  width = 1, type = 1, legend = NULL, lname = NULL, lgroup = NULL,
-  ...)
+ly_segments(fig, x0, y0, x1, y1, data = figure_data(fig), color = "black",
+  alpha = 1, width = 1, type = 1, legend = NULL, lname = NULL,
+  lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

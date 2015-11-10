@@ -4,9 +4,9 @@
 \alias{ly_oval}
 \title{Add an "oval" layer to a Bokeh figure}
 \usage{
-ly_oval(fig, x, y = NULL, data = NULL, width = 0.1, height = 0.1,
-  angle = 0, color = NULL, alpha = 1, legend = NULL, lname = NULL,
-  lgroup = NULL, ...)
+ly_oval(fig, x, y = NULL, data = figure_data(fig), width = 0.1,
+  height = 0.1, angle = 0, color = NULL, alpha = 1, legend = NULL,
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

@@ -4,9 +4,9 @@
 \alias{ly_rect}
 \title{Add a "rect" layer to a Bokeh figure}
 \usage{
-ly_rect(fig, xleft, ybottom, xright, ytop, data = NULL, color = NULL,
-  alpha = 1, hover = NULL, url = NULL, legend = NULL, lname = NULL,
-  lgroup = NULL, ...)
+ly_rect(fig, xleft, ybottom, xright, ytop, data = figure_data(fig),
+  color = NULL, alpha = 1, hover = NULL, url = NULL, legend = NULL,
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

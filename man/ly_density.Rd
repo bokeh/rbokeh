@@ -4,7 +4,7 @@
 \alias{ly_density}
 \title{Add a "density" layer to a Bokeh figure}
 \usage{
-ly_density(fig, x, data = NULL, bw = "nrd0", adjust = 1,
+ly_density(fig, x, data = figure_data(fig), bw = "nrd0", adjust = 1,
   kernel = c("gaussian", "epanechnikov", "rectangular", "triangular",
   "biweight", "cosine", "optcosine"), weights = NULL, window = kernel,
   n = 512, cut = 3, na.rm = FALSE, color = "black", alpha = 1,

@@ -4,7 +4,7 @@
 \alias{ly_hist}
 \title{Add a "hist" layer to a Bokeh figure}
 \usage{
-ly_hist(fig, x, data = NULL, breaks = "Sturges", freq = TRUE,
+ly_hist(fig, x, data = figure_data(fig), breaks = "Sturges", freq = TRUE,
   include.lowest = TRUE, right = TRUE, color = NULL, alpha = 1,
   lname = NULL, lgroup = NULL, ...)
 }

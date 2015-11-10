@@ -4,9 +4,9 @@
 \alias{ly_quadratic}
 \title{Add a "quadratic" layer to a Bokeh figure}
 \usage{
-ly_quadratic(fig, x0, y0, x1, y1, cx, cy, data = NULL, color = "black",
-  alpha = 1, width = 1, type = 1, legend = NULL, lname = NULL,
-  lgroup = NULL, ...)
+ly_quadratic(fig, x0, y0, x1, y1, cx, cy, data = figure_data(fig),
+  color = "black", alpha = 1, width = 1, type = 1, legend = NULL,
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

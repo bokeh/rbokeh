@@ -4,9 +4,9 @@
 \alias{ly_polygons}
 \title{Add a "polygons" layer to a Bokeh figure}
 \usage{
-ly_polygons(fig, xs, ys, group = NULL, data = NULL, color = NULL,
-  alpha = 1, hover = NULL, url = NULL, lname = NULL, lgroup = NULL,
-  ...)
+ly_polygons(fig, xs, ys, group = NULL, data = figure_data(fig),
+  color = NULL, alpha = 1, hover = NULL, url = NULL, lname = NULL,
+  lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

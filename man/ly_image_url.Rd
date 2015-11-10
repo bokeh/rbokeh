@@ -4,9 +4,9 @@
 \alias{ly_image_url}
 \title{Add an "image_url" layer to a Bokeh figure}
 \usage{
-ly_image_url(fig, x = 0, y = 0, data = NULL, w = 10, h = 10, imageUrl,
-  dilate = TRUE, anchor = "top_left", angle = 0, lname = NULL,
-  lgroup = NULL)
+ly_image_url(fig, x = 0, y = 0, data = figure_data(fig), w = 10,
+  h = 10, imageUrl, dilate = TRUE, anchor = "top_left", angle = 0,
+  lname = NULL, lgroup = NULL)
 }
 \arguments{
 \item{fig}{figure to modify}

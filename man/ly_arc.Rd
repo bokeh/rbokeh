@@ -4,10 +4,10 @@
 \alias{ly_arc}
 \title{Add an "arc" layer to a Bokeh figure}
 \usage{
-ly_arc(fig, x, y = NULL, data = NULL, color = NULL, alpha = 1,
-  width = 2, type = 1, radius = 0.2, start_angle = 0, end_angle = 2 *
-  pi, direction = "anticlock", legend = NULL, lname = NULL,
-  lgroup = NULL, ...)
+ly_arc(fig, x, y = NULL, data = figure_data(fig), color = NULL,
+  alpha = 1, width = 2, type = 1, radius = 0.2, start_angle = 0,
+  end_angle = 2 * pi, direction = "anticlock", legend = NULL,
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

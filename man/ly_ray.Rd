@@ -4,9 +4,9 @@
 \alias{ly_ray}
 \title{Add a "ray" layer to a Bokeh figure}
 \usage{
-ly_ray(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
-  color = "black", type = 1, width = 1, alpha = NULL, legend = NULL,
-  lname = NULL, lgroup = NULL, ...)
+ly_ray(fig, x, y = NULL, data = figure_data(fig), length = NULL,
+  angle = 0, color = "black", type = 1, width = 1, alpha = NULL,
+  legend = NULL, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

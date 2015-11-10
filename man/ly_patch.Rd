@@ -4,8 +4,9 @@
 \alias{ly_patch}
 \title{Add a "patch" layer to a Bokeh figure}
 \usage{
-ly_patch(fig, x, y, data = NULL, color = NULL, alpha = 1, hover = NULL,
-  url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...)
+ly_patch(fig, x, y, data = figure_data(fig), color = NULL, alpha = 1,
+  hover = NULL, url = NULL, legend = NULL, lname = NULL,
+  lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

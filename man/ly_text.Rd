@@ -4,10 +4,11 @@
 \alias{ly_text}
 \title{Add a "text" layer to a Bokeh figure}
 \usage{
-ly_text(fig, x, y = NULL, text = NULL, data = NULL, color = "black",
-  alpha = 1, angle = 0, align = NULL, baseline = NULL, font = NULL,
-  font_size = NULL, font_style = NULL, x_offset = NULL, y_offset = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL)
+ly_text(fig, x, y = NULL, text = NULL, data = figure_data(fig),
+  color = "black", alpha = 1, angle = 0, align = NULL,
+  baseline = NULL, font = NULL, font_size = NULL, font_style = NULL,
+  x_offset = NULL, y_offset = NULL, legend = NULL, lname = NULL,
+  lgroup = NULL)
 }
 \arguments{
 \item{fig}{figure to modify}

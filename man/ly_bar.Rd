@@ -4,7 +4,7 @@
 \alias{ly_bar}
 \title{Add a "barchart" layer to a Bokeh figure}
 \usage{
-ly_bar(fig, x, y, data = NULL, color = NULL, alpha = 1,
+ly_bar(fig, x, y, data = figure_data(fig), color = NULL, alpha = 1,
   position = c("stack", "fill", "dodge"), width = 0.9, origin = NULL,
   breaks = NULL, right = FALSE, binwidth = NULL, lname = NULL,
   lgroup = NULL, legend = NULL, ...)
