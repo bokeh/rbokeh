@@ -30,6 +30,7 @@ Imports:
 Suggests:
     testthat,
     data.table,
-    lattice
+    lattice,
+    roxygen2 (>= 5.0.0)
 Enhances: shiny (>= 0.12)
 RoxygenNote: 5.0.0
