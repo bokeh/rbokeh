@@ -268,3 +268,17 @@ load_all(); bFig %>% ly_boxplot(voice.part, height, data = lattice::singer) %>% 
 # hover with data.frame
 d <- data.frame(x = 1:10, y = 1:10, random = rnorm(10))
 load_all(); bFig %>% ly_points(x, y, data = d[,c("x","y")], hover = d) -> a
+
+
+
+
+# Figure Data
+load_all(); figure() %>% ly_points(Sepal.Length, Sepal.Width, data = iris) -> a
+
+# but also support
+load_all(); figure(data = iris) %>% ly_points(Sepal.Length, Sepal.Width) -> a
+
+# if this happens, honor data provided in layer first, then look in figure data if it's not there
+iris2 <- iris
+iris2$Sepal.Length <- 1
+load_all(); figure(data = iris) %>% ly_points(Sepal.Length, Sepal.Width, data = iris2) -> a
