@@ -13,7 +13,7 @@
 #' @family layer functions
 #' @export
 ly_lines <- function(
-  fig, x, y = NULL, data = NULL, group = NULL,
+  fig, x, y = NULL, data = figure_data(fig), group = NULL,
   color = "black", type = 1, width = 1, alpha = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...
 ) {
@@ -119,7 +119,7 @@ ly_lines <- function(
 #' @template dots-line
 #' @family layer functions
 #' @export
-ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
+ly_segments <- function(fig, x0, y0, x1, y1, data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
@@ -452,7 +452,7 @@ ly_contour <- function(
 #' @family layer functions
 #' @export
 ly_ray <- function(
-  fig, x, y = NULL, data = NULL,
+  fig, x, y = NULL, data = figure_data(fig),
   length = NULL, angle = 0,
   color = "black", type = 1, width = 1, alpha = NULL,
   legend = NULL, lname = NULL, lgroup = NULL, ...
@@ -520,7 +520,7 @@ ly_ray <- function(
 ly_bezier <- function(
   fig,
   x0, y0, x1, y1, cx0, cy0, cx1, cy1,
-  data = NULL,
+  data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...
 ) {
@@ -587,7 +587,7 @@ ly_bezier <- function(
 ly_quadratic <- function(
   fig,
   x0, y0, x1, y1, cx, cy,
-  data = NULL,
+  data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...
 ) {

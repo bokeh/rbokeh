@@ -19,7 +19,7 @@
 #' @family layer functions
 #' @export
 ly_annular_wedge <- function(
-  fig, x, y = NULL, data = NULL,
+  fig, x, y = NULL, data = figure_data(fig),
   inner_radius = 0.1, outer_radius = 0.3,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   color = NULL, alpha = 1,
@@ -85,7 +85,7 @@ ly_annular_wedge <- function(
 #' @family layer functions
 #' @export
 ly_annulus <- function(
-  fig, x, y = NULL, data = NULL,
+  fig, x, y = NULL, data = figure_data(fig),
   inner_radius = 0.1, outer_radius = 0.2,
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL,
@@ -149,7 +149,7 @@ ly_annulus <- function(
 #' @family layer functions
 #' @export
 ly_arc <- function(
-  fig, x, y = NULL, data = NULL,
+  fig, x, y = NULL, data = figure_data(fig),
   color = NULL, alpha = 1, width = 2, type = 1,
   radius = 0.2,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
@@ -216,7 +216,7 @@ ly_arc <- function(
 #' @family layer functions
 #' @export
 ly_wedge <- function(
-  fig, x, y = NULL, data = NULL,
+  fig, x, y = NULL, data = figure_data(fig),
   radius = 0.3, start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...

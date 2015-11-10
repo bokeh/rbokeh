@@ -12,7 +12,7 @@
 #' @family layer functions
 #' @export
 ly_hist <- function(
-  fig, x, data = NULL,
+  fig, x, data = figure_data(fig),
   breaks = "Sturges", freq = TRUE, include.lowest = TRUE, right = TRUE,
   color = NULL, alpha = 1,
   lname = NULL, lgroup = NULL, ...
@@ -78,7 +78,7 @@ ly_hist <- function(
 #' @family layer functions
 #' @export
 ly_density <- function(
-  fig, x, data = NULL,
+  fig, x, data = figure_data(fig),
   bw = "nrd0", adjust = 1,
   kernel = c("gaussian", "epanechnikov", "rectangular", "triangular",
     "biweight", "cosine", "optcosine"),
@@ -148,7 +148,7 @@ ly_density <- function(
 #' @family layer functions
 #' @export
 ly_quantile <- function(
-  fig, x, group = NULL, data = NULL,
+  fig, x, group = NULL, data = figure_data(fig),
   probs = NULL, distn = qunif, ncutoff = 200,
   color = NULL, alpha = 1,
   legend = TRUE, lname = NULL, lgroup = NULL, ...
@@ -241,7 +241,7 @@ ly_quantile <- function(
 #' @family layer functions
 #' @export
 ly_boxplot <- function(
-  fig, x, y = NULL, data = NULL,
+  fig, x, y = NULL, data = figure_data(fig),
   coef = 1.5,
   color = "blue", alpha = 1,
   lname = NULL, lgroup = NULL, ...

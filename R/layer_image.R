@@ -92,7 +92,7 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
 #' @example man-roxygen/ex-image_url.R
 #' @export
 ly_image_url <- function(
-  fig, x = 0, y = 0, data = NULL, w = 10, h = 10,
+  fig, x = 0, y = 0, data = figure_data(fig), w = 10, h = 10,
   imageUrl, dilate = TRUE, anchor = "top_left", angle = 0,
   lname = NULL, lgroup = NULL
 ) {

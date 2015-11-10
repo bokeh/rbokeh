@@ -23,7 +23,7 @@
 ly_text <- function(
   fig,
   x, y = NULL,
-  text = NULL, data = NULL,
+  text = NULL, data = figure_data(fig),
   color = "black", alpha = 1,
   angle = 0, align = NULL, baseline = NULL,
   font = NULL, font_size = NULL, font_style = NULL,

@@ -17,7 +17,7 @@
 #' }
 #' @export
 ly_hexbin <- function(
-  fig, x, y = NULL, data = NULL,
+  fig, x, y = NULL, data = figure_data(fig),
   xbins = 30, shape = 1, style = "colorscale",
   trans = NULL, inv = NULL,
   palette = "RdYlGn11", line = FALSE, alpha = 1, hover = TRUE

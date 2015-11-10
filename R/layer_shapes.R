@@ -13,7 +13,7 @@
 #' @family layer functions
 #' @export
 ly_polygons <- function(
-  fig, xs, ys, group = NULL, data = NULL,
+  fig, xs, ys, group = NULL, data = figure_data(fig),
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, # legend = NULL,
   lname = NULL, lgroup = NULL, ...
@@ -122,7 +122,7 @@ ly_polygons <- function(
 ly_rect <- function(
   fig,
   xleft, ybottom, xright, ytop,
-  data = NULL,
+  data = figure_data(fig),
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL,
   lname = NULL, lgroup = NULL, ...
@@ -202,7 +202,7 @@ ly_rect <- function(
 #' @family layer functions
 #' @export
 ly_crect <- function(
-  fig, x, y = NULL, data = NULL,
+  fig, x, y = NULL, data = figure_data(fig),
   width = 1, height = 1, angle = 0, dilate = FALSE,
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
@@ -279,7 +279,7 @@ ly_crect <- function(
 #' @family layer functions
 #' @export
 ly_oval <- function(
-  fig, x, y = NULL, data = NULL,
+  fig, x, y = NULL, data = figure_data(fig),
   width = 0.1, height = 0.1, angle = 0,
   color = NULL, alpha = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...
@@ -344,7 +344,7 @@ ly_oval <- function(
 #' @note This function is included for completeness as it maps to Bokeh's \code{patch} glyph, but the same and more functionality can be obtained with \code{\link{ly_polygons}}.
 #' @export
 ly_patch <- function(
-  fig, x, y, data = NULL,
+  fig, x, y, data = figure_data(fig),
   color = NULL, alpha = 1,
   hover = NULL, url = NULL,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
