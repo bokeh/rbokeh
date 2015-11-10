@@ -9,7 +9,8 @@ Authors@R: c(
     person("Continuum Analytics, Inc.", role = c("aut", "cph"),
       comment = "Bokeh library in htmlwidgets/lib, http://bokeh.pydata.org"
     ))
-Description: R interface for creating plots in Bokeh.  Bokeh by Continuum Analytics, \url{http://bokeh.pydata.org/en/latest/}.
+Description: R interface for creating plots in Bokeh. Bokeh by Continuum
+    Analytics, \url{http://bokeh.pydata.org/en/latest/}.
 URL: https://hafen.github.io/rbokeh
 BugReports: https://github.com/hafen/rbokeh/issues
 License: MIT + file LICENSE
@@ -30,5 +31,5 @@ Suggests:
     testthat,
     data.table,
     lattice
-Enhances:
-    shiny (>= 0.12)
+Enhances: shiny (>= 0.12)
+RoxygenNote: 5.0.0
