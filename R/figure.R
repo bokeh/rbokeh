@@ -1,5 +1,6 @@
 #' Initialize a Bokeh figure
 #'
+#' @param data data to be supplied to all layers, if the layer doesn't supply a data value
 #' @param width figure width in pixels
 #' @param height figure width in pixels
 #' @param title a title to display above the plot. - "title" is also the prefix for a set of Text Properties, so you can set the font for the title with the parameter text_font.
@@ -57,6 +58,7 @@
 #' @import htmlwidgets
 #' @import methods
 figure <- function(
+  data = NULL,
   width = 480,
   height = 520,
   title = NULL,
@@ -116,6 +118,7 @@ figure <- function(
     theme <- theme()
 
   spec <- structure(list(
+    figure_data = data,
     width = width, height = height, title = title,
     xlab = xlab, ylab = ylab,
     xlim = xlim, ylim = ylim, padding_factor = padding_factor,
@@ -178,6 +181,20 @@ figure <- function(
     fig <- eval(parse(text = paste("tool_", tl, "(fig)", sep = "")))
 
   fig
+}
+
+#' Retrieve rbokeh figure data
+#'
+#' @param fig rbokeh figure
+#' @export
+figure_data <- function(fig) {
+  if (is.list(fig)) {
+    # will return NULL even if it all doesn't exist,
+    # as long as fig is a list
+    return(fig$x$spec$figure_data)
+  }
+
+  return(NULL)
 }
 
 fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plot") {
@@ -248,5 +265,3 @@ figure_par_validator_map <- list(
   "lod_timeout" = "int",
   "webgl" = "logical"
 )
-
-
