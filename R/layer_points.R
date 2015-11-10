@@ -30,7 +30,7 @@
 # ir$glyphCol <- c("red", "green", "blue")[ ir$glyphVal ]
 # load_all(); a <- figure() %>% ly_points(Sepal.Length, data = ir, fill_color = glyphCol); a
 ly_points <- function(
-  fig, x, y = NULL, data = NULL,
+  fig, x, y = NULL, data = figure_data(fig),
   glyph = 21, color = NULL, alpha = 1, size = 10,
   hover = NULL, url = NULL, legend = NULL,
   lname = NULL, lgroup = NULL, ...
