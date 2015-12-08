@@ -51,7 +51,6 @@ b_eval <- function(data) {
         return(NULL)
       }
 
-
       xSymbol <- b_eval_get_symbol(x)
       xName <- deparse(xSymbol)
 
