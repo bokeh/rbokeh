@@ -260,6 +260,13 @@ ly_boxplot <- function(
     )
   )
 
+  if (missing(y)) {
+    args$data$x <- args$data$y
+    args$data$y <- NULL
+    args$info$xName <- args$info$yName
+    args$info$yName <- NULL
+  }
+
   if (is.factor(args$data$x)) {
     args$data$x <- as.character(args$data$x)
   }
