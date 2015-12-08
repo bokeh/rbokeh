@@ -21,7 +21,7 @@
 #' @example man-roxygen/ex-bar.R
 #' @export
 ly_bar <- function(
-  fig, x, y, data = figure_data(fig),
+  fig, x, y = NULL, data = figure_data(fig),
   color = NULL, alpha = 1,
   position = c("stack", "fill", "dodge"), width = 0.9,
   origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
