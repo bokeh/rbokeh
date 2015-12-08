@@ -56,8 +56,10 @@ ly_bar <- function(
   # will give NULL if it was not a variable
   colorname <- attr(args$params$color, "stringName")
 
-  if(is.null(args$data$y)) {
+  if(missing(y)) {
+    args$data$x <- args$data$y
     args$data$y <- rep(1, length(args$data$x))
+    args$info$xName <- attr(args$data$x, "stringName")
     args$info$yName <- "count"
   }
 
