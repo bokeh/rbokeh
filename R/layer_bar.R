@@ -53,11 +53,8 @@ ly_bar <- function(
     )
   )
 
-  if (is.null(color)) {
-    colorname <- NULL
-  } else {
-    colorname <- deparse(substitute(color))
-  }
+  # will give NULL if it was not a variable
+  colorname <- attr(args$params$color, "stringName")
 
   if(is.null(args$data$y)) {
     args$data$y <- rep(1, length(args$data$x))
