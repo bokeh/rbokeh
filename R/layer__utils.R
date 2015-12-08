@@ -12,6 +12,14 @@ b_eval_get_symbol = function(x) {
 #' @return a function that takes in one lazy argument to be evaluated
 b_eval <- function(data) {
 
+  deparse_or_string <- function(val) {
+    if (is.character(val)) {
+      val
+    } else {
+      deparse(val)
+    }
+  }
+
 
   if (is.null(data)) {
     fn <- function(x) {
@@ -22,7 +30,7 @@ b_eval <- function(data) {
         if (
           paste0(deparse(x$expr), collapse = "") %in% data_name_list_c()
         ) {
-          attr(ans, "stringName") <- deparse(b_eval_get_symbol(x))
+          attr(ans, "stringName") <- deparse_or_string(b_eval_get_symbol(x))
         }
       }
 
@@ -59,10 +67,10 @@ b_eval <- function(data) {
         if (!is.null(ans)) {
           if (deparse(x$expr) %in% data_name_list_c()) {
             # it's data, force the stringName
-            attr(ans, "stringName") <- deparse(b_eval_get_symbol(x))
+            attr(ans, "stringName") <- deparse_or_string(b_eval_get_symbol(x))
           } else if (xName %in% names(data)) {
             # it's parameter, add for fun
-            attr(ans, "stringName") <- deparse(b_eval_get_symbol(x))
+            attr(ans, "stringName") <- deparse_or_string(b_eval_get_symbol(x))
           }
         }
         ans
