@@ -137,6 +137,7 @@ ly_bar <- function(
 
   do.call(ly_rect, c(list(fig = fig,
     xleft = args$info$xName, ybottom = args$info$yName, xright = "xright", ytop = "ytop",
+    xlab = args$info$xName, ylab = args$info$yName,
     color = colorname, data = res,
     lname = args$info$lname, lgroup = args$info$lgroup, legend = args$info$legend), remainingArgs))
 }
