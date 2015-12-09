@@ -21,7 +21,7 @@
 #' @example man-roxygen/ex-bar.R
 #' @export
 ly_bar <- function(
-  fig, x, y, data = figure_data(fig),
+  fig, x, y = NULL, data = figure_data(fig),
   color = NULL, alpha = 1,
   position = c("stack", "fill", "dodge"), width = 0.9,
   origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
@@ -53,14 +53,13 @@ ly_bar <- function(
     )
   )
 
-  if (is.null(color)) {
-    colorname <- NULL
-  } else {
-    colorname <- deparse(substitute(color))
-  }
+  # will give NULL if it was not a variable
+  colorname <- attr(args$params$color, "stringName")
 
-  if(is.null(args$data$y)) {
+  if(missing(y)) {
+    args$data$x <- args$data$y
     args$data$y <- rep(1, length(args$data$x))
+    args$info$xName <- attr(args$data$x, "stringName")
     args$info$yName <- "count"
   }
 
@@ -138,6 +137,7 @@ ly_bar <- function(
 
   do.call(ly_rect, c(list(fig = fig,
     xleft = args$info$xName, ybottom = args$info$yName, xright = "xright", ytop = "ytop",
+    xlab = args$info$xName, ylab = args$info$yName,
     color = colorname, data = res,
     lname = args$info$lname, lgroup = args$info$lgroup, legend = args$info$legend), remainingArgs))
 }

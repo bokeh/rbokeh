@@ -260,6 +260,13 @@ ly_boxplot <- function(
     )
   )
 
+  if (missing(y)) {
+    args$data$x <- args$data$y
+    args$data$y <- NULL
+    args$info$xName <- args$info$yName
+    args$info$yName <- NULL
+  }
+
   if (is.factor(args$data$x)) {
     args$data$x <- as.character(args$data$x)
   }
@@ -335,7 +342,8 @@ ly_boxplot <- function(
         x0 = c(gp, gp, gpr, gpr),
         y0 = c(bp$stats[1], bp$stats[4], bp$stats[1], bp$stats[5]),
         x1 = c(gp, gp, gpl, gpl),
-        y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5])
+        y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5]),
+        xlab = xName, ylab = yName
       ),
       args$params[!fill_ind])
     )
@@ -345,7 +353,8 @@ ly_boxplot <- function(
         list(
           fig = fig,
           x = rep(gp, length(bp$out)), y = bp$out,
-          type = 1
+          type = 1,
+          xlab = xName, ylab = yName
         ),
         args$params
       ))
