@@ -60,6 +60,9 @@ b_eval <- function(data) {
       }
 
       xSymbol <- b_eval_get_symbol(x)
+      if (is.character(xSymbol)) {
+        xSymbol <- as.symbol(xSymbol)
+      }
       xName <- deparse(xSymbol)
 
       return_ans <- function(ans) {
