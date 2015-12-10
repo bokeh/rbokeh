@@ -24,10 +24,17 @@
 #' @example man-roxygen/ex-lines.R
 #' @family layer functions
 #' @export
-ly_points <- function(fig, x, y = NULL, data = NULL,
+# @example
+# ir <- iris
+# ir$glyph_val <- as.numeric(ir$Species)
+# ir$glyph_col <- c("red", "green", "blue")[ ir$glyph_val ]
+# load_all(); a <- figure() %>% ly_points(Sepal.Length, data = ir, fill_color = glyph_col); a
+ly_points <- function(
+  fig, x, y = NULL, data = figure_data(fig),
   glyph = 21, color = NULL, alpha = 1, size = 10,
   hover = NULL, url = NULL, legend = NULL,
-  lname = NULL, lgroup = NULL, ...) {
+  lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_points")
 
@@ -35,93 +42,74 @@ ly_points <- function(fig, x, y = NULL, data = NULL,
   if(is.null(mc))
     mc <- lapply(match.call(), deparse)
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots  <- substitute(list(...))[-1]
-    args  <- lapply(dots, function(x) v_eval(x, data))
-    x     <- v_eval(substitute(x), data)
-    y     <- v_eval(substitute(y), data)
-    size  <- v_eval(substitute(size), data)
-    glyph <- v_eval(substitute(glyph), data)
-    color <- v_eval(substitute(color), data)
-  } else {
-    args <- list(...)
+  args <- sub_names(fig, data,
+    grab(
+      x,
+      y,
+      glyph,
+      color,
+      alpha,
+      size,
+      hover,
+      url,
+      legend,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  if(is.null(args$params$glyph)) {
+    args$params$glyph <- "circle"
   }
 
-  hover <- get_hover(substitute(hover), data, parent.frame())
-  url <- get_url(url, data)
+  # #TODO
+  # # if color wasn't specified, it should be the same for all glyphs
+  # if(length(unique(args$glyph)) != 1) {
+  #   # if color wasn't specified, it should be the same for all glyphs
+  #   if(is.null(args$color))
+  #     args$color <- fig$x$spec$theme[["discrete"]][["fill_color"]](1)
+  # }
 
-  xy_names <- get_xy_names(x, y, xname, yname, args)
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
+  if(length(args$params$glyph) == 1) {
+    args$params$glyph <- rep(args$params$glyph, length(args$data$x))
+  }
+  if(is.character(args$params$glyph)) {
+    args$params$glyph <- factor(args$params$glyph)
+  }
 
-  if(is.null(glyph))
-    glyph <- "circle"
 
-  args <- c(args, list(glyph = glyph, color = color,
-    alpha = alpha, size = size))
+  # split data up for each glyph
+  split_list <- split(seq_along(args$params$glyph), args$params$glyph)
+  for (ii in seq_along(split_list)) {
+    arg_obj <- subset_arg_obj(args, split_list[[ii]])
 
-  # if glyph is not unique, we need to split the data
-  # and call make_glyph several times
-  # otherwise we can just vary the values of things
-  # and call make_glyph just once...
-  if(length(unique(glyph)) > 1) {
-    gl <- args$glyph
-    args$glyph <- NULL
+    arg_obj$params$glyph <- arg_obj$params$glyph[1]
 
-    # if color wasn't specified, it should be the same for all glyphs
-    if(is.null(args$color))
-      args$color <- fig$x$spec$theme[["discrete"]][["fill_color"]](1)
+    arg_obj$params <- resolve_color_alpha(
+      arg_obj$params,
+      has_line = TRUE, has_fill = TRUE,
+      ly    = fig$x$spec$layers[[arg_obj$info$lgroup]],
+      solid = arg_obj$params$glyph %in% as.character(15:20),
+      theme = fig$x$spec$theme
+    )
 
-    lns <- sapply(args, length)
-    idx <- lns == length(xy$x)
+    arg_obj$params <- resolve_glyph_props(arg_obj$params$glyph, arg_obj$params, arg_obj$info$lgroup)
 
-    df_args <- args[idx]
-
-    if(is.character(gl))
-      gl <- factor(gl)
-
-    df_split <- split(seq_along(gl), gl)
-
-    attr(fig, "ly_call") <- mc
-    for(ii in seq_along(df_split)) {
-      cur_idx <- df_split[[ii]]
-
-      cur_hover <- hover
-      cur_hover$data <- cur_hover$data[cur_idx, , drop = FALSE]
-
-      fig <- do.call(ly_points,
-        c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)), args[!idx],
-          list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
-            glyph = subset_with_attributes(gl, cur_idx[1]), lgroup = lgroup,
-            lname = ii, hover = cur_hover, legend = legend,
-            xlab = xy_names$x, ylab = xy_names$y)))
+    ## see if any options won't be used and give a message
+    if(valid_glyph(arg_obj$params$glyph)) {
+      check_opts(arg_obj$params, arg_obj$params$glyph, formals = names(formals(ly_points)))
     }
-    attr(fig, "ly_call") <- NULL
-    return(fig)
+
+    axis_type_range <- get_glyph_axis_type_range(arg_obj$data$x,
+      arg_obj$data$y, glyph = arg_obj$params$glyph)
+
+    fig <- make_glyph(
+      fig, arg_obj$params$glyph, lname = arg_obj$info$lname, lgroup = arg_obj$info$lgroup,
+      data = arg_obj$data, data_sig = ifelse(is.null(data), NA, digest(data)),
+      args = arg_obj$params, axis_type_range = axis_type_range,
+      hover = arg_obj$info$hover, url = arg_obj$info$url, legend = arg_obj$info$legend,
+      xname = arg_obj$info$x_name, yname = arg_obj$info$y_name, ly_call = mc
+    )
   }
-
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]],
-    solid = glyph %in% as.character(15:20),
-    theme = fig$x$spec$theme)
-
-  args <- resolve_glyph_props(glyph, args, lgroup)
-
-  args <- fix_args(args, length(xy$x))
-
-  ## see if any options won't be used and give a message
-  if(valid_glyph(args$glyph))
-    check_opts(args, args$glyph, formals = names(formals(ly_points)))
-
-  axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y, glyph = glyph)
-
-  make_glyph(fig, args$glyph, lname = lname, lgroup = lgroup,
-    data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
-    args = args, axis_type_range = axis_type_range,
-    hover = hover, url = url, legend = legend,
-    xname = xy_names$x, yname = xy_names$y, ly_call = mc)
+  fig
 }

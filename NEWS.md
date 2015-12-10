@@ -1,8 +1,10 @@
-Version 0.2.4.1
+Version 0.2.5
 ----------------------------------------------------------------------
 
+- major overhaul of internal lazy evaluation logic to be more flexible
 - add webgl parameter
 - fix 2html and 2gist to handle NAs properly
+- add `catjitter()` function for jittering categorical scales
 
 Version 0.2.4
 ----------------------------------------------------------------------

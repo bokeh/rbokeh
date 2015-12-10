@@ -34,7 +34,7 @@ get_next_color <- function(lgroupobj, which = "fill_color", type = "discrete", t
 }
 
 check_arc_direction <- function(direction) {
-  if(!direction %in% c("clock", "anticlock"))
+  if(! all(direction %in% c("clock", "anticlock")))
     stop("'direction' must be 'clock' or 'anticlock'", call. = FALSE)
 }
 
@@ -80,6 +80,7 @@ get_glyph_axis_type_range <- function(x, y, assert_x = NULL, assert_y = NULL, gl
     y_range = get_glyph_range(y, y_axis_type)
   )
 }
+# attr(get_glyph_axis_type_range, "keys") <- c("x_axis_type", "y_axis_type", "x_range", "y_range")
 
 ## determine whether axis is "numeric" or "categorical"
 get_glyph_axis_type <- function(a) {
@@ -144,6 +145,8 @@ get_all_glyph_range <- function(ranges, padding_factor, axis_type = "numeric", l
 
 ## give a little warning if any options are specified that won't be used
 check_opts <- function(opts, type, formals = NULL) {
+  opts <- opts[! names(opts) %in% c("x_name", "y_name")]
+
   cur_glyph_props <- glyph_props[[type]]
 
   valid_opts <- c("glyph", "xlab", "ylab", formals)
@@ -229,6 +232,7 @@ get_xy_names <- function(x, y, xname, yname, dots) {
 
   res
 }
+
 
 resolve_line_args <- function(fig, args) {
 
@@ -330,6 +334,7 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, soli
 
   args
 }
+# attr(resolve_color_alpha, "keys") <- c("color", "line_color", "fill_color", "alpha", "line_alpha", "fill_alpha")
 
 ## make sure marker fill and line properties are correct for marker glyphs
 ## (for example, some, such as glyph = 1, must not have fill)
@@ -365,6 +370,7 @@ resolve_glyph_props <- function(glyph, args, lgroup) {
   }
   args
 }
+# attr(resolve_glyph_props, "keys") <- c("glyph", "line_color", "fill_color", "line_width", "line_alpha")
 
 get_lgroup <- function(lgroup, fig) {
   if(is.null(lgroup))
@@ -372,13 +378,163 @@ get_lgroup <- function(lgroup, fig) {
   lgroup <- as.character(lgroup)
 }
 
+get_hover2 <- function(lazyHoverVal, data, sub_fn) {
+
+  # three cases
+  # 1. evaluates right away
+  # 2. evaluates to a list that can't evaluate. must look at data
+  # 3. comes from a string that must have an '@' symbol
+
+  hoverSymbol <- b_eval_get_symbol(lazyHoverVal)
+  if (is.null(hoverSymbol)) {
+    return(NULL)
+  }
+
+  hoverSymbolList <- as.list(hoverSymbol)
+
+  isListOrC <- deparse(hoverSymbolList[[1]]) %in% c("list", "c")
+  isParseable <- FALSE
+  isAtString <- FALSE
+  isDataFrame <- FALSE
+
+  if (inherits(hoverSymbol, "character")) {
+    if (grepl("@", hoverSymbol)) {
+      isAtString <- TRUE
+      tmp_split <- strsplit(hoverSymbol, "@")[[1]][-1]
+      tmpNames <- gsub("^([a-zA-Z0-9_]+).*", "\\1", tmp_split)
+      hoverSymbolList <- lapply(tmpNames, as.symbol)
+      isParseable <- TRUE
+    }
+  } else {
+    # try to eval the arg to a char string
+    # if it evals, check to see if it's full of
+    maybeVar <- try(lazy_eval(lazyHoverVal), silent = TRUE)
+    if (!inherits(maybeVar, "try-error")) {
+      if (is.data.frame(maybeVar)) {
+        hoverSymbolList <- as.list(maybeVar)
+        isDataFrame <- TRUE
+        isParseable <- FALSE
+        isListOrC <- FALSE
+      } else if (is.vector(maybeVar) || is.list(maybeVar)) {
+        if (all(unlist(maybeVar) %in% names(data))) {
+          hoverSymbolList <- lapply(maybeVar, as.symbol)
+          isListOrC <- FALSE
+          isParseable <- TRUE
+        }
+      }
+    }
+  }
+
+
+  isSingleSymbol <- (length(hoverSymbolList) == 1)
+  if (isListOrC || isSingleSymbol || isParseable) {
+    # item is a list, get the elements from the list
+    if (isListOrC) {
+      hoverSymbolList <- hoverSymbolList[-1]
+    }
+    hoverListNames <- names(hoverSymbolList)
+
+    # if no names are supplied, then
+    if (is.null(hoverListNames)) {
+      # assume they want to name the value with the column names
+      hoverListNames <- as.character(hoverSymbolList)
+    }
+
+    # correct missing name issues
+    if (any((missingNames <- hoverListNames == ""))) {
+      hoverListNames[missingNames] <- as.character(hoverSymbolList[missingNames])
+    }
+
+    # set the hoverSymbolList
+    names(hoverSymbolList) <- hoverListNames
+
+    # get results into a list
+    hoverValList <- lapply(hoverSymbolList, function(symbolVal) {
+      lazyVal <- as.lazy(
+        symbolVal,
+        env = lazyHoverVal$env
+      )
+      sub_fn(lazyVal)
+    })
+
+
+  } else if (isDataFrame) {
+    hoverValList <- hoverSymbolList
+
+  } else {
+    # hover value is not a interperable
+    hoverVal <- try(lazy_eval(lazyHoverVal), silent = TRUE)
+
+    if (inherits(hoverVal, "try-error")) {
+      print("HOVER - IDK!")
+      browser()
+    }
+
+    hoverValList <- as.list(hoverVal)
+  }
+
+  # keep the original names
+  hoverDtNames <- names(hoverValList)
+
+  hoverValList <- lapply(hoverValList, format)
+
+  # make the hover list into a dataframe
+  hoverValDt <- as.data.frame(hoverValList)
+
+  if(nrow(hoverValDt) == 1) {
+    hoverValDt <- lapply(hoverValDt, I)
+  }
+
+  # make fake, easy to use key names "hover_col_1", "hover_col_2",...
+  names(hoverValDt) <- hoverDtKey <- paste0("hover_col_", seq_along(hoverDtNames))
+
+
+  # list of list(pretty name, key name)
+  if (isAtString) {
+    tmp <- hoverSymbol
+    for(ii in seq_along(hoverDtKey)) {
+      tmp <- gsub(
+        paste0("@", hoverDtNames[ii]),
+        paste0("@", hoverDtKey[ii]),
+        tmp
+      )
+    }
+    hdict <- tmp
+
+  } else {
+    hdict <- lapply(seq_along(hoverDtNames), function(i) {
+      list(hoverDtNames[i], paste0("@", hoverDtKey[i]))
+    })
+  }
+
+  return(structure(list(
+    data = hoverValDt,
+    dict = hdict
+  ), class = "hoverSpec"))
+}
+
 # get the "hover" argument and turn it into data and dict
 # if a string was provided, parse the @var values
 # if a data frame was provided, the arg sould be a
 # list of column names
 # otherwise it should be a named list or data frame
-get_hover <- function(hn, data, envir) {
-  tmp <- try(eval(hn, envir = envir), silent = TRUE)
+get_hover <- function(hn, data, sub_fn) {
+
+  # try to get the raw data
+  tmp <- try(lazy_eval(hn), silent = TRUE)
+
+  if (is.null(tmp)) {
+    return(NULL)
+  }
+
+  # if failed, it's a "fancy symbol", so retrieve and eval that
+  if (inherits(tmp, "try-error")) {
+    tmp <- sub_fn(hn)
+    # to work with code below
+    hn <- b_eval_get_symbol(hn)
+
+    # there is also a sub_fn to retrieve data, but didn't want to mess with code
+  }
 
   # is.character is bad because it's true for try-error
   if(inherits(tmp, "character")) {
@@ -448,9 +604,12 @@ get_hover <- function(hn, data, envir) {
 
 # get the "url" argument and turn it into data and "dict"
 # must be a vector or a string referencing variables in data
-get_url <- function(url, data) {
+get_url <- function(url, data, sub_fn) {
+  url <- lazy_eval(url)
+
   if(is.null(url))
     return(NULL)
+  url <- as.character(url)
   if(length(url) == 1) {
     if(!grepl("@", url)) {
       message("url tap tool not added - 'url' must be a vector of URLs or a string referencing names of 'data' with e.g. @varname")
@@ -512,7 +671,7 @@ v_eval <- function(x, data) {
     }
   }
 
-  if(is.null(res))
+  if (is.null(res))
     return(res)
 
   # # if the variable came from the data, give it a name
@@ -524,12 +683,34 @@ v_eval <- function(x, data) {
 }
 
 fix_args <- function(args, n) {
-  lns <- sapply(args, length)
-  nms <- names(args)
+  # print(args); cat("\n\n\n\n\n\n\n\n\n\n\n")
+
+  lns <- sapply(names(args), function(itemName) {
+    itemVal = args[[itemName]]
+
+    if (is.null(itemVal)) {
+      return(0)
+    }
+
+    switch(itemName,
+      url = 1,
+      hover = ifelse(is.data.frame(itemVal$data), nrow(itemVal$data), length(itemVal$data)),
+
+      if (is.data.frame(itemVal) || is.matrix(itemVal)) {
+        nrow(itemVal)
+      } else {
+        length(itemVal)
+      }
+
+    )
+  })
   idx <- which(!lns %in% c(0, 1, n))
 
-  if(length(idx) > 0)
-    stop("Arguments do not have correct length: ", paste(nms[idx], " (", lns[idx],")", sep = "", collapse = ", "))
+  if(length(idx) > 0) {
+    nms <- names(args)
+    print(args[idx])
+    stop("Arguments do not have correct length of ", n, ": ", paste(nms[idx], " (", lns[idx],")", sep = "", collapse = ", "))
+  }
 
   # scl_idx <- which(lns == 1)
   # split_idx <- which(lns == n)
@@ -537,6 +718,7 @@ fix_args <- function(args, n) {
   if(length(null_idx) > 0)
     args[null_idx] <- NULL
 
+  # print(args); cat("\n\n\n\n")
   args
 }
 
@@ -568,9 +750,25 @@ to_epoch <- function(x) {
 
 subset_with_attributes <- function(x, ...) {
   res <- x[...]
-  attr.names <- names(attributes(x))
-  attr.names <- attr.names[attr.names != 'names']
-  attributes(res)[attr.names] <- attributes(x)[attr.names]
+  attrs <- attributes(x)
+  attrNames <- names(attrs)
+  attrNames <- attrNames[! (attrNames %in% c("names", "class"))]
+
+  ans <- try({
+    attributes(res)[attrNames] <- attributes(x)[attrNames]
+  }, silent = TRUE)
+
+  # if there's trouble setting the attributes,
+  # (like in Time-Series data, 'tsp' attr)
+  # try doing them one at a time
+  if (inherits(ans, "try-error")) {
+    for (attrName in attrNames) {
+      try({
+        attributes(res)[attrName] <- attributes(x)[attrName]
+      }, silent = TRUE)
+    }
+  }
+
   res
 }
 
