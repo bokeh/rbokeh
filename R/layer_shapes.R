@@ -98,7 +98,7 @@ ly_polygons <- function(
   make_glyph(
     fig, type = "patches", data = list(xs = unname(xs), ys = unname(ys)),
     args = args$params, axis_type_range = axis_type_range,
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     lname = args$info$lname, lgroup = args$info$lgroup, hover = args$info$hover, url = args$info$url,
     ly_call = mc
   )
@@ -169,7 +169,7 @@ ly_rect <- function(
 
   make_glyph(
     fig, type = "quad", lname = args$info$lname, lgroup = args$info$lgroup,
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     legend = args$info$legend, hover = args$info$hover, url = args$info$url,
     data = list(
       left = args$data$xleft,
@@ -256,7 +256,7 @@ ly_crect <- function(
 
   make_glyph(
     fig, type = "rect", lname = lname, lgroup = lgroup,
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     legend = args$info$legend, hover = args$info$hover, url = args$info$url,
     data_sig = ifelse(is.null(data), NA, digest(data)),
     data = args$data, args = args$params, axis_type_range = axis_type_range,
@@ -324,7 +324,7 @@ ly_oval <- function(
     data = args$data, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args$params, axis_type_range = axis_type_range,
     hover = args$info$hover, url = args$info$url, legend = args$info$legend,
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     ly_call = mc
   )
 }

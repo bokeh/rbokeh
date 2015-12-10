@@ -4,15 +4,15 @@
 \alias{subset_arg_obj}
 \title{Subset args object}
 \usage{
-subset_arg_obj(argObj, idxs)
+subset_arg_obj(arg_obj, idxs)
 }
 \arguments{
-\item{argObj}{args object to be subsetted}
+\item{arg_obj}{args object to be subsetted}
 
 \item{idxs}{indicies that should be used}
 }
 \value{
-similar argObj, just subsetted at the suggested indicies
+similar arg_obj, just subsetted at the suggested indicies
 }
 \description{
 Subset args object

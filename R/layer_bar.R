@@ -59,8 +59,8 @@ ly_bar <- function(
   if(missing(y)) {
     args$data$x <- args$data$y
     args$data$y <- rep(1, length(args$data$x))
-    args$info$xName <- attr(args$data$x, "stringName")
-    args$info$yName <- "count"
+    args$info$x_name <- attr(args$data$x, "stringName")
+    args$info$y_name <- "count"
   }
 
   if(is.numeric(args$data$x)) {
@@ -70,9 +70,9 @@ ly_bar <- function(
   if(is.null(args$params$color) || length(args$params$color) == 1) {
     res <- aggregate(y ~ x, data = args$data, sum)
   } else {
-    dataAndColor <- args$data
-    dataAndColor$color <- args$params$color
-    res <- aggregate(y ~ x + color, data = dataAndColor, sum)
+    data_and_color <- args$data
+    data_and_color$color <- args$params$color
+    res <- aggregate(y ~ x + color, data = data_and_color, sum)
     if(missing(legend)) {
       args$info$legend <- TRUE
     }
@@ -81,14 +81,14 @@ ly_bar <- function(
   ## handle y values
   ##---------------------------------------------------------
 
-  if (position == "stack") {
+  if(position == "stack") {
     res <- do.call(rbind, by(res, res$x, function(a) {
       a$ytop <- cumsum(a$y)
       a$ybottom <- a$ytop - a$y
       a
     }))
 
-  } else if (position == "fill") {
+  } else if(position == "fill") {
     res <- do.call(rbind, by(res, res$x, function(a) {
       tmp <- a$y / sum(a$y)
       a$ytop <- cumsum(tmp)
@@ -96,7 +96,7 @@ ly_bar <- function(
       a
     }))
 
-  } else if (position == "dodge") {
+  } else if(position == "dodge") {
     res$ytop <- res$y
     res$ybottom <- 0
   }
@@ -123,20 +123,20 @@ ly_bar <- function(
     names(res)[ind] <- colorname
   }
 
-  badParamNames = c("color", "origin","breaks","right","binwidth", "position")
-  remainingArgs = args$params
-  remainingArgs = remainingArgs[! (names(remainingArgs) %in% badParamNames)]
+  bad_param_names = c("color", "origin","breaks","right","binwidth", "position")
+  remaining_args = args$params
+  remaining_args = remaining_args[! (names(remaining_args) %in% bad_param_names)]
 
   # get rid of x and y as they are no longer needed
   # and may conflict with xname, yname
   res$x <- NULL
   res$y <- NULL
 
-  colorValue <- if (is.null(colorname)) args$params$color else colorname
+  color_value <- if(is.null(colorname)) args$params$color else colorname
   do.call(ly_rect, append(list(fig = fig,
     xleft = "xleft", ybottom = "ybottom", xright = "xright", ytop = "ytop",
-    xlab = args$info$xName, ylab = args$info$yName,
+    xlab = args$info$x_name, ylab = args$info$y_name,
     data = res,
-    color = colorValue,
-    lname = args$info$lname, lgroup = args$info$lgroup, legend = args$info$legend), remainingArgs))
+    color = color_value,
+    lname = args$info$lname, lgroup = args$info$lgroup, legend = args$info$legend), remaining_args))
 }

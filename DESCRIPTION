@@ -34,4 +34,4 @@ Suggests:
     lattice,
     roxygen2 (>= 5.0.0)
 Enhances: shiny (>= 0.12)
-RoxygenNote: 5.0.0
+RoxygenNote: 5.0.1

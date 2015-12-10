@@ -65,7 +65,7 @@ ly_annular_wedge <- function(
     data = args$data, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args$params, axis_type_range = axis_type_range,
     hover = args$info$hover, url = args$info$url, legend = args$info$legend,
-    xname = args$info$xName, yname = args$info$yName, ly_call = mc)
+    xname = args$info$x_name, yname = args$info$y_name, ly_call = mc)
 }
 
 #' Add an "annulus" layer to a Bokeh figure
@@ -129,7 +129,7 @@ ly_annulus <- function(
     data = args$data, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args$params, axis_type_range = axis_type_range,
     hover = args$info$hover, url = args$info$url, legend = args$info$legend,
-    xname = args$info$xName, yname = args$info$yName, ly_call = mc)
+    xname = args$info$x_name, yname = args$info$y_name, ly_call = mc)
 }
 
 #' Add an "arc" layer to a Bokeh figure
@@ -192,7 +192,7 @@ ly_arc <- function(
     fig, type = "arc", lname = args$info$lname, lgroup = args$info$lgroup,
     data = args$data, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args$params, axis_type_range = axis_type_range,
-    legend = args$info$legend, xname = args$info$xName, yname = args$info$yName,
+    legend = args$info$legend, xname = args$info$x_name, yname = args$info$y_name,
     ly_call = mc
   )
 }
@@ -264,6 +264,6 @@ ly_wedge <- function(
     data = args$data, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args$params, axis_type_range = axis_type_range,
     hover = args$info$hover, url = args$info$url, legend = args$info$legend,
-    xname = args$info$xName, yname = args$info$yName, ly_call = mc
+    xname = args$info$x_name, yname = args$info$y_name, ly_call = mc
   )
 }

@@ -4,16 +4,16 @@
 \alias{sub_names}
 \title{retrieve and properly parse all data}
 \usage{
-sub_names(fig, data, argObj, processDataAndNames = TRUE)
+sub_names(fig, data, arg_obj, process_data_and_names = TRUE)
 }
 \arguments{
 \item{fig}{figure to be used}
 
 \item{data}{data to be used}
 
-\item{argObj}{args object supplied by \code{grab}}
+\item{arg_obj}{args object supplied by \code{grab}}
 
-\item{processDataAndNames}{boolean to determine if the data and xName and yName should be post processed}
+\item{process_data_and_names}{boolean to determine if the data and x_name and y_name should be post processed}
 }
 \value{
 list of three groups: data, info, and params.

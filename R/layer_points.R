@@ -26,9 +26,9 @@
 #' @export
 # @example
 # ir <- iris
-# ir$glyphVal <- as.numeric(ir$Species)
-# ir$glyphCol <- c("red", "green", "blue")[ ir$glyphVal ]
-# load_all(); a <- figure() %>% ly_points(Sepal.Length, data = ir, fill_color = glyphCol); a
+# ir$glyph_val <- as.numeric(ir$Species)
+# ir$glyph_col <- c("red", "green", "blue")[ ir$glyph_val ]
+# load_all(); a <- figure() %>% ly_points(Sepal.Length, data = ir, fill_color = glyph_col); a
 ly_points <- function(
   fig, x, y = NULL, data = figure_data(fig),
   glyph = 21, color = NULL, alpha = 1, size = 10,
@@ -79,35 +79,36 @@ ly_points <- function(
 
 
   # split data up for each glyph
-  splitList <- split(seq_along(args$params$glyph), args$params$glyph)
-  for (ii in seq_along(splitList)) {
-    argObj <- subset_arg_obj(args, splitList[[ii]])
+  split_list <- split(seq_along(args$params$glyph), args$params$glyph)
+  for (ii in seq_along(split_list)) {
+    arg_obj <- subset_arg_obj(args, split_list[[ii]])
 
-    argObj$params$glyph <- argObj$params$glyph[1]
+    arg_obj$params$glyph <- arg_obj$params$glyph[1]
 
-    argObj$params <- resolve_color_alpha(
-      argObj$params,
+    arg_obj$params <- resolve_color_alpha(
+      arg_obj$params,
       has_line = TRUE, has_fill = TRUE,
-      ly    = fig$x$spec$layers[[argObj$info$lgroup]],
-      solid = argObj$params$glyph %in% as.character(15:20),
+      ly    = fig$x$spec$layers[[arg_obj$info$lgroup]],
+      solid = arg_obj$params$glyph %in% as.character(15:20),
       theme = fig$x$spec$theme
     )
 
-    argObj$params <- resolve_glyph_props(argObj$params$glyph, argObj$params, argObj$info$lgroup)
+    arg_obj$params <- resolve_glyph_props(arg_obj$params$glyph, arg_obj$params, arg_obj$info$lgroup)
 
     ## see if any options won't be used and give a message
-    if(valid_glyph(argObj$params$glyph)) {
-      check_opts(argObj$params, argObj$params$glyph, formals = names(formals(ly_points)))
+    if(valid_glyph(arg_obj$params$glyph)) {
+      check_opts(arg_obj$params, arg_obj$params$glyph, formals = names(formals(ly_points)))
     }
 
-    axis_type_range <- get_glyph_axis_type_range(argObj$data$x, argObj$data$y, glyph = argObj$params$glyph)
+    axis_type_range <- get_glyph_axis_type_range(arg_obj$data$x,
+      arg_obj$data$y, glyph = arg_obj$params$glyph)
 
     fig <- make_glyph(
-      fig, argObj$params$glyph, lname = argObj$info$lname, lgroup = argObj$info$lgroup,
-      data = argObj$data, data_sig = ifelse(is.null(data), NA, digest(data)),
-      args = argObj$params, axis_type_range = axis_type_range,
-      hover = argObj$info$hover, url = argObj$info$url, legend = argObj$info$legend,
-      xname = argObj$info$xName, yname = argObj$info$yName, ly_call = mc
+      fig, arg_obj$params$glyph, lname = arg_obj$info$lname, lgroup = arg_obj$info$lgroup,
+      data = arg_obj$data, data_sig = ifelse(is.null(data), NA, digest(data)),
+      args = arg_obj$params, axis_type_range = axis_type_range,
+      hover = arg_obj$info$hover, url = arg_obj$info$url, legend = arg_obj$info$legend,
+      xname = arg_obj$info$x_name, yname = arg_obj$info$y_name, ly_call = mc
     )
   }
   fig

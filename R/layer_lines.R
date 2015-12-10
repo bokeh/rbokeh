@@ -46,25 +46,25 @@ ly_lines <- function(
   # and call make_glyph several times
   # otherwise we can just vary the values of things
   # and call make_glyph just once...
-  groupDt <- args$params
-  groupDt$group <- args$info$group
+  group_dt <- args$params
+  group_dt$group <- args$info$group
   group_vars <- c("group", "type", "width", "color")
   groupable <- which(
-    (names(groupDt) %in% group_vars) &
-    sapply(groupDt, function(x) length(unique(x)) > 1)
+    (names(group_dt) %in% group_vars) &
+    sapply(group_dt, function(x) length(unique(x)) > 1)
   )
 
   if (length(groupable) > 0) {
     # there are groups to split on
 
     # split works with a data.frame as the groups.
-    splitList <- split(
+    split_list <- split(
       seq_along(args$data$x),
-      as.data.frame(groupDt[names(groupable)])
+      as.data.frame(group_dt[names(groupable)])
     )
   } else {
     # no groups to split on.  will split on "one" group
-    splitList <- list(seq_along(args$data$x))
+    split_list <- list(seq_along(args$data$x))
   }
 
 
@@ -74,28 +74,28 @@ ly_lines <- function(
     mc <- lapply(match.call(), deparse)
   }
 
-  for (ii in seq_along(splitList)) {
-    argObj <- subset_arg_obj(args, splitList[[ii]])
+  for (ii in seq_along(split_list)) {
+    arg_obj <- subset_arg_obj(args, split_list[[ii]])
 
     ## b_eval will repeat these, but the line glyph doesn't like this
-    if(length(unique(argObj$params$color)) == 1)
-      argObj$params$color <- subset_with_attributes(argObj$params$color, 1)
+    if(length(unique(arg_obj$params$color)) == 1)
+      arg_obj$params$color <- subset_with_attributes(arg_obj$params$color, 1)
     if(length(unique(args$params$type)) == 1)
-      argObj$params$type <- subset_with_attributes(argObj$params$type, 1)
+      arg_obj$params$type <- subset_with_attributes(arg_obj$params$type, 1)
     if(length(unique(args$params$width)) == 1)
-      argObj$params$width <- subset_with_attributes(argObj$params$width, 1)
+      arg_obj$params$width <- subset_with_attributes(arg_obj$params$width, 1)
 
-    argObj$params <- resolve_line_args(fig, argObj$params)
+    arg_obj$params <- resolve_line_args(fig, arg_obj$params)
 
     ## see if any options won't be used and give a message
-    check_opts(argObj$params, "line", formals = names(formals(ly_lines)))
+    check_opts(arg_obj$params, "line", formals = names(formals(ly_lines)))
 
     fig <- make_glyph(
-      fig, type = "line", data = argObj$data,
-      legend = argObj$info$legend,
-      args = argObj$params, axis_type_range = axis_type_range,
-      xname = argObj$info$xName, yname = argObj$info$yName,
-      lname = argObj$info$lname, lgroup = argObj$info$lgroup,
+      fig, type = "line", data = arg_obj$data,
+      legend = arg_obj$info$legend,
+      args = arg_obj$params, axis_type_range = axis_type_range,
+      xname = arg_obj$info$x_name, yname = arg_obj$info$y_name,
+      lname = arg_obj$info$lname, lgroup = arg_obj$info$lgroup,
       ly_call = mc
     )
 
@@ -159,7 +159,7 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = figure_data(fig),
   make_glyph(
     fig, type = "segment",
     data = args$data,
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     args = args$params, axis_type_range = axis_type_range,
     legend = args$info$legend, lname = args$info$lname, lgroup = args$info$lgroup,
     ly_call = mc
@@ -196,7 +196,7 @@ ly_abline <- function(
       type,
       legend, lname, lgroup,
       dots = lazy_dots(...),
-      nullData = TRUE
+      null_data = TRUE
     )
   )
   args$params$glyph <- "segment"
@@ -295,7 +295,7 @@ ly_abline <- function(
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, defer = defer_fn),
     legend = args$info$legend,
     lname = args$info$lname, lgroup = args$info$lgroup,
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     args = args$params, axis_type_range = axis_type_range,
     ly_call = mc
   )
@@ -352,7 +352,7 @@ ly_curve <- function(
       type,
       legend, lname, lgroup,
       dots = lazy_dots(...),
-      nullData = TRUE
+      null_data = TRUE
     )
   )
 
@@ -409,7 +409,7 @@ ly_contour <- function(
       type,
       lname, lgroup,
       dots = lazy_dots(...),
-      nullData = TRUE
+      null_data = TRUE
     )
   )
 
@@ -429,7 +429,7 @@ ly_contour <- function(
   make_glyph(
     fig, type = "multi_line",
     lname = args$info$lname, lgroup = args$info$lgroup,
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     data = list(xs = xs, ys = ys),
     args = args$params, axis_type_range = axis_type_range,
     ly_call = mc
@@ -489,7 +489,7 @@ ly_ray <- function(
 
   make_glyph(
     fig, type = "ray",
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     data = args$data, legend = args$info$legend,
     args = args$params, axis_type_range = axis_type_range,
     lname = args$info$lname, lgroup = args$info$lgroup,
@@ -560,7 +560,7 @@ ly_bezier <- function(
   make_glyph(
     fig, type = "bezier",
     lname = args$info$lname, lgroup = args$info$lgroup,
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     data = args$data,
     args = args$params, axis_type_range = axis_type_range,
     ly_call = mc
@@ -627,7 +627,7 @@ ly_quadratic <- function(
   make_glyph(
     fig, type = "quadratic",
     lname = args$info$lname, lgroup = args$info$lgroup,
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     data = args$data,
     args = args$params, axis_type_range = axis_type_range,
     ly_call = mc
@@ -677,9 +677,9 @@ ly_multi_line <- function(
 
   ## see if any options won't be used and give a message
   # can't pass in color, alpha, width, or type
-  goodNames = names(args$params)
-  goodNames = goodNames[! (goodNames %in% c("color", "alpha", "width", "type"))]
-  check_opts(args$params[goodNames], "multi_line")
+  good_names = names(args$params)
+  good_names = good_names[! (good_names %in% c("color", "alpha", "width", "type"))]
+  check_opts(args$params[good_names], "multi_line")
 
   args$params <- resolve_line_args(fig, args$params)
 
@@ -690,7 +690,7 @@ ly_multi_line <- function(
   make_glyph(
     fig, type = "multi_line",
     data = args$data, args = args$params,
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     lname = args$info$lname, lgroup = args$info$lgroup,
     axis_type_range = axis_type_range,
     ly_call = mc

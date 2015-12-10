@@ -34,15 +34,15 @@ ly_hist <- function(
 
   if(inherits(args$data$x, "histogram")) {
     hh <- args$data$x
-    args$info$xName <- args$data$x$xname
+    args$info$x_name <- args$data$x$xname
   } else {
     # was moved to position of "y" as only "x" was supplied.  (inside sub_names)
     # moving values from "y" to "x"
     hh <- graphics::hist.default(x = args$data[[2]], breaks = breaks,
       include.lowest = include.lowest, right = right, plot = FALSE)
-    args$info$xName <- args$info$yName
+    args$info$x_name <- args$info$y_name
   }
-  args$info$yName <- ifelse(freq, "Frequency", "Density")
+  args$info$y_name <- ifelse(freq, "Frequency", "Density")
 
   args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
@@ -57,7 +57,7 @@ ly_hist <- function(
       fig = fig,
       xleft = hh$breaks[-length(hh$breaks)],
       xright = hh$breaks[-1], ytop = y, ybottom = 0,
-      xlab = args$info$xName, ylab = args$info$yName,
+      xlab = args$info$x_name, ylab = args$info$y_name,
       lname = args$info$lname, lgroup = args$info$lgroup
     ),
     args$params
@@ -103,8 +103,8 @@ ly_density <- function(
 
   # data was moved to 'y' position as only 'x' was supplied to sub_names
   args$data$x <- args$data[[2]]; args$data[[2]] <- NULL
-  args$info$xName <- args$info$yName
-  args$info$yName <- "Density"
+  args$info$x_name <- args$info$y_name
+  args$info$y_name <- "Density"
 
 
   ## b_eval will repeat these, but the line glyph doesn't like this
@@ -123,7 +123,7 @@ ly_density <- function(
     list(
       fig = fig,
       x = dd$x, y = dd$y,
-      xlab = args$info$xName, ylab = args$info$yName
+      xlab = args$info$x_name, ylab = args$info$y_name
     ), args$params)
   )
 }
@@ -168,8 +168,8 @@ ly_quantile <- function(
   )
   # sub_names moves data into 'y' position as only 'x' is supplied
   args$data$x <- args$data[[2]]
-  args$info$xName <- "f-value"
-  # args$info$yName <- deparse(substitute(x)) # already done!
+  args$info$x_name <- "f-value"
+  # args$info$y_name <- deparse(substitute(x)) # already done!
 
   if(is.null(args$info$group)) {
     args$info$group <- rep(1, length(args$data$x))
@@ -219,7 +219,7 @@ ly_quantile <- function(
       fig <- do.call(ly_points, c(
         list(
           fig = fig, x = ff, y = qq,
-          xlab = args$info$xName, ylab = args$info$yName,
+          xlab = args$info$x_name, ylab = args$info$y_name,
           lgroup = args$info$lgroup, legend = cur_legend
         ),
         args$params
@@ -263,8 +263,8 @@ ly_boxplot <- function(
   if (missing(y)) {
     args$data$x <- args$data$y
     args$data$y <- NULL
-    args$info$xName <- args$info$yName
-    args$info$yName <- NULL
+    args$info$x_name <- args$info$y_name
+    args$info$y_name <- NULL
   }
 
   if (is.factor(args$data$x)) {
@@ -284,30 +284,30 @@ ly_boxplot <- function(
   y <- args$data$y
 
   if(is.null(y)) {
-    xName <- " "
-    yName <- args$info$xName
-    group <- rep(xName, length(x))
+    x_name <- " "
+    y_name <- args$info$x_name
+    group <- rep(x_name, length(x))
   } else {
     num_ind <- c(is.numeric(x), is.numeric(y))
     if(all(num_ind)) {
       message("both x and y are numeric -- choosing numeric variable based on which has the most unique values")
       if(length(unique(x)) > length(unique(y))) {
-        xName <- args$info$yName
-        yName <- args$info$xName
+        x_name <- args$info$y_name
+        y_name <- args$info$x_name
         group <- y
       } else {
-        xName <- args$info$xName
-        yName <- args$info$yName
+        x_name <- args$info$x_name
+        y_name <- args$info$y_name
         group <- x
         x <- y
       }
     } else if(num_ind[1]) {
-      xName <- args$info$yName
-      yName <- args$info$xName
+      x_name <- args$info$y_name
+      y_name <- args$info$x_name
       group <- y
     } else if(num_ind[2]) {
-      xName <- args$info$xName
-      yName <- args$info$yName
+      x_name <- args$info$x_name
+      y_name <- args$info$y_name
       group <- x
       x <- y
     } else {
@@ -332,7 +332,7 @@ ly_boxplot <- function(
       list(
         fig = fig, x = rep(gp, 2), y = c(md1, md2),
         width = 0.9, height = c(hgt1, hgt2),
-        xlab = xName, ylab = yName
+        xlab = x_name, ylab = y_name
       ),
       args$params
     ))
@@ -343,7 +343,7 @@ ly_boxplot <- function(
         y0 = c(bp$stats[1], bp$stats[4], bp$stats[1], bp$stats[5]),
         x1 = c(gp, gp, gpl, gpl),
         y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5]),
-        xlab = xName, ylab = yName
+        xlab = x_name, ylab = y_name
       ),
       args$params[!fill_ind])
     )
@@ -354,7 +354,7 @@ ly_boxplot <- function(
           fig = fig,
           x = rep(gp, length(bp$out)), y = bp$out,
           type = 1,
-          xlab = xName, ylab = yName
+          xlab = x_name, ylab = y_name
         ),
         args$params
       ))

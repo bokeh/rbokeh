@@ -38,7 +38,7 @@ ly_hexbin <- function(
       hover,
       dots = lazy_dots()
     ),
-    processDataAndNames = FALSE
+    process_data_and_names = FALSE
   )
 
   minarea <- 0.04; maxarea <- 0.8; mincnt <- 1; maxcnt <- NULL
@@ -48,14 +48,14 @@ ly_hexbin <- function(
     xy <- get_xy_data(args$data$x, args$data$y)
     args$data$x <- xy$x
     args$data$y <- xy$y
-    args$info$xName <- xy_names$x
-    args$info$yName <- xy_names$y
+    args$info$x_name <- xy_names$x
+    args$info$y_name <- xy_names$y
 
     hbd <- get_hexbin_data(x = xy$x, y = xy$y, xbins = xbins,
       shape = shape)
   } else {
-    args$info$xName <- "x"
-    args$info$yName <- "y"
+    args$info$x_name <- "x"
+    args$info$y_name <- "y"
 
     hbd <- args$data$x
   }
@@ -82,11 +82,11 @@ ly_hexbin <- function(
     col <- clrs[colgrp]
   }
 
-  if(args$info$xName == args$info$yName) {
-    args$info$xName <- paste(args$info$xName, "(x)")
-    args$info$yName <- paste(args$info$yName, "(y)")
+  if(args$info$x_name == args$info$y_name) {
+    args$info$x_name <- paste(args$info$x_name, "(x)")
+    args$info$y_name <- paste(args$info$y_name, "(y)")
   }
-  names(hbd$data)[1:2] <- c(args$info$xName, args$info$yName)
+  names(hbd$data)[1:2] <- c(args$info$x_name, args$info$y_name)
 
   if(!line) {
     line_color <- NA
@@ -100,7 +100,7 @@ ly_hexbin <- function(
     xs = hbd$xs, ys = hbd$ys, color = NULL,
     fill_color = col, alpha = NULL,
     fill_alpha = args$params$alpha, line_color = line_color,
-    hover = hbd$data, xlab = args$info$xName, ylab = args$info$yName
+    hover = hbd$data, xlab = args$info$x_name, ylab = args$info$y_name
   )
 }
 

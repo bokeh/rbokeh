@@ -21,11 +21,11 @@ ly_map <- function(fig, database = "world", regions = ".",
       alpha,
       lname, lgroup,
       dots = lazy_dots(...),
-      nullData = TRUE
+      null_data = TRUE
     )
   )
-  args$info$xName <- "longitude"
-  args$info$yName <- "latitude"
+  args$info$x_name <- "longitude"
+  args$info$y_name <- "latitude"
 
   dd <- map2df(map(database = database,
     regions = regions, fill = TRUE, plot = FALSE))
@@ -38,7 +38,7 @@ ly_map <- function(fig, database = "world", regions = ".",
         fig = fig,
         xs = dd$lon, ys = dd$lat, group = dd$group,
         lname = args$info$lname, lgroup = args$info$lgroup,
-        xlab = args$info$xName, ylab = args$info$yName
+        xlab = args$info$x_name, ylab = args$info$y_name
       ),
       args$params
     )

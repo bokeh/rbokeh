@@ -4,10 +4,10 @@
 \alias{ly_bar}
 \title{Add a "barchart" layer to a Bokeh figure}
 \usage{
-ly_bar(fig, x, y, data = figure_data(fig), color = NULL, alpha = 1,
-  position = c("stack", "fill", "dodge"), width = 0.9, origin = NULL,
-  breaks = NULL, right = FALSE, binwidth = NULL, lname = NULL,
-  lgroup = NULL, legend = NULL, ...)
+ly_bar(fig, x, y = NULL, data = figure_data(fig), color = NULL,
+  alpha = 1, position = c("stack", "fill", "dodge"), width = 0.9,
+  origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
+  lname = NULL, lgroup = NULL, legend = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -83,6 +83,12 @@ When color is \code{NULL} and \code{fill_color} or \code{line_color} are not spe
 }
 \examples{
 \donttest{
+# count of variety
+figure() \%>\%
+  ly_bar(variety, data = lattice::barley) \%>\%
+  theme_axis("x", major_label_orientation = 90)
+
+# total yield per variety
 figure() \%>\%
   ly_bar(variety, yield, data = lattice::barley) \%>\%
   theme_axis("x", major_label_orientation = 90)

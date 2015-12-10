@@ -126,10 +126,10 @@ ly_image_url <- function(
   args$params$image_url <- NULL
 
   if(missing(x)) {
-    args$info$xName <- "x"
+    args$info$x_name <- "x"
   }
   if(missing(y)) {
-    args$info$yName <- "y"
+    args$info$y_name <- "y"
   }
 
   # pull out values, as they are used a lot
@@ -160,7 +160,7 @@ ly_image_url <- function(
 
   make_glyph(
     fig, type = "image_URL",
-    xname = args$info$xName, yname = args$info$yName,
+    xname = args$info$x_name, yname = args$info$y_name,
     lname = args$info$lname, lgroup = args$info$lgroup,
     data = args$data, args = args$params,
     axis_type_range = axis_type_range, ly_call = mc

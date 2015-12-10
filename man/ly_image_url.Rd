@@ -5,7 +5,7 @@
 \title{Add an "image_url" layer to a Bokeh figure}
 \usage{
 ly_image_url(fig, x = 0, y = 0, data = figure_data(fig), w = 10,
-  h = 10, imageUrl, dilate = TRUE, anchor = "top_left", angle = 0,
+  h = 10, image_url, dilate = TRUE, anchor = "top_left", angle = 0,
   lname = NULL, lgroup = NULL)
 }
 \arguments{
@@ -19,7 +19,7 @@ ly_image_url(fig, x = 0, y = 0, data = figure_data(fig), w = 10,
 
 \item{w, h}{values or field names of width and height of image}
 
-\item{imageUrl}{values or field name of image URLs}
+\item{image_url}{values or field name of image URLs}
 
 \item{dilate}{logical - whether to dilate pixel distance computations when drawing}
 
@@ -49,7 +49,7 @@ imgdat <- data.frame(
 )
 
 p <- figure(xlab = "x", ylab = "y") \%>\%
-  ly_image_url(x, y, w = w, h = h, url = url, data = imgdat,
+  ly_image_url(x, y, w = w, h = h, image_url = url, data = imgdat,
     anchor = "center") \%>\%
   ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
     width = 15, alpha = 0.1)

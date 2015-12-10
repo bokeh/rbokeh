@@ -6,27 +6,27 @@
 
 
 ir <- iris
-ir$glyphVal <- as.numeric(ir$Species)
-ir$glyphCol <- c("red", "green", "blue")[ ir$glyphVal ]
-ir$randomGroup <- sample(c("A", "B"), nrow(ir), replace = TRUE)
+ir$glyph_val <- as.numeric(ir$Species)
+ir$glyph_col <- c("red", "green", "blue")[ ir$glyph_val ]
+ir$random_group <- sample(c("A", "B"), nrow(ir), replace = TRUE)
 
 rescale <- function(x) {
   (x - min(x)) / diff(range(x))
 }
 
-bFig <- figure(width = 480*1.5,height = 520*1.5)
+b_fig <- figure(width = 480*1.5,height = 520*1.5)
 
 
 # works!
-load_all(); bFig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = Species)
-load_all(); bFig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = list(Species, pl = Petal.Length, Petal.Length))
-load_all(); bFig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = "Species")
-load_all(); specs <- c("Species", "Sepal.Width"); bFig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = specs)
-load_all(); bFig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = NULL)
-load_all(); bFig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = "Species")
+load_all(); b_fig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = Species)
+load_all(); b_fig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = list(Species, pl = Petal.Length, Petal.Length))
+load_all(); b_fig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = "Species")
+load_all(); specs <- c("Species", "Sepal.Width"); b_fig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = specs)
+load_all(); b_fig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = NULL)
+load_all(); b_fig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = "Species")
 
 # why?
-load_all(); bFig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = "@Species")
+load_all(); b_fig %>% ly_points(Sepal.Length, Sepal.Width, data = ir, hover = "@Species")
 
 
 library(maps)
@@ -72,7 +72,7 @@ imgdat <- data.frame(
   url = rep(url, 6)
 )
 p <- figure(xlab = "x", ylab = "y") %>%
-  ly_image_url(x, y, w = w, h = h, imageUrl = url, data = imgdat,
+  ly_image_url(x, y, w = w, h = h, image_url = url, data = imgdat,
     anchor = "center") %>%
   ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
     width = 15, alpha = 0.1)

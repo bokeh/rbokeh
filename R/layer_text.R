@@ -51,19 +51,19 @@ ly_text <- function(
     )
   )
 
-  argParams <- list(glyph = "text")
+  arg_params <- list(glyph = "text")
 
-  argParams$glyph <- "text"
-  argParams$text_color <- args$params$color
-  argParams$angle <- args$params$angle
-  argParams$text_align <- args$params$align
-  argParams$text_alpha <- args$params$alpha
-  argParams$text_baseline <- args$params$baseline
-  argParams$text_font <- args$params$font
-  argParams$text_font_size <- args$params$font_size
-  argParams$text_font_style <- args$params$font_style
-  argParams$x_offset <- args$params$x_offset
-  argParams$y_offset <- args$params$y_offset
+  arg_params$glyph <- "text"
+  arg_params$text_color <- args$params$color
+  arg_params$angle <- args$params$angle
+  arg_params$text_align <- args$params$align
+  arg_params$text_alpha <- args$params$alpha
+  arg_params$text_baseline <- args$params$baseline
+  arg_params$text_font <- args$params$font
+  arg_params$text_font_size <- args$params$font_size
+  arg_params$text_font_style <- args$params$font_style
+  arg_params$x_offset <- args$params$x_offset
+  arg_params$y_offset <- args$params$y_offset
 
   if(is.null(args$params$text)) {
     args$params$text <- seq_along(args$data$x)
@@ -78,8 +78,8 @@ ly_text <- function(
     lname = args$info$lname, lgroup = args$info$lgroup,
     data = c(args$data, list(text = args$params$text, angle = args$params$angle)),
     legend = args$info$legend,
-    xname = args$info$xName, yname = args$info$yName,
-    args = argParams, axis_type_range = axis_type_range,
+    xname = args$info$x_name, yname = args$info$y_name,
+    args = arg_params, axis_type_range = axis_type_range,
     ly_call = mc
   )
 }

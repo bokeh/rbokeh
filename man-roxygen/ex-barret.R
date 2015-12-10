@@ -1,26 +1,26 @@
 
 ir <- iris
-ir$glyphVal <- as.numeric(ir$Species)
-ir$glyphCol <- c("red", "green", "blue")[ ir$glyphVal ]
-ir$randomGroup <- sample(c("A", "B"), nrow(ir), replace = TRUE)
+ir$glyph_val <- as.numeric(ir$Species)
+ir$glyph_col <- c("red", "green", "blue")[ ir$glyph_val ]
+ir$random_group <- sample(c("A", "B"), nrow(ir), replace = TRUE)
 
 rescale <- function(x) {
   (x - min(x)) / diff(range(x))
 }
 
-bFig <- figure(width = 480*1.5,height = 520*1.5)
+b_fig <- figure(width = 480*1.5,height = 520*1.5)
 
 # test evaluation function
 (test_b_eval = function(){
-  matchVal = ir$Species
-  attr(matchVal, "stringName") <- "Species"
+  match_val = ir$Species
+  attr(match_val, "stringName") <- "Species"
   load_all(); require(testthat); require(lazyeval)
   b <- b_eval(ir); a <- function(x){ b(lazy(x)) };
   col = 5; expect_equivalent(a(col), 5)
-  expect_equivalent(a("Species"), matchVal)
-  z = "Species"; expect_equivalent(a(z), matchVal)
+  expect_equivalent(a("Species"), match_val)
+  z = "Species"; expect_equivalent(a(z), match_val)
   z = I("Species"); expect_equivalent(a(z), I("Species"))
-  expect_equivalent(a(Species), matchVal)
+  expect_equivalent(a(Species), match_val)
   expect_error(a(DOES_NOT_EXIST))
 
   TRUE
@@ -28,26 +28,26 @@ bFig <- figure(width = 480*1.5,height = 520*1.5)
 
 
 # ly_points
-load_all(); bFig %>% ly_points(ir$Sepal.Length) -> a; a
-load_all(); bFig %>% ly_points(Sepal.Length, data = ir) -> a; a
-load_all(); bFig %>% ly_points(Sepal.Length, data = ir, color = glyphCol) -> a; a
-load_all(); bFig %>% ly_points(Sepal.Length, data = ir, glyph = glyphVal, hover = Species) -> a; a
-load_all(); bFig %>% ly_points(Sepal.Length, data = ir, color = Species) -> a; a
+load_all(); b_fig %>% ly_points(ir$Sepal.Length) -> a; a
+load_all(); b_fig %>% ly_points(Sepal.Length, data = ir) -> a; a
+load_all(); b_fig %>% ly_points(Sepal.Length, data = ir, color = glyph_col) -> a; a
+load_all(); b_fig %>% ly_points(Sepal.Length, data = ir, glyph = glyph_val, hover = Species) -> a; a
+load_all(); b_fig %>% ly_points(Sepal.Length, data = ir, color = Species) -> a; a
 
 # ly_annular_wedge
-load_all(); bFig %>% ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris, end_angle = rescale(Petal.Length)*2*pi, inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5, hover = Species, color = Species) -> a; a
+load_all(); b_fig %>% ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris, end_angle = rescale(Petal.Length)*2*pi, inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5, hover = Species, color = Species) -> a; a
 
 # ly_annulus
 # Hover does not work.  It did not work beforehand
-load_all(); bFig %>% ly_annulus(Sepal.Length, Sepal.Width, data = ir, inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5, hover = Species) -> a; a
-load_all(); bFig %>% ly_annulus(Sepal.Length, Sepal.Width, data = ir, inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5, hover = Species, color = Species) -> a; a
+load_all(); b_fig %>% ly_annulus(Sepal.Length, Sepal.Width, data = ir, inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5, hover = Species) -> a; a
+load_all(); b_fig %>% ly_annulus(Sepal.Length, Sepal.Width, data = ir, inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5, hover = Species, color = Species) -> a; a
 
 
 # ly_arc
-load_all(); bFig %>% ly_arc(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, alpha = 0.5) -> a; a
+load_all(); b_fig %>% ly_arc(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, alpha = 0.5) -> a; a
 
 # ly_wedge
-load_all(); bFig %>% ly_wedge(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, radius = 0.15, alpha = 0.5, hover = Species) -> a; a
+load_all(); b_fig %>% ly_wedge(Sepal.Length, Sepal.Width, data = ir, end_angle = rescale(Petal.Length)*2*pi, color = Species, radius = 0.15, alpha = 0.5, hover = Species) -> a; a
 
 
 
@@ -56,12 +56,12 @@ xx <- rnorm(10000)
 yy <- rnorm(10000)
 
 # ly_polygon
-load_all(); bFig %>% ly_hexbin(xx, yy) -> a; a
+load_all(); b_fig %>% ly_hexbin(xx, yy) -> a; a
 
 
 # ly_crect, # ly_text
 a <- function() {
-  warnOriginal <- options()$warn
+  warn_original <- options()$warn
 
   options(warn = 1)
   load_all()
@@ -95,7 +95,7 @@ a <- function() {
   ly_text(symx, massy, text = atomic.mass, data = elements,
     font_size = "6pt", align = "left", baseline = "middle")
 
-  options(warn = warnOriginal)
+  options(warn = warn_original)
 
   p
 }; a()
@@ -103,19 +103,19 @@ a <- function() {
 
 # ly_oval
 # legend looks funny
-load_all(); bFig %>% ly_oval(Sepal.Length, Sepal.Width, data = ir, color = Species, alpha = 0.5) -> a; a
+load_all(); b_fig %>% ly_oval(Sepal.Length, Sepal.Width, data = ir, color = Species, alpha = 0.5) -> a; a
 
 # ly_patch
 # color doesn't work
-load_all(); bFig %>% ly_patch(Sepal.Length, Sepal.Width, data = ir, color = Species, alpha = 0.5) -> a; a
-load_all(); bFig %>% ly_patch(Sepal.Length, Sepal.Width, data = ir, color = "blue", alpha = 0.5) -> a; a
+load_all(); b_fig %>% ly_patch(Sepal.Length, Sepal.Width, data = ir, color = Species, alpha = 0.5) -> a; a
+load_all(); b_fig %>% ly_patch(Sepal.Length, Sepal.Width, data = ir, color = "blue", alpha = 0.5) -> a; a
 
 
 
 
 
 # ly_bar
-load_all(); bFig %>% ly_bar(variety, yield, data = lattice::barley) %>% theme_axis("x", major_label_orientation = 90) -> a; a
+load_all(); b_fig %>% ly_bar(variety, yield, data = lattice::barley) %>% theme_axis("x", major_label_orientation = 90) -> a; a
 
 
 
@@ -132,11 +132,11 @@ a <- function() {
   imgdat <- data.frame(
     x = sin(ss) * 10, y = cos(ss) * 10,
     w = ws, h = ws * rep(c(1, 0.76), 6),
-    imageUrl = rep(url, 6)
+    image_url = rep(url, 6)
   )
 
   p <- figure(xlab = "x", ylab = "y") %>%
-    ly_image_url(x, y, w = w, h = h, imageUrl = imageUrl, data = imgdat,
+    ly_image_url(x, y, w = w, h = h, image_url = image_url, data = imgdat,
       anchor = "center") %>%
     ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
       width = 15, alpha = 0.1)
@@ -152,41 +152,41 @@ load_all(); figure(xlim = c(0, 1), ylim = c(0, 1), title = "Volcano") %>% ly_ima
 a <- function() {
   load_all()
   z <- lm(Sepal.Width ~ Sepal.Length, data = ir)
-  irLowess <- list(
-    lowess(ir[ir$Species == "setosa" & ir$randomGroup == "A", c("Sepal.Length", "Sepal.Width")]),
-    lowess(ir[ir$Species == "setosa" & ir$randomGroup == "B", c("Sepal.Length", "Sepal.Width")]),
-    lowess(ir[ir$Species == "versicolor" & ir$randomGroup == "A", c("Sepal.Length", "Sepal.Width")]),
-    lowess(ir[ir$Species == "versicolor" & ir$randomGroup == "B", c("Sepal.Length", "Sepal.Width")]),
-    lowess(ir[ir$Species == "virginica" & ir$randomGroup == "A", c("Sepal.Length", "Sepal.Width")]),
-    lowess(ir[ir$Species == "virginica" & ir$randomGroup == "B", c("Sepal.Length", "Sepal.Width")])
+  ir_lowess <- list(
+    lowess(ir[ir$Species == "setosa" & ir$random_group == "A", c("Sepal.Length", "Sepal.Width")]),
+    lowess(ir[ir$Species == "setosa" & ir$random_group == "B", c("Sepal.Length", "Sepal.Width")]),
+    lowess(ir[ir$Species == "versicolor" & ir$random_group == "A", c("Sepal.Length", "Sepal.Width")]),
+    lowess(ir[ir$Species == "versicolor" & ir$random_group == "B", c("Sepal.Length", "Sepal.Width")]),
+    lowess(ir[ir$Species == "virginica" & ir$random_group == "A", c("Sepal.Length", "Sepal.Width")]),
+    lowess(ir[ir$Species == "virginica" & ir$random_group == "B", c("Sepal.Length", "Sepal.Width")])
   )
-  lowessDt <- data.frame(
-    x = unlist(lapply(irLowess, "[[", "x")),
-    y = unlist(lapply(irLowess, "[[", "y")),
-    Species = rep(rep(c("setosa", "versicolor", "virginica"), each = 2), times = unlist(lapply(lapply(irLowess, "[[", "x"), length))),
-    randomGroup = rep(rep(c("A", "B"), 3), times = unlist(lapply(lapply(irLowess, "[[", "x"), length)))
+  lowess_dt <- data.frame(
+    x = unlist(lapply(ir_lowess, "[[", "x")),
+    y = unlist(lapply(ir_lowess, "[[", "y")),
+    Species = rep(rep(c("setosa", "versicolor", "virginica"), each = 2), times = unlist(lapply(lapply(ir_lowess, "[[", "x"), length))),
+    random_group = rep(rep(c("A", "B"), 3), times = unlist(lapply(lapply(ir_lowess, "[[", "x"), length)))
   )
-  lowessDt$lowessColor <- paste(lowessDt$Species, lowessDt$randomGroup, sep = ":")
+  lowess_dt$lowess_color <- paste(lowess_dt$Species, lowess_dt$random_group, sep = ":")
 
-  bFig %>%
-    ly_points(Sepal.Length, Sepal.Width, color = Species, hover = Species, glyph = randomGroup, data = ir) %>%
-    ly_lines(x, y, color = Species, group = randomGroup, data = lowessDt) %>%
+  b_fig %>%
+    ly_points(Sepal.Length, Sepal.Width, color = Species, hover = Species, glyph = random_group, data = ir) %>%
+    ly_lines(x, y, color = Species, group = random_group, data = lowess_dt) %>%
     ly_abline(z, type = 2, legend = "lm", width = 2)
 }; a()
 
 
 # ly_curve
 chippy <- function(x) sin(cos(x)*exp(-x/2))
-load_all(); bFig %>% ly_curve(chippy, -8, 7, n = 2001) -> a; a
+load_all(); b_fig %>% ly_curve(chippy, -8, 7, n = 2001) -> a; a
 
 # ly_ray
-load_all(); bFig %>% ly_ray(Sepal.Length, Sepal.Width, data = ir, length = runif(150), angle = runif(150, max = 2 * pi), color = Species) %>% ly_points(Sepal.Length, Sepal.Width, data = ir, color = Species) -> a; a
+load_all(); b_fig %>% ly_ray(Sepal.Length, Sepal.Width, data = ir, length = runif(150), angle = runif(150, max = 2 * pi), color = Species) %>% ly_points(Sepal.Length, Sepal.Width, data = ir, color = Species) -> a; a
 
 # ly_bezier
 a <- function() {
   load_all()
 
-  bFig %>%
+  b_fig %>%
     ly_bezier(
       x0 = Sepal.Length,
       x1 = Sepal.Length + runif(150),
@@ -206,7 +206,7 @@ a <- function() {
 # ly_quadratic
 a <- function() {
   load_all()
-  bFig %>%
+  b_fig %>%
     ly_quadratic(
       x0 = Sepal.Length,
       x1 = Sepal.Length + runif(150),
@@ -231,14 +231,14 @@ a <- function() {
   for (i in 1:500) {
     count <- sample(1:10, 1)
     angles <- runif(count + 1, 0, 2*pi)
-    xDists <- (1/2)^(0:count) * cos(angles)
-    yDists <- (1/2)^(0:count) * sin(angles)
+    x_dists <- (1/2)^(0:count) * cos(angles)
+    y_dists <- (1/2)^(0:count) * sin(angles)
 
-    xs[[length(xs) + 1]] <- c(cumsum(xDists))
-    ys[[length(ys) + 1]] <- c(cumsum(yDists))
+    xs[[length(xs) + 1]] <- c(cumsum(x_dists))
+    ys[[length(ys) + 1]] <- c(cumsum(y_dists))
   }
 
-  bFig %>%
+  b_fig %>%
     ly_multi_line(
       xs = xs, ys = ys
     )
@@ -247,27 +247,27 @@ a <- function() {
 
 # ly_map
 # this doesn't work unless you "library(maps)" first
-load_all(); bFig %>% ly_map()
+load_all(); b_fig %>% ly_map()
 
 
 # ly_hist
-load_all(); bFig %>% ly_hist(Sepal.Length, data = ir)
+load_all(); b_fig %>% ly_hist(Sepal.Length, data = ir)
 
 
 # ly_density
-load_all(); bFig %>% ly_density(Sepal.Length, data = ir)
+load_all(); b_fig %>% ly_density(Sepal.Length, data = ir)
 
 # ly_quantile
-load_all(); bFig %>% ly_quantile(Sepal.Length, data = ir)
+load_all(); b_fig %>% ly_quantile(Sepal.Length, data = ir)
 
 # ly_segments, ly_boxplot
-load_all(); bFig %>% ly_boxplot(voice.part, height, data = lattice::singer) %>% theme_axis("x", major_label_orientation = 90) -> a; a
+load_all(); b_fig %>% ly_boxplot(voice.part, height, data = lattice::singer) %>% theme_axis("x", major_label_orientation = 90) -> a; a
 
 
 
 # hover with data.frame
 d <- data.frame(x = 1:10, y = 1:10, random = rnorm(10))
-load_all(); bFig %>% ly_points(x, y, data = d[,c("x","y")], hover = d) -> a
+load_all(); b_fig %>% ly_points(x, y, data = d[,c("x","y")], hover = d) -> a
 
 
 
