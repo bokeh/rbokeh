@@ -83,7 +83,7 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
 #' @param y y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other properties
 #' @param w,h values or field names of width and height of image
-#' @param imageUrl values or field name of image URLs
+#' @param image_url values or field name of image URLs
 #' @param dilate logical - whether to dilate pixel distance computations when drawing
 #' @param anchor where the image is anchored to with respect to \code{x} and \code{y}
 #' @param angle values or field name of the angle to rotate the image, in radians
@@ -93,7 +93,7 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
 #' @export
 ly_image_url <- function(
   fig, x = 0, y = 0, data = figure_data(fig), w = 10, h = 10,
-  imageUrl, dilate = TRUE, anchor = "top_left", angle = 0,
+  image_url, dilate = TRUE, anchor = "top_left", angle = 0,
   lname = NULL, lgroup = NULL
 ) {
 
@@ -111,7 +111,7 @@ ly_image_url <- function(
       y,
       w,
       h,
-      imageUrl,
+      image_url,
       dilate,
       anchor,
       angle,
@@ -121,9 +121,9 @@ ly_image_url <- function(
     )
   )
 
-  # TODO THIS URL IS NOT A "URL"!!!!. it is a data, not a parameter
-  args$params$url <- args$params$imageUrl
-  args$params$imageUrl <- NULL
+  # TODO: this url is not a "url" - it is data, not a parameter
+  args$params$url <- args$params$image_url
+  args$params$image_url <- NULL
 
   if(missing(x)) {
     args$info$xName <- "x"

@@ -12,7 +12,7 @@ imgdat <- data.frame(
 )
 
 p <- figure(xlab = "x", ylab = "y") %>%
-  ly_image_url(x, y, w = w, h = h, imageUrl = url, data = imgdat,
+  ly_image_url(x, y, w = w, h = h, image_url = url, data = imgdat,
     anchor = "center") %>%
   ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
     width = 15, alpha = 0.1)
