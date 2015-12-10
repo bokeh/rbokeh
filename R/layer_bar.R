@@ -123,9 +123,6 @@ ly_bar <- function(
     names(res)[ind] <- colorname
   }
 
-  names(res)[which(names(res) == "xleft")] <- args$info$xName
-  names(res)[which(names(res) == "ybottom")] <- args$info$yName
-
   badParamNames = c("color", "origin","breaks","right","binwidth", "position")
   remainingArgs = args$params
   remainingArgs = remainingArgs[! (names(remainingArgs) %in% badParamNames)]
@@ -135,9 +132,11 @@ ly_bar <- function(
   res$x <- NULL
   res$y <- NULL
 
-  do.call(ly_rect, c(list(fig = fig,
-    xleft = args$info$xName, ybottom = args$info$yName, xright = "xright", ytop = "ytop",
+  colorValue <- if (is.null(colorname)) args$params$color else colorname
+  do.call(ly_rect, append(list(fig = fig,
+    xleft = "xleft", ybottom = "ybottom", xright = "xright", ytop = "ytop",
     xlab = args$info$xName, ylab = args$info$yName,
-    color = colorname, data = res,
+    data = res,
+    color = colorValue,
     lname = args$info$lname, lgroup = args$info$lgroup, legend = args$info$legend), remainingArgs))
 }
