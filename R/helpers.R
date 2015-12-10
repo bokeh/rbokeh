@@ -426,7 +426,7 @@ get_hover2 <- function(lazyHoverVal, data, sub_fn) {
   }
 
 
-  isSingleSymbol <- (length(hoverSymbolList) == 1)
+  isSingleSymbol <- (length(hoverSymbolList) == 1 && ! isDataFrame)
   if (isListOrC || isSingleSymbol || isParseable) {
     # item is a list, get the elements from the list
     if (isListOrC) {
