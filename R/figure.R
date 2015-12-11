@@ -13,7 +13,7 @@
 #' @param ygrid whether to draw y axis grid lines
 #' @param xaxes where to put x axis, or FALSE if no x axis ticks / labels
 #' @param yaxes where to put y axis, or FALSE if no y axis ticks / labels
-#' @param legend_location ('top_right', 'top_left', 'bottom_left', 'bottom_right') the location where the legend should draw itself.
+#' @param legend_location ('top_right', 'top_left', 'bottom_left', 'bottom_right') the location where the legend should draw itself, or NULL to omit the legend
 #' @param tools character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.
 #' @param theme an rbokeh theme to use
 #' @param toolbar_location ('above', 'below', 'left', 'right') Where the toolbar will be located. If set to None, no toolbar will be attached to the plot.

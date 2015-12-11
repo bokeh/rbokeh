@@ -139,7 +139,7 @@ prepare_figure <- function(fig) {
     }
   }
 
-  if(length(legend) > 0)
+  if(length(legend) > 0 && !is.null(fig$x$spec$legend_attrs))
     fig <- fig %>%
       add_legend(unname(unlist(legend, recursive = FALSE)),
         fig$x$spec$legend_attrs)
