@@ -47,13 +47,13 @@ figure(data = NULL, width = 480, height = 520, title = NULL,
 
 \item{theme}{an rbokeh theme to use}
 
-\item{toolbar_location}{('above', 'below', 'left', 'right') Where the toolbar will be located. If set to None, no toolbar will be attached to the plot.}
+\item{toolbar_location}{('above', 'below', 'left', 'right') Where the toolbar will be located. If set to NULL, no toolbar will be attached to the plot.}
 
 \item{h_symmetry}{(logical) Whether the total horizontal padding on both sides of the plot will be made equal (the left or right padding amount, whichever is larger).}
 
 \item{v_symmetry}{(logical) Whether the total vertical padding on both sides of the plot will be made equal (the top or bottom padding amount, whichever is larger).}
 
-\item{logo}{('normal', 'grey') What version of the Bokeh logo to display on the toolbar. If set to None, no logo will be displayed.}
+\item{logo}{('normal', 'grey') What version of the Bokeh logo to display on the toolbar. If set to NULL, no logo will be displayed.}
 
 \item{lod_factor}{(integer) Decimation factor to use when applying level-of-detail decimation (see "Controlling level of detail").}
 

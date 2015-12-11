@@ -232,7 +232,7 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
 
   # set attributes to help set the padding for each individual panel
   for(ii in seq_along(obj$x$spec$figs)) {
-    obj$x$spec$figs[[ii]]$x$spec$model$plot$attributes$toolbar_location <- "None"
+    obj$x$spec$figs[[ii]]$x$spec$model$plot$attributes["toolbar_location"] <- list(NULL)
     obj$x$spec$figs[[ii]]$x$parenttype <- "GridPlot"
   }
 
