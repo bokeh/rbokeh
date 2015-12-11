@@ -462,12 +462,11 @@ get_hover2 <- function(lazyHoverVal, data, sub_fn) {
     hoverValList <- hoverSymbolList
 
   } else {
-    # hover value is not a interperable
+    # hover value is not interpretable
     hoverVal <- try(lazy_eval(lazyHoverVal), silent = TRUE)
 
     if (inherits(hoverVal, "try-error")) {
       print("HOVER - IDK!")
-      browser()
     }
 
     hoverValList <- as.list(hoverVal)

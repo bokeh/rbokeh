@@ -156,11 +156,11 @@ get_legend <- function(val) {
 }
 
 
-#' Subset args object
-#'
-#' @param arg_obj args object to be subsetted
-#' @param idxs indicies that should be used
-#' @return similar arg_obj, just subsetted at the suggested indicies
+# Subset args object
+#
+# @param arg_obj args object to be subsetted
+# @param idxs indicies that should be used
+# @return similar arg_obj, just subsetted at the suggested indicies
 subset_arg_obj <- function(arg_obj, idxs) {
   non_subsetable_names <- c("lgroup", "lname", "url", "legend", "xlab", "ylab", "x_name", "y_name")
   n <- length(idxs)
@@ -192,7 +192,6 @@ subset_arg_obj <- function(arg_obj, idxs) {
       }
 
       if(length(attributes(val)) > 1) {
-        # browser()
         return(subset_with_attributes(val, idxs))
       } else {
         return(val[idxs])

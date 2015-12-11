@@ -41,7 +41,7 @@ figure(data = NULL, width = 480, height = 520, title = NULL,
 
 \item{yaxes}{where to put y axis, or FALSE if no y axis ticks / labels}
 
-\item{legend_location}{('top_right', 'top_left', 'bottom_left', 'bottom_right') the location where the legend should draw itself.}
+\item{legend_location}{('top_right', 'top_left', 'bottom_left', 'bottom_right') the location where the legend should draw itself, or NULL to omit the legend}
 
 \item{tools}{character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.}
 
