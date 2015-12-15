@@ -129,7 +129,8 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   data_lengths <- sapply(data, length)
   data_is_list <- sapply(data, is.list)
   data_names <- names(data)
-  scalar_ind <- which(data_lengths == 1 & !data_is_list)
+  max_data_length <- max(data_lengths)
+  scalar_ind <- which(data_lengths == 1 & !data_is_list & max_data_length != 1)
   for(ii in scalar_ind)
     args[[data_names[ii]]] <- data[[ii]]
   data[scalar_ind] <- NULL
