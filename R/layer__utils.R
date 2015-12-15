@@ -173,6 +173,7 @@ subset_arg_obj <- function(arg_obj, idxs) {
       if(key %in% non_subsetable_names) {
         return(val)
       }
+
       if(is.null(val)) {
         return(val)
       }
@@ -256,7 +257,7 @@ grab_data_index <- function(name_vals) {
 
 # helper function to get all 'info' positions from the given names
 grab_regular_index <- function(name_vals) {
-  name_vals %in% c("hover", "group", "lname", "lgroup", "legend", "xlab", "ylab")
+  name_vals %in% c("hover", "url", "group", "lname", "lgroup", "legend", "xlab", "ylab")
 }
 
 # helper function to get all 'params' positions from the given names
