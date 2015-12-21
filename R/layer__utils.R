@@ -162,7 +162,7 @@ get_legend <- function(val) {
 # @param idxs indicies that should be used
 # @return similar arg_obj, just subsetted at the suggested indicies
 subset_arg_obj <- function(arg_obj, idxs) {
-  non_subsetable_names <- c("lgroup", "lname", "url", "legend", "xlab", "ylab", "x_name", "y_name")
+  non_subsetable_names <- c("lgroup", "lname", "legend", "xlab", "ylab", "x_name", "y_name")
   n <- length(idxs)
 
   subset_obj <- function(x) {
@@ -173,11 +173,15 @@ subset_arg_obj <- function(arg_obj, idxs) {
       if(key %in% non_subsetable_names) {
         return(val)
       }
+
       if(is.null(val)) {
         return(val)
       }
 
-      if(key == "hover") {
+      if(key %in% c("hover", "url")) {
+        if (is.null(nrow(val$data))) {
+          return(val)
+        }
         val$data <- subset(val$data, 1:nrow(val$data) %in% idxs)
         return(val)
       }
@@ -252,7 +256,7 @@ grab_data_index <- function(name_vals) {
 
 # helper function to get all 'info' positions from the given names
 grab_regular_index <- function(name_vals) {
-  name_vals %in% c("hover", "group", "lname", "lgroup", "legend", "xlab", "ylab")
+  name_vals %in% c("hover", "url", "group", "lname", "lgroup", "legend", "xlab", "ylab")
 }
 
 # helper function to get all 'params' positions from the given names
