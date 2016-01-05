@@ -6,10 +6,16 @@ R interface to Bokeh.
 
 ### Install
 
-Using the `devtools` package:
+rbokeh will be put on CRAN soon.  Until then, you can install from an alternative repo:
+
+```s
+options(repos = c(tessera = "http://packages.tessera.io", getOption("repos")))
+install.packages("rbokeh")
+```
+
+Alternatively, you can install directly from github:
 
 ```
-devtools::install_github("ramnathv/htmlwidgets")
 devtools::install_github("bokeh/rbokeh")
 ```
 
