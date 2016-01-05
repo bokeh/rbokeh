@@ -378,136 +378,137 @@ get_lgroup <- function(lgroup, fig) {
   lgroup <- as.character(lgroup)
 }
 
-get_hover2 <- function(lazyHoverVal, data, sub_fn) {
+get_hover2 <- function(lazy_hover_val, data, sub_fn) {
 
   # three cases
   # 1. evaluates right away
   # 2. evaluates to a list that can't evaluate. must look at data
   # 3. comes from a string that must have an '@' symbol
 
-  hoverSymbol <- b_eval_get_symbol(lazyHoverVal)
-  if (is.null(hoverSymbol)) {
+  hover_symbol <- b_eval_get_symbol(lazy_hover_val)
+  if (is.null(hover_symbol)) {
     return(NULL)
   }
 
-  hoverSymbolList <- as.list(hoverSymbol)
+  hover_symbol_list <- as.list(hover_symbol)
 
-  isListOrC <- deparse(hoverSymbolList[[1]]) %in% c("list", "c")
-  isParseable <- FALSE
-  isAtString <- FALSE
-  isDataFrame <- FALSE
+  is_list_or_c <- deparse(hover_symbol_list[[1]]) %in% c("list", "c")
+  is_parseable <- FALSE
+  is_at_string <- FALSE
+  is_data_frame <- FALSE
 
-  if (inherits(hoverSymbol, "character")) {
-    if (grepl("@", hoverSymbol)) {
-      isAtString <- TRUE
-      tmp_split <- strsplit(hoverSymbol, "@")[[1]][-1]
-      tmpNames <- gsub("^([a-zA-Z0-9_]+).*", "\\1", tmp_split)
-      hoverSymbolList <- lapply(tmpNames, as.symbol)
-      isParseable <- TRUE
+  if (inherits(hover_symbol, "character")) {
+    if (grepl("@", hover_symbol)) {
+      is_at_string <- TRUE
+      tmp_split <- strsplit(hover_symbol, "@")[[1]][-1]
+      tmp_names <- gsub("^([a-zA-Z0-9_]+).*", "\\1", tmp_split)
+      hover_symbol_list <- lapply(tmp_names, as.symbol)
+      is_parseable <- TRUE
     }
   } else {
     # try to eval the arg to a char string
     # if it evals, check to see if it's full of
-    maybeVar <- try(lazy_eval(lazyHoverVal), silent = TRUE)
-    if (!inherits(maybeVar, "try-error")) {
-      if (is.data.frame(maybeVar)) {
-        hoverSymbolList <- as.list(maybeVar)
-        isDataFrame <- TRUE
-        isParseable <- FALSE
-        isListOrC <- FALSE
-      } else if (is.vector(maybeVar) || is.list(maybeVar)) {
-        if (all(unlist(maybeVar) %in% names(data))) {
-          hoverSymbolList <- lapply(maybeVar, as.symbol)
-          isListOrC <- FALSE
-          isParseable <- TRUE
+    maybe_var <- try(lazy_eval(lazy_hover_val), silent = TRUE)
+    if (!inherits(maybe_var, "try-error")) {
+      if(is.null(maybe_var)) {
+        return(NULL)
+      } else if (is.data.frame(maybe_var)) {
+        hover_symbol_list <- as.list(maybe_var)
+        is_data_frame <- TRUE
+        is_parseable <- FALSE
+        is_list_or_c <- FALSE
+      } else if (is.vector(maybe_var) || is.list(maybe_var)) {
+        if (all(unlist(maybe_var) %in% names(data))) {
+          hover_symbol_list <- lapply(maybe_var, as.symbol)
+          is_list_or_c <- FALSE
+          is_parseable <- TRUE
         }
       }
     }
   }
 
-
-  isSingleSymbol <- (length(hoverSymbolList) == 1 && ! isDataFrame)
-  if (isListOrC || isSingleSymbol || isParseable) {
+  is_single_symbol <- (length(hover_symbol_list) == 1 && ! is_data_frame)
+  if (is_list_or_c || is_single_symbol || is_parseable) {
     # item is a list, get the elements from the list
-    if (isListOrC) {
-      hoverSymbolList <- hoverSymbolList[-1]
+    if (is_list_or_c) {
+      hover_symbol_list <- hover_symbol_list[-1]
     }
-    hoverListNames <- names(hoverSymbolList)
+    hover_list_names <- names(hover_symbol_list)
 
     # if no names are supplied, then
-    if (is.null(hoverListNames)) {
+    if (is.null(hover_list_names)) {
       # assume they want to name the value with the column names
-      hoverListNames <- as.character(hoverSymbolList)
+      hover_list_names <- as.character(hover_symbol_list)
     }
 
     # correct missing name issues
-    if (any((missingNames <- hoverListNames == ""))) {
-      hoverListNames[missingNames] <- as.character(hoverSymbolList[missingNames])
+    if (any((missing_names <- hover_list_names == ""))) {
+      hover_list_names[missing_names] <- as.character(hover_symbol_list[missing_names])
     }
 
-    # set the hoverSymbolList
-    names(hoverSymbolList) <- hoverListNames
+    # set the hover_symbol_list
+    names(hover_symbol_list) <- hover_list_names
 
     # get results into a list
-    hoverValList <- lapply(hoverSymbolList, function(symbolVal) {
-      lazyVal <- as.lazy(
-        symbolVal,
-        env = lazyHoverVal$env
+    hover_val_list <- lapply(hover_symbol_list, function(symbol_val) {
+      lazy_val <- as.lazy(
+        symbol_val,
+        env = lazy_hover_val$env
       )
-      sub_fn(lazyVal)
+      sub_fn(lazy_val)
     })
 
 
-  } else if (isDataFrame) {
-    hoverValList <- hoverSymbolList
+  } else if (is_data_frame) {
+    hover_val_list <- hover_symbol_list
 
   } else {
     # hover value is not interpretable
-    hoverVal <- try(lazy_eval(lazyHoverVal), silent = TRUE)
+    hover_val <- try(lazy_eval(lazy_hover_val), silent = TRUE)
 
-    if (inherits(hoverVal, "try-error")) {
-      print("HOVER - IDK!")
+    if (inherits(hover_val, "try-error")) {
+      message("there was an issue evaluating the hover argument")
     }
 
-    hoverValList <- as.list(hoverVal)
+    hover_val_list <- as.list(hover_val)
   }
 
   # keep the original names
-  hoverDtNames <- names(hoverValList)
+  hover_dt_names <- names(hover_val_list)
 
-  hoverValList <- lapply(hoverValList, format)
+  hover_val_list <- lapply(hover_val_list, format)
 
   # make the hover list into a dataframe
-  hoverValDt <- as.data.frame(hoverValList)
+  hover_val_dt <- as.data.frame(hover_val_list)
 
-  if(nrow(hoverValDt) == 1) {
-    hoverValDt <- lapply(hoverValDt, I)
+  if(nrow(hover_val_dt) == 1) {
+    hover_val_dt <- lapply(hover_val_dt, I)
   }
 
   # make fake, easy to use key names "hover_col_1", "hover_col_2",...
-  names(hoverValDt) <- hoverDtKey <- paste0("hover_col_", seq_along(hoverDtNames))
+  names(hover_val_dt) <- hover_dt_key <- paste0("hover_col_", seq_along(hover_dt_names))
 
 
   # list of list(pretty name, key name)
-  if (isAtString) {
-    tmp <- hoverSymbol
-    for(ii in seq_along(hoverDtKey)) {
+  if (is_at_string) {
+    tmp <- hover_symbol
+    for(ii in seq_along(hover_dt_key)) {
       tmp <- gsub(
-        paste0("@", hoverDtNames[ii]),
-        paste0("@", hoverDtKey[ii]),
+        paste0("@", hover_dt_names[ii]),
+        paste0("@", hover_dt_key[ii]),
         tmp
       )
     }
     hdict <- tmp
 
   } else {
-    hdict <- lapply(seq_along(hoverDtNames), function(i) {
-      list(hoverDtNames[i], paste0("@", hoverDtKey[i]))
+    hdict <- lapply(seq_along(hover_dt_names), function(i) {
+      list(hover_dt_names[i], paste0("@", hover_dt_key[i]))
     })
   }
 
   return(structure(list(
-    data = hoverValDt,
+    data = hover_val_dt,
     dict = hdict
   ), class = "hoverSpec"))
 }
@@ -684,21 +685,21 @@ v_eval <- function(x, data) {
 fix_args <- function(args, n) {
   # print(args); cat("\n\n\n\n\n\n\n\n\n\n\n")
 
-  lns <- sapply(names(args), function(itemName) {
-    itemVal = args[[itemName]]
+  lns <- sapply(names(args), function(item_name) {
+    item_val = args[[item_name]]
 
-    if (is.null(itemVal)) {
+    if (is.null(item_val)) {
       return(0)
     }
 
-    switch(itemName,
+    switch(item_name,
       url = 1,
-      hover = ifelse(is.data.frame(itemVal$data), nrow(itemVal$data), length(itemVal$data)),
+      hover = ifelse(is.data.frame(item_val$data), nrow(item_val$data), length(item_val$data)),
 
-      if (is.data.frame(itemVal) || is.matrix(itemVal)) {
-        nrow(itemVal)
+      if (is.data.frame(item_val) || is.matrix(item_val)) {
+        nrow(item_val)
       } else {
-        length(itemVal)
+        length(item_val)
       }
 
     )
@@ -750,20 +751,20 @@ to_epoch <- function(x) {
 subset_with_attributes <- function(x, ...) {
   res <- x[...]
   attrs <- attributes(x)
-  attrNames <- names(attrs)
-  attrNames <- attrNames[! (attrNames %in% c("names", "class"))]
+  attr_names <- names(attrs)
+  attr_names <- attr_names[! (attr_names %in% c("names", "class"))]
 
   ans <- try({
-    attributes(res)[attrNames] <- attributes(x)[attrNames]
+    attributes(res)[attr_names] <- attributes(x)[attr_names]
   }, silent = TRUE)
 
   # if there's trouble setting the attributes,
   # (like in Time-Series data, 'tsp' attr)
   # try doing them one at a time
   if (inherits(ans, "try-error")) {
-    for (attrName in attrNames) {
+    for (attr_name in attr_names) {
       try({
-        attributes(res)[attrName] <- attributes(x)[attrName]
+        attributes(res)[attr_name] <- attributes(x)[attr_name]
       }, silent = TRUE)
     }
   }

@@ -412,6 +412,9 @@ load_all(); figure() %>% ly_points(Sepal.Length, Sepal.Width, data = as.data.tab
 print_model_json(p, file = "/dev/null")
 # url is broken
 
+figure() %>% ly_points(Sepal.Length, Sepal.Width, data = iris, color = Species,
+  hover = iris, url = "http://www.google.com?q=@Species")
+
 hover <- NULL
 load_all(); figure() %>% ly_points(1:10, hover = hover) -> p ; p
 # fixed
@@ -423,18 +426,14 @@ load_all(); figure() %>% ly_text(1, 1, text = "howdy") -> p; p
 # blank graph is now displayed.  no text though
 
 # what's interesting is you don't find the text "howdy" in the json:
-print_model_json(p)
+print_model_json(p, pbcopy = TRUE)
 # fixed!
 
 
-
+figure() %>% ly_points(Sepal.Length, Sepal.Width, data = iris[1,])
 
 # here's another related hover thing
 tmp <- iris[1,]
 
 load_all(); figure() %>% ly_points(Sepal.Length, Sepal.Width, hover = Species, data = iris)
 load_all(); figure() %>% ly_points(Sepal.Length, Sepal.Width, hover = Species, data = tmp)
-# first one works, second one doesn't
-# has to do with it being a single row of data
-
-# fixed? Can't see anything wrong
