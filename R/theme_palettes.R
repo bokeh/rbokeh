@@ -7,8 +7,8 @@
 pal_tableau <- function(pal = "Tableau10") {
   pal <- tableau_colors[[pal]]
   function(n) {
-    if(n > length(pal))
-      message("There are more levels to color than there are available colors in this palette... repeating colors")
+    # if(n > length(pal))
+    #   message("There are more levels to color than there are available colors in this palette... repeating colors")
     pal[(seq_len(n) - 1) %% length(pal) + 1]
   }
 }
@@ -19,8 +19,8 @@ pal_tableau <- function(pal = "Tableau10") {
 pal_bk_glyph <- function() {
   function(n) {
     pal <- c("circle", "square", "triangle", "diamond", "circle_cross", "circle_x", "cross", "diamond_cross", "inverted_triangle","square_cross", "square_x", "x", "asterisk")
-    if(n > length(pal))
-      message("There are more levels to color than there are available colors in this palette... repeating colors")
+    # if(n > length(pal))
+    #   message("There are more levels to color than there are available colors in this palette... repeating colors")
     pal[(seq_len(n) - 1) %% length(pal) + 1]
   }
 }
@@ -45,8 +45,8 @@ pal_size <- function(min = 2, max = 20) {
 pal_bk_line_dash <- function() {
   function(n) {
     dashes <- as.character(1:6)
-    if(n > 6)
-      message("There are more levels for line dash than there are available line dash styles in this theme... repeating line dash")
+    # if(n > 6)
+    #   message("There are more levels for line dash than there are available line dash styles in this theme... repeating line dash")
     lty_dict[dashes[(seq_len(n) - 1) %% length(dashes) + 1]]
   }
 }
@@ -56,8 +56,8 @@ pal_bk_line_dash <- function() {
 pal_bk_line_width <- function() {
   function(n) {
     dashes <- as.character(1:6)
-    if(n > 6)
-      message("There are more levels for line dash than there are available line dash styles in this theme... repeating line dash")
+    # if(n > 6)
+    #   message("There are more levels for line dash than there are available line dash styles in this theme... repeating line dash")
     dashes[(seq_len(n) - 1) %% length(dashes) + 1]
   }
 }

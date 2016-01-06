@@ -155,7 +155,7 @@ prepare_figure <- function(fig) {
 
   ## set xlim and ylim if not set
   if(length(fig$x$spec$xlim) == 0) {
-    message("xlim not specified explicitly... calculating...")
+    # message("xlim not specified explicitly... calculating...")
     xrange <- get_all_glyph_range(fig$x$spec$glyph_x_ranges, fig$x$spec$padding_factor, fig$x$spec$x_axis_type, x_log)
   } else {
     xrange <- fig$x$spec$xlim
@@ -164,7 +164,7 @@ prepare_figure <- function(fig) {
   }
 
   if(length(fig$x$spec$ylim) == 0) {
-    message("ylim not specified explicitly... calculating...")
+    # message("ylim not specified explicitly... calculating...")
     yrange <- get_all_glyph_range(fig$x$spec$glyph_y_ranges, fig$x$spec$padding_factor, fig$x$spec$y_axis_type, y_log)
   } else {
     yrange <- fig$x$spec$ylim
