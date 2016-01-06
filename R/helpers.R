@@ -238,8 +238,8 @@ resolve_line_args <- function(fig, args) {
 
   if(!is.null(args$color)) {
     if(!is.null(args$line_color)) {
-      if(any(args$color != args$line_color))
-        message("both color and line_color specified - honoring line_color")
+      # if(any(args$color != args$line_color))
+      #   message("both color and line_color specified - honoring line_color")
     } else {
       args$line_color <- args$color
     }
@@ -247,8 +247,8 @@ resolve_line_args <- function(fig, args) {
 
   if(!is.null(args$alpha)) {
     if(!is.null(args$line_alpha)) {
-      if(any(args$alpha != args$line_alpha))
-        message("both alpha and line_alpha specified - honoring line_alpha")
+      # if(any(args$alpha != args$line_alpha))
+      #   message("both alpha and line_alpha specified - honoring line_alpha")
     } else {
       args$line_alpha <- args$alpha
     }
@@ -295,14 +295,14 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, soli
 
   if(!is.null(args$color)) {
     if(!is.null(args$line_color)) {
-      if(any(args$color != args$line_color))
-        message("both color and line_color specified - honoring line_color")
+      # if(any(args$color != args$line_color))
+      #   message("both color and line_color specified - honoring line_color")
     } else {
       args$line_color <- args$color
     }
     if(!is.null(args$fill_color)) {
-      if(any(args$color != args$fill_color))
-        message("both color and fill_color specified - honoring fill_color")
+      # if(any(args$color != args$fill_color))
+      #   message("both color and fill_color specified - honoring fill_color")
     } else {
       args$fill_color <- args$color
     }
@@ -313,14 +313,14 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, soli
 
   if(!is.null(args$alpha)) {
     if(!is.null(args$line_alpha)) {
-      if(any(args$alpha != args$line_alpha))
-        message("both alpha and line_alpha specified - honoring line_alpha")
+      # if(any(args$alpha != args$line_alpha))
+      #   message("both alpha and line_alpha specified - honoring line_alpha")
     } else {
       args$line_alpha <- args$alpha
     }
     if(!is.null(args$fill_alpha)) {
-      if(any(args$alpha != args$fill_alpha))
-        message("both alpha and fill_alpha specified - honoring fill_alpha")
+      # if(any(args$alpha != args$fill_alpha))
+      #   message("both alpha and fill_alpha specified - honoring fill_alpha")
     } else {
       args$fill_alpha <- args$alpha * 0.5
     }
@@ -351,8 +351,14 @@ resolve_glyph_props <- function(glyph, args, lgroup) {
         }
       }
     } else {
-      args$fill_color <- NA
-      args$fill_alpha <- NA
+      # if set to NULL, it will use bokeh default as the fill
+      if(glyph_props[[args$glyph]]$fp) {
+        args$fill_color <- NA
+        args$fill_alpha <- NA
+      } else {
+        args$fill_color <- NULL
+        args$fill_alpha <- NULL
+      }
     }
 
     if(cur_glyph_props$line) {
