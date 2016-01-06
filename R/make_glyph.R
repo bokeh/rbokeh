@@ -147,7 +147,7 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   args[long_ind] <- NULL
 
   ## data elements of length 1 must be lists (since toJSON auto_unbox = TRUE)
-  length_one <- which(sapply(data, length) == 1)
+  length_one <- which(sapply(data, length) == 1 & !sapply(data, is.list))
   for(ii in length_one) {
     data[[ii]] <- list(data[[ii]])
   }
