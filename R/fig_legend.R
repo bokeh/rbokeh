@@ -33,7 +33,7 @@ legend_model <- function(id, plot_ref, legends, extra_pars) {
 }
 
 legend_par_validator_map <- list(
-  "orientation" = "legend_orientation",
+  "location" = "legend_orientation",
   "border_line_alpha" = "num_data_spec",
   "border_line_cap" = "line_cap",
   "border_line_color" = "color",

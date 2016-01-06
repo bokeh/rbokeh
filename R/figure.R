@@ -144,7 +144,7 @@ figure <- function(
     has_y_axis = FALSE,
     has_x_range = FALSE,
     has_y_range = FALSE,
-    legend_attrs = list(orientation = legend_location)
+    legend_attrs = list(location = legend_location)
   ), class = "BokehFigure")
 
   extra_pars <- handle_extra_pars(attr_pars, figure_par_validator_map)
@@ -267,3 +267,15 @@ figure_par_validator_map <- list(
   "lod_timeout" = "int",
   "webgl" = "logical"
 )
+
+
+library(rvest)
+
+# plots <- read_html("http://bokeh.pydata.org/en/latest/docs/reference/models/plots.html")
+
+# attrs <- plots %>%
+#   html_nodes("dl.attribute")
+
+# attrs %>%
+#   html_nodes("code.descname") %>%
+#   html_text()

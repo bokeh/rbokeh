@@ -1,3 +1,5 @@
+var xx;
+
 HTMLWidgets.widget({
 
   name: 'rbokeh',
@@ -19,30 +21,28 @@ HTMLWidgets.widget({
     el.innerHTML = "";
 
     if(x.isJSON == true) {
-      x.all_models = JSON.parse(x.all_models);
+      x.docs_json = JSON.parse(x.docs_json);
     }
+
+    var refkey = Object.keys(x.docs_json)[0]
+    var refs = x.docs_json[refkey].roots.references
 
     // set size from initialize if "figure" (doesn't work for gridplot now)
     if(x.padding.type === "figure") {
       if(instance.width) {
-        x.all_models[0].attributes.plot_width = instance.width - x.padding.y_pad;
+        refs[0].attributes.plot_width = instance.width - x.padding.y_pad;
       }
       if(instance.height) {
-        x.all_models[0].attributes.plot_height = instance.height - x.padding.x_pad;
+        refs[0].attributes.plot_height = instance.height - x.padding.x_pad;
       }
     }
-
-    Bokeh.logger.info("Realizing plot:")
-    Bokeh.logger.info(" - modeltype: " + x.modeltype);
-    Bokeh.logger.info(" - modelid:   " + x.modelid);
-    Bokeh.logger.info(" - elementid: " + x.elementid);
 
     instance.modelid = x.modelid;
     instance.elementid = x.elementid;
 
     if(x.debug == true) {
-      console.log(x.all_models);
-      console.log(JSON.stringify(x.all_models));
+      console.log(refs);
+      console.log(JSON.stringify(refs));
     }
 
     // change "nulls" in data to NaN
@@ -58,9 +58,9 @@ HTMLWidgets.widget({
         }
       };
     }
-    for(var i = 0; i < x.all_models.length; i++) {
-      if(x.all_models[i].type === "ColumnDataSource")
-        traverseObject(x.all_models[i].attributes.data);
+    for(var i = 0; i < refs.length; i++) {
+      if(refs[i].type === "ColumnDataSource")
+        traverseObject(refs[i].attributes.data);
     };
 
     var dv = document.createElement('div');
@@ -68,12 +68,13 @@ HTMLWidgets.widget({
     dv.setAttribute("class", "plotdiv");
     el.appendChild(dv);
 
-    Bokeh.load_models(x.all_models);
-    var model = Bokeh.Collections(x.modeltype).get(x.modelid);
-    var view = new model.default_view({model: model, el: '#' + x.elementid});
+    var render_items = [{
+      "docid": x.docid,
+      "elementid": x.elementid,
+      "modelid": x.modelid
+    }];
 
-    // Bokeh.instance = view;
-    Bokeh.index[x.modelid] = view;
+    Bokeh.embed.embed_items(x.docs_json, render_items);
   },
 
   resize: function(el, width, height, instance) {
