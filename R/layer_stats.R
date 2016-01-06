@@ -353,7 +353,7 @@ ly_boxplot <- function(
         list(
           fig = fig,
           x = rep(gp, length(bp$out)), y = bp$out,
-          type = 1,
+          glyph = 1,
           xlab = x_name, ylab = y_name
         ),
         args$params
