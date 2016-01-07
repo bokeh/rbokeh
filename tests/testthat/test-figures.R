@@ -149,7 +149,7 @@ test_that("examples", {
   )
 
   p <- figure(xlab = "x", ylab = "y") %>%
-    ly_image_url(x, y, w = w, h = h, url = url, data = imgdat,
+    ly_image_url(x, y, w = w, h = h, image_url = url, data = imgdat,
       anchor = "center") %>%
     ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
       width = 15, alpha = 0.1)
@@ -214,16 +214,16 @@ test_that("examples", {
     y_axis(number_formatter = "printf", format = "%0.1f%%")
   print_model_json(p, file = "/dev/null")
 
-  # data.table
-  library(data.table)
-  p <- figure() %>%
-    ly_points(Sepal.Length, Sepal.Width, data = as.data.table(iris),
-              color = Species, hover = as.data.table(iris)[, list(Species)])
-  print_model_json(p, file = "/dev/null")
+  # # data.table
+  # library(data.table)
+  # p <- figure() %>%
+  #   ly_points(Sepal.Length, Sepal.Width, data = as.data.table(iris),
+  #     color = Species, hover = as.data.table(iris)[, list(Species)])
+  # print_model_json(p, file = "/dev/null")
 
-  p <- figure() %>%
-    ly_points(Sepal.Length, Sepal.Width, data = as.data.table(iris),
-              color = Species, hover = as.data.table(iris)[, list(Species)],
-              url = "http://www.google.com?q=@Species")
-  print_model_json(p, file = "/dev/null")
+  # p <- figure() %>%
+  #   ly_points(Sepal.Length, Sepal.Width, data = as.data.table(iris),
+  #     color = Species, hover = as.data.table(iris)[, list(Species)],
+  #     url = "http://www.google.com?q=@Species")
+  # print_model_json(p, file = "/dev/null")
 })

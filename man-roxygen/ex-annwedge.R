@@ -1,6 +1,7 @@
 \donttest{
-rescale <- function(x)
+rescale <- function(x) {
   (x - min(x)) / diff(range(x))
+}
 
 figure() %>%
   ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris,

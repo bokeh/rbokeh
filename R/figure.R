@@ -1,5 +1,6 @@
 #' Initialize a Bokeh figure
 #'
+#' @param data data to be supplied to all layers, if the layer doesn't supply a data value
 #' @param width figure width in pixels
 #' @param height figure width in pixels
 #' @param title a title to display above the plot. - "title" is also the prefix for a set of Text Properties, so you can set the font for the title with the parameter text_font.
@@ -12,13 +13,13 @@
 #' @param ygrid whether to draw y axis grid lines
 #' @param xaxes where to put x axis, or FALSE if no x axis ticks / labels
 #' @param yaxes where to put y axis, or FALSE if no y axis ticks / labels
-#' @param legend_location ('top_right', 'top_left', 'bottom_left', 'bottom_right') the location where the legend should draw itself.
+#' @param legend_location ('top_right', 'top_left', 'bottom_left', 'bottom_right') the location where the legend should draw itself, or NULL to omit the legend
 #' @param tools character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.
 #' @param theme an rbokeh theme to use
-#' @param toolbar_location ('above', 'below', 'left', 'right') Where the toolbar will be located. If set to None, no toolbar will be attached to the plot.
+#' @param toolbar_location ('above', 'below', 'left', 'right') Where the toolbar will be located. If set to NULL, no toolbar will be attached to the plot.
 #' @param h_symmetry (logical) Whether the total horizontal padding on both sides of the plot will be made equal (the left or right padding amount, whichever is larger).
 #' @param v_symmetry (logical) Whether the total vertical padding on both sides of the plot will be made equal (the top or bottom padding amount, whichever is larger).
-#' @param logo ('normal', 'grey') What version of the Bokeh logo to display on the toolbar. If set to None, no logo will be displayed.
+#' @param logo ('normal', 'grey') What version of the Bokeh logo to display on the toolbar. If set to NULL, no logo will be displayed.
 #' @param lod_factor (integer) Decimation factor to use when applying level-of-detail decimation (see "Controlling level of detail").
 #' @param lod_interval (integer) Interval (in ms) during which an interactive tool event will enable level-of-detail downsampling (see "Controlling level of detail").
 #' @param lod_threshold (integer) A number of data points, above which level-of-detail downsampling may be performed by glyph renderers. Set to \code{NULL} to disable any level-of-detail downsampling (see "Controlling level of detail").
@@ -57,6 +58,7 @@
 #' @import htmlwidgets
 #' @import methods
 figure <- function(
+  data = NULL,
   width = 480,
   height = 520,
   title = NULL,
@@ -116,6 +118,7 @@ figure <- function(
     theme <- theme()
 
   spec <- structure(list(
+    figure_data = data,
     width = width, height = height, title = title,
     xlab = xlab, ylab = ylab,
     xlim = xlim, ylim = ylim, padding_factor = padding_factor,
@@ -145,13 +148,15 @@ figure <- function(
   ), class = "BokehFigure")
 
   extra_pars <- handle_extra_pars(attr_pars, figure_par_validator_map)
+  epn <- names(extra_pars)
+
   if(is.null(extra_pars))
     extra_pars$min_border <- 4
-  if(is.null(extra_pars$lod_threshold))
+  if(!"lod_threshold" %in% epn)
     extra_pars["lod_threshold"] <- list(NULL)
 
   if(is.null(tools))
-    extra_pars$toolbar_location <- "None"
+    extra_pars["toolbar_location"] <- list(NULL)
 
   spec$model$plot$attributes <- c(spec$model$plot$attributes, extra_pars)
 
@@ -178,6 +183,20 @@ figure <- function(
     fig <- eval(parse(text = paste("tool_", tl, "(fig)", sep = "")))
 
   fig
+}
+
+#' Retrieve rbokeh figure data
+#'
+#' @param fig rbokeh figure
+#' @export
+figure_data <- function(fig) {
+  if (is.list(fig)) {
+    # will return NULL even if it all doesn't exist,
+    # as long as fig is a list
+    return(fig$x$spec$figure_data)
+  }
+
+  return(NULL)
 }
 
 fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plot") {
@@ -248,5 +267,3 @@ figure_par_validator_map <- list(
   "lod_timeout" = "int",
   "webgl" = "logical"
 )
-
-

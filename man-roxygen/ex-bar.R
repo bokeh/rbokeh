@@ -1,4 +1,10 @@
 \donttest{
+# count of variety
+figure() %>%
+  ly_bar(variety, data = lattice::barley) %>%
+  theme_axis("x", major_label_orientation = 90)
+
+# total yield per variety
 figure() %>%
   ly_bar(variety, yield, data = lattice::barley) %>%
   theme_axis("x", major_label_orientation = 90)

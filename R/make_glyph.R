@@ -129,7 +129,9 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   data_lengths <- sapply(data, length)
   data_is_list <- sapply(data, is.list)
   data_names <- names(data)
-  scalar_ind <- which(data_lengths == 1 & !data_is_list)
+  max_data_length <- max(data_lengths)
+  scalar_ind <- which(data_lengths == 1 & !data_is_list & max_data_length != 1)
+
   for(ii in scalar_ind)
     args[[data_names[ii]]] <- data[[ii]]
   data[scalar_ind] <- NULL
@@ -143,6 +145,12 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
     data[[arg_names[ii]]] <- args[[ii]]
   }
   args[long_ind] <- NULL
+
+  ## data elements of length 1 must be lists (since toJSON auto_unbox = TRUE)
+  length_one <- which(sapply(data, length) == 1 & !sapply(data, is.list))
+  for(ii in length_one) {
+    data[[ii]] <- list(data[[ii]])
+  }
 
   # ## NAs must be changed to NaN for bokeh to be happy
   # for(ii in seq_along(data)) {
@@ -179,6 +187,15 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
       type = "GlyphRenderer",
       id = glr_id
     )
+
+    # convert to character and make it a list so it shows up properly
+    hover$data <- lapply(hover$data, function(x) {
+      if(length(x) == 1) {
+        return(list(as.character(x)))
+      } else {
+        return(as.character(x))
+      }
+    })
 
     fig <- fig %>% add_hover(hover$dict, renderer_ref)
     data <- c(data, hover$data)

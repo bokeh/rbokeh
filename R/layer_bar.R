@@ -20,54 +20,62 @@
 #' @family layer functions
 #' @example man-roxygen/ex-bar.R
 #' @export
-ly_bar <- function(fig, x, y = NULL, data = NULL,
+ly_bar <- function(
+  fig, x, y = NULL, data = figure_data(fig),
   color = NULL, alpha = 1,
   position = c("stack", "fill", "dodge"), width = 0.9,
   origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
-  lname = NULL, lgroup = NULL, legend = NULL, ...) {
+  lname = NULL, lgroup = NULL, legend = NULL, ...
+) {
 
   position <- match.arg(position)
 
   validate_fig(fig, "ly_bar")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-  colorname <- deparse(substitute(color))
+  args <- sub_names(fig, data,
+    grab(
+      x,
+      y,
+      color,
+      alpha,
+      position,
+      width,
+      origin,
+      breaks,
+      right,
+      binwidth,
+      # hover, # no hover
+      # url, # no url
+      legend,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
+    )
+  )
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots  <- substitute(list(...))[-1]
-    args  <- lapply(dots, function(x) v_eval(x, data))
-    x     <- v_eval(substitute(x), data)
-    y     <- v_eval(substitute(y), data)
-    color <- v_eval(substitute(color), data)
-  } else {
-    args <- list(...)
+  # will give NULL if it was not a variable
+  colorname <- attr(args$params$color, "stringName")
+
+  if(missing(y)) {
+    args$data$x <- args$data$y
+    args$data$y <- rep(1, length(args$data$x))
+    args$info$x_name <- attr(args$data$x, "stringName")
+    args$info$y_name <- "count"
   }
 
-  if(is.null(y)) {
-    y <- rep(1, length(x))
-    yname <- "count"
-  }
-
-  args$alpha <- alpha
-
-  xy_names <- get_xy_names(x, y, xname, yname, args)
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
-
-  if(is.numeric(xy$x))
+  if(is.numeric(args$data$x)) {
     stop("numeric values for x in ly_bar are not yet supported", call. = FALSE)
+  }
 
-  if(is.null(color) || length(color) == 1) {
-    res <- aggregate(y ~ x, data = xy, sum)
+  if(is.null(args$params$color) || length(args$params$color) == 1) {
+    res <- aggregate(y ~ x, data = args$data, sum)
   } else {
-    xy$color <- color
-    color <- colorname
-    res <- aggregate(y ~ x + color, data = xy, sum)
-    if(missing(legend))
-      legend <- TRUE
+    data_and_color <- args$data
+    data_and_color$color <- args$params$color
+    res <- aggregate(y ~ x + color, data = data_and_color, sum)
+    if(missing(legend)) {
+      args$info$legend <- TRUE
+    }
   }
 
   ## handle y values
@@ -79,18 +87,16 @@ ly_bar <- function(fig, x, y = NULL, data = NULL,
       a$ybottom <- a$ytop - a$y
       a
     }))
-  }
 
-  if(position == "fill") {
+  } else if(position == "fill") {
     res <- do.call(rbind, by(res, res$x, function(a) {
       tmp <- a$y / sum(a$y)
       a$ytop <- cumsum(tmp)
       a$ybottom <- a$ytop - tmp
       a
     }))
-  }
 
-  if(position == "dodge") {
+  } else if(position == "dodge") {
     res$ytop <- res$y
     res$ybottom <- 0
   }
@@ -101,6 +107,7 @@ ly_bar <- function(fig, x, y = NULL, data = NULL,
   if(position %in% c("stack", "fill")) {
     res$xleft <- paste0(res$x, ":", 1 - width)
     res$xright <- paste0(res$x, ":", width)
+
   } else {
     res <- do.call(rbind, by(res, res$x, function(a) {
       nn <- nrow(a)
@@ -112,19 +119,24 @@ ly_bar <- function(fig, x, y = NULL, data = NULL,
   }
 
   ind <- which(names(res) == "color")
-  if(length(ind) > 0)
+  if(length(ind) > 0) {
     names(res)[ind] <- colorname
+  }
+
+  bad_param_names = c("color", "origin","breaks","right","binwidth", "position")
+  remaining_args = args$params
+  remaining_args = remaining_args[! (names(remaining_args) %in% bad_param_names)]
 
   # get rid of x and y as they are no longer needed
   # and may conflict with xname, yname
   res$x <- NULL
   res$y <- NULL
 
-  names(res)[which(names(res) == "xleft")] <- xname
-  names(res)[which(names(res) == "ybottom")] <- yname
-
-  do.call(ly_rect, c(list(fig = fig,
-    xleft = xname, ybottom = yname, xright = "xright", ytop = "ytop",
-    color = color, data = res,
-    lname = lname, lgroup = lgroup, legend = legend), args))
+  color_value <- if(is.null(colorname)) args$params$color else colorname
+  do.call(ly_rect, append(list(fig = fig,
+    xleft = "xleft", ybottom = "ybottom", xright = "xright", ytop = "ytop",
+    xlab = args$info$x_name, ylab = args$info$y_name,
+    data = res,
+    color = color_value,
+    lname = args$info$lname, lgroup = args$info$lgroup, legend = args$info$legend), remaining_args))
 }

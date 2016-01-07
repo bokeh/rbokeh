@@ -3,7 +3,7 @@ handle_extra_pars <- function(pars, map) {
     cur_map <- map[[nm]]
     if(!is.null(cur_map)) {
       cur_fn <- par_type_validate_fns[[cur_map]]
-      pars[[nm]] <- cur_fn(nm, pars[[nm]])
+      pars[nm] <- list(cur_fn(nm, pars[[nm]]))
     }
   }
 
@@ -42,10 +42,10 @@ par_type_validate_fns <- list(
     validate_enum(name, val, c("normal", "italic", "bold"))
   },
   toolbar_location = function(name, val) {
-    validate_enum(name, val, c("above", "below", "left", "right", "None"))
+    validate_enum(name, val, c("above", "below", "left", "right"), null_ok = TRUE)
   },
   logo = function(name, val) {
-    validate_enum(name, val, c("normal", "grey", "None"))
+    validate_enum(name, val, c("normal", "grey"), null_ok = TRUE)
   },
   color = function(name, val) {
     if(!valid_color(val))
@@ -110,11 +110,21 @@ par_type_validate_fns <- list(
   }
 )
 
-validate_enum <- function(name, val, vals) {
+validate_enum <- function(name, val, vals, null_ok = FALSE) {
+  if(is.null(val)) {
+    if(null_ok) {
+      return(NULL)
+    } else {
+      val <- "__NULL__"
+    }
+  }
+  null_str <- ""
+  if(null_ok)
+    null_str <- " or NULL"
   if(!is.character(val))
     val <- as.character(val)
   if(!val %in% vals)
-    stop(name, " must be in: ('", paste(vals, collapse = "', '"), "')", call. = FALSE)
+    stop(name, " must be in: ('", paste(vals, collapse = "', '"), "')", null_str, call. = FALSE)
 
   val
 }
