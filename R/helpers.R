@@ -487,13 +487,12 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
   # make the hover list into a dataframe
   hover_val_dt <- as.data.frame(hover_val_list)
 
-  if(nrow(hover_val_dt) == 1) {
-    hover_val_dt <- lapply(hover_val_dt, I)
-  }
+  # if(nrow(hover_val_dt) == 1) {
+  #   hover_val_dt <- lapply(hover_val_dt, I)
+  # }
 
   # make fake, easy to use key names "hover_col_1", "hover_col_2",...
   names(hover_val_dt) <- hover_dt_key <- paste0("hover_col_", seq_along(hover_dt_names))
-
 
   # list of list(pretty name, key name)
   if (is_at_string) {
