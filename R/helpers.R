@@ -485,7 +485,7 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
   hover_val_list <- lapply(hover_val_list, format)
 
   # make the hover list into a dataframe
-  hover_val_dt <- as.data.frame(hover_val_list)
+  hover_val_dt <- as.data.frame(hover_val_list, stringsAsFactors = FALSE)
 
   # if(nrow(hover_val_dt) == 1) {
   #   hover_val_dt <- lapply(hover_val_dt, I)

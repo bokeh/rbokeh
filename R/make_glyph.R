@@ -188,6 +188,15 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
       id = glr_id
     )
 
+    # convert to character and make it a list so it shows up properly
+    hover$data <- lapply(hover$data, function(x) {
+      if(length(x) == 1) {
+        return(list(as.character(x)))
+      } else {
+        return(as.character(x))
+      }
+    })
+
     fig <- fig %>% add_hover(hover$dict, renderer_ref)
     data <- c(data, hover$data)
   }
