@@ -2,5 +2,5 @@ dependencies:
 - name: bokehjs
   version: 0.10.0
   src: htmlwidgets/lib/bokehjs
-  script: bokeh.js
+  script: bokeh.min.js
   stylesheet: bokeh.min.css
