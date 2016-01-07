@@ -1,6 +1,7 @@
 \donttest{
-rescale <- function(x)
+rescale <- function(x) {
   (x - min(x)) / diff(range(x))
+}
 
 figure() %>%
   ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris,
@@ -21,7 +22,7 @@ figure() %>%
 
 figure() %>%
   ly_annulus(Sepal.Length, Sepal.Width, data = iris,
-    color = Species, hover = Species,
+    color = Species, hover = Species, alpha = 0.5,
     outer_radius = rescale(Petal.Length) * 0.3,
     inner_radius = rescale(Petal.Length) * 0.1)
 }

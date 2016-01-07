@@ -8,3 +8,4 @@ NEWS\.md
 ^_ignore$
 \.sublime\-
 .Rproj
+^\.httr-oauth$

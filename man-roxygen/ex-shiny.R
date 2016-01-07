@@ -12,9 +12,8 @@ server <- function(input, output, session) {
   output$rbokeh <- renderRbokeh({
     # Use invalidateLater() and jitter() to add some motion
     invalidateLater(1000, session)
-    p <- figure() %>%
+    figure() %>%
       ly_points(jitter(cars$speed), jitter(cars$dist))
-    rbokeh:::plot.BokehFigure(p)
   })
 }
 

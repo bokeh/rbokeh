@@ -45,6 +45,24 @@ HTMLWidgets.widget({
       console.log(JSON.stringify(x.all_models));
     }
 
+    // change "nulls" in data to NaN
+    function traverseObject(obj) {
+      for(var key in obj) {
+        if(obj[key].constructor === Object) {
+          traverseObject(obj[key]);
+        } else if(obj[key].constructor === Array) {
+          for (var i = 0; i < obj[key].length; i++) {
+            if(obj[key][i] === null)
+              obj[key][i] = NaN;
+          };
+        }
+      };
+    }
+    for(var i = 0; i < x.all_models.length; i++) {
+      if(x.all_models[i].type === "ColumnDataSource")
+        traverseObject(x.all_models[i].attributes.data);
+    };
+
     var dv = document.createElement('div');
     dv.id = x.elementid;
     dv.setAttribute("class", "plotdiv");

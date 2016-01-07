@@ -12,81 +12,96 @@
 #' @template dots-fillline
 #' @family layer functions
 #' @export
-ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
+ly_polygons <- function(
+  fig, xs, ys, group = NULL, data = figure_data(fig),
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, # legend = NULL,
-  lname = NULL, lgroup = NULL, ...) {
+  lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_polygons")
 
-  xname <- deparse(substitute(xs))
-  yname <- deparse(substitute(ys))
+  args <- sub_names(fig, data,
+    grab(
+      xs,
+      ys,
+      group,
+      color,
+      alpha,
+      hover,
+      url,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
+    )
+  )
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots  <- substitute(list(...))[-1]
-    args  <- lapply(dots, function(x) v_eval(x, data))
-    xs    <- v_eval(substitute(xs), data)
-    ys    <- v_eval(substitute(ys), data)
-    group <- v_eval(substitute(group), data)
-    color <- v_eval(substitute(color), data)
-  } else {
-    args <- list(...)
+  # pull out manually, as they are repeatedly customized
+  xs <- args$data$xs
+  ys <- args$data$ys
+  group <- args$info$group
+
+  if(missing(alpha)) {
+    args$params$alpha <- NULL
   }
 
-  args$color <- color
-  args$alpha <- alpha
-  if(missing(alpha))
-    args$alpha <- NULL
-
   if(!is.null(group)) {
+    if(is.factor(group)) {
+      group <- as.character(group)
+    }
     idx <- unname(split(seq_along(group), group))
     xs <- lapply(idx, function(x) xs[x])
     ys <- lapply(idx, function(x) ys[x])
 
-    ns <- lapply(args, length)
+    # data for hover and url will only be one row for each group
+    data <- data[sapply(idx, "[", 1),]
+
+    ns <- lapply(args$params, length)
     bad_ind <- which(!ns %in% c(0, 1, length(idx), length(group)))
     if(length(bad_ind) > 0) {
-      message("The following arguments do not have length the same as the number of groups or the total number of observations for ly_polygons() and will be ignored: ", paste(names(args[bad_ind]), collapse = ", "))
-      args[bad_ind] <- NULL
+      message("The following arguments do not have length the same as the number of groups or the total number of observations for ly_polygons() and will be ignored: ", paste(names(args$params[bad_ind]), collapse = ", "))
+      args$params[bad_ind] <- NULL
     }
 
     full_length <- which(ns == length(group))
     for(ii in full_length) {
-      args[[ii]] <- sapply(idx, function(x) args[[ii]][x[1]])
+      args$params[[ii]] <- sapply(idx, function(x) args$params[[ii]][x[1]])
     }
   }
 
-  # hover <- get_hover(substitute(hover), data, parent.frame())
-  xy_names <- get_xy_names(xs, ys, xname, yname, args)
   ## translate different x, y types to vectors
-  lgroup <- get_lgroup(lgroup, fig)
-
-  if(is.atomic(xs) && !is.list(xs))
+  if(is.atomic(xs) && !is.list(xs)) {
     xs <- list(xs)
+  }
 
-  if(is.atomic(ys) && !is.list(ys))
+  if(is.atomic(ys) && !is.list(ys)) {
     ys <- list(ys)
+  }
 
   if(!(is.list(xs) && is.list(ys))) {
     stop("For ly_polygons, xs and ys must be lists or specified through a data frame through 'data' argument.")
   }
 
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
-  check_opts(args, "patches", formals = names(formals(ly_polygons)))
+  check_opts(args$params, "patches", formals = names(formals(ly_polygons)))
 
-  if(is.null(args$fill_alpha))
-    args$fill_alpha <- 0.5
-
-  hover <- get_hover(hover, data, parent.frame())
-  url <- get_url(url, data)
+  if(is.null(args$params$fill_alpha)) {
+    args$params$fill_alpha <- 0.5
+  }
 
   axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
-  make_glyph(fig, type = "patches", data = list(xs = unname(xs), ys = unname(ys)),
-    args = args, axis_type_range = axis_type_range, xname = xy_names$x, yname = xy_names$y,
-    lname = lname, lgroup = lgroup, hover = hover, url = url)
+
+  mc <- lapply(match.call(), deparse)
+
+  make_glyph(
+    fig, type = "patches", data = list(xs = unname(xs), ys = unname(ys)),
+    args = args$params, axis_type_range = axis_type_range,
+    xname = args$info$x_name, yname = args$info$y_name,
+    lname = args$info$lname, lgroup = args$info$lgroup, hover = args$info$hover, url = args$info$url,
+    ly_call = mc
+  )
 }
 
 #' Add a "rect" layer to a Bokeh figure
@@ -104,54 +119,68 @@ ly_polygons <- function(fig, xs, ys, group = NULL, data = NULL,
 #' @template dots-fillline
 #' @family layer functions
 #' @export
-ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
+ly_rect <- function(
+  fig,
+  xleft, ybottom, xright, ytop,
+  data = figure_data(fig),
   color = NULL, alpha = 1,
-  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  hover = NULL, url = NULL, legend = NULL,
+  lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_rect")
 
-  xname <- deparse(substitute(xleft))
-  yname <- deparse(substitute(ybottom))
+  args <- sub_names(fig, data,
+    grab(
+      xleft,
+      ybottom,
+      xright,
+      ytop,
+      color,
+      alpha,
+      hover,
+      url,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
+    )
+  )
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots    <- substitute(list(...))[-1]
-    args    <- lapply(dots, function(x) v_eval(x, data))
-    xleft   <- v_eval(substitute(xleft), data)
-    xright  <- v_eval(substitute(xright), data)
-    ybottom <- v_eval(substitute(ybottom), data)
-    ytop    <- v_eval(substitute(ytop), data)
-    color   <- v_eval(substitute(color), data)
-  } else {
-    args <- list(...)
+
+  if (missing(alpha)) {
+    args$params$alpha <- NULL
   }
 
-  hover <- get_hover(substitute(hover), data, parent.frame())
-  url <- get_url(url, data)
-
-  xy_names <- get_xy_names(xleft, ybottom, xname, yname, args)
-
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- c(args, list(color = color, alpha = alpha))
-  if(missing(alpha))
-    args$alpha <- NULL
-
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
-  check_opts(args, "quad", formals = names(formals(ly_rect)))
+  check_opts(args$params, "quad", formals = names(formals(ly_rect)))
 
-  if(is.null(args$fill_alpha))
-    args$fill_alpha <- 0.5
+  if(is.null(args$params$fill_alpha)) {
+    args$params$fill_alpha <- 0.5
+  }
 
-  axis_type_range <- get_glyph_axis_type_range(c(xleft, xright), c(ybottom, ytop))
-  make_glyph(fig, type = "quad", lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
-    legend = legend, hover = hover, url = url,
-    data = list(left = xleft, right = xright, top = ytop, bottom = ybottom),
+  axis_type_range <- get_glyph_axis_type_range(
+    c(args$data$xleft, args$data$xright),
+    c(args$data$ybottom, args$data$ytop)
+  )
+
+  mc <- lapply(match.call(), deparse)
+
+  make_glyph(
+    fig, type = "quad", lname = args$info$lname, lgroup = args$info$lgroup,
+    xname = args$info$x_name, yname = args$info$y_name,
+    legend = args$info$legend, hover = args$info$hover, url = args$info$url,
+    data = list(
+      left = args$data$xleft,
+      right = args$data$xright,
+      top = args$data$ytop,
+      bottom = args$data$ybottom
+    ),
     data_sig = ifelse(is.null(data), NA, digest(data)),
-    args = args, axis_type_range = axis_type_range)
+    args = args$params, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
 
 #' Add a "crect" (centered rectangle) layer to a Bokeh figure
@@ -172,66 +201,67 @@ ly_rect <- function(fig, xleft, ybottom, xright, ytop, data = NULL,
 #' @example man-roxygen/ex-elements.R
 #' @family layer functions
 #' @export
-ly_crect <- function(fig, x, y = NULL, data = NULL,
+ly_crect <- function(
+  fig, x, y = NULL, data = figure_data(fig),
   width = 1, height = 1, angle = 0, dilate = FALSE,
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_crect")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  args <- sub_names(fig, data,
+    grab(
+      x,
+      y,
+      width,
+      height,
+      angle,
+      dilate,
+      color,
+      alpha,
+      hover,
+      url,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$info$glyph <- "rect"
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots   <- substitute(list(...))[-1]
-    args   <- lapply(dots, function(x) v_eval(x, data))
-    x      <- v_eval(substitute(x), data)
-    y      <- v_eval(substitute(y), data)
-    width  <- v_eval(substitute(width), data)
-    height <- v_eval(substitute(height), data)
-    angle  <- v_eval(substitute(angle), data)
-    color  <- v_eval(substitute(color), data)
-  } else {
-    args <- list(...)
+  if(missing(alpha)) {
+    args$info$alpha <- NULL
   }
 
-  hover <- get_hover(substitute(hover), data, parent.frame())
-  url <- get_url(url, data)
-  xy_names <- get_xy_names(x, y, xname, yname, args)
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- c(args, list(glyph = "rect", color = color, alpha = alpha,
-    width = width, height = height, angle = angle, dilate = dilate))
-  if(missing(alpha))
-    args$alpha <- NULL
-
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$params$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
-  check_opts(args, "rect", formals = names(formals(ly_crect)))
+  check_opts(args$params, "rect", formals = names(formals(ly_crect)))
 
-  if(is.null(args$fill_alpha))
-    args$fill_alpha <- 0.5
-
-  xr <- xy$x
-  if(is.numeric(xy$x)) {
-    xr <- c(xy$x - width / 2, xy$x + width / 2)
+  if(is.null(args$params$fill_alpha)) {
+    args$params$fill_alpha <- 0.5
   }
-  yr <- xy$y
-  if(is.numeric(xy$y)) {
-    yr <- c(xy$y - height / 2, xy$y + height / 2)
+
+  xr <- args$data$x
+  if(is.numeric(xr)) {
+    xr <- c(xr - width / 2, xr + width / 2)
+  }
+  yr <- args$data$y
+  if(is.numeric(yr)) {
+    yr <- c(yr - height / 2, yr + height / 2)
   }
 
   axis_type_range <- get_glyph_axis_type_range(xr, yr)
 
-  make_glyph(fig, type = "rect", lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
-    legend = legend, hover = hover, url = url,
+  mc <- lapply(match.call(), deparse)
+
+  make_glyph(
+    fig, type = "rect", lname = lname, lgroup = lgroup,
+    xname = args$info$x_name, yname = args$info$y_name,
+    legend = args$info$legend, hover = args$info$hover, url = args$info$url,
     data_sig = ifelse(is.null(data), NA, digest(data)),
-    data = xy, args = args, axis_type_range = axis_type_range)
+    data = args$data, args = args$params, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
 
 #' Add an "oval" layer to a Bokeh figure
@@ -248,54 +278,55 @@ ly_crect <- function(fig, x, y = NULL, data = NULL,
 #' @template dots-fillline
 #' @family layer functions
 #' @export
-ly_oval <- function(fig, x, y = NULL, data = NULL,
+ly_oval <- function(
+  fig, x, y = NULL, data = figure_data(fig),
   width = 0.1, height = 0.1, angle = 0,
   color = NULL, alpha = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_oval")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  args <- sub_names(fig, data,
+    grab(
+      x,
+      y,
+      width,
+      height,
+      angle,
+      color,
+      alpha,
+      # hover, # no hover
+      # url, # no url
+      legend,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$info$glyph <- "oval"
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots   <- substitute(list(...))[-1]
-    args   <- lapply(dots, function(x) v_eval(x, data))
-    x      <- v_eval(substitute(x), data)
-    y      <- v_eval(substitute(y), data)
-    color  <- v_eval(substitute(color), data)
-    width  <- v_eval(substitute(width), data)
-    height <- v_eval(substitute(height), data)
-    angle  <- v_eval(substitute(angle), data)
-  } else {
-    args <- list(...)
+  if(missing(alpha)) {
+    args$params$alpha <- NULL
   }
 
-  hover <- get_hover(substitute(hover), data, parent.frame())
-  url <- get_url(url, data)
-  xy_names <- get_xy_names(x, y, xname, yname, args)
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- c(args, list(glyph = "oval", color = color, alpha = alpha,
-    width = width, height = height, angle = angle))
-  if(missing(alpha))
-    args$alpha <- NULL
-
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
-  check_opts(args, "oval", formals = names(formals(ly_oval)))
+  check_opts(args$params, "oval", formals = names(formals(ly_oval)))
 
-  axis_type_range <- get_glyph_axis_type_range(x, y)
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y)
 
-  make_glyph(fig, type = "oval", lname = lname, lgroup = lgroup,
-    data = xy, data_sig = ifelse(is.null(data), NA, digest(data)),
-    args = args, axis_type_range = axis_type_range,
-    hover = hover, url = url, legend = legend,
-    xname = xy_names$x, yname = xy_names$y)
+  mc <- lapply(match.call(), deparse)
+
+  make_glyph(
+    fig, type = "oval", lname = args$info$lname, lgroup = args$info$lgroup,
+    data = args$data, data_sig = ifelse(is.null(data), NA, digest(data)),
+    args = args$params, axis_type_range = axis_type_range,
+    hover = args$info$hover, url = args$info$url, legend = args$info$legend,
+    xname = args$info$x_name, yname = args$info$y_name,
+    ly_call = mc
+  )
 }
 
 #' Add a "patch" layer to a Bokeh figure
@@ -312,47 +343,47 @@ ly_oval <- function(fig, x, y = NULL, data = NULL,
 #' @family layer functions
 #' @note This function is included for completeness as it maps to Bokeh's \code{patch} glyph, but the same and more functionality can be obtained with \code{\link{ly_polygons}}.
 #' @export
-ly_patch <- function(fig, x, y, data = NULL,
+ly_patch <- function(
+  fig, x, y, data = figure_data(fig),
   color = NULL, alpha = 1,
-  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  hover = NULL, url = NULL,
+  legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_patch")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  args <- sub_names(fig, data,
+    grab(
+      x,
+      y,
+      color,
+      alpha,
+      hover,
+      url,
+      legend,
+      lname,
+      lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$info$glyph <- "patch"
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    dots  <- substitute(list(...))[-1]
-    args  <- lapply(dots, function(x) v_eval(x, data))
-    x     <- v_eval(substitute(x), data)
-    y     <- v_eval(substitute(y), data)
-    color <- v_eval(substitute(color), data)
-    alpha <- v_eval(substitute(alpha), data)
-  } else {
-    args <- list(...)
+  if(missing(alpha)) {
+    args$params$alpha <- NULL
   }
 
-  hover <- get_hover(substitute(hover), data, parent.frame())
-  url <- get_url(url, data)
-  xy_names <- get_xy_names(x, y, xname, yname, args)
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- c(args, list(color = color, alpha = alpha))
-  if(missing(alpha))
-    args$alpha <- NULL
-
-  args <- resolve_color_alpha(args, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[lgroup]])
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args, "patch", formals = names(formals(ly_patch)))
 
-  axis_type_range <- get_glyph_axis_type_range(x, y)
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y)
 
-  make_glyph(fig, type = "patch", data = xy, args = args,
-    legend = legend, hover = hover, url = url,
-    lname = lname, lgroup = lgroup,
-    axis_type_range = axis_type_range)
+  mc <- lapply(match.call(), deparse)
+
+  make_glyph(
+    fig, type = "patch", data = args$data, args = args$params,
+    legend = args$info$legend, hover = args$info$hover, url = args$info$url,
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    axis_type_range = axis_type_range, ly_call = mc
+  )
 }

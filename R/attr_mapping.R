@@ -16,33 +16,25 @@
 
 get_attr_maps <- function(args, glr_id) {
   nms <- names(args)
-  ## get an index of arguments that need a map and have an nseName
-  ## nseName is used in the legend so we know what variable created the map
-  mappable <- sapply(seq_along(args), function(ii) {
-    if(!is.null(attr(args[[ii]], "nseName"))) {
-      if(!is.null(needs_map_fns[[nms[ii]]])) {
-        if(needs_map_fns[[nms[ii]]](args[[ii]]))
-          return(TRUE)
-      }
-    }
-    return(FALSE)
-  })
+  ## get an index of arguments that need a map
+  ## name attribute is used in the legend so we know what variable created the map
+  mappable <- sapply(args, function(x) !is.null(attr(x, "mapped")))
 
   if(length(mappable) > 0) {
     if(length(which(mappable)) == 0)
       return(NULL)
 
-    # build an attrMap object with an entry for each unique nseName
+    # build an attrMap object with an entry for each unique name
     # entry has the name, domain
-    nse_names <- as.character(sapply(args[mappable], function(x) attr(x, "nseName")))
-    u_nse_names <- unique(nse_names)
+    arg_names <- as.character(sapply(args[mappable], function(x) attr(x, "name")))
+    u_arg_names <- unique(arg_names)
 
     layer_attr_map <- structure(vector("list",
-      length = length(u_nse_names)), names = u_nse_names)
+      length = length(u_arg_names)), names = u_arg_names)
 
-    for(nm in u_nse_names) {
+    for(nm in u_arg_names) {
       ## args we need to map
-      margs <- args[mappable[nse_names == nm]]
+      margs <- args[mappable][arg_names == nm]
       ## args we need to maintain for legend glyphs
       ## -- for now the assumption is these will be scalar
       ## -- (assume all args are either mapped or scalar)
@@ -132,15 +124,15 @@ get_domain <- function(x) {
   }
 }
 
-get_theme_value <- function(domain, values, type) {
+get_theme_value <- function(domain, values, type, theme) {
   is_discrete <- ifelse(is.numeric(domain), FALSE, TRUE)
-  subtype <- ifelse(is_discrete, "discrete", "continuous")
+  mode <- ifelse(is_discrete, "discrete", "continuous")
   if(is_discrete) {
     idx <- match(values, domain)
-    vals <- bk_theme[[type]][[subtype]](length(domain))
+    vals <- theme[[mode]][[type]](length(domain))
   } else {
     ct <- cut(values, domain, include.lowest = TRUE)
-    vals <- bk_theme[[type]][[subtype]](length(levels(ct)))
+    vals <- theme[[mode]][[type]](length(levels(ct)))
     idx <- as.integer(ct)
   }
   if(length(idx) == 1) {
@@ -150,19 +142,25 @@ get_theme_value <- function(domain, values, type) {
   }
 }
 
+valid_glyph <- function(dd) {
+  is_numeric_glyph <- is.numeric(dd) & dd %in% marker_pch_types
+  is_named_glyph <- dd %in% marker_names
+  all(is_numeric_glyph | is_named_glyph)
+}
+
 valid_color <- function(dd) {
-  all(dd %in% css_colors || (nchar(as.character(dd)) == 7 && grepl("^#", dd)))
+  all(dd %in% css_colors | (nchar(as.character(dd)) == 7 && grepl("^#", dd)))
 }
 
 valid_line <- function(dd) {
   all(as.character(dd) %in% lty_names)
 }
 
-# any variable with nseName will be a candidate to be mapped
+# any variable with a name will be a candidate to be mapped
 # but if it is a valid value, it won't be mapped
 needs_map_fns <- list(
   glyph = function(dd)
-    !all(dd %in% marker_pch_types || dd %in% marker_names),
+    !valid_glyph(dd),
   color = function(dd)
     !valid_color(dd),
   line_color = function(dd)
@@ -174,7 +172,7 @@ needs_map_fns <- list(
   lty = function(dd)
     !valid_line(dd),
   size = function(dd)
-    TRUE,
+    !(is.numeric(dd) & all(dd > 0)),
   line_dash = function(dd)
     !valid_line(dd)
 )
