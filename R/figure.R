@@ -150,7 +150,7 @@ figure <- function(
   extra_pars <- handle_extra_pars(attr_pars, figure_par_validator_map)
   epn <- names(extra_pars)
 
-  if(is.null(extra_pars))
+  if(is.null(extra_pars) || is.null(extra_pars$min_border))
     extra_pars$min_border <- 4
   if(!"lod_threshold" %in% epn)
     extra_pars["lod_threshold"] <- list(NULL)
