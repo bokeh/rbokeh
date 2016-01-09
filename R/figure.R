@@ -150,8 +150,26 @@ figure <- function(
   extra_pars <- handle_extra_pars(attr_pars, figure_par_validator_map)
   epn <- names(extra_pars)
 
-  if(is.null(extra_pars))
-    extra_pars$min_border <- 4
+  if(!is.null(extra_pars[["min_border"]])) {
+    if(is.null(extra_pars$min_border_left))
+      extra_pars$min_border_left <- extra_pars$min_border
+    if(is.null(extra_pars$min_border_right))
+      extra_pars$min_border_right <- extra_pars$min_border
+    if(is.null(extra_pars$min_border_top))
+      extra_pars$min_border_top <- extra_pars$min_border
+    if(is.null(extra_pars$min_border_bottom))
+      extra_pars$min_border_bottom <- extra_pars$min_border
+    extra_pars$min_border <- NULL
+  }
+  if(is.null(extra_pars$min_border_left))
+    extra_pars$min_border_left <- 4
+  if(is.null(extra_pars$min_border_right))
+    extra_pars$min_border_right <- 4
+  if(is.null(extra_pars$min_border_top))
+    extra_pars$min_border_top <- 4
+  if(is.null(extra_pars$min_border_bottom))
+    extra_pars$min_border_bottom <- 4
+
   if(!"lod_threshold" %in% epn)
     extra_pars["lod_threshold"] <- list(NULL)
 

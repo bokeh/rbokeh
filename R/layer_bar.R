@@ -132,6 +132,8 @@ ly_bar <- function(
   res$x <- NULL
   res$y <- NULL
 
+  remaining_args$width <- NULL
+
   color_value <- if(is.null(colorname)) args$params$color else colorname
   do.call(ly_rect, append(list(fig = fig,
     xleft = "xleft", ybottom = "ybottom", xright = "xright", ytop = "ytop",

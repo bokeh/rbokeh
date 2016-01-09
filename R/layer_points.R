@@ -77,7 +77,6 @@ ly_points <- function(
     args$params$glyph <- factor(args$params$glyph)
   }
 
-
   # split data up for each glyph
   split_list <- split(seq_along(args$params$glyph), args$params$glyph)
   for (ii in seq_along(split_list)) {
