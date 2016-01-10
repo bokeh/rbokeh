@@ -28,11 +28,12 @@ bokeh_render_json <- function(json_file) {
 
   # forward options using x
   x = list(
-    all_models = paste(readLines(json_file), collapse = "\n"),
+    docs_json = paste(readLines(json_file), collapse = "\n"),
     padding = list(type = "figure", y_pad = 0, x_pad = 0),
     modeltype = modeltype,
-    elementid = digest(Sys.time()),
+    elementid = digest::digest(Sys.time()),
     modelid = id,
+    docid = digest::digest(paste("rbokehjson", Sys.time())),
     isJSON = TRUE
   )
 

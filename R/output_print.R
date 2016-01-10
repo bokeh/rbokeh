@@ -21,17 +21,8 @@ rbokeh_prerender <- function(fig) {
     x$type
   })
 
-  fig$x$docid <- "qwertqwert"
-
-  fig$x$docs_json <- list(list(
-    version = "0.11.0",
-    title = "Bokeh Application",
-    roots = list(
-      root_ids = list(fig$x$modelid),
-      references = fig$x$spec$model
-  )))
+  fig$x$docs_json[[1]]$roots$references <- fig$x$spec$model
   fig$x$docs_json[[1]]$roots$references <- remove_model_names(fig$x$docs_json[[1]]$roots$references)
-  names(fig$x$docs_json) <- fig$x$docid
   fig$x$spec <- NULL
   fig$preRenderHook <- NULL
 

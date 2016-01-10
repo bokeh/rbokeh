@@ -1,0 +1,67 @@
+#' Get the HTML content required to embed a Bokeh figure
+#' @param fig figure
+#' @examples
+#' p <- figure() %>% ly_points(1:10)
+#' rbokeh2html(p)
+#' @export
+rbokeh2html <- function(fig, file = tempfile(fileext = ".html"), pretty = FALSE) {
+  fig <- rbokeh_prerender(fig)
+
+  modelid <- fig$x$modelid
+  elementid <- fig$x$elementid
+  docid <- fig$x$docid
+  type <- fig$x$modeltype
+
+  fig <- toJSON(fig$x$docs_json, pretty = pretty,
+    auto_unbox = TRUE, null = "null", na = "null")
+
+  ver <- get_bokeh_version()
+
+  a <- paste0('<!DOCTYPE html>
+<html>
+<head>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.js"></script>
+<link href="http://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.css" rel="stylesheet">
+</head>
+<body>
+<div id="', elementid, '" class="plotdiv"></div>
+<script type="text/javascript">
+Bokeh.$(function() {
+  var modelid = "', modelid, '";
+  var elementid = "', elementid, '";
+  var docid = "', docid, '";
+  var docs_json = JSON.parse(\'', fig, '\');
+  var refkey = Object.keys(docs_json)[0]
+  var refs = docs_json[refkey].roots.references
+  function traverseObject(obj) {
+    for(var key in obj) {
+      if(obj[key].constructor === Object) {
+        traverseObject(obj[key]);
+      } else if(obj[key].constructor === Array) {
+        for (var i = 0; i < obj[key].length; i++) {
+          if(obj[key][i] === null)
+            obj[key][i] = NaN;
+        };
+      }
+    };
+  }
+  for(var i = 0; i < refs.length; i++) {
+    if(refs[i].type === "ColumnDataSource")
+      traverseObject(refs[i].attributes.data);
+  };
+  var render_items = [{
+    "docid": docid,
+    "elementid": elementid,
+    "modelid": modelid
+  }];
+  Bokeh.embed.embed_items(docs_json, render_items);
+});
+</script>
+</body>
+</html>')
+
+  cat(a, file = file)
+  message("html file written to: ", file)
+
+  return(invisible(file))
+}

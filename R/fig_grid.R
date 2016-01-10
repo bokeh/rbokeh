@@ -177,19 +177,30 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
     x_margin = x_margin, y_margin = y_margin,
     nrow = nrow, ncol = ncol), class = "BokehGridPlot")
 
+  id <- digest(paste("gridplot", Sys.time(), runif(1)))
+
   obj <- htmlwidgets::createWidget(
     name = 'rbokeh',
     x = list(
       spec = spec,
       elementid = digest(Sys.time()),
       modeltype = "GridPlot",
-      modelid = digest(Sys.time())
+      modelid = id,
+      docid = digest::digest(paste("rbokehgridplot", Sys.time())),
+      docs_json = list(list(
+        version = get_bokeh_version(),
+        title = "Bokeh GridPlot",
+        roots = list(
+          root_ids = list(id),
+          references = NULL
+      )))
     ),
     preRenderHook = rbokeh_prerender,
     width = width,
     height = height,
     package = 'rbokeh'
   )
+  names(obj$x$docs_json) <- obj$x$docid
 
   ## get overall width / height
   dims <- lapply(obj$x$spec$figs, function(x) {

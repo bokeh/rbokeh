@@ -184,13 +184,22 @@ figure <- function(
         spec = spec,
         elementid = digest(Sys.time()),
         modeltype = type,
-        modelid = id
+        modelid = id,
+        docid = digest::digest(paste("rbokehfigure", Sys.time())),
+        docs_json = list(list(
+          version = get_bokeh_version(),
+          title = "Bokeh Figure",
+          roots = list(
+            root_ids = list(id),
+            references = NULL
+        )))
      ),
      preRenderHook = rbokeh_prerender,
      width = spec$width,
      height = spec$height,
      package = 'rbokeh'
   )
+  names(fig$x$docs_json) <- fig$x$docid
 
   ## check and add tools
   tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help")]
