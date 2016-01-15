@@ -1,6 +1,7 @@
 Version 0.3
 ----------------------------------------------------------------------
 
+- fix bug in `ly_crect()` (0.3.2)
 - fix ly_hist to allow a 'histogram' object (0.3.2)
 - fix typo in ly_boxplot (0.3.1)
 - fix json encoding issue when data is a list to begin with (0.3.1)

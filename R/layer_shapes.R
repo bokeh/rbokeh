@@ -232,7 +232,7 @@ ly_crect <- function(
     args$info$alpha <- NULL
   }
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$params$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args$params, "rect", formals = names(formals(ly_crect)))
