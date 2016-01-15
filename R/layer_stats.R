@@ -31,10 +31,11 @@ ly_hist <- function(
     )
   )
 
+  tryres <- try(identity(x), silent = TRUE)
 
-  if(inherits(args$data$x, "histogram")) {
-    hh <- args$data$x
-    args$info$x_name <- args$data$x$xname
+  if(inherits(tryres, "histogram")) {
+    hh <- x
+    args$info$x_name <- x$xname
   } else {
     # was moved to position of "y" as only "x" was supplied.  (inside sub_names)
     # moving values from "y" to "x"
@@ -63,7 +64,6 @@ ly_hist <- function(
     args$params
   ))
 }
-
 
 #' Add a "density" layer to a Bokeh figure
 #'
