@@ -226,7 +226,8 @@ prepare_figure <- function(fig) {
   }
   tb <- fig$x$spec$model$plot$attributes$toolbar_location
   if(is.null(tb)) {
-    x_pad <- 46
+    if(!"toolbar_location" %in% names(fig$x$spec$model$plot$attributes))
+      x_pad <- 46
   } else if(tb %in% c("above", "below")) {
     y_pad <- 46
   } else if(tb %in% c("left", "right")) {
