@@ -377,6 +377,8 @@ sub_names <- function(
     check_arc_direction(ret$params$direction)
   }
 
+  # TODO: handle histogram and hexbin here...
+
   # get the x and y names and data
   if(process_data_and_names) {
     d2_and_names <- b_xy_data_and_names2(

@@ -1,6 +1,12 @@
 Version 0.3
 ----------------------------------------------------------------------
 
+- make POSIX detection more robust (0.3.3)
+- fix bug in singleton glyphs involving date axis (0.3.3)
+- fix margins for gridplots (0.3.3)
+- fix bug in gridplot dimension calculation (0.3.3)
+- fix bug in `ly_crect()` (0.3.2)
+- fix ly_hist to allow a 'histogram' object (0.3.2)
 - fix typo in ly_boxplot (0.3.1)
 - fix json encoding issue when data is a list to begin with (0.3.1)
 - fix single-row hover issue (0.3.1)

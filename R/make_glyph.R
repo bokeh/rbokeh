@@ -216,21 +216,21 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   if(axis_type_range$x_axis_type == "datetime") {
     axis_type_range$x_range <- to_epoch(axis_type_range$x_range)
     if(!is.null(data$x))
-      data$x <- to_epoch(data$x)
+      data$x <- handle_singleton(data$x, to_epoch)
     if(!is.null(data$x0))
-      data$x0 <- to_epoch(data$x0)
+      data$x0 <- handle_singleton(data$x0, to_epoch)
     if(!is.null(data$x1))
-      data$x1 <- to_epoch(data$x1)
+      data$x1 <- handle_singleton(data$x1, to_epoch)
   }
 
   if(axis_type_range$y_axis_type == "datetime") {
     axis_type_range$y_range <- to_epoch(axis_type_range$y_range)
     if(!is.null(data$y))
-      data$y <- to_epoch(data$y)
+      data$y <- handle_singleton(data$y, to_epoch)
     if(!is.null(data$y0))
-      data$y0 <- to_epoch(data$y0)
+      data$y0 <- handle_singleton(data$y0, to_epoch)
     if(!is.null(data$y1))
-      data$y1 <- to_epoch(data$y1)
+      data$y1 <- handle_singleton(data$y1, to_epoch)
   }
 
   fig <- fig %>% add_layer(args, data, lname, lgroup)

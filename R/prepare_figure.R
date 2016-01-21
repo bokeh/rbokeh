@@ -159,7 +159,7 @@ prepare_figure <- function(fig) {
     xrange <- get_all_glyph_range(fig$x$spec$glyph_x_ranges, fig$x$spec$padding_factor, fig$x$spec$x_axis_type, x_log)
   } else {
     xrange <- fig$x$spec$xlim
-    if(inherits(xrange, c("Date", "POSIXct")))
+    if(inherits(xrange, c("Date", "POSIXt")))
       xrange <- to_epoch(xrange)
   }
 
@@ -168,7 +168,7 @@ prepare_figure <- function(fig) {
     yrange <- get_all_glyph_range(fig$x$spec$glyph_y_ranges, fig$x$spec$padding_factor, fig$x$spec$y_axis_type, y_log)
   } else {
     yrange <- fig$x$spec$ylim
-    if(inherits(yrange, c("Date", "POSIXct")))
+    if(inherits(yrange, c("Date", "POSIXt")))
       yrange <- to_epoch(yrange)
   }
 
@@ -226,7 +226,8 @@ prepare_figure <- function(fig) {
   }
   tb <- fig$x$spec$model$plot$attributes$toolbar_location
   if(is.null(tb)) {
-    x_pad <- 46
+    if(!"toolbar_location" %in% names(fig$x$spec$model$plot$attributes))
+      x_pad <- 46
   } else if(tb %in% c("above", "below")) {
     y_pad <- 46
   } else if(tb %in% c("left", "right")) {

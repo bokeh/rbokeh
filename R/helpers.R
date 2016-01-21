@@ -752,10 +752,18 @@ map2df <- function(a) {
 #     bitShiftL(x[,2], 8)), bitShiftL(x[,1], 0))
 # }
 
+handle_singleton <- function(x, fn) {
+  if(is.list(x) && length(x) == 1) {
+    list(fn(x[[1]]))
+  } else {
+    fn(x)
+  }
+}
+
 to_epoch <- function(x) {
   if(inherits(x, "Date")) {
     return(as.numeric(x) * 86400000)
-  } else if(inherits(x, "POSIXct")) {
+  } else if(inherits(x, "POSIXt")) {
     return(as.numeric(x) * 1000)
   }
   x
