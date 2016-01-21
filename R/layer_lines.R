@@ -235,7 +235,7 @@ ly_abline <- function(
     x1 <- rep(1, nn)
     y1 <- b * x1 + a
   } else if(!is.null(h)) {
-    if(inherits(h, c("Date", "POSIXct"))) {
+    if(inherits(h, c("Date", "POSIXt"))) {
       y_axis_type <- "datetime"
       h <- to_epoch(h)
     }
@@ -245,7 +245,7 @@ ly_abline <- function(
     x1 <- rep(1, nn)
     y1 <- h
   } else if(!is.null(v)) {
-    if(inherits(v, c("Date", "POSIXct"))) {
+    if(inherits(v, c("Date", "POSIXt"))) {
       x_axis_type <- "datetime"
       v <- to_epoch(v)
     }
