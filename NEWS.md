@@ -1,6 +1,7 @@
 Version 0.3
 ----------------------------------------------------------------------
 
+- fix bug in singleton glyphs involving date axis (0.3.3)
 - fix margins for gridplots (0.3.3)
 - fix bug in gridplot dimension calculation (0.3.3)
 - fix bug in `ly_crect()` (0.3.2)
