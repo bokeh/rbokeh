@@ -401,13 +401,13 @@ update_grid_sizes <- function(obj) {
   full_width <- sum(widths)
   full_height <- sum(heights)
 
-  new_width_factor <- (width - x_margin - 46) / full_width
-  new_height_factor <- (height - y_margin) / full_height
+  new_width_factor <- (width - y_margin - 46) / full_width
+  new_height_factor <- (height - x_margin) / full_height
 
   new_wmat <- wmat * new_width_factor
   new_hmat <- hmat * new_height_factor
-  new_wmat[,1] <- new_wmat[,1] + x_margin
-  new_hmat[nrow(new_hmat),] <- new_hmat[nrow(new_hmat),] + y_margin
+  new_wmat[,1] <- new_wmat[,1] + y_margin
+  new_hmat[nrow(new_hmat),] <- new_hmat[nrow(new_hmat),] + x_margin
 
   obj$width <- sum(apply(new_wmat, 2, function(x) max(x, na.rm = TRUE))) + 46
   obj$height <- sum(apply(new_hmat, 1, function(x) max(x, na.rm = TRUE)))
@@ -419,10 +419,10 @@ update_grid_sizes <- function(obj) {
         obj$x$spec$figs[[cur_id]]$width <- new_wmat[ii, jj]
         obj$x$spec$figs[[cur_id]]$height <- new_hmat[ii, jj]
         if(jj == 1) {
-          obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_left <- x_margin
+          obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_left <- y_margin
         }
         if(ii == length(obj$x$spec$plot_refs)) {
-          obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_bottom <- y_margin
+          obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_bottom <- x_margin
         }
       }
     }
