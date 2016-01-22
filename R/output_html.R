@@ -10,7 +10,6 @@ rbokeh2html <- function(fig, file = tempfile(fileext = ".html"), pretty = FALSE)
   modelid <- fig$x$modelid
   elementid <- fig$x$elementid
   docid <- fig$x$docid
-  type <- fig$x$modeltype
 
   fig <- toJSON(fig$x$docs_json, pretty = pretty,
     auto_unbox = TRUE, null = "null", na = "null")
