@@ -1,6 +1,7 @@
 Version 0.3
 ----------------------------------------------------------------------
 
+- update to Bokeh 0.11.0 (0.3.4)
 - make POSIX detection more robust (0.3.3)
 - fix bug in singleton glyphs involving date axis (0.3.3)
 - fix margins for gridplots (0.3.3)
