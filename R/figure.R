@@ -296,7 +296,7 @@ figure_par_validator_map <- list(
 )
 
 
-library(rvest)
+# library(rvest)
 
 # plots <- read_html("http://bokeh.pydata.org/en/latest/docs/reference/models/plots.html")
 
