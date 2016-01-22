@@ -19,6 +19,6 @@ print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, file = "", pbco
 
   if(pbcopy)
     file <- pipe("pbcopy")
-  cat(toJSON(fig$x$all_models, pretty = pretty,
+  cat(toJSON(fig$x$docs_json, pretty = pretty,
     auto_unbox = TRUE, null = "null", na = "null"), "\n", file = file)
 }
