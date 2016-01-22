@@ -1,5 +1,7 @@
 #' Get the HTML content required to embed a Bokeh figure
 #' @param fig figure
+#' @param file html file name to write the figure to
+#' @param pretty should the json model be pretty printed to the html file?
 #' @examples
 #' p <- figure() %>% ly_points(1:10)
 #' rbokeh2html(p)
