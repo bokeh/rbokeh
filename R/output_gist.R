@@ -10,7 +10,9 @@
 #'
 #' Also note that this currently can't handle thumbnails but will find a way to do that soon.
 #' @examples
+#' \dontrun{
 #' rbokeh2gist("figure() %>% ly_points(1:10)", name = "test")
+#' }
 #' @importFrom gistr gist_create
 #' @export
 rbokeh2gist <- function(fig_str, name, created = NULL, description = "", view = TRUE) {
