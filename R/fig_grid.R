@@ -177,7 +177,7 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
     x_margin = x_margin, y_margin = y_margin,
     nrow = nrow, ncol = ncol), class = "BokehGridPlot")
 
-  id <- digest(paste("gridplot", Sys.time(), runif(1)))
+  id <- gen_id(list(x = list(spec = list(time = Sys.time()))), "GridPlot")
 
   obj <- htmlwidgets::createWidget(
     name = 'rbokeh',
@@ -361,7 +361,8 @@ prepare_gridplot <- function(obj) {
 
   mod <- unlist(lapply(figs, function(fig) remove_model_names(fig$x$spec$model)), recursive = FALSE)
 
-  id <- gen_id(list(x = list(spec = list(time = Sys.time()))), "GridPlot")
+  # id <- gen_id(list(x = list(spec = list(time = Sys.time()))), "GridPlot")
+  id <- obj$x$modelid
 
   tid <- gen_id(list(x = list(spec = list(time = Sys.time()))), c("GridPlot", "tool"))
   tool_evt <- tool_events(tid)
