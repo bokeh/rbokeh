@@ -1,6 +1,8 @@
 Version 0.3
 ----------------------------------------------------------------------
 
+- set proper defaults in `gmap()` so that user can't do things they shouldn't (0.3.4)
+- fix bug in `ly_image_url()` for computing w/h (0.3.4)
 - update to Bokeh 0.11.0 (0.3.4)
 - make POSIX detection more robust (0.3.3)
 - fix bug in singleton glyphs involving date axis (0.3.3)
