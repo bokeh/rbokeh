@@ -13,6 +13,8 @@
 #' @param map_type \href{https://developers.google.com/maps/documentation/staticmaps/\#MapTypes}{map type} to use for the plot - one of "hybrid", "satellite", "roadmap", "terrain"
 #' @param map_style a json string of a Google Maps style - see \code{\link{gmap_style}}
 #' @note This can be used in the same way as \code{\link{figure}}, adding layers on top of the Google Map.
+#' There is an open issue documenting points appearing to sometimes be a few pixels off from their intended location.
+#' Google has its own terms of service for using Google Maps API and any use of rbokeh with Google Maps must be within Google’s Terms of Service
 #' @inheritParams figure
 #' @seealso \code{\link{gmap_style}}
 #' @example man-roxygen/ex-gmap.R
@@ -30,10 +32,25 @@ gmap <- function(lat = 0, lng = 0, zoom = 0,
   padding_factor = 0.07,
   xgrid = FALSE,
   ygrid = FALSE,
-  xaxes = "below",
-  yaxes = "left",
-  tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save"),
+  xaxes = FALSE,
+  yaxes = FALSE,
+  tools = c("pan", "wheel_zoom", "save"),
   theme = getOption("bokeh_theme")) {
+
+  if(length(setdiff(tools, c("pan", "wheel_zoom", "save"))) > 0) {
+    message("For gmap, tools can only be 'pan', 'wheel_zoom', and 'save' - setting accordingly.")
+    tools <- c("pan", "wheel_zoom", "save")
+  }
+
+  if(!is.logical(xaxes) || !is.logical(yaxes) || xaxes || yaxes) {
+    message("For gmap, xaxes and yaxes should be FALSE - setting accordingly")
+    xaxes <- yaxes <- FALSE
+  }
+
+  if(xgrid || ygrid) {
+    message("For gmap, xgrid and ygrid should be FALSE - setting accordingly")
+    xaxes <- yaxes <- xgrid <- ygrid <- FALSE
+  }
 
   fig <- figure(
     map_type = map_type,

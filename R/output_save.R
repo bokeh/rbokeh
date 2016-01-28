@@ -25,7 +25,7 @@ save_figure <- function(p, file, timeout = 500) {
       # don't want any padding
       p$sizingPolicy$padding <- 0
       # suppressMessages(saveWidget(p, ff, selfcontained = FALSE))
-      suppressMessages(cat(rbokeh2html(p), file = ff))
+      suppressMessages(rbokeh2html(p, file = ff))
 
       js <- paste0("var page = require('webpage').create();
 page.open('file://", ff, "', function() {

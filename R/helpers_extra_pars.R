@@ -18,7 +18,7 @@ handle_extra_pars <- function(pars, map) {
 }
 
 par_type_validate_fns <- list(
-  legend_orientation = function(name, val) {
+  legend_location = function(name, val) {
     validate_enum(name, val, c("top_right", "top_left", "bottom_left", "bottom_right"))
   },
   line_cap = function(name, val) {

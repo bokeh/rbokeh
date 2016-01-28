@@ -15,24 +15,16 @@ bokeh_render_json <- function(json_file) {
 
   # extract the id
   tmp <- jsonlite::fromJSON(json_file, simplifyVector = FALSE)
-  nms <- sapply(tmp, function(x) { x$type })
-  if("GridPlot" %in% nms) {
-    modeltype <- "GridPlot"
-  } else if("GMapPlot" %in% nms) {
-    modeltype <- "GMapPlot"
-  } else {
-    modeltype <- "Plot"
-  }
-
-  id <- tmp[[which(nms %in% modeltype)[1]]]$id
+  docid <- names(tmp)[1]
+  modelid <- tmp[[1]]$roots$root_ids[[1]]
 
   # forward options using x
-  x = list(
-    all_models = paste(readLines(json_file), collapse = "\n"),
+  x <- list(
+    docs_json = paste(readLines(json_file), collapse = "\n"),
     padding = list(type = "figure", y_pad = 0, x_pad = 0),
-    modeltype = modeltype,
-    elementid = digest(Sys.time()),
-    modelid = id,
+    elementid = digest::digest(Sys.time()),
+    modelid = modelid,
+    docid = docid,
     isJSON = TRUE
   )
 

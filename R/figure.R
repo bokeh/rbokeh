@@ -144,7 +144,7 @@ figure <- function(
     has_y_axis = FALSE,
     has_x_range = FALSE,
     has_y_range = FALSE,
-    legend_attrs = list(orientation = legend_location)
+    legend_attrs = list(location = legend_location)
   ), class = "BokehFigure")
 
   extra_pars <- handle_extra_pars(attr_pars, figure_par_validator_map)
@@ -184,13 +184,22 @@ figure <- function(
         spec = spec,
         elementid = digest(Sys.time()),
         modeltype = type,
-        modelid = id
+        modelid = id,
+        docid = digest::digest(paste("rbokehfigure", Sys.time())),
+        docs_json = list(list(
+          version = get_bokeh_version(),
+          title = "Bokeh Figure",
+          roots = list(
+            root_ids = list(id),
+            references = NULL
+        )))
      ),
      preRenderHook = rbokeh_prerender,
      width = spec$width,
      height = spec$height,
      package = 'rbokeh'
   )
+  names(fig$x$docs_json) <- fig$x$docid
 
   ## check and add tools
   tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help")]
@@ -285,3 +294,15 @@ figure_par_validator_map <- list(
   "lod_timeout" = "int",
   "webgl" = "logical"
 )
+
+
+# library(rvest)
+
+# plots <- read_html("http://bokeh.pydata.org/en/latest/docs/reference/models/plots.html")
+
+# attrs <- plots %>%
+#   html_nodes("dl.attribute")
+
+# attrs %>%
+#   html_nodes("code.descname") %>%
+#   html_text()

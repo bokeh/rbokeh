@@ -17,11 +17,13 @@ rbokeh_prerender <- function(fig) {
     stop("Unsupported model type: ", fig$x$modeltype)
   }
 
-  sapply(fig$x$spec$model, function(x) {
-    x$type
-  })
-  fig$x$all_models <- fig$x$spec$model
-  fig$x$all_models <- remove_model_names(fig$x$all_models)
+  # sapply(fig$x$spec$model, function(x) {
+  #   # x$type
+  #   x$id
+  # })
+
+  fig$x$docs_json[[1]]$roots$references <- fig$x$spec$model
+  fig$x$docs_json[[1]]$roots$references <- remove_model_names(fig$x$docs_json[[1]]$roots$references)
   fig$x$spec <- NULL
   fig$preRenderHook <- NULL
 

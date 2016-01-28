@@ -3,6 +3,14 @@
 
 ## internal helper methods
 
+get_bokeh_version <- function() {
+  # assumes there is only one listed dependency here
+  # (don't want dependency on yaml package just for this)
+  yaml <- readLines(file.path(system.file(package = "rbokeh"), "htmlwidgets", "rbokeh.yaml"))
+  yaml <- yaml[grepl("version:", yaml)]
+  gsub(" +version: +(.*)", "\\1", yaml)
+}
+
 validate_fig <- function(fig, fct) {
   if(!inherits(fig$x$spec, "BokehFigure"))
     stop("Error in ", fct, ": first argument must be of type 'BokehFigure'", call. = FALSE)
@@ -755,7 +763,7 @@ handle_singleton <- function(x, fn) {
 to_epoch <- function(x) {
   if(inherits(x, "Date")) {
     return(as.numeric(x) * 86400000)
-  } else if(inherits(x, "POSIXct")) {
+  } else if(inherits(x, "POSIXt")) {
     return(as.numeric(x) * 1000)
   }
   x
