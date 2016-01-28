@@ -14,7 +14,7 @@
 #' @param map_style a json string of a Google Maps style - see \code{\link{gmap_style}}
 #' @note This can be used in the same way as \code{\link{figure}}, adding layers on top of the Google Map.
 #' There is an open issue documenting points appearing to sometimes be a few pixels off from their intended location.
-#' Google has its own terms of service for using Google Maps API and any use of rbokeh with Google Maps must be within Google’s Terms of Service
+#' Google has its own terms of service for using Google Maps API and any use of rbokeh with Google Maps must be within Google's Terms of Service
 #' @inheritParams figure
 #' @seealso \code{\link{gmap_style}}
 #' @example man-roxygen/ex-gmap.R
