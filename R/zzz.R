@@ -1,3 +1,3 @@
 .onLoad <- function(libname, pkgname){
-  options(bokeh_theme = tableau_theme)
+  options(bokeh_theme = bk_default_theme())
 }

@@ -7,18 +7,27 @@
 prepare_figure <- function(fig) {
   legend <- list()
 
+  if(is.null(fig$x$spec$theme))
+    fig$x$spec$theme <- bk_default_theme()
+
   ## resolve attribute mappings
+  ## step through each layer
   for(ly in fig$x$spec$layers) {
     if(!is.null(ly$maps)) {
-      for(nm in names(ly$maps)) {
+      ## step through each mapped attribute
+      mapnames <- names(ly$maps)
+      for(nm in mapnames) {
         map_item <- ly$maps[[nm]]
         if(is.numeric(map_item$domain)) {
+          # the continuous domain cuts should be specifiable
+          # and the default number of cuts should be a theme thing
           intervals <- pretty(map_item$domain, 6)
           nl <- length(intervals) - 1
           map_item$domain <- intervals
           map_item$labels <- levels(cut(map_item$domain, intervals, include.lowest = TRUE))
           map_item$values <- (head(intervals, nl) + tail(intervals, nl)) / 2
         } else {
+          ## categorical domain
           map_item$labels <- map_item$domain
           map_item$values <- map_item$domain
         }
@@ -32,7 +41,8 @@ prepare_figure <- function(fig) {
           for(attr in entry$map_args) {
             ## handle glyph type
             if(attr == "glyph") {
-              new_type <- underscore2camel(get_theme_value(underscore2camel(map_item$domain), gl$type, attr))
+              new_type <- underscore2camel(get_theme_value(underscore2camel(map_item$domain), gl$type, attr,
+                fig$x$spec$theme))
               ## should check things in resolve_glyph_props() with new glyph
               fig$x$spec$model[[entry$id]]$attributes$glyph$type <- new_type
               fig$x$spec$model[[gl$id]]$type <- new_type
@@ -44,14 +54,17 @@ prepare_figure <- function(fig) {
             } else {
               if(attr %in% data_attr_names) {
                 cur_dat <- fig$x$spec$model[[did]]$attributes$data[[attr]]
-                fig$x$spec$model[[did]]$attributes$data[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr)
+                fig$x$spec$model[[did]]$attributes$data[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr,
+                  fig$x$spec$theme)
               } else if(attr %in% glyph_attr_names) {
                 if(attr == "line_dash") {
                   cur_dat <- fig$x$spec$model[[gl$id]]$attributes[[attr]]
-                  fig$x$spec$model[[gl$id]]$attributes[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr)
+                  fig$x$spec$model[[gl$id]]$attributes[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr,
+                    fig$x$spec$theme)
                 } else {
                   cur_dat <- fig$x$spec$model[[gl$id]]$attributes[[attr]]$value
-                  fig$x$spec$model[[gl$id]]$attributes[[attr]]$value <- get_theme_value(map_item$domain, cur_dat, attr)
+                  fig$x$spec$model[[gl$id]]$attributes[[attr]]$value <- get_theme_value(map_item$domain, cur_dat, attr,
+                    fig$x$spec$theme)
                 }
               }
             }
@@ -60,15 +73,21 @@ prepare_figure <- function(fig) {
 
         ## add legend glyphs and build legend element
         if(is.null(ly$do_legend)) {
+          ## add a header to this entry of the legend
+          # ## spacer if it's not the first legend group
+          # if(nm != mapnames[1])
+          #   legend[[paste0("lgnd_spacer_", nm)]] <- list(list("", list()))
+          nm <- gsub("^\"|\"$", "", nm)
+          legend[[paste0("lgnd_header_", nm)]] <- list(list(nm, list()))
           for(ii in seq_along(map_item$labels)) {
             cur_val <- map_item$values[[ii]]
             cur_lab <- map_item$labels[[ii]]
             lgnd_id <- paste(nm, cur_lab, sep = "_")
-            legend[[lgnd_id]] <- list(list(cur_lab, list()))
+            legend[[lgnd_id]] <- list(list(paste0(" ", cur_lab), list()))
 
             for(glph in map_item$legend_glyphs) {
               for(mrg in glph$map_args)
-                glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg)
+                glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg, fig$x$spec$theme)
               # render legend glyph
               spec <- c(glph$args, list(x = "x", y = "y"))
               lgroup <- paste("legend_", nm, "_", cur_lab, sep = "")
@@ -78,9 +97,11 @@ prepare_figure <- function(fig) {
               oox <- ifelse(fig$x$spec$x_axis_type == "categorical", "", NA)
               ooy <- ifelse(fig$x$spec$y_axis_type == "categorical", "", NA)
               if(!is.null(spec$size))
-                spec$size <- NA
+                spec$size <- 0
               if(!is.null(spec$radius))
-                spec$radius <- NA
+                spec$radius <- 0
+              if(is.null(spec$glyph))
+                spec$glyph <- "Circle"
               fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
 
               # add reference to glyph to legend object
@@ -106,9 +127,9 @@ prepare_figure <- function(fig) {
         oox <- ifelse(fig$x$spec$x_axis_type == "categorical", "", NA)
         ooy <- ifelse(fig$x$spec$y_axis_type == "categorical", "", NA)
         if(!is.null(spec$size))
-          spec$size <- NA
+          spec$size <- 0
         if(!is.null(spec$radius))
-          spec$radius <- NA
+          spec$radius <- 0
         fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
 
         # add reference to glyph to legend object
@@ -118,8 +139,10 @@ prepare_figure <- function(fig) {
     }
   }
 
-  if(length(legend) > 0)
-    fig <- fig %>% add_legend(unname(unlist(legend, recursive = FALSE)))
+  if(length(legend) > 0 && !is.null(fig$x$spec$legend_attrs))
+    fig <- fig %>%
+      add_legend(unname(unlist(legend, recursive = FALSE)),
+        fig$x$spec$legend_attrs)
 
   ## see if there is a log axis so we can compute padding appropriately
   ## log axis is only available if explicitly specified through x_axis()
@@ -132,7 +155,7 @@ prepare_figure <- function(fig) {
 
   ## set xlim and ylim if not set
   if(length(fig$x$spec$xlim) == 0) {
-    message("xlim not specified explicitly... calculating...")
+    # message("xlim not specified explicitly... calculating...")
     xrange <- get_all_glyph_range(fig$x$spec$glyph_x_ranges, fig$x$spec$padding_factor, fig$x$spec$x_axis_type, x_log)
   } else {
     xrange <- fig$x$spec$xlim
@@ -141,7 +164,7 @@ prepare_figure <- function(fig) {
   }
 
   if(length(fig$x$spec$ylim) == 0) {
-    message("ylim not specified explicitly... calculating...")
+    # message("ylim not specified explicitly... calculating...")
     yrange <- get_all_glyph_range(fig$x$spec$glyph_y_ranges, fig$x$spec$padding_factor, fig$x$spec$y_axis_type, y_log)
   } else {
     yrange <- fig$x$spec$ylim
@@ -203,7 +226,8 @@ prepare_figure <- function(fig) {
   }
   tb <- fig$x$spec$model$plot$attributes$toolbar_location
   if(is.null(tb)) {
-    x_pad <- 46
+    if(!"toolbar_location" %in% names(fig$x$spec$model$plot$attributes))
+      x_pad <- 46
   } else if(tb %in% c("above", "below")) {
     y_pad <- 46
   } else if(tb %in% c("left", "right")) {
@@ -213,6 +237,16 @@ prepare_figure <- function(fig) {
   fig$x$padding <- list(type = "figure", y_pad = y_pad, x_pad = x_pad)
   fig$x$spec$model$plot$attributes$plot_width <- fig$width - y_pad
   fig$x$spec$model$plot$attributes$plot_height <- fig$height - x_pad
+
+  # handle plot/axis/grid/legend themes
+  if(!is.null(fig$x$spec$theme$plot))
+    fig <- fig %>% theme_plot(pars = fig$x$spec$theme$plot)
+  if(!is.null(fig$x$spec$theme$axis))
+    fig <- fig %>% theme_axis(c("x", "y"), pars = fig$x$spec$theme$axis)
+  if(!is.null(fig$x$spec$theme$grid))
+    fig <- fig %>% theme_grid(c("x", "y"), pars = fig$x$spec$theme$grid)
+  if(!is.null(fig$x$spec$theme$legend))
+    fig <- fig %>% theme_legend(pars = fig$x$spec$theme$legend)
 
   fig
 }

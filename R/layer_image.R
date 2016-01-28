@@ -24,10 +24,15 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
   ## see if any options won't be used and give a message
   # check_opts(list(...), "image")
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-
-  lgroup <- get_lgroup(lgroup, fig)
+  args <- sub_names(fig, data = NULL,
+    grab(
+      x,
+      y,
+      lname,
+      lgroup,
+      dots = lazy_dots()
+    )
+  )
 
   axis_type_range <- get_glyph_axis_type_range(c(x, dw), c(y, dh), assert_x = "numeric", assert_y = "numeric")
 
@@ -44,10 +49,10 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
     if(valid_color(palette)) {
       stop("'palette' specified in ly_image is a single color; please supply a vector of colors or name of a bokeh palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
     } else {
-      if(!palette %in% bk_palette_names){
+      if(!palette %in% bk_gradient_palette_names){
         stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
       } else {
-        palette <- bk_palettes[[palette]]
+        palette <- bk_gradient_palettes[[palette]]
       }
     }
   } else if( is.character(palette) && length(palette) > 1 ) {
@@ -59,10 +64,15 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
     stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
   }
 
-  make_glyph(fig, type = "image", lname = lname, lgroup = lgroup,
-    data = list(image = list(z), rows = rows, cols = cols,
-      x = x, y = y, dw = dw, dh = dh, palette = palette, dilate = dilate),
-    args = NULL, axis_type_range = axis_type_range)
+  mc <- lapply(match.call(), deparse)
+
+  make_glyph(fig, type = "image", lname = args$info$lname, lgroup = args$info$lgroup,
+    data = list(
+      image = list(z), rows = rows, cols = cols,
+      x = x, y = y, dw = dw, dh = dh,
+      palette = palette, dilate = dilate
+    ),
+    args = NULL, axis_type_range = axis_type_range, ly_call = mc)
 }
 
 #' Add an "image_url" layer to a Bokeh figure
@@ -73,7 +83,7 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
 #' @param y y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other properties
 #' @param w,h values or field names of width and height of image
-#' @param url values or field name of image URLs
+#' @param image_url values or field name of image URLs
 #' @param dilate logical - whether to dilate pixel distance computations when drawing
 #' @param anchor where the image is anchored to with respect to \code{x} and \code{y}
 #' @param angle values or field name of the angle to rotate the image, in radians
@@ -81,45 +91,52 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
 #' @family layer functions
 #' @example man-roxygen/ex-image_url.R
 #' @export
-ly_image_url <- function(fig, x = 0, y = 0, data = NULL, w = 10, h = 10,
-  url, dilate = TRUE, anchor = "top_left", angle = 0,
-  lname = NULL, lgroup = NULL) {
+ly_image_url <- function(
+  fig, x = 0, y = 0, data = figure_data(fig), w = 10, h = 10,
+  image_url, dilate = TRUE, anchor = "top_left", angle = 0,
+  lname = NULL, lgroup = NULL
+) {
 
   validate_fig(fig, "ly_image_url")
 
   anchor_opts <- c("top_left", "top_center", "top_right", "right_center",
     "bottom_right", "bottom_center", "bottom_left", "left_center", "center")
-  if(! anchor %in% anchor_opts)
+  if(! anchor %in% anchor_opts) {
     stop("anchor must be one of: ", paste(anchor_opts, collapse = ", "), call. = FALSE)
+  }
+
+  args <- sub_names(fig, data,
+    grab(
+      x,
+      y,
+      w,
+      h,
+      image_url,
+      dilate,
+      anchor,
+      angle,
+      lname,
+      lgroup,
+      dots = lazy_dots()
+    )
+  )
+
+  # TODO: this url is not a "url" - it is data, not a parameter
+  args$params$url <- args$params$image_url
+  args$params$image_url <- NULL
 
   if(missing(x)) {
-    xname <- "x"
-  } else {
-    xname <- deparse(substitute(x))
+    args$info$x_name <- "x"
   }
   if(missing(y)) {
-    yname <- "y"
-  } else {
-    yname <- deparse(substitute(y))
+    args$info$y_name <- "y"
   }
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x      <- v_eval(substitute(x), data)
-    y      <- v_eval(substitute(y), data)
-    url    <- v_eval(substitute(url), data)
-    w      <- v_eval(substitute(w), data)
-    h      <- v_eval(substitute(h), data)
-    angle  <- v_eval(substitute(angle), data)
-  }
-
-  xy_names <- get_xy_names(x, y, xname, yname, NULL)
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- list(url = url, w = w, h = h, anchor = anchor,
-    angle = angle, dilate = dilate)
+  # pull out values, as they are used a lot
+  x <- args$data$x
+  y <- args$data$y
+  h <- args$params$h
+  w <- args$params$w
 
   ## range stuff
   if(grepl("left", anchor)) {
@@ -139,11 +156,15 @@ ly_image_url <- function(fig, x = 0, y = 0, data = NULL, w = 10, h = 10,
   # can this have "categorical" axes?
   axis_type_range <- get_glyph_axis_type_range(c(x, x2), c(y, y2))
 
-  make_glyph(fig, type = "image_URL",
-    xname = xy_names$x, yname = xy_names$y,
-    lname = lname, lgroup = lgroup,
-    data = xy, args = args,
-    axis_type_range = axis_type_range)
+  mc <- lapply(match.call(), deparse)
+
+  make_glyph(
+    fig, type = "image_URL",
+    xname = args$info$x_name, yname = args$info$y_name,
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    data = args$data, args = args$params,
+    axis_type_range = axis_type_range, ly_call = mc
+  )
 }
 
 
@@ -160,4 +181,3 @@ ly_image_url <- function(fig, x = 0, y = 0, data = NULL, w = 10, h = 10,
 #     data = list(image = list(image), rows = rows, cols = cols, x = x, y = y, dw = dw, dh = dh),
 #     args = list(...), axis_type_range = axis_type_range)
 # }
-

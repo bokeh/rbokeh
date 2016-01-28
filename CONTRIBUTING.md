@@ -13,9 +13,10 @@ Before you write too much code, check the [open issues in the rbokeh issue track
 to see if someone else has already filed an issue related to your work or is already working on it. If not, go ahead and
 [open a new issue](https://github.com/bokeh/rbokeh/issues/new).
 
-## Announce your work on the mailing list
+## Announce your work on the mailing list or issue tracker
 
-Shoot us a quick email on the mailing list letting us know what you're working on. There
+Shoot us a quick email on the mailing list or note on the issue tracker letting us
+know what you're working on. There
 will likely be people on the list who can give you tips about where to find relevant
 source or alert you to other planned changes that might effect your work.
 

@@ -3,8 +3,9 @@
 # you can add new layers to an existing layer group
 # which will ensure that attributes are mapped to glyphs within the layer
 
-make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
-  hover = NULL, url = NULL, legend = NULL, xname = NULL, yname = NULL, data_sig = NA) {
+make_glyph <- function(fig, type, lname, lgroup, data, args,
+  axis_type_range, hover = NULL, url = NULL, legend = NULL,
+  xname = NULL, yname = NULL, data_sig = NA, ly_call) {
 
   if(is.null(args))
     args <- list()
@@ -47,9 +48,40 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
   fig$x$spec$x_axis_type <- axis_type_range$x_axis_type
   fig$x$spec$y_axis_type <- axis_type_range$y_axis_type
 
+  ## get rid of factors
+  for(ii in seq_along(args)) {
+    if(is.factor(args[[ii]]))
+      args[[ii]] <- as.character(args[[ii]])
+  }
+
+  ## get names of data in args that were specified by user
+  ## and get whether variable is mapped
+  for(nm in names(args)) {
+    if(!is.null(args[[nm]])) {
+      arg_nm <- ly_call[[nm]][1]
+
+      ## deal with 'color' and 'alpha' higher-level parameters
+      if(is.null(arg_nm)) {
+        if(nm %in% c("fill_alpha", "line_alpha"))
+          arg_nm <- ly_call[["alpha"]]
+        if(nm %in% c("fill_color", "line_color"))
+          arg_nm <- ly_call[["color"]]
+      }
+
+      if(!is.null(arg_nm)) {
+        attr(args[[nm]], "name") <- arg_nm
+        ## see if named args are valid
+        ## if they are not, they will be marked as mapped
+        if(!is.null(needs_map_fns[[nm]]))
+          if(needs_map_fns[[nm]](args[[nm]]) && !is.na(args[[nm]]))
+            attr(args[[nm]], "mapped") <- TRUE
+      }
+    }
+  }
+
   ## make sure specified colors are bokeh-valid hex codes (if they are hex codes)
   ## only to ones that don't need to be mapped
-  is_mapped <- sapply(args, function(x) !is.null(attr(x, "nseName")))
+  is_mapped <- sapply(args, function(x) !is.null(attr(x, "mapped")))
   mapped_args <- names(args)[is_mapped]
   ind <- setdiff(names(args), mapped_args)
   args[ind] <- validate_colors(args[ind])
@@ -59,6 +91,8 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
   ## in which case we need to track its domain
   ## and its range will be filled in from a theme
   ## when the figure is printed
+  if(is.null(args$glyph))
+    args$glyph <- type
   attr_maps <- get_attr_maps(args, glr_id)
 
   ## deal with manual legend
@@ -95,7 +129,9 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
   data_lengths <- sapply(data, length)
   data_is_list <- sapply(data, is.list)
   data_names <- names(data)
-  scalar_ind <- which(data_lengths == 1 & !data_is_list)
+  max_data_length <- max(data_lengths)
+  scalar_ind <- which(data_lengths == 1 & !data_is_list & max_data_length != 1)
+
   for(ii in scalar_ind)
     args[[data_names[ii]]] <- data[[ii]]
   data[scalar_ind] <- NULL
@@ -110,7 +146,20 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
   }
   args[long_ind] <- NULL
 
-  ## remove NAs in data at this point?
+  ## data elements of length 1 must be lists (since toJSON auto_unbox = TRUE)
+  length_one <- which(sapply(data, length) == 1 & !sapply(data, is.list))
+  for(ii in length_one) {
+    data[[ii]] <- list(data[[ii]])
+  }
+
+  # ## NAs must be changed to NaN for bokeh to be happy
+  # for(ii in seq_along(data)) {
+  #   if(inherits(data[[ii]], c("Date", "POSIXct")))
+  #     data[[ii]] <- as.character(data[[ii]])
+  #   data[[ii]][which(is.na(data[[ii]]))] <- NaN
+  # }
+  ## actually this causes problems with categorical and date data
+  ## se we'll handle it in the js prior to rendering
 
   ## spec needs to point to corresponding data
   data_names <- names(data)
@@ -122,9 +171,8 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
     data <- list(dummy = list(1))
 
   ## fix spec for "text" glyph
-  if("text" %in% names(args)) {
+  if("text" %in% names(args))
      args$text <- list(field = "text")
-  }
 
   if(!is.null(fig$x$spec$glyph_defer[[lgn]])) {
     fig$x$spec$glyph_defer[[lgn]]$spec <- args
@@ -139,6 +187,15 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
       type = "GlyphRenderer",
       id = glr_id
     )
+
+    # convert to character and make it a list so it shows up properly
+    hover$data <- lapply(hover$data, function(x) {
+      if(length(x) == 1) {
+        return(list(as.character(x)))
+      } else {
+        return(as.character(x))
+      }
+    })
 
     fig <- fig %>% add_hover(hover$dict, renderer_ref)
     data <- c(data, hover$data)
@@ -159,21 +216,21 @@ make_glyph <- function(fig, type, lname, lgroup, data, args, axis_type_range,
   if(axis_type_range$x_axis_type == "datetime") {
     axis_type_range$x_range <- to_epoch(axis_type_range$x_range)
     if(!is.null(data$x))
-      data$x <- to_epoch(data$x)
+      data$x <- handle_singleton(data$x, to_epoch)
     if(!is.null(data$x0))
-      data$x0 <- to_epoch(data$x0)
+      data$x0 <- handle_singleton(data$x0, to_epoch)
     if(!is.null(data$x1))
-      data$x1 <- to_epoch(data$x1)
+      data$x1 <- handle_singleton(data$x1, to_epoch)
   }
 
   if(axis_type_range$y_axis_type == "datetime") {
     axis_type_range$y_range <- to_epoch(axis_type_range$y_range)
     if(!is.null(data$y))
-      data$y <- to_epoch(data$y)
+      data$y <- handle_singleton(data$y, to_epoch)
     if(!is.null(data$y0))
-      data$y0 <- to_epoch(data$y0)
+      data$y0 <- handle_singleton(data$y0, to_epoch)
     if(!is.null(data$y1))
-      data$y1 <- to_epoch(data$y1)
+      data$y1 <- handle_singleton(data$y1, to_epoch)
   }
 
   fig <- fig %>% add_layer(args, data, lname, lgroup)

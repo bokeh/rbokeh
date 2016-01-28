@@ -1,27 +1,37 @@
 Package: rbokeh
 Title: R Interface for Bokeh
-Version: 0.2.3.2
+Version: 0.3.3
 Authors@R: c(
     person("Ryan", "Hafen", email = "rhafen@gmail.com", role = c("aut", "cre")),
     person("Kenton", "Russell", email = "kent.russell@timelyportfolio.com", role = "ctb"),
     person("Jonathan", "Owen", email = "jonathanro@gmail.com", role = "ctb"),
-    person(
-      "Bokeh", "team", role = c("aut", "cph"),
+    person("Schloerke", "Barret", email = "schloerke@gmail.com", role = "ctb"),
+    person("Continuum Analytics, Inc.", role = c("aut", "cph"),
       comment = "Bokeh library in htmlwidgets/lib, http://bokeh.pydata.org"
     ))
-Description: R interface for creating plots in Bokeh.  Bokeh by Continuum Analytics, \url{http://bokeh.pydata.org/en/latest/}.
+Description: R interface for creating plots in Bokeh. Bokeh by Continuum
+    Analytics, \url{http://bokeh.pydata.org/en/latest/}.
+URL: https://hafen.github.io/rbokeh
+BugReports: https://github.com/hafen/rbokeh/issues
 License: MIT + file LICENSE
 LazyData: true
+NeedsCompilation: no
 Imports:
-    htmlwidgets,
+    htmlwidgets (>= 0.5),
     maps,
     methods,
     jsonlite,
     digest,
     hexbin,
-    magrittr
+    lazyeval,
+    magrittr,
+    ggplot2,
+    scales,
+    gistr
 Suggests:
     testthat,
-    data.table
-Enhances:
-    shiny (>= 0.10.2.1)
+    data.table,
+    lattice,
+    roxygen2 (>= 5.0.0)
+Enhances: shiny (>= 0.12)
+RoxygenNote: 5.0.1

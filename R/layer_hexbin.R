@@ -16,36 +16,48 @@
 #' figure() %>% ly_hexbin(rnorm(10000), rnorm(10000))
 #' }
 #' @export
-ly_hexbin <- function(fig, x, y = NULL, data = NULL,
+ly_hexbin <- function(
+  fig, x, y = NULL, data = figure_data(fig),
   xbins = 30, shape = 1, style = "colorscale",
   trans = NULL, inv = NULL,
-  palette = "RdYlGn11", line = FALSE, alpha = 1, hover = TRUE) {
+  palette = "RdYlGn11", line = FALSE, alpha = 1, hover = TRUE
+) {
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
-
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x <- v_eval(substitute(x), data)
-    y <- v_eval(substitute(y), data)
-  }
+  args <- sub_names(fig, data,
+    grab(
+      x,
+      y,
+      xbins,
+      shape,
+      # style,
+      # trans,
+      # inv,
+      # palette,
+      line,
+      alpha,
+      hover,
+      dots = lazy_dots()
+    ),
+    process_data_and_names = FALSE
+  )
 
   minarea <- 0.04; maxarea <- 0.8; mincnt <- 1; maxcnt <- NULL
-  if(!inherits(x, "hexbin")) {
-    xy_names <- get_xy_names(x, y, xname, yname, NULL)
-    xy <- get_xy_data(x, y)
-    x <- xy$x
-    y <- xy$y
-    xname <- xy_names$x
-    yname <- xy_names$y
 
-    hbd <- get_hexbin_data(x = x, y = y, xbins = xbins,
+  if(!inherits(args$data$x, "hexbin")) {
+    xy_names <- get_xy_names(args$data$x, args$data$y, deparse(substitute(x)), deparse(substitute(y)), NULL)
+    xy <- get_xy_data(args$data$x, args$data$y)
+    args$data$x <- xy$x
+    args$data$y <- xy$y
+    args$info$x_name <- xy_names$x
+    args$info$y_name <- xy_names$y
+
+    hbd <- get_hexbin_data(x = xy$x, y = xy$y, xbins = xbins,
       shape = shape)
   } else {
-    xname <- "x"
-    yname <- "y"
+    args$info$x_name <- "x"
+    args$info$y_name <- "y"
 
-    hbd <- x
+    hbd <- args$data$x
   }
 
   hbd <- get_from_hexbin(hbd, maxcnt = maxcnt,
@@ -56,9 +68,9 @@ ly_hexbin <- function(fig, x, y = NULL, data = NULL,
     if(valid_color(palette)) {
       col <- palette
     } else {
-      if(!palette %in% bk_palette_names)
+      if(!palette %in% bk_gradient_palette_names)
         stop("'palette' specified in ly_hexbin is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
-      palette <- colorRampPalette(bk_palettes[[palette]])
+      palette <- colorRampPalette(bk_gradient_palettes[[palette]])
     }
   }
 
@@ -70,22 +82,26 @@ ly_hexbin <- function(fig, x, y = NULL, data = NULL,
     col <- clrs[colgrp]
   }
 
-  if(xname == yname) {
-    xname <- paste(xname, "(x)")
-    yname <- paste(yname, "(y)")
+  if(args$info$x_name == args$info$y_name) {
+    args$info$x_name <- paste(args$info$x_name, "(x)")
+    args$info$y_name <- paste(args$info$y_name, "(y)")
   }
-  names(hbd$data)[1:2] <- c(xname, yname)
+  names(hbd$data)[1:2] <- c(args$info$x_name, args$info$y_name)
 
   if(!line) {
     line_color <- NA
   } else {
+    # TODO
+    # this could be reached and never have been set
     line_color <- col
   }
 
-  fig %>% ly_polygons(xs = hbd$xs, ys = hbd$ys, color = NULL,
+  fig %>% ly_polygons(
+    xs = hbd$xs, ys = hbd$ys, color = NULL,
     fill_color = col, alpha = NULL,
-    fill_alpha = alpha, line_color = line_color,
-    hover = hbd$data, xlab = xname, ylab = yname)
+    fill_alpha = args$params$alpha, line_color = line_color,
+    hover = hbd$data, xlab = args$info$x_name, ylab = args$info$y_name
+  )
 }
 
 

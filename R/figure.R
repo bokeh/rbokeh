@@ -1,5 +1,6 @@
 #' Initialize a Bokeh figure
 #'
+#' @param data data to be supplied to all layers, if the layer doesn't supply a data value
 #' @param width figure width in pixels
 #' @param height figure width in pixels
 #' @param title a title to display above the plot. - "title" is also the prefix for a set of Text Properties, so you can set the font for the title with the parameter text_font.
@@ -8,14 +9,27 @@
 #' @param xlim the extent of the plotting area in the x-dimension (will be computed automatically if not specified).
 #' @param ylim the extent of the plotting area in the y-dimension (will be computed automatically if not specified).
 #' @param padding_factor if limits are not specified, by what factor should the extents of the data be padded
-#' @param plot_width,plot_height width and height of the entire plot in pixels, including border space
 #' @param xgrid whether to draw x axis grid lines
 #' @param ygrid whether to draw y axis grid lines
 #' @param xaxes where to put x axis, or FALSE if no x axis ticks / labels
 #' @param yaxes where to put y axis, or FALSE if no y axis ticks / labels
-#' @param tools character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.
-#' @param theme an rbokeh theme to use (tableau by default)
-#' @template dots-figure
+#' @param legend_location ('top_right', 'top_left', 'bottom_left', 'bottom_right') the location where the legend should draw itself, or NULL to omit the legend
+#' @param tools character vector of interactivity tools options (acceptable values are: "pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see the "See Also" section below for a list of tool functions.  If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.
+#' @param theme an rbokeh theme to use
+#' @param toolbar_location ('above', 'below', 'left', 'right') Where the toolbar will be located. If set to NULL, no toolbar will be attached to the plot.
+#' @param h_symmetry (logical) Whether the total horizontal padding on both sides of the plot will be made equal (the left or right padding amount, whichever is larger).
+#' @param v_symmetry (logical) Whether the total vertical padding on both sides of the plot will be made equal (the top or bottom padding amount, whichever is larger).
+#' @param logo ('normal', 'grey') What version of the Bokeh logo to display on the toolbar. If set to NULL, no logo will be displayed.
+#' @param lod_factor (integer) Decimation factor to use when applying level-of-detail decimation (see "Controlling level of detail").
+#' @param lod_interval (integer) Interval (in ms) during which an interactive tool event will enable level-of-detail downsampling (see "Controlling level of detail").
+#' @param lod_threshold (integer) A number of data points, above which level-of-detail downsampling may be performed by glyph renderers. Set to \code{NULL} to disable any level-of-detail downsampling (see "Controlling level of detail").
+#' @param lod_timeout (integer) Timeout (in ms) for checking whether interactive tool events are still occurring. Once level-of-detail mode is enabled, a check is made every lod_timeout ms. If no interactive tool events have happened, level-of-detail mode is disabled (see "Controlling level of detail").
+#' @param webgl (logical) should webgl be used for rendering?
+#' @param \ldots parameters can be specified here that are available in \code{\link{theme_plot}}
+#' @section Controlling level of detail:
+#' Although the HTML canvas can comfortably display tens or even hundreds of thousands of glyphs, doing so can have adverse affects on interactive performance. In order to accommodate large-ish (but not enormous) data sizes, Bokeh plots offer "Level of Detail" (LOD) capability in the client.
+#'
+#' The basic idea is that during interactive operations (e.g., panning or zooming), the plot only draws some small fraction data points. This hopefully allows the general sense of the interaction to be preserved mid-flight, while maintaining interactive performance. See the \code{lod_} parameters for information on how to control this.
 #' @examples
 #' figure() %>% ly_points(1:10)
 #' @seealso
@@ -44,6 +58,7 @@
 #' @import htmlwidgets
 #' @import methods
 figure <- function(
+  data = NULL,
   width = 480,
   height = 520,
   title = NULL,
@@ -52,20 +67,33 @@ figure <- function(
   xlim = NULL,
   ylim = NULL,
   padding_factor = 0.07,
-  plot_width = NULL,
-  plot_height = NULL,
   xgrid = TRUE,
   ygrid = TRUE,
   xaxes = "below",
   yaxes = "left",
-  tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save"),
+  legend_location = "top_right",
+  tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save", "help"),
   theme = getOption("bokeh_theme"),
+  toolbar_location = "above",
+  h_symmetry = TRUE,
+  v_symmetry = FALSE,
+  logo = "normal",
+  lod_factor = 10,
+  lod_interval = 300,
+  lod_threshold = NULL,
+  lod_timeout = 500,
+  webgl = FALSE,
   ...
 ) {
+  specified <- names(as.list(match.call())[-1])
+  attr_pars <- c(as.list(environment())[specified], list(...))
+  attr_pars <- attr_pars[names(attr_pars) %in% names(figure_par_validator_map)]
+
+  dots <- list(...)
 
   ## figure of another type (like GMapPlot)
-  if("type" %in% names(list(...))) {
-    type <- list(...)$type
+  if("type" %in% names(dots)) {
+    type <- dots$type
   } else {
     type <- "Plot"
   }
@@ -86,11 +114,14 @@ figure <- function(
   )
   ref$subtype <- model$plot$subtype
 
+  if(is.function(theme))
+    theme <- theme()
+
   spec <- structure(list(
+    figure_data = data,
     width = width, height = height, title = title,
     xlab = xlab, ylab = ylab,
     xlim = xlim, ylim = ylim, padding_factor = padding_factor,
-    plot_width = plot_width, plot_height = plot_height,
     xgrid = xgrid, ygrid = ygrid, xaxes = xaxes, yaxes = yaxes,
     tools = tools, theme = theme,
     model = model,
@@ -112,15 +143,38 @@ figure <- function(
     has_x_axis = FALSE,
     has_y_axis = FALSE,
     has_x_range = FALSE,
-    has_y_range = FALSE
+    has_y_range = FALSE,
+    legend_attrs = list(orientation = legend_location)
   ), class = "BokehFigure")
 
-  extra_pars <- handle_extra_pars(list(...), figure_par_validator_map)
-  if(is.null(extra_pars))
-    extra_pars$min_border <- 4
+  extra_pars <- handle_extra_pars(attr_pars, figure_par_validator_map)
+  epn <- names(extra_pars)
+
+  if(!is.null(extra_pars[["min_border"]])) {
+    if(is.null(extra_pars$min_border_left))
+      extra_pars$min_border_left <- extra_pars$min_border
+    if(is.null(extra_pars$min_border_right))
+      extra_pars$min_border_right <- extra_pars$min_border
+    if(is.null(extra_pars$min_border_top))
+      extra_pars$min_border_top <- extra_pars$min_border
+    if(is.null(extra_pars$min_border_bottom))
+      extra_pars$min_border_bottom <- extra_pars$min_border
+    extra_pars$min_border <- NULL
+  }
+  if(is.null(extra_pars$min_border_left))
+    extra_pars$min_border_left <- 4
+  if(is.null(extra_pars$min_border_right))
+    extra_pars$min_border_right <- 4
+  if(is.null(extra_pars$min_border_top))
+    extra_pars$min_border_top <- 4
+  if(is.null(extra_pars$min_border_bottom))
+    extra_pars$min_border_bottom <- 4
+
+  if(!"lod_threshold" %in% epn)
+    extra_pars["lod_threshold"] <- list(NULL)
 
   if(is.null(tools))
-    extra_pars$toolbar_location <- "None"
+    extra_pars["toolbar_location"] <- list(NULL)
 
   spec$model$plot$attributes <- c(spec$model$plot$attributes, extra_pars)
 
@@ -139,7 +193,7 @@ figure <- function(
   )
 
   ## check and add tools
-  tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save")]
+  tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help")]
   not_used <- setdiff(tool_list, tools)
   if(length(not_used) > 0)
     message("Note: tools not used: ", paste(not_used, collapse = ", "))
@@ -147,6 +201,20 @@ figure <- function(
     fig <- eval(parse(text = paste("tool_", tl, "(fig)", sep = "")))
 
   fig
+}
+
+#' Retrieve rbokeh figure data
+#'
+#' @param fig rbokeh figure
+#' @export
+figure_data <- function(fig) {
+  if (is.list(fig)) {
+    # will return NULL even if it all doesn't exist,
+    # as long as fig is a list
+    return(fig$x$spec$figure_data)
+  }
+
+  return(NULL)
 }
 
 fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plot") {
@@ -210,7 +278,10 @@ figure_par_validator_map <- list(
   "toolbar_location" = "toolbar_location",
   "logo" =  "logo",
   "h_symmetry" = "logical",
-  "v_symmetry" = "logical"
+  "v_symmetry" = "logical",
+  "lod_factor" = "int",
+  "lod_interval" = "int",
+  "lod_threshold" = "int",
+  "lod_timeout" = "int",
+  "webgl" = "logical"
 )
-
-

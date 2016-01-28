@@ -12,93 +12,96 @@
 #' @example man-roxygen/ex-lines.R
 #' @family layer functions
 #' @export
-ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
+ly_lines <- function(
+  fig, x, y = NULL, data = figure_data(fig), group = NULL,
   color = "black", type = 1, width = 1, alpha = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_lines")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "line", formals = names(formals(ly_lines)))
-
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
 
   ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x     <- v_eval(substitute(x), data)
-    y     <- v_eval(substitute(y), data)
-    group <- v_eval(substitute(group), data)
-    color <- v_eval(substitute(color), data)
-    type  <- v_eval(substitute(type), data)
-    width <- v_eval(substitute(width), data)
-  }
+  bv <- b_eval(data)
+  args <- sub_names(fig, data,
+    grab(
+      x,
+      y,
+      group,
+      color,
+      type,
+      width,
+      alpha,
+      legend, lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$params$glyph <- "line"
 
-  ## v_eval will repeat these, but the line glyph doesn't like this
-  if(length(unique(color)) == 1)
-    color <- subset_with_attributes(color, 1)
-  if(length(unique(type)) == 1)
-    type <- type[1]
-  if(length(unique(width)) == 1)
-    width <- width[1]
+  if(missing(color) && !is.null(args$params$line_color))
+    args$params$color <- NULL
 
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- list(glyph = "line", group = group, color = color,
-    width = width, type = type, ...)
-
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
-
-  args$alpha <- alpha
+  # args$params$alpha <- alpha
 
   # if any of group, type, width, or color are not unique, we need to split the data
   # and call make_glyph several times
   # otherwise we can just vary the values of things
   # and call make_glyph just once...
+  group_dt <- args$params
+  group_dt$group <- args$info$group
   group_vars <- c("group", "type", "width", "color")
-  groupable <- which(names(args) %in% group_vars &
-    sapply(args, function(x) length(unique(x)) > 1))
-  if(length(groupable) > 0) {
+  groupable <- which(
+    (names(group_dt) %in% group_vars) &
+    sapply(group_dt, function(x) length(unique(x)) > 1)
+  )
 
-    g_args <- args[groupable]
-    ng_args <- args[-groupable]
+  if (length(groupable) > 0) {
+    # there are groups to split on
 
-    lns <- sapply(ng_args, length)
-    idx <- lns == length(xy$x)
-
-    df_args <- args[idx]
-    df_args$group <- NULL
-
-    ## much more efficient way to do this but would probably require more dependencies...
-    lvls <- apply(as.matrix(data.frame(g_args)), 1,
-      function(x) paste(x, collapse = ""))
-    df_split <- split(seq_along(lvls), lvls)
-
-    g_args$group <- NULL
-
-    for(ii in seq_along(df_split)) {
-      cur_idx <- df_split[[ii]]
-
-      fig <- do.call(ly_lines,
-        c(lapply(df_args, function(x) subset_with_attributes(x, cur_idx)),
-          lapply(g_args, function(x) subset_with_attributes(x, cur_idx[1])),
-          ng_args[!idx], list(fig = fig, x = xy$x[cur_idx], y = xy$y[cur_idx],
-            lgroup = lgroup, lname = ii, legend = legend, xlab = xy_names$x, ylab = xy_names$y)))
-    }
-    return(fig)
+    # split works with a data.frame as the groups.
+    split_list <- split(
+      seq_along(args$data$x),
+      as.data.frame(group_dt[names(groupable)])
+    )
+  } else {
+    # no groups to split on.  will split on "one" group
+    split_list <- list(seq_along(args$data$x))
   }
 
-  args <- resolve_line_args(fig, args)
 
-  axis_type_range <- get_glyph_axis_type_range(xy$x, xy$y)
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y)
+  mc <- attr(fig, "ly_call")
+  if(is.null(mc)) {
+    mc <- lapply(match.call(), deparse)
+  }
 
-  make_glyph(fig, type = "line", lname = lname, lgroup = lgroup,
-    data = xy, legend = legend,
-    args = args, axis_type_range = axis_type_range,
-    xname = xy_names$x, yname = xy_names$y)
+  for (ii in seq_along(split_list)) {
+    arg_obj <- subset_arg_obj(args, split_list[[ii]])
+
+    ## b_eval will repeat these, but the line glyph doesn't like this
+    if(length(unique(arg_obj$params$color)) == 1)
+      arg_obj$params$color <- subset_with_attributes(arg_obj$params$color, 1)
+    if(length(unique(args$params$type)) == 1)
+      arg_obj$params$type <- subset_with_attributes(arg_obj$params$type, 1)
+    if(length(unique(args$params$width)) == 1)
+      arg_obj$params$width <- subset_with_attributes(arg_obj$params$width, 1)
+
+    arg_obj$params <- resolve_line_args(fig, arg_obj$params)
+
+    ## see if any options won't be used and give a message
+    check_opts(arg_obj$params, "line", formals = names(formals(ly_lines)))
+
+    fig <- make_glyph(
+      fig, type = "line", data = arg_obj$data,
+      legend = arg_obj$info$legend,
+      args = arg_obj$params, axis_type_range = axis_type_range,
+      xname = arg_obj$info$x_name, yname = arg_obj$info$y_name,
+      lname = arg_obj$info$lname, lgroup = arg_obj$info$lgroup,
+      ly_call = mc
+    )
+
+  }
+
+  return(fig)
 }
 
 #' Add a "segments" layer to a Bokeh figure
@@ -116,48 +119,51 @@ ly_lines <- function(fig, x, y = NULL, data = NULL, group = NULL,
 #' @template dots-line
 #' @family layer functions
 #' @export
-ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
+ly_segments <- function(fig, x0, y0, x1, y1, data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "segment", formals = names(formals(ly_segments)))
-
   validate_fig(fig, "ly_segments")
 
-  xname <- deparse(substitute(x0))
-  yname <- deparse(substitute(y0))
+  args <- sub_names(fig, data,
+    grab(
+      x0,
+      y0,
+      x1,
+      y1,
+      color,
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$params$glyph <- "segment"
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x0    <- v_eval(substitute(x0), data)
-    y0    <- v_eval(substitute(y0), data)
-    x1    <- v_eval(substitute(x1), data)
-    y1    <- v_eval(substitute(y1), data)
-    color <- v_eval(substitute(color), data)
-    type  <- v_eval(substitute(type), data)
-    width <- v_eval(substitute(width), data)
-  }
+  if(missing(color) && !is.null(args$params$line_color))
+    args$params$color <- NULL
 
-  xy_names <- get_xy_names(x0, y0, xname, yname, list(...))
+  args$params <- resolve_line_args(fig, args$params)
 
-  lgroup <- get_lgroup(lgroup, fig)
+  axis_type_range <- get_glyph_axis_type_range(
+    c(args$data$x0, args$data$x1),
+    c(args$data$y0, args$data$y1)
+  )
 
-  args <- list(glyph = "segment", color = color,
-    alpha = alpha, width = width,
-    type = type, ...)
+  ## see if any options won't be used and give a message
+  check_opts(args$params, "segment", formals = names(formals(ly_segments)))
 
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
+  mc <- lapply(match.call(), deparse)
 
-  args <- resolve_line_args(fig, args)
-
-  axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1))
-  make_glyph(fig, type = "segment",
-    xname = xy_names$x, yname = xy_names$y,
-    legend = legend, lname = lname, lgroup = lgroup,
-    data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1),
-    args = args, axis_type_range = axis_type_range)
+  make_glyph(
+    fig, type = "segment",
+    data = args$data,
+    xname = args$info$x_name, yname = args$info$y_name,
+    args = args$params, axis_type_range = axis_type_range,
+    legend = args$info$legend, lname = args$info$lname, lgroup = args$info$lgroup,
+    ly_call = mc
+  )
 }
 
 #' Add an "abline" layer to a Bokeh figure
@@ -175,27 +181,39 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = NULL,
 #' @example man-roxygen/ex-lines.R
 #' @family layer functions
 #' @export
-ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
+ly_abline <- function(
+  fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   color = "black", alpha = NULL, width = 1, type = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_abline")
+
+  args <- sub_names(fig, data = NULL,
+    grab(
+      color,
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...),
+      null_data = TRUE
+    )
+  )
+  args$params$glyph <- "segment"
+
+  if(missing(color) && !is.null(args$params$line_color)) {
+    args$params$color <- NULL
+  }
+
   ## see if any options won't be used and give a message
-  check_opts(list(...), "segment", formals = names(formals(ly_abline)))
+  check_opts(args$params, "segment", formals = names(formals(ly_abline)))
 
-  xy_names <- get_xy_names(NULL, NULL, "x", "y", list(...))
+  args$params <- resolve_line_args(fig, args$params)
 
-  lgroup <- get_lgroup(lgroup, fig)
+  x_axis_type <- "numeric"
+  y_axis_type <- "numeric"
 
-  args <- list(glyph = "segment", color = color,
-    alpha = alpha, width = width,
-    type = type, ...)
-
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
-
-  args <- resolve_line_args(fig, args)
-
+  # manage data
   if(!is.null(coef) || inherits(a, "lm")) {
     if(is.null(coef))
       coef <- a
@@ -205,9 +223,6 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     a <- coef[1]
     b <- coef[2]
   }
-
-  x_axis_type <- "numeric"
-  y_axis_type <- "numeric"
 
   if(!is.null(a) && !is.null(b)) {
     nn <- max(c(length(a), length(b)))
@@ -242,12 +257,15 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   }
 
   defer_fn <- function(data, xlim, ylim) {
-    if(length(data$x0) == 1) {
+    if(length(data$x0[[1]]) == 1) {
       if(data$x0 == "x0")
         return(data)
-    } else if(length(data$x0) == 0) {
+    } else if(length(data$x0[[1]]) == 0) {
       return(data)
     }
+    # unlist because of json encoding issues
+    # (json wants each as a list but we want to work with scalars here)
+    data <- unlist(data, recursive = FALSE)
     if(all(data$x0 == data$x1)) {
       ## vertical lines
       data$y0 <- rep(ylim[1], length(data$y0))
@@ -266,6 +284,11 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
       data$y0 <- data$x0 * b + a
       data$y1 <- data$x1 * b + a
     }
+    # now below wrap each result with list so json encoding is happy
+    data$x0 <- list(data$x0)
+    data$x1 <- list(data$x1)
+    data$y0 <- list(data$y0)
+    data$y1 <- list(data$y1)
     data
   }
 
@@ -273,11 +296,17 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
     x_axis_type = x_axis_type, y_axis_type = y_axis_type,
     x_range = NULL, y_range = NULL)
 
-  make_glyph(fig, type = "segment", legend = legend,
-    lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
+  mc <- lapply(match.call(), deparse)
+
+  make_glyph(
+    fig, type = "segment",
     data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, defer = defer_fn),
-    args = args, axis_type_range = axis_type_range)
+    legend = args$info$legend,
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    xname = args$info$x_name, yname = args$info$y_name,
+    args = args$params, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
 
 #' Add a "curve" layer to a Bokeh figure
@@ -297,18 +326,15 @@ ly_abline <- function(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
 #' }
 #' @family layer functions
 #' @export
-ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
+ly_curve <- function(
+  fig, expr, from = NULL, to = NULL, n = 101,
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_curve")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "line", formals = names(formals(ly_curve)))
 
   xname <- "x"
-
-  lgroup <- get_lgroup(lgroup, fig)
-
   sexpr <- substitute(expr)
   if (is.name(sexpr)) {
     yname <- paste(deparse(sexpr), "(x)", sep = "")
@@ -326,17 +352,37 @@ ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
   names(ll) <- xname
   y <- eval(expr, envir = ll, enclos = parent.frame())
 
-  args <- list(color = color,
-    alpha = alpha, width = width,
-    type = type, ...)
+  args <- sub_names(fig, data = NULL,
+    grab(
+      color,
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...),
+      null_data = TRUE
+    )
+  )
 
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
+  ## see if any options won't be used and give a message
+  check_opts(args$params, "line", formals = names(formals(ly_curve)))
 
-  args <- resolve_line_args(fig, args)
+  if(missing(color) && !is.null(args$params$line_color))
+    args$params$color <- NULL
 
-  do.call(ly_lines, c(list(fig = fig, x = x, y = y, legend = legend,
-    lname = lname, lgroup = lgroup, xlab = xname, ylab = yname), args))
+  args$params <- resolve_line_args(fig, args$params)
+
+  do.call(ly_lines,
+    c(
+      list(
+        fig = fig,
+        x = x, y = y,
+        legend = args$info$legend, lname = args$info$lname, lgroup = args$info$lgroup,
+        xlab = xname, ylab = yname
+      ),
+      args$params
+    )
+  )
 }
 
 #' Add a "contour" layer to a Bokeh figure
@@ -352,37 +398,50 @@ ly_curve <- function(fig, expr, from = NULL, to = NULL, n = 101,
 #' @example man-roxygen/ex-image.R
 #' @family layer functions
 #' @export
-ly_contour <- function(fig, z,
+ly_contour <- function(
+  fig, z,
   x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1, length.out = ncol(z)),
   nlevels = 10, levels = pretty(range(z, na.rm = TRUE), nlevels),
   color = "black", alpha = 1, width = 1, type = 1,
-  lname = NULL, lgroup = NULL, ...) {
+  lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_contour")
   ## see if any options won't be used and give a message
-  check_opts(list(...), "multi_line", formals = names(formals(ly_contour)))
 
-  xy_names <- get_xy_names(NULL, NULL, "x", "y", list(...))
+  args <- sub_names(fig, data = NULL,
+    grab(
+      color,
+      alpha,
+      width,
+      type,
+      lname, lgroup,
+      dots = lazy_dots(...),
+      null_data = TRUE
+    )
+  )
 
-  lgroup <- get_lgroup(lgroup, fig)
-
-  args <- list(color = color,
-    alpha = alpha, width = width,
-    type = type, ...)
-
-  args <- resolve_line_args(fig, args)
+  args$params <- resolve_line_args(fig, args$params)
 
   contr <- do.call(contourLines, list(x = x, y = y, z = z, nlevels = nlevels, levels = levels))
 
   xs <- lapply(contr, "[[", 2)
   ys <- lapply(contr, "[[", 3)
 
+  check_opts(args$params, "multi_line", formals = names(formals(ly_contour)))
+
   axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
 
-  make_glyph(fig, type = "multi_line", lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
+  mc <- lapply(match.call(), deparse)
+
+  make_glyph(
+    fig, type = "multi_line",
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    xname = args$info$x_name, yname = args$info$y_name,
     data = list(xs = xs, ys = ys),
-    args = args, axis_type_range = axis_type_range)
+    args = args$params, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
 
 #' Add a "ray" layer to a Bokeh figure
@@ -400,46 +459,50 @@ ly_contour <- function(fig, z,
 #' @template dots-line
 #' @family layer functions
 #' @export
-ly_ray <- function(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
+ly_ray <- function(
+  fig, x, y = NULL, data = figure_data(fig),
+  length = NULL, angle = 0,
   color = "black", type = 1, width = 1, alpha = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_ray")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "ray", formals = names(formals(ly_ray)))
 
-  xname <- deparse(substitute(x))
-  yname <- deparse(substitute(y))
+  args <- sub_names(fig, data,
+    grab(
+      x, y,
+      length,
+      angle,
+      color,
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
 
-  ## deal with possible named inputs from a data source
-  if(!is.null(data)) {
-    x     <- v_eval(substitute(x), data)
-    y     <- v_eval(substitute(y), data)
-    color <- v_eval(substitute(color), data)
-    type  <- v_eval(substitute(type), data)
-    width <- v_eval(substitute(width), data)
+  if(missing(color) && !is.null(args$params$line_color)) {
+    args$params$color <- NULL
   }
 
-  xy_names <- get_xy_names(x, y, xname, yname, list(...))
-  ## translate different x, y types to vectors
-  xy <- get_xy_data(x, y)
-  lgroup <- get_lgroup(lgroup, fig)
+  ## see if any options won't be used and give a message
+  check_opts(args$params, "ray", formals = names(formals(ly_ray)))
 
-  args <- list(glyph = "ray", color = color,
-    alpha = alpha, width = width, type = type,
-    length = length, angle = angle, ...)
+  args$params <- resolve_line_args(fig, args$params)
 
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y)
 
-  args <- resolve_line_args(fig, args)
+  mc <- lapply(match.call(), deparse)
 
-  axis_type_range <- get_glyph_axis_type_range(x, y)
-
-  make_glyph(fig, type = "ray", lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
-    data = xy, legend = legend,
-    args = args, axis_type_range = axis_type_range)
+  make_glyph(
+    fig, type = "ray",
+    xname = args$info$x_name, yname = args$info$y_name,
+    data = args$data, legend = args$info$legend,
+    args = args$params, axis_type_range = axis_type_range,
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    ly_call = mc
+  )
 }
 
 
@@ -462,50 +525,54 @@ ly_ray <- function(fig, x, y = NULL, data = NULL, length = NULL, angle = 0,
 #' @template dots-line
 #' @family layer functions
 #' @export
-ly_bezier <- function(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = NULL,
+ly_bezier <- function(
+  fig,
+  x0, y0, x1, y1, cx0, cy0, cx1, cy1,
+  data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_bezier")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "bezier", formals = names(formals(ly_bezier)))
 
-  xname <- deparse(substitute(x0))
-  yname <- deparse(substitute(y0))
+  args <- sub_names(fig, data,
+    grab(
+      x0, y0, x1, y1, cx0, cy0, cx1, cy1,
+      color,
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$params$glyph = "bezier"
 
-  if(!is.null(data)) {
-    x0    <- v_eval(substitute(x0), data)
-    y0    <- v_eval(substitute(y0), data)
-    x1    <- v_eval(substitute(x1), data)
-    y1    <- v_eval(substitute(y1), data)
-    cx0   <- v_eval(substitute(cx0), data)
-    cy0   <- v_eval(substitute(cy0), data)
-    cx1   <- v_eval(substitute(cx1), data)
-    cy1   <- v_eval(substitute(cy1), data)
-    color <- v_eval(substitute(color), data)
-    type  <- v_eval(substitute(type), data)
-    width <- v_eval(substitute(width), data)
+  if(missing(color) && !is.null(args$params$line_color)) {
+    args$params$color <- NULL
   }
 
-  xy_names <- get_xy_names(x0, y0, xname, yname, list(...))
-  lgroup <- get_lgroup(lgroup, fig)
+  ## see if any options won't be used and give a message
+  check_opts(args$params, "bezier", formals = names(formals(ly_bezier)))
 
-  args <- list(glyph = "bezier", color = color, type = type,
-    width = width, alpha = alpha, ...)
+  args$params <- resolve_line_args(fig, args$params)
 
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
+  axis_type_range <- get_glyph_axis_type_range(
+    c(args$data$x0, args$data$x1),
+    c(args$data$y0, args$data$y1),
+    assert_x = "numeric", assert_y = "numeric"
+  )
 
-  args <- resolve_line_args(fig, args)
+  mc <- lapply(match.call(), deparse)
 
-  axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1),
-    assert_x = "numeric", assert_y = "numeric")
-
-  make_glyph(fig, type = "bezier", lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
-    data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1,
-      cx0 = cx0, cy0 = cy0, cx1 = cx1, cy1 = cy1),
-    args = args, axis_type_range = axis_type_range)
+  make_glyph(
+    fig, type = "bezier",
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    xname = args$info$x_name, yname = args$info$y_name,
+    data = args$data,
+    args = args$params, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
 
 #' Add a "quadratic" layer to a Bokeh figure
@@ -525,47 +592,54 @@ ly_bezier <- function(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = NULL,
 #' @template dots-fillline
 #' @family layer functions
 #' @export
-ly_quadratic <- function(fig, x0, y0, x1, y1, cx, cy, data = NULL,
+ly_quadratic <- function(
+  fig,
+  x0, y0, x1, y1, cx, cy,
+  data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_quadratic")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "quadratic", formals = names(formals(ly_quadratic)))
 
-  xname <- deparse(substitute(x0))
-  yname <- deparse(substitute(y0))
+  args <- sub_names(fig, data,
+    grab(
+      x0, y0, x1, y1, cx, cy,
+      color,
+      alpha,
+      width,
+      type,
+      legend, lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$params$glyph <- "quadratic"
 
-  if(!is.null(data)) {
-    x0    <- v_eval(substitute(x0), data)
-    y0    <- v_eval(substitute(y0), data)
-    x1    <- v_eval(substitute(x1), data)
-    y1    <- v_eval(substitute(y1), data)
-    cx    <- v_eval(substitute(cx), data)
-    cy    <- v_eval(substitute(cy), data)
-    color <- v_eval(substitute(color), data)
-    type  <- v_eval(substitute(type), data)
-    width <- v_eval(substitute(width), data)
+  if(missing(color) && !is.null(args$params$line_color)) {
+    args$color <- NULL
   }
 
-  xy_names <- get_xy_names(x0, y0, xname, yname, list(...))
-  lgroup <- get_lgroup(lgroup, fig)
+  ## see if any options won't be used and give a message
+  check_opts(args$params, "quadratic", formals = names(formals(ly_quadratic)))
 
-  args <- list(glyph = "quadratic", color = color, type = type,
-    width = width, alpha = alpha, ...)
+  args$params <- resolve_line_args(fig, args$params)
 
-  if(missing(color) && !is.null(args$line_color))
-    args$color <- NULL
+  axis_type_range <- get_glyph_axis_type_range(
+    c(args$data$x0, args$data$x1),
+    c(args$data$y0, args$data$y1),
+    assert_x = "numeric", assert_y = "numeric"
+  )
 
-  args <- resolve_line_args(fig, args)
+  mc <- lapply(match.call(), deparse)
 
-  axis_type_range <- get_glyph_axis_type_range(c(x0, x1), c(y0, y1),
-    assert_x = "numeric", assert_y = "numeric")
-
-  make_glyph(fig, type = "quadratic", lname = lname, lgroup = lgroup,
-    xname = xy_names$x, yname = xy_names$y,
-    data = list(x0 = x0, y0 = y0, x1 = x1, y1 = y1, cx = cx, cy = cy),
-    args = list(...), axis_type_range = axis_type_range)
+  make_glyph(
+    fig, type = "quadratic",
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    xname = args$info$x_name, yname = args$info$y_name,
+    data = args$data,
+    args = args$params, axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
 
 ## a common thing to do is make a layer with both points and lines (type = "b")
@@ -582,31 +656,51 @@ ly_quadratic <- function(fig, x0, y0, x1, y1, cx, cy, data = NULL,
 #' @template dots-line
 #' @family layer functions
 #' @export
-ly_multi_line <- function(fig, xs, ys,
+ly_multi_line <- function(
+  fig,
+  xs, ys,
   color = "black", alpha = 1, width = 1, type = 1,
-  lname = NULL, lgroup = NULL, ...) {
-
-  xname <- deparse(substitute(xs))
-  yname <- deparse(substitute(ys))
+  lname = NULL, lgroup = NULL, ...
+) {
 
   validate_fig(fig, "ly_multi_line")
-  ## see if any options won't be used and give a message
-  check_opts(list(...), "multi_line")
 
-  args <- list(glyph = "line", color = color,
-    width = width, type = type, ...)
+  args <- sub_names(fig, data = NULL,
+    grab(
+      xs, ys,
+      color,
+      alpha,
+      width,
+      type,
+      # no legend?
+      lname, lgroup,
+      dots = lazy_dots(...)
+    )
+  )
+  args$params$glyph <- "line"
 
-  if(missing(color) && !is.null(args$line_color))
+  if(missing(color) && !is.null(args$params$line_color)) {
     args$color <- NULL
+  }
 
-  args$alpha <- alpha
+  ## see if any options won't be used and give a message
+  # can't pass in color, alpha, width, or type
+  good_names = names(args$params)
+  good_names = good_names[! (good_names %in% c("color", "alpha", "width", "type"))]
+  check_opts(args$params[good_names], "multi_line")
 
-  args <- resolve_line_args(fig, args)
+  args$params <- resolve_line_args(fig, args$params)
 
-  axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
+  axis_type_range <- get_glyph_axis_type_range(unlist(args$data$xs), unlist(args$data$ys))
 
-  make_glyph(fig, type = "multi_line", xname = xname, yname = yname,
-    lname = lname, lgroup = lgroup,
-    data = list(xs = xs, ys = ys), args = args,
-    axis_type_range = axis_type_range)
+  mc <- lapply(match.call(), deparse)
+
+  make_glyph(
+    fig, type = "multi_line",
+    data = args$data, args = args$params,
+    xname = args$info$x_name, yname = args$info$y_name,
+    lname = args$info$lname, lgroup = args$info$lgroup,
+    axis_type_range = axis_type_range,
+    ly_call = mc
+  )
 }
