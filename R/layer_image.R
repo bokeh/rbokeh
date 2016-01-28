@@ -144,14 +144,14 @@ ly_image_url <- function(
   } else if(grepl("right", anchor)) {
     x2 <- min(x - w)
   } else if(anchor %in% c("top_center", "bottom_center", "center")) {
-    x2 <- range(x + c(-1, 1) * w / 2)
+    x2 <- range(c(x +  w / 2, x - w / 2))
   }
   if(grepl("top", anchor)) {
     y2 <- min(y - h)
   } else if(grepl("bottom", anchor)) {
     y2 <- max(y + h)
   } else if(anchor %in% c("left_center", "right_center", "center")) {
-    y2 <- range(y + c(-1, 1) * h / 2)
+    y2 <- range(c(y + h / 2, y - h / 2))
   }
   # can this have "categorical" axes?
   axis_type_range <- get_glyph_axis_type_range(c(x, x2), c(y, y2))
