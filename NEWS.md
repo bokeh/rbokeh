@@ -1,6 +1,7 @@
 Version 0.3
 ----------------------------------------------------------------------
 
+- fix issue with `ly_rect()` and datetime axes (0.3.4)
 - set proper defaults in `gmap()` so that user can't do things they shouldn't (0.3.4)
 - fix bug in `ly_image_url()` for computing w/h (0.3.4)
 - update to Bokeh 0.11.0 (0.3.4)
