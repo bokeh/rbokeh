@@ -221,6 +221,10 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
       data$x0 <- handle_singleton(data$x0, to_epoch)
     if(!is.null(data$x1))
       data$x1 <- handle_singleton(data$x1, to_epoch)
+    if(!is.null(data$left))
+      data$left <- handle_singleton(data$left, to_epoch)
+    if(!is.null(data$right))
+      data$right <- handle_singleton(data$right, to_epoch)
   }
 
   if(axis_type_range$y_axis_type == "datetime") {
@@ -231,6 +235,10 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
       data$y0 <- handle_singleton(data$y0, to_epoch)
     if(!is.null(data$y1))
       data$y1 <- handle_singleton(data$y1, to_epoch)
+    if(!is.null(data$top))
+      data$top <- handle_singleton(data$top, to_epoch)
+    if(!is.null(data$bottom))
+      data$bottom <- handle_singleton(data$bottom, to_epoch)
   }
 
   fig <- fig %>% add_layer(args, data, lname, lgroup)
