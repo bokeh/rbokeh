@@ -14,10 +14,10 @@ Version 0.3
 - fix json encoding issue when data is a list to begin with (0.3.1)
 - fix single-row hover issue (0.3.1)
 - fix abline to work with json encoding scheme (0.3.1)
-- reduce verbosity and remove (0.3.1)
+- reduce verbosity (0.3.1)
 - fill props if none for a glyph (0.3.1)
 - fix custom date axis issue #100 (0.3.1)
-- allow NULL to hide legend (0.3.1)
+- allow FALSE to hide legend (0.3.1)
 - **major** overhaul of internal lazy evaluation logic to be more flexible
 - add webgl parameter
 - fix 2html and 2gist to handle NAs properly
