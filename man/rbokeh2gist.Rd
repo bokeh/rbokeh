@@ -4,7 +4,8 @@
 \alias{rbokeh2gist}
 \title{Export rbokeh plot to a gist}
 \usage{
-rbokeh2gist(fig_str, name, created = NULL, description = "", view = TRUE)
+rbokeh2gist(fig_str, name, created = NULL, description = "",
+  secure = TRUE, view = TRUE)
 }
 \arguments{
 \item{fig_str}{a string containing R code to create an rbokeh figure}
@@ -14,6 +15,8 @@ rbokeh2gist(fig_str, name, created = NULL, description = "", view = TRUE)
 \item{created}{optional string for a "Created by" to preceed the README}
 
 \item{description}{text to go in README.md}
+
+\item{secure}{should https be used for cdn links?}
 
 \item{view}{should the resulting gist be opened in the browser on bl.ocks.org?}
 }

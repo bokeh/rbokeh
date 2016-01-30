@@ -2,11 +2,13 @@
 #' @param fig figure
 #' @param file html file name to write the figure to
 #' @param pretty should the json model be pretty printed to the html file?
+#' @param secure should https be used for cdn links?
 #' @examples
 #' p <- figure() %>% ly_points(1:10)
 #' rbokeh2html(p)
 #' @export
-rbokeh2html <- function(fig, file = tempfile(fileext = ".html"), pretty = FALSE) {
+rbokeh2html <- function(fig, file = tempfile(fileext = ".html"), pretty = FALSE,
+  secure = TRUE) {
   fig <- rbokeh_prerender(fig)
 
   modelid <- fig$x$modelid
@@ -18,11 +20,13 @@ rbokeh2html <- function(fig, file = tempfile(fileext = ".html"), pretty = FALSE)
 
   ver <- get_bokeh_version()
 
+  sc <- ifelse(secure, "s", "")
+
   a <- paste0('<!DOCTYPE html>
 <html>
 <head>
-<script src="http://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.js"></script>
-<link href="http://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.css" rel="stylesheet">
+<script src="http', sc, '://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.js"></script>
+<link href="http', sc, '://cdn.pydata.org/bokeh/release/bokeh-', ver, '.min.css" rel="stylesheet">
 </head>
 <body>
 <div id="', elementid, '" class="plotdiv"></div>

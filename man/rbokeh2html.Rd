@@ -4,7 +4,8 @@
 \alias{rbokeh2html}
 \title{Get the HTML content required to embed a Bokeh figure}
 \usage{
-rbokeh2html(fig, file = tempfile(fileext = ".html"), pretty = FALSE)
+rbokeh2html(fig, file = tempfile(fileext = ".html"), pretty = FALSE,
+  secure = TRUE)
 }
 \arguments{
 \item{fig}{figure}
@@ -12,6 +13,8 @@ rbokeh2html(fig, file = tempfile(fileext = ".html"), pretty = FALSE)
 \item{file}{html file name to write the figure to}
 
 \item{pretty}{should the json model be pretty printed to the html file?}
+
+\item{secure}{should https be used for cdn links?}
 }
 \description{
 Get the HTML content required to embed a Bokeh figure
