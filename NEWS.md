@@ -1,6 +1,9 @@
 Version 0.3
 ----------------------------------------------------------------------
 
+- change gist iframe to use rawgit because bl.ocks.org changed X-frame-options to SAMEORIGIN (0.3.4)
+- add 'secure' option to `rbokeh2html()` for using https cdn links (0.3.4)
+- add `desired_num_ticks` to axis options (0.3.4)
 - fix issue with `ly_rect()` and datetime axes (0.3.4)
 - set proper defaults in `gmap()` so that user can't do things they shouldn't (0.3.4)
 - fix bug in `ly_image_url()` for computing w/h (0.3.4)
