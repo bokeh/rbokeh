@@ -5,9 +5,10 @@
 \title{Customize x axis of a Bokeh figure}
 \usage{
 x_axis(fig, label, position = "below", log = FALSE, grid = TRUE,
-  num_minor_ticks = 5, visible = TRUE, number_formatter = c("basic",
-  "numeral", "printf"), power_limit_high = 5, power_limit_low = -3,
-  precision = NULL, use_scientific = TRUE, format = NULL)
+  desired_num_ticks = NULL, num_minor_ticks = 5, visible = TRUE,
+  number_formatter = c("basic", "numeral", "printf"), power_limit_high = 5,
+  power_limit_low = -3, precision = NULL, use_scientific = TRUE,
+  format = NULL)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -19,6 +20,8 @@ x_axis(fig, label, position = "below", log = FALSE, grid = TRUE,
 \item{log}{logical or integer - if TRUE, a log axis with base 10 is used - if an integer, a log axis with base of that integer will be used}
 
 \item{grid}{logical - should a reference grid be shown for this axis?}
+
+\item{desired_num_ticks}{desired target number of major tick positions to generate across the plot range}
 
 \item{num_minor_ticks}{number of minor ticks}
 
