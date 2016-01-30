@@ -4,6 +4,7 @@
 #' @param position where to place the axis (either "above" or "below")
 #' @param log logical or integer - if TRUE, a log axis with base 10 is used - if an integer, a log axis with base of that integer will be used
 #' @param grid logical - should a reference grid be shown for this axis?
+#' @param desired_num_ticks desired target number of major tick positions to generate across the plot range
 #' @param num_minor_ticks number of minor ticks
 #' @param visible should axis be shown?
 #' @param number_formatter Bokeh numeric tick label formatter
@@ -24,10 +25,10 @@
 #' @example man-roxygen/ex-axis.R
 #' @export
 x_axis <- function(fig, label, position = "below", log = FALSE,
-  grid = TRUE, num_minor_ticks = 5, visible = TRUE,
-  number_formatter = c("basic", "numeral", "printf"),
-  power_limit_high = 5, power_limit_low = -3,
-  precision = NULL, use_scientific = TRUE, format = NULL) {
+  grid = TRUE, desired_num_ticks = NULL, num_minor_ticks = 5,
+  visible = TRUE, number_formatter = c("basic", "numeral", "printf"),
+  power_limit_high = 5, power_limit_low = -3, precision = NULL,
+  use_scientific = TRUE, format = NULL) {
 
   if(is.null(position))
     position <- "below"
@@ -58,6 +59,7 @@ x_axis <- function(fig, label, position = "below", log = FALSE,
   format_pars <- format_pars[names(format_pars) %in% specified]
 
   update_axis(fig, position = position, label = label, grid = grid,
+    desired_num_ticks = desired_num_ticks,
     num_minor_ticks = num_minor_ticks, visible = visible,
     log = log, number_formatter = match.arg(number_formatter),
     format_pars = format_pars)
@@ -70,10 +72,10 @@ x_axis <- function(fig, label, position = "below", log = FALSE,
 #' @example man-roxygen/ex-axis.R
 #' @export
 y_axis <- function(fig, label, position = "left", log = FALSE,
-  grid = TRUE, num_minor_ticks = 5, visible = TRUE,
-  number_formatter = c("basic", "numeral", "printf"),
-  power_limit_high = 5, power_limit_low = -3,
-  precision = NULL, use_scientific = TRUE, format = NULL) {
+  grid = TRUE, desired_num_ticks = NULL, num_minor_ticks = 5,
+  visible = TRUE, number_formatter = c("basic", "numeral", "printf"),
+  power_limit_high = 5, power_limit_low = -3, precision = NULL,
+  use_scientific = TRUE, format = NULL) {
 
   if(is.null(position))
     position <- "left"
@@ -104,6 +106,7 @@ y_axis <- function(fig, label, position = "left", log = FALSE,
   format_pars <- format_pars[names(format_pars) %in% specified]
 
   update_axis(fig, position = position, label = label, grid = grid,
+    desired_num_ticks = desired_num_ticks,
     num_minor_ticks = num_minor_ticks, visible = visible,
     log = log, number_formatter = match.arg(number_formatter),
     format_pars = format_pars)
@@ -122,8 +125,8 @@ y_axis <- function(fig, label, position = "left", log = FALSE,
 # also create grid
 
 update_axis <- function(fig, position, label, grid = TRUE,
-  num_minor_ticks = 5, visible = TRUE, log = NULL,
-  number_formatter = c("basic", "numeral", "printf"),
+  desired_num_ticks = NULL, num_minor_ticks = 5, visible = TRUE,
+  log = NULL, number_formatter = c("basic", "numeral", "printf"),
   format_pars = NULL) {
 
   is_y <- position %in% c("left", "right")
@@ -169,7 +172,8 @@ update_axis <- function(fig, position, label, grid = TRUE,
   }
 
   formatter <- formatter_model(type_list$format, f_id, format_pars)
-  ticker <- ticker_model(type_list$tick, t_id, num_minor_ticks, log)
+  ticker <- ticker_model(type_list$tick, t_id, desired_num_ticks,
+    num_minor_ticks, log)
   axis <- axis_model(type = type_list$axis, label = label,
     id = a_id, plot_ref = fig$x$spec$ref,
     formatter_ref = formatter$ref, ticker_ref = ticker$ref,
@@ -225,10 +229,11 @@ formatter_model <- function(type = "BasicTickFormatter",
 }
 
 ticker_model <- function(type = "BasicTicker", id,
-  num_minor_ticks = 5, log = NULL) {
+  desired_num_ticks = NULL, num_minor_ticks = 5, log = NULL) {
 
   res <- base_model_object(type, id)
   res$model$attributes$num_minor_ticks <- num_minor_ticks
+  res$model$attributes$desired_num_ticks <- desired_num_ticks
   if(!is.null(log))
     res$model$attributes$base <- log
 
