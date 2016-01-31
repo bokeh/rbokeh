@@ -18,4 +18,23 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+
+
+library("shiny")
+library("rbokeh")
+library("htmlwidgets")
+
+ui <- fluidPage(
+  rbokehOutput("rbokeh")
+)
+
+server <- function(input, output, session) {
+  output$rbokeh <- renderRbokeh({
+    figure() %>% ly_points(1:10) %>%
+      x_range(callback = "console.log(x_range.get('start'))")
+  })
 }
+
+shinyApp(ui, server)
+}
+

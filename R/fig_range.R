@@ -1,11 +1,12 @@
 #' Update x axis range in a Bokeh figure
 #' @param fig figure to modify
 #' @param dat either a vector (min, max) if the axis is numeric, or a vector of values if the axis is categorical.  In the latter case, the order in which the values are supplied is how they will be arranged on the axis.
+#' @param callback TODO
 #' @family ranges
 #' @example man-roxygen/ex-range.R
 #' @export
-x_range <- function(fig, dat) {
-  update_range(fig, "x", dat)
+x_range <- function(fig, dat = NULL, callback = NULL) {
+  update_range(fig, "x", dat, callback)
 }
 
 #' Update y axis range in a Bokeh figure
@@ -13,44 +14,52 @@ x_range <- function(fig, dat) {
 #' @family ranges
 #' @example man-roxygen/ex-range.R
 #' @export
-y_range <- function(fig, dat) {
-  update_range(fig, "y", dat)
-}
-
-range_model <- function(type = "Range1d", id, dat) {
-  res <- base_model_object(type, id)
-
-  if(type == "Range1d") {
-    res$model$attributes$start <- dat[1]
-    res$model$attributes$end <- dat[2]
-  } else if(type == "FactorRange") {
-    res$model$attributes$factors <- I(dat)
-  }
-
-  res
+y_range <- function(fig, dat = NULL, callback = NULL) {
+  update_range(fig, "y", dat, callback)
 }
 
 # range ref needs to be added to plot attributes as "x_range" or "y_range"
 # then range model added to object
-update_range <- function(fig, axis = "x", dat) {
-  if(inherits(dat, c("Date", "POSIXt")))
-    dat <- to_epoch(dat)
-
-  if(is.numeric(dat)) {
-    type <- "Range1d"
-    dat <- range(dat, na.rm = TRUE)
-  } else {
-    type <- "FactorRange"
-  }
+update_range <- function(fig, axis = "x", dat = NULL, callback = NULL) {
 
   range_name <- paste0(axis, "_range")
-
   id <- gen_id(fig, range_name)
-  model <- range_model(type, id, dat)
+  type <- ifelse(fig$x$spec$x_axis_type == "numeric", "Range1d", "FactorRange")
+  model <- base_model_object(type, id)
+
+  # first get the model if it exists
+  if(!is.null(fig$x$spec$model[[id]]))
+    model$model <- fig$x$spec$model[[id]]
+
+  if(!is.null(dat)) {
+    if(inherits(dat, c("Date", "POSIXt")))
+      dat <- to_epoch(dat)
+
+    if(type == "Range1d") {
+      dat <- range(dat, na.rm = TRUE)
+      model$model$attributes$start <- dat[1]
+      model$model$attributes$end <- dat[2]
+    } else if(type == "FactorRange") {
+      model$model$attributes$factors <- I(dat)
+    }
+
+    # this way we know a range was alredy specified
+    # so we don't need to do it at the render time
+    fig$x$spec[[paste0("has_", axis, "_range")]] <- TRUE
+  }
+
+  if(!is.null(callback)) {
+    cb_id <- gen_id(fig, paste0(range_name, "_callback"))
+
+    cb_model <- customjs_model(id = cb_id,
+      code = callback, args = structure(list(model$ref), names = range_name))
+
+    fig$x$spec$model[[cb_id]] <- cb_model$model
+    model$model$attributes$callback <- cb_model$ref
+  }
 
   fig$x$spec$model$plot$attributes[[range_name]] <- model$ref
   fig$x$spec$model[[id]] <- model$model
-  fig$x$spec[[paste0("has_", axis, "_range")]] <- TRUE
 
   fig
 }
