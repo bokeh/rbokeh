@@ -49,13 +49,14 @@ update_range <- function(fig, axis = "x", dat = NULL, callback = NULL) {
   }
 
   if(!is.null(callback)) {
-    cb_id <- gen_id(fig, paste0(range_name, "_callback"))
-
-    cb_model <- customjs_model(id = cb_id,
-      code = callback, args = structure(list(model$ref), names = range_name))
-
-    fig$x$spec$model[[cb_id]] <- cb_model$model
-    model$model$attributes$callback <- cb_model$ref
+    callback <- handle_range_callback(callback, model)
+    if(!is.null(callback)) {
+      cb_id <- gen_id(fig, paste0(range_name, "_callback"))
+      cb_model <- customjs_model(id = cb_id,
+        code = callback$code, args = callback$args)
+      fig$x$spec$model[[cb_id]] <- cb_model$model
+      model$model$attributes$callback <- cb_model$ref
+    }
   }
 
   fig$x$spec$model$plot$attributes[[range_name]] <- model$ref

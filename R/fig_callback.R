@@ -1,23 +1,5 @@
-# {
-#   "attributes": {
-#     "code": "\n        var data = source.get('data');\n        var start = range.get('start');\n        var end = range.get('end');\n        data['x'] = [start + (end - start) / 2];\n        data['width'] = [end - start];\n        source.trigger('change');\n    ",
-#     "args": {
-#       "source": {
-#         "type": "ColumnDataSource",
-#         "id": "ff93fc5a-b296-445e-a293-fd67e164bede"
-#       },
-#       "range": {
-#         "type": "Range1d",
-#         "id": "520ddf82-bfa6-433a-80f8-0c46e9bcf1e1"
-#       }
-#     }
-#   },
-#   "type": "CustomJS",
-#   "id": "76737339-256b-49fe-b0e9-55ccd8d74c6c"
-# }
 
 # args should be a named list of refs to other things that code will reference
-
 customjs_model <- function(type = "CustomJS", id, code, args) {
   res <- base_model_object(type, id)
   res$model$attributes$code <- code
@@ -26,46 +8,83 @@ customjs_model <- function(type = "CustomJS", id, code, args) {
 }
 
 
-# {
-#   "attributes": {
-#     "callback": {
-#       "type": "CustomJS",
-#       "id": "76737339-256b-49fe-b0e9-55ccd8d74c6c"
-#     },
-#     "end": 100
-#   },
-#   "type": "Range1d",
-#   "id": "520ddf82-bfa6-433a-80f8-0c46e9bcf1e1"
-# }
 
-# {
-#   "attributes": {
-#     "code": "\n        var data = source.get('data'); console.log(range);\n        var start = range.get('start');\n        var end = range.get('end');\n        data['y'] = [start + (end - start) / 2];\n        data['height'] = [end - start];\n        source.trigger('change');\n    ",
-#     "args": {
-#       "source": {
-#         "type": "ColumnDataSource",
-#         "id": "ff93fc5a-b296-445e-a293-fd67e164bede"
-#       },
-#       "range": {
-#         "type": "Range1d",
-#         "id": "b0dfac3a-0bb1-4f32-975e-de4162cd0a50"
-#       }
-#     }
-#   },
-#   "type": "CustomJS",
-#   "id": "5799b231-29f5-4387-a794-6f9c20bd33eb"
-# }
+#' @export
+shiny_callback <- function(id) {
+  class(id) <- "shinyCallback"
+  id
+}
+
+#' @export
+console_callback <- function() {
+  res <- 1
+  class(res) <- "consoleCallback"
+  res
+}
+
+#' @export
+custom_callback <- function(code, args) {
+  # TODO: checking that code and args are correct
+  # code should be string
+  # args should be named list of refs to parts of the model code accesses
+  structure(list(code = code, args = args), class = "customCallback")
+}
 
 
-# {
-#   "attributes": {
-#     "callback": {
-#       "type": "CustomJS",
-#       "id": "5799b231-29f5-4387-a794-6f9c20bd33eb"
-#     },
-#     "end": 100
-#   },
-#   "type": "Range1d",
-#   "id": "b0dfac3a-0bb1-4f32-975e-de4162cd0a50"
+
+
+
+## range callbacks
+##---------------------------------------------------------
+
+handle_range_callback <- function(x, model)
+  UseMethod("handle_range_callback", x)
+
+handle_range_callback.character <- function(x, model) {
+  list(
+    code = x,
+    args = list(range = model$ref)
+  )
+}
+
+handle_range_callback.consoleCallback <- function(x, model) {
+  list(
+    code = "
+console.log('factors: ' + range.get('factors') + ', start: ' + range.get('start') + ', end: ' + range.get('end'))
+    ",
+    args = list(range = model$ref)
+  )
+}
+# if(range.get('factors')) {
+#   console.log(range.get('factors'))
+# } else if(range.get('start')) {
+#   console.log('[' + range.get('start').toFixed(2) + ',' + range.get('end').toFixed(2) + ']')
 # }
+
+handle_range_callback.shinyCallback <- function(x, model) {
+  list(
+    code = sprintf("
+if (HTMLWidgets.shinyMode) {
+  var dat = {factors: range.get('factors'), start: range.get('start'), end: range.get('end')}
+  Shiny.onInputChange('%s', dat);
+}
+", as.character(x)),
+    args = list(range = model$ref)
+  )
+}
+
+handle_range_callback.customCallback <- function(x, model) {
+  x
+}
+
+handle_range_callback.default <- function(x, model) {
+  message("range callback not recognized - ignoring")
+}
+
+
+# figure() %>% ly_points(1:10) %>%
+#   x_range(callback = console_callback())
+
+# figure() %>% ly_points(1:10) %>%
+#   x_range(callback = "console.log(range.get('start'))")
 

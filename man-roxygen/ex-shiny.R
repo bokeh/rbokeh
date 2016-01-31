@@ -2,7 +2,6 @@
 # courtesy of Joe Cheng from RStudio
 library("shiny")
 library("rbokeh")
-library("htmlwidgets")
 
 ui <- fluidPage(
   rbokehOutput("rbokeh")
@@ -22,19 +21,28 @@ shinyApp(ui, server)
 
 library("shiny")
 library("rbokeh")
-library("htmlwidgets")
 
 ui <- fluidPage(
-  rbokehOutput("rbokeh")
+  rbokehOutput("rbokeh", width = 500, height = 540),
+  textOutput("x_range_text")
 )
 
 server <- function(input, output, session) {
   output$rbokeh <- renderRbokeh({
     figure() %>% ly_points(1:10) %>%
-      x_range(callback = "console.log(x_range.get('start'))")
+      x_range(callback = shiny_callback("x_range"))
+  })
+
+  output$x_range_text <- reactive({
+    xrng <- input$x_range
+    if(!is.null(xrng)) {
+      paste0("factors: ", xrng$factors, ", start: ", xrng$start,
+        ", end: ", xrng$end)
+    } else {
+      "waiting for axis event..."
+    }
   })
 }
 
 shinyApp(ui, server)
 }
-
