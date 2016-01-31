@@ -59,6 +59,7 @@ Bokeh.$(function() {
     "elementid": elementid,
     "modelid": modelid
   }];
+  Bokeh.set_log_level(\'info\');
   Bokeh.embed.embed_items(docs_json, render_items);
 });
 </script>
