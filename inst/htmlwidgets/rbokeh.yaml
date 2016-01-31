@@ -4,7 +4,7 @@ dependencies:
   src: htmlwidgets/lib/bokehjs
   script:
     - bokeh.min.js
-    - bokeh-widgets.min.js
+    # - bokeh-widgets.min.js
   stylesheet:
     - bokeh.min.css
-    - bokeh-widgets.min.css
+    # - bokeh-widgets.min.css
