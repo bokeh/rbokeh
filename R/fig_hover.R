@@ -27,16 +27,13 @@ add_hover_callback <- function(fig, callback, ref_layer) {
 
   callback <- handle_hover_callback(callback, hov_model, fig$x$spec$layers$callback)
 
-  if(!is.null(callback)) {
-    cb_id <- gen_id(fig, "hover_callback")
-    cb_model <- customjs_model(id = cb_id,
-      code = callback$code, args = callback$args)
-    fig$x$spec$model[[cb_id]] <- cb_model$model
-    hov_model$model$attributes$callback <- cb_model$ref
-
-    fig$x$spec$model$plot$attributes$tools[[hov_id]] <- hov_model$ref
-    fig$x$spec$model[[hov_id]] <- hov_model$model
-  }
+  cb_id <- gen_id(fig, "hover_callback")
+  cb_model <- customjs_model(id = cb_id,
+    code = callback$code, args = callback$args)
+  hov_model$model$attributes$callback <- cb_model$ref
+  fig$x$spec$model[[cb_id]] <- cb_model$model
+  fig$x$spec$model$plot$attributes$tools[[hov_id]] <- hov_model$ref
+  fig$x$spec$model[[hov_id]] <- hov_model$model
 
   fig
 }

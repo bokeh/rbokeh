@@ -121,6 +121,11 @@ tool_hover <- function(fig, callback, ref_layer) {
   fig %>% add_hover_callback(callback, ref_layer)
 }
 
+#' @export
+tool_tap <- function(fig, callback, ref_layer) {
+  fig %>% add_tap_callback(callback, ref_layer)
+}
+
 tool_help <- function(fig, redirect = "http://hafen.github.io/rbokeh",
   help_tooltip = "Click to learn more about rbokeh.") {
   update_tool(fig, which = "help",
