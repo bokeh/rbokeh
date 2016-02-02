@@ -19,8 +19,12 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   fig$x$spec$layers[[lgroup]]$lgroup <- lgroup
 
   ## give it a unique layer name if not provided
-  if(is.null(lname))
-    lname <- gen_layer_name(names(fig$x$spec$layers[[lgroup]]$glyph_ids), prefix = "layer")
+  prefix <- paste0(lgroup, "l")
+  if(grepl("^group", prefix))
+    prefix <- gsub("roup", "", prefix)
+
+  if(length(lname) == 0)
+    lname <- gen_layer_name(names(fig$x$spec$layers[[lgroup]]$glyph_ids), prefix = prefix)
   lname <- as.character(lname)
 
   ## some figure elements need a single index to a layer name/group combination

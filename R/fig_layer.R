@@ -96,7 +96,7 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
 
   # add in mappings from lname to refs for use in custom js callbacks
   # but ignore legend glyphs
-  if(!grepl("^__legend", lgroup)) {
+  if(!grepl("^__legend", lgroup) && length(lname) == 1) {
     if(is.null(fig$x$spec$layers$callback))
       fig$x$spec$layers$callback <- list()
 
