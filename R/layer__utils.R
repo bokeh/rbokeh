@@ -357,6 +357,7 @@ sub_names <- function(
         lgroup    = get_lgroup(lazy_eval(arg_val), fig),
         url       = get_url(arg_val, data, sub_fn),
         legend    = get_legend(lazy_eval(arg_val)),
+        lname     = as.character(lazy_eval(arg_val)),
         position  = as.character(lazy_eval(arg_val)),
         xlab      = as.character(lazy_eval(arg_val)),
         ylab      = as.character(lazy_eval(arg_val)),
