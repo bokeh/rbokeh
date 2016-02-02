@@ -90,7 +90,7 @@ prepare_figure <- function(fig) {
                 glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg, fig$x$spec$theme)
               # render legend glyph
               spec <- c(glph$args, list(x = "x", y = "y"))
-              lgroup <- paste("legend_", nm, "_", cur_lab, sep = "")
+              lgroup <- paste("__legend_", nm, "_", cur_lab, sep = "")
               lname <- glph$args$glyph
               glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
               # make it so legend glyph doesn't show up on page

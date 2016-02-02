@@ -49,7 +49,7 @@ update_range <- function(fig, axis = "x", dat = NULL, callback = NULL) {
   }
 
   if(!is.null(callback)) {
-    callback <- handle_range_callback(callback, model)
+    callback <- handle_range_callback(callback, model, fig$x$spec$layers$callback)
     if(!is.null(callback)) {
       cb_id <- gen_id(fig, paste0(range_name, "_callback"))
       cb_model <- customjs_model(id = cb_id,

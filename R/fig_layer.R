@@ -64,7 +64,7 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
   }
 
   gl_id <- gen_id(fig, c(glyph, lgroup, lname))
-  glyph_obj <- glyph_model(gl_id, glyph, glyph_attrs)
+  glyph_mod <- glyph_model(gl_id, glyph, glyph_attrs)
 
   # nonselection glyph
   ns_glyph_attrs <- glyph_attrs
@@ -79,20 +79,37 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
     }
   }
   nsgl_id <- gen_id(fig, c("ns", glyph, lgroup, lname))
-  ns_glyph_obj <- glyph_model(nsgl_id, glyph, ns_glyph_attrs)
+  ns_glyph_mod <- glyph_model(nsgl_id, glyph, ns_glyph_attrs)
 
   d_id <- gen_id(fig, digest(dat))
   dat_mod <- data_model(dat, d_id)
 
   glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
-  glyph_rend <- glyph_renderer_model(glr_id, dat_mod$ref, glyph_obj$ref, ns_glyph_obj$ref)
+  glyph_rend_mod <- glyph_renderer_model(glr_id, dat_mod$ref, glyph_mod$ref, ns_glyph_mod$ref)
 
-  fig$x$spec$model$plot$attributes$renderers[[glr_id]] <- glyph_rend$ref
+  fig$x$spec$model$plot$attributes$renderers[[glr_id]] <- glyph_rend_mod$ref
 
   fig$x$spec$model[[d_id]] <- dat_mod$model
-  fig$x$spec$model[[gl_id]] <- glyph_obj$model
-  fig$x$spec$model[[nsgl_id]] <- ns_glyph_obj$model
-  fig$x$spec$model[[glr_id]] <- glyph_rend$model
+  fig$x$spec$model[[gl_id]] <- glyph_mod$model
+  fig$x$spec$model[[nsgl_id]] <- ns_glyph_mod$model
+  fig$x$spec$model[[glr_id]] <- glyph_rend_mod$model
+
+  # add in mappings from lname to refs for use in custom js callbacks
+  # but ignore legend glyphs
+  if(!grepl("^__legend", lgroup)) {
+    if(is.null(fig$x$spec$layers$callback))
+      fig$x$spec$layers$callback <- list()
+
+    cb <- list(
+      glyph_mod$ref,
+      ns_glyph_mod$ref,
+      dat_mod$ref,
+      glyph_rend_mod$ref
+    )
+    names(cb) <- paste(lname, c("glyph", "ns_glyph", "data", "glyph_rend"), sep = "_")
+
+    fig$x$spec$layers$callback[[lname]] <- cb
+  }
 
   fig
 }

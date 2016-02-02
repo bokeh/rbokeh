@@ -7,7 +7,12 @@ customjs_model <- function(type = "CustomJS", id, code, args) {
   res
 }
 
-
+# translate a vector of lnames to a list of refs
+# that will be made available inside custom callback
+callback_lname2args <- function(lnames, fig_refs) {
+  args <- fig_refs[lnames]
+  unlist(unname(args), recursive = FALSE)
+}
 
 #' @export
 shiny_callback <- function(id) {
@@ -31,23 +36,20 @@ custom_callback <- function(code, args) {
 }
 
 
-
-
-
 ## range callbacks
 ##---------------------------------------------------------
 
-handle_range_callback <- function(x, model)
+handle_range_callback <- function(x, model, fig_refs)
   UseMethod("handle_range_callback", x)
 
-handle_range_callback.character <- function(x, model) {
+handle_range_callback.character <- function(x, model, fig_refs) {
   list(
     code = x,
     args = list(range = model$ref)
   )
 }
 
-handle_range_callback.consoleCallback <- function(x, model) {
+handle_range_callback.consoleCallback <- function(x, model, fig_refs) {
   list(
     code = "
 console.log('factors: ' + range.get('factors') + ', start: ' + range.get('start') + ', end: ' + range.get('end'))
@@ -61,7 +63,7 @@ console.log('factors: ' + range.get('factors') + ', start: ' + range.get('start'
 #   console.log('[' + range.get('start').toFixed(2) + ',' + range.get('end').toFixed(2) + ']')
 # }
 
-handle_range_callback.shinyCallback <- function(x, model) {
+handle_range_callback.shinyCallback <- function(x, model, fig_refs) {
   list(
     code = sprintf("
 if (HTMLWidgets.shinyMode) {
@@ -73,28 +75,29 @@ if (HTMLWidgets.shinyMode) {
   )
 }
 
-handle_range_callback.customCallback <- function(x, model) {
+handle_range_callback.customCallback <- function(x, model, fig_refs) {
+  x$args <- callback_lname2args(x$args, fig_refs)
   x
 }
 
-handle_range_callback.default <- function(x, model) {
+handle_range_callback.default <- function(x, model, fig_refs) {
   message("range callback not recognized - ignoring")
 }
 
 ## url callbacks
 ##---------------------------------------------------------
 
-handle_tap_callback <- function(x, model)
+handle_tap_callback <- function(x, model, fig_refs)
   UseMethod("handle_tap_callback", x)
 
-handle_tap_callback.character <- function(x, model) {
+handle_tap_callback.character <- function(x, model, fig_refs) {
   list(
     code = x,
     args = list()
   )
 }
 
-handle_tap_callback.consoleCallback <- function(x, model) {
+handle_tap_callback.consoleCallback <- function(x, model, fig_refs) {
   list(
     code = "
 var cols = cb_obj.attributes.column_names;
@@ -112,7 +115,7 @@ console.log(res)
   )
 }
 
-handle_tap_callback.shinyCallback <- function(x, model) {
+handle_tap_callback.shinyCallback <- function(x, model, fig_refs) {
   list(
     code = sprintf("
 if (HTMLWidgets.shinyMode) {
@@ -135,11 +138,12 @@ if (HTMLWidgets.shinyMode) {
   )
 }
 
-handle_tap_callback.customCallback <- function(x, model) {
+handle_tap_callback.customCallback <- function(x, model, fig_refs) {
+  x$args <- callback_lname2args(x$args, fig_refs)
   x
 }
 
-handle_tap_callback.default <- function(x, model) {
+handle_tap_callback.default <- function(x, model, fig_refs) {
   message("url callback not recognized - ignoring")
 }
 
@@ -147,17 +151,17 @@ handle_tap_callback.default <- function(x, model) {
 ## hover callbacks
 ##---------------------------------------------------------
 
-handle_hover_callback <- function(x, model)
+handle_hover_callback <- function(x, model, fig_refs)
   UseMethod("handle_hover_callback", x)
 
-handle_hover_callback.character <- function(x, model) {
+handle_hover_callback.character <- function(x, model, fig_refs) {
   list(
     code = x,
     args = list(hover = model$ref)
   )
 }
 
-handle_hover_callback.consoleCallback <- function(x, model) {
+handle_hover_callback.consoleCallback <- function(x, model, fig_refs) {
   list(
     code = "
 console.log(cb_data);
@@ -166,7 +170,7 @@ console.log(cb_data);
   )
 }
 
-handle_hover_callback.shinyCallback <- function(x, model) {
+handle_hover_callback.shinyCallback <- function(x, model, fig_refs) {
   list(
     code = sprintf("
 if (HTMLWidgets.shinyMode) {
@@ -178,11 +182,12 @@ if (HTMLWidgets.shinyMode) {
   )
 }
 
-handle_hover_callback.customCallback <- function(x, model) {
+handle_hover_callback.customCallback <- function(x, model, fig_refs) {
+  x$args <- callback_lname2args(x$args, fig_refs)
   x
 }
 
-handle_hover_callback.default <- function(x, model) {
+handle_hover_callback.default <- function(x, model, fig_refs) {
   message("hover callback not recognized - ignoring")
 }
 
