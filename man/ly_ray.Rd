@@ -6,7 +6,8 @@
 \usage{
 ly_ray(fig, x, y = NULL, data = figure_data(fig), length = NULL,
   angle = 0, color = "black", type = 1, width = 1, alpha = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, ...)
+  legend = NULL, lname = NULL, lgroup = NULL, hover_callback = NULL,
+  tap_callback = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

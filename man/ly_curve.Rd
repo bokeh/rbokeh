@@ -6,7 +6,7 @@
 \usage{
 ly_curve(fig, expr, from = NULL, to = NULL, n = 101, color = "black",
   alpha = 1, width = 1, type = 1, legend = NULL, lname = NULL,
-  lgroup = NULL, ...)
+  lgroup = NULL, hover_callback = NULL, tap_callback = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

@@ -6,7 +6,8 @@
 \usage{
 ly_quadratic(fig, x0, y0, x1, y1, cx, cy, data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, ...)
+  lname = NULL, lgroup = NULL, hover_callback = NULL,
+  tap_callback = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

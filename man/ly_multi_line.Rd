@@ -5,7 +5,8 @@
 \title{Add a "multi_line" layer to a Bokeh figure}
 \usage{
 ly_multi_line(fig, xs, ys, color = "black", alpha = 1, width = 1,
-  type = 1, lname = NULL, lgroup = NULL, ...)
+  type = 1, lname = NULL, lgroup = NULL, hover_callback = NULL,
+  tap_callback = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

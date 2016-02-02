@@ -6,7 +6,8 @@
 \usage{
 ly_annulus(fig, x, y = NULL, data = figure_data(fig), inner_radius = 0.1,
   outer_radius = 0.2, color = NULL, alpha = 1, hover = NULL,
-  url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...)
+  url = NULL, legend = NULL, lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
