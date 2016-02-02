@@ -117,8 +117,8 @@ tool_lasso_select <- function(fig, select_every_mousemove = TRUE) {
 }
 
 #' @export
-tool_hover <- function(fig, callback) {
-  fig %>% add_hover_callback(callback, renderer_ref = NULL)
+tool_hover <- function(fig, callback, ref_layer) {
+  fig %>% add_hover_callback(callback, ref_layer)
 }
 
 tool_help <- function(fig, redirect = "http://hafen.github.io/rbokeh",

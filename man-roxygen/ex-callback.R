@@ -15,7 +15,7 @@ figure() %>% ly_points(x, url = "@link", data = dd, tap_callback = console_callb
 p <- figure() %>%
   ly_points(1:10, lname = "l1") %>%
   ly_points(10:1, lname = "l2") %>%
-  tool_hover(custom_callback(code = "console.log(l1_data); console.log(l2_data)", args = c("l1", "l2")))
+  tool_hover(custom_callback(code = "debugger; console.log(l1_data); console.log(l2_data)", args = c("l1", "l2")), "l1")
 
 # won't work when splitting up glyphs...
 # figure() %>% ly_points(1:10, glyph = rep(c("a", "b"), 5))
