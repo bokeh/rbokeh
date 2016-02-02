@@ -23,7 +23,8 @@ ly_annular_wedge <- function(
   inner_radius = 0.1, outer_radius = 0.3,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   color = NULL, alpha = 1,
-  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...
+  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL, ...
 ) {
 
   validate_fig(fig, "ly_annular_wedge")
@@ -61,11 +62,13 @@ ly_annular_wedge <- function(
 
   mc <- lapply(match.call(), deparse)
 
-  make_glyph(fig, type = "annular_wedge", lname = args$info$lname, lgroup = args$info$lgroup,
+  make_glyph(fig, type = "annular_wedge", lname = args$info$lname,
+    lgroup = args$info$lgroup,
     data = args$data, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args$params, axis_type_range = axis_type_range,
     hover = args$info$hover, url = args$info$url, legend = args$info$legend,
-    xname = args$info$x_name, yname = args$info$y_name, ly_call = mc)
+    xname = args$info$x_name, yname = args$info$y_name, ly_call = mc,
+    hover_callback = hover_callback, tap_callback = tap_callback, dots)
 }
 
 #' Add an "annulus" layer to a Bokeh figure
@@ -89,7 +92,8 @@ ly_annulus <- function(
   inner_radius = 0.1, outer_radius = 0.2,
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL,
-  lname = NULL, lgroup = NULL, ...
+  lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL,...
 ) {
 
   validate_fig(fig, "ly_annulus")
@@ -129,7 +133,9 @@ ly_annulus <- function(
     data = args$data, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args$params, axis_type_range = axis_type_range,
     hover = args$info$hover, url = args$info$url, legend = args$info$legend,
-    xname = args$info$x_name, yname = args$info$y_name, ly_call = mc)
+    xname = args$info$x_name, yname = args$info$y_name, ly_call = mc,
+    hover_callback = hover_callback, tap_callback = tap_callback,
+    ly_call = mc, dots)
 }
 
 #' Add an "arc" layer to a Bokeh figure
@@ -153,7 +159,8 @@ ly_arc <- function(
   color = NULL, alpha = 1, width = 2, type = 1,
   radius = 0.2,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
-  legend = NULL, lname = NULL, lgroup = NULL, ...
+  legend = NULL, lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL,...
 ) {
 
   validate_fig(fig, "ly_arc")
@@ -170,8 +177,8 @@ ly_arc <- function(
       start_angle,
       end_angle,
       direction,
-      # hover, # no hover?
-      # url, # no url?
+      hover,
+      url,
       legend,
       lname,
       lgroup,
@@ -192,8 +199,11 @@ ly_arc <- function(
     fig, type = "arc", lname = args$info$lname, lgroup = args$info$lgroup,
     data = args$data, data_sig = ifelse(is.null(data), NA, digest(data)),
     args = args$params, axis_type_range = axis_type_range,
-    legend = args$info$legend, xname = args$info$x_name, yname = args$info$y_name,
-    ly_call = mc
+    args = args$params, axis_type_range = axis_type_range,
+    hover = args$info$hover, url = args$info$url,
+    legend = args$info$legend, xname = args$info$x_name,
+    yname = args$info$y_name, ly_call = mc,
+    hover_callback = hover_callback, tap_callback = tap_callback, dots
   )
 }
 
@@ -219,7 +229,8 @@ ly_wedge <- function(
   fig, x, y = NULL, data = figure_data(fig),
   radius = 0.3, start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   color = NULL, alpha = 1,
-  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...
+  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL,...
 ) {
 
   validate_fig(fig, "ly_wedge")

@@ -24,7 +24,7 @@ update_range <- function(fig, axis = "x", dat = NULL, callback = NULL) {
 
   range_name <- paste0(axis, "_range")
   id <- gen_id(fig, range_name)
-  type <- ifelse(fig$x$spec$x_axis_type == "numeric", "Range1d", "FactorRange")
+  type <- ifelse(fig$x$spec$x_axis_type == "categorical", "FactorRange", "Range1d")
   model <- base_model_object(type, id)
 
   # first get the model if it exists
@@ -64,4 +64,3 @@ update_range <- function(fig, axis = "x", dat = NULL, callback = NULL) {
 
   fig
 }
-

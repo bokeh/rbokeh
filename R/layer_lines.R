@@ -15,7 +15,8 @@
 ly_lines <- function(
   fig, x, y = NULL, data = figure_data(fig), group = NULL,
   color = "black", type = 1, width = 1, alpha = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...
+  legend = NULL, lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL, ...
 ) {
 
   validate_fig(fig, "ly_lines")
@@ -93,6 +94,7 @@ ly_lines <- function(
     fig <- make_glyph(
       fig, type = "line", data = arg_obj$data,
       legend = arg_obj$info$legend,
+      hover_callback = hover_callback, tap_callback = tap_callback,
       args = arg_obj$params, axis_type_range = axis_type_range,
       xname = arg_obj$info$x_name, yname = arg_obj$info$y_name,
       lname = arg_obj$info$lname, lgroup = arg_obj$info$lgroup,
@@ -184,7 +186,8 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = figure_data(fig),
 ly_abline <- function(
   fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   color = "black", alpha = NULL, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL, ...) {
 
   validate_fig(fig, "ly_abline")
 
@@ -305,7 +308,8 @@ ly_abline <- function(
     lname = args$info$lname, lgroup = args$info$lgroup,
     xname = args$info$x_name, yname = args$info$y_name,
     args = args$params, axis_type_range = axis_type_range,
-    ly_call = mc
+    ly_call = mc,
+    hover_callback = hover_callback, tap_callback = tap_callback
   )
 }
 
@@ -329,7 +333,8 @@ ly_abline <- function(
 ly_curve <- function(
   fig, expr, from = NULL, to = NULL, n = 101,
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...
+  legend = NULL, lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL, ...
 ) {
 
   validate_fig(fig, "ly_curve")
@@ -378,7 +383,8 @@ ly_curve <- function(
         fig = fig,
         x = x, y = y,
         legend = args$info$legend, lname = args$info$lname, lgroup = args$info$lgroup,
-        xlab = xname, ylab = yname
+        xlab = xname, ylab = yname,
+        hover_callback = hover_callback, tap_callback = tap_callback
       ),
       args$params
     )
@@ -403,7 +409,8 @@ ly_contour <- function(
   x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1, length.out = ncol(z)),
   nlevels = 10, levels = pretty(range(z, na.rm = TRUE), nlevels),
   color = "black", alpha = 1, width = 1, type = 1,
-  lname = NULL, lgroup = NULL, ...
+  lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL, ...
 ) {
 
   validate_fig(fig, "ly_contour")
@@ -440,7 +447,8 @@ ly_contour <- function(
     xname = args$info$x_name, yname = args$info$y_name,
     data = list(xs = xs, ys = ys),
     args = args$params, axis_type_range = axis_type_range,
-    ly_call = mc
+    ly_call = mc,
+    hover_callback = hover_callback, tap_callback = tap_callback
   )
 }
 
@@ -463,7 +471,8 @@ ly_ray <- function(
   fig, x, y = NULL, data = figure_data(fig),
   length = NULL, angle = 0,
   color = "black", type = 1, width = 1, alpha = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, ...
+  legend = NULL, lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL, ...
 ) {
 
   validate_fig(fig, "ly_ray")
@@ -501,7 +510,8 @@ ly_ray <- function(
     data = args$data, legend = args$info$legend,
     args = args$params, axis_type_range = axis_type_range,
     lname = args$info$lname, lgroup = args$info$lgroup,
-    ly_call = mc
+    ly_call = mc,
+    hover_callback = hover_callback, tap_callback = tap_callback
   )
 }
 
@@ -530,7 +540,8 @@ ly_bezier <- function(
   x0, y0, x1, y1, cx0, cy0, cx1, cy1,
   data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...
+  legend = NULL, lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL, ...
 ) {
 
   validate_fig(fig, "ly_bezier")
@@ -571,7 +582,8 @@ ly_bezier <- function(
     xname = args$info$x_name, yname = args$info$y_name,
     data = args$data,
     args = args$params, axis_type_range = axis_type_range,
-    ly_call = mc
+    ly_call = mc,
+    hover_callback = hover_callback, tap_callback = tap_callback
   )
 }
 
@@ -597,7 +609,8 @@ ly_quadratic <- function(
   x0, y0, x1, y1, cx, cy,
   data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...
+  legend = NULL, lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL, ...
 ) {
 
   validate_fig(fig, "ly_quadratic")
@@ -638,7 +651,8 @@ ly_quadratic <- function(
     xname = args$info$x_name, yname = args$info$y_name,
     data = args$data,
     args = args$params, axis_type_range = axis_type_range,
-    ly_call = mc
+    ly_call = mc,
+    hover_callback = hover_callback, tap_callback = tap_callback
   )
 }
 
@@ -660,7 +674,8 @@ ly_multi_line <- function(
   fig,
   xs, ys,
   color = "black", alpha = 1, width = 1, type = 1,
-  lname = NULL, lgroup = NULL, ...
+  lname = NULL, lgroup = NULL,
+  hover_callback = NULL, tap_callback = NULL, ...
 ) {
 
   validate_fig(fig, "ly_multi_line")
@@ -701,6 +716,7 @@ ly_multi_line <- function(
     xname = args$info$x_name, yname = args$info$y_name,
     lname = args$info$lname, lgroup = args$info$lgroup,
     axis_type_range = axis_type_range,
+    hover_callback = hover_callback, tap_callback = tap_callback,
     ly_call = mc
   )
 }

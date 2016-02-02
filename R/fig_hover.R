@@ -1,5 +1,3 @@
-
-
 # to add a HoverTool:
 # - create a HoverTool model
 # - need to point to glyph
@@ -9,13 +7,32 @@
 ## this is only used internally
 ## users cannot manually add a hover tool
 ## it must be done through the hover argument to the layer functions
+
 add_hover <- function(fig, tooltips, renderer_ref) {
-
   id <- gen_id(fig, c(renderer_ref$id, "hover"))
-  hov <- hover_model(id, fig$x$spec$ref, renderer_ref, tooltips)
+  hov_model <- hover_model(id, fig$x$spec$ref, renderer_ref, tooltips)
+  fig$x$spec$model$plot$attributes$tools[[id]] <- hov_model$ref
+  fig$x$spec$model[[id]] <- hov_model$model
 
-  fig$x$spec$model$plot$attributes$tools[[id]] <- hov$ref
-  fig$x$spec$model[[id]] <- hov$model
+  fig
+}
+
+add_hover_callback <- function(fig, callback, renderer_ref) {
+  hov_id <- gen_id(fig, callback)
+  hov_model <- hover_model(hov_id, fig$x$spec$ref, renderer_ref, tooltips = NA)
+
+  callback <- handle_hover_callback(callback, hov_model)
+
+  if(!is.null(callback)) {
+    cb_id <- gen_id(fig, "hover_callback")
+    cb_model <- customjs_model(id = cb_id,
+      code = callback$code, args = callback$args)
+    fig$x$spec$model[[cb_id]] <- cb_model$model
+    hov_model$model$attributes$callback <- cb_model$ref
+
+    fig$x$spec$model$plot$attributes$tools[[hov_id]] <- hov_model$ref
+    fig$x$spec$model[[hov_id]] <- hov_model$model
+  }
 
   fig
 }
