@@ -6,7 +6,7 @@
 make_glyph <- function(fig, type, lname, lgroup, data, args,
   axis_type_range, hover = NULL, url = NULL, legend = NULL,
   xname = NULL, yname = NULL, data_sig = NA, ly_call,
-  hover_callback = NULL, tap_callback = NULL, dots = NULL) {
+  dots = NULL) {
 
   if(is.null(args))
     args <- list()
@@ -206,22 +206,14 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
     data <- c(data, hover$data)
   }
 
-  if(!is.null(hover_callback)) {
-    fig <- fig %>% add_hover_callback(hover_callback, renderer_ref)
-  }
-
-  if(!is.null(url) && !is.null(tap_callback)) {
-    message("'url' and 'tap_callback' can't be specified simultaneously - honoring 'url'")
-    tap_callback <- NULL
-  }
+  # if(!is.null(url) && !is.null(tap_callback)) {
+  #   message("'url' and 'tap_callback' can't be specified simultaneously - honoring 'url'")
+  #   tap_callback <- NULL
+  # }
 
   if(!is.null(url)) {
     fig <- fig %>% add_url(url$url, renderer_ref)
     data <- c(data, url$data)
-  }
-
-  if(!is.null(tap_callback)) {
-    fig <- fig %>% add_tap_callback(tap_callback, renderer_ref)
   }
 
   args$glyph <- type
