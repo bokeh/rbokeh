@@ -10,112 +10,160 @@ customjs_model <- function(type = "CustomJS", id, code, args) {
 # translate a vector of lnames to a list of refs
 # that will be made available inside custom callback
 callback_lname2args <- function(lnames, fig_refs) {
-  args <- fig_refs[lnames]
-  unlist(unname(args), recursive = FALSE)
+  fig_refs <- fig_refs[lnames]
+  unlist(unname(fig_refs), recursive = FALSE)
 }
 
 #' @export
-shiny_callback <- function(id) {
-  class(id) <- "shinyCallback"
-  id
+shiny_callback <- function(id, lnames = NULL) {
+  structure(list(id = id, lnames = lnames, args = NULL), class = "shinyCallback")
 }
 
 #' @export
-console_callback <- function() {
-  res <- 1
-  class(res) <- "consoleCallback"
-  res
+console_callback <- function(lnames = NULL) {
+  structure(list(code = "", lnames = lnames, args = NULL), class = "consoleCallback")
 }
 
 #' @export
-custom_callback <- function(code, args) {
+custom_callback <- function(code, lnames = NULL) {
   # TODO: checking that code and args are correct
   # code should be string
-  # args should be named list of refs to parts of the model code accesses
-  structure(list(code = code, args = args), class = "customCallback")
+  structure(list(code = code, lnames = lnames, args = NULL), class = "customCallback")
 }
 
+#' @export
+debug_callback <- function(lnames = NULL) {
+  structure(list(code = "debugger", lnames = lnames, args = NULL), class = "debugCallback")
+}
 
-## range callbacks
+## s3 methods
 ##---------------------------------------------------------
 
-handle_range_callback <- function(x, model, fig_refs)
+handle_range_callback <- function(x, args)
   UseMethod("handle_range_callback", x)
 
-handle_range_callback.character <- function(x, model, fig_refs) {
-  list(
-    code = x,
-    args = list(range = model$ref)
-  )
-}
+handle_tap_callback <- function(x, args)
+  UseMethod("handle_tap_callback", x)
 
-handle_range_callback.consoleCallback <- function(x, model, fig_refs) {
+handle_hover_callback <- function(x, args)
+  UseMethod("handle_hover_callback", x)
+
+
+## console_callback
+##---------------------------------------------------------
+
+handle_range_callback.consoleCallback <- function(x, fig_refs) {
   list(
     code = "
-console.log('factors: ' + range.get('factors') + ', start: ' + range.get('start') + ', end: ' + range.get('end'))
-    ",
-    args = list(range = model$ref)
+if(range.get('factors')) {
+  console.log(range.get('factors'))
+} else if(range.get('start')) {
+  console.log('[' + range.get('start').toFixed(2) + ',' + range.get('end').toFixed(2) + ']')
+}",
+    args = c(x$args, callback_lname2args(x$lnames, fig_refs))
   )
 }
-# if(range.get('factors')) {
-#   console.log(range.get('factors'))
-# } else if(range.get('start')) {
-#   console.log('[' + range.get('start').toFixed(2) + ',' + range.get('end').toFixed(2) + ']')
-# }
 
-handle_range_callback.shinyCallback <- function(x, model, fig_refs) {
+handle_tap_callback.consoleCallback <- function(x, fig_refs) {
+  list(
+    code = "
+console.log('cb_data:')
+console.log(cb_data)
+console.log('cb_obj:')
+console.log(cb_obj)",
+    args = c(x$args, callback_lname2args(x$lnames, fig_refs))
+  )
+}
+
+handle_hover_callback.consoleCallback <- function(x, fig_refs) {
+  list(
+    code = "
+if(cb_data.index['1d'].indices.length > 0) {
+  console.log('cb_data:')
+  console.log(cb_data)
+  console.log('cb_obj:')
+  console.log(cb_obj)
+}",
+    args = c(x$args, callback_lname2args(x$lnames, fig_refs))
+  )
+}
+
+## custom callback
+##---------------------------------------------------------
+
+handle_range_callback.customCallback <- function(x, fig_refs)
+  handle_custom_callback(x, fig_refs)
+
+handle_hover_callback.customCallback <- function(x, fig_refs)
+  handle_custom_callback(x, fig_refs)
+
+handle_tap_callback.customCallback <- function(x, fig_refs)
+  handle_custom_callback(x, fig_refs)
+
+handle_custom_callback <- function(x, fig_refs) {
+  x$args <- c(x$args, callback_lname2args(x$lnames, fig_refs))
+  x
+}
+
+## debug callback
+##---------------------------------------------------------
+
+handle_range_callback.debugCallback <- function(x, fig_refs)
+  handle_debug_callback(x, fig_refs)
+
+handle_hover_callback.debugCallback <- function(x, fig_refs) {
+  x$args <- c(x$args, callback_lname2args(x$lnames, fig_refs))
+  x$code <- "
+if(cb_data.index['1d'].indices.length > 0) {
+  debugger;
+}"
+  x
+}
+
+handle_tap_callback.debugCallback <- function(x, fig_refs)
+  handle_debug_callback(x, fig_refs)
+
+handle_debug_callback <- function(x, fig_refs) {
+  x$args <- c(x$args, callback_lname2args(x$lnames, fig_refs))
+  x
+}
+
+
+## character callback
+##---------------------------------------------------------
+
+handle_range_callback.character <- function(x, fig_refs)
+  handle_character_callback(x, fig_refs)
+
+handle_hover_callback.character <- function(x, fig_refs)
+  handle_character_callback(x, fig_refs)
+
+handle_tap_callback.character <- function(x, fig_refs)
+  handle_character_callback(x, fig_refs)
+
+handle_character_callback <- function(x, fig_refs) {
+  list(
+    code = x,
+    args = list()
+  )
+}
+
+## shiny callback
+##---------------------------------------------------------
+
+handle_range_callback.shinyCallback <- function(x, fig_refs) {
   list(
     code = sprintf("
 if (HTMLWidgets.shinyMode) {
   var dat = {factors: range.get('factors'), start: range.get('start'), end: range.get('end')}
   Shiny.onInputChange('%s', dat);
 }
-", as.character(x)),
-    args = list(range = model$ref)
+", as.character(x$id)),
+    args = c(x$args, callback_lname2args(x$lnames, fig_refs))
   )
 }
 
-handle_range_callback.customCallback <- function(x, model, fig_refs) {
-  x$args <- callback_lname2args(x$args, fig_refs)
-  x
-}
-
-handle_range_callback.default <- function(x, model, fig_refs) {
-  message("range callback not recognized - ignoring")
-}
-
-## url callbacks
-##---------------------------------------------------------
-
-handle_tap_callback <- function(x, model, fig_refs)
-  UseMethod("handle_tap_callback", x)
-
-handle_tap_callback.character <- function(x, model, fig_refs) {
-  list(
-    code = x,
-    args = list()
-  )
-}
-
-handle_tap_callback.consoleCallback <- function(x, model, fig_refs) {
-  list(
-    code = "
-var cols = cb_obj.attributes.column_names;
-var idx = cb_obj.attributes.selected['1d'].indices;
-var res = {}
-for(var i = 0; i < cols.length; i++) {
-  res[cols[i]] = [];
-  for (var j = 0; j < idx.length; j++) {
-    res[cols[i]].push(cb_obj.attributes.data[cols[i]][idx[j]]);
-  }
-}
-console.log(res)
-    ",
-    args = list()
-  )
-}
-
-handle_tap_callback.shinyCallback <- function(x, model, fig_refs) {
+handle_tap_callback.shinyCallback <- function(x, fig_refs) {
   list(
     code = sprintf("
 if (HTMLWidgets.shinyMode) {
@@ -133,62 +181,36 @@ if (HTMLWidgets.shinyMode) {
     Shiny.onInputChange('%s', res);
   }
 }
-", as.character(x)),
-    args = list()
+", as.character(x$id)),
+    args = c(x$args, callback_lname2args(x$lnames, fig_refs))
   )
 }
 
-handle_tap_callback.customCallback <- function(x, model, fig_refs) {
-  x$args <- callback_lname2args(x$args, fig_refs)
-  x
-}
-
-handle_tap_callback.default <- function(x, model, fig_refs) {
-  message("url callback not recognized - ignoring")
-}
-
-
-## hover callbacks
-##---------------------------------------------------------
-
-handle_hover_callback <- function(x, model, fig_refs)
-  UseMethod("handle_hover_callback", x)
-
-handle_hover_callback.character <- function(x, model, fig_refs) {
-  list(
-    code = x,
-    args = list(hover = model$ref)
-  )
-}
-
-handle_hover_callback.consoleCallback <- function(x, model, fig_refs) {
-  list(
-    code = "
-console.log(cb_data);
-    ",
-    args = list(hover = model$ref)
-  )
-}
-
-handle_hover_callback.shinyCallback <- function(x, model, fig_refs) {
+handle_hover_callback.shinyCallback <- function(x, fig_refs) {
   list(
     code = sprintf("
 if (HTMLWidgets.shinyMode) {
   var dat = {index: cb_data.index, geom: cb_data.geometry}
   Shiny.onInputChange('%s', dat);
 }
-", as.character(x)),
-    args = list()
+", as.character(x$id)),
+    args = c(x$args, callback_lname2args(x$lnames, fig_refs))
   )
 }
 
-handle_hover_callback.customCallback <- function(x, model, fig_refs) {
-  x$args <- callback_lname2args(x$args, fig_refs)
-  x
+## default methods
+##---------------------------------------------------------
+
+handle_tap_callback.default <- function(x, fig_refs) {
+  message("url callback not recognized - ignoring")
 }
 
-handle_hover_callback.default <- function(x, model, fig_refs) {
+handle_hover_callback.default <- function(x, fig_refs) {
   message("hover callback not recognized - ignoring")
+}
+
+handle_range_callback.default <- function(x, fig_refs) {
+  message("range callback not recognized - ignoring")
 }
 
 # figure() %>% ly_points(1:10) %>%
@@ -197,3 +219,14 @@ handle_hover_callback.default <- function(x, model, fig_refs) {
 # figure() %>% ly_points(1:10) %>%
 #   x_range(callback = "console.log(range.get('start'))")
 
+
+# var cols = cb_obj.attributes.column_names;
+# var idx = cb_obj.attributes.selected['1d'].indices;
+# var res = {}
+# for(var i = 0; i < cols.length; i++) {
+#   res[cols[i]] = [];
+#   for (var j = 0; j < idx.length; j++) {
+#     res[cols[i]].push(cb_obj.attributes.data[cols[i]][idx[j]]);
+#   }
+# }
+# console.log(res)

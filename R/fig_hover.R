@@ -18,14 +18,15 @@ add_hover <- function(fig, tooltips, renderer_ref) {
 }
 
 add_hover_callback <- function(fig, callback, ref_layer) {
-  hov_id <- gen_id(fig, callback)
+
+  hov_id <- gen_id(fig, c(callback, ref_layer, "hov_callback"))
 
   nm <- paste(ref_layer, "glyph_rend", sep = "_")
-  renderer_ref <- fig$x$spec$layers$callback[[ref_layer]][[nm]]
+  renderer_ref <- fig$x$spec$callback$layers[[ref_layer]][[nm]]
 
   hov_model <- hover_model(hov_id, fig$x$spec$ref, renderer_ref, tooltips = NA)
 
-  callback <- handle_hover_callback(callback, hov_model, fig$x$spec$layers$callback)
+  callback <- handle_hover_callback(callback, fig$x$spec$callback$layers)
 
   cb_id <- gen_id(fig, "hover_callback")
   cb_model <- customjs_model(id = cb_id,
@@ -51,4 +52,3 @@ hover_model <- function(id, plot_ref, renderer_ref, tooltips) {
   res$model$attributes$tooltips <- tooltips
   res
 }
-

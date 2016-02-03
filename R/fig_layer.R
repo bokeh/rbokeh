@@ -97,8 +97,8 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
   # add in mappings from lname to refs for use in custom js callbacks
   # but ignore legend glyphs
   if(!grepl("^__legend", lgroup) && length(lname) == 1) {
-    if(is.null(fig$x$spec$layers$callback))
-      fig$x$spec$layers$callback <- list()
+    if(is.null(fig$x$spec$callback$layers))
+      fig$x$spec$callback$layers <- list()
 
     cb <- list(
       glyph_mod$ref,
@@ -108,7 +108,7 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
     )
     names(cb) <- paste(lname, c("glyph", "ns_glyph", "data", "glyph_rend"), sep = "_")
 
-    fig$x$spec$layers$callback[[lname]] <- cb
+    fig$x$spec$callback$layers[[lname]] <- cb
   }
 
   fig

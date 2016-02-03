@@ -18,14 +18,14 @@ add_url <- function(fig, url, renderer_ref) {
 
 add_tap_callback <- function(fig, callback, ref_layer) {
 
-  tap_id <- gen_id(fig, c(renderer_ref$id, "tap_callback"))
+  tap_id <- gen_id(fig, c(callback, ref_layer, "tap_callback"))
 
   nm <- paste(ref_layer, "glyph_rend", sep = "_")
-  renderer_ref <- fig$x$spec$layers$callback[[ref_layer]][[nm]]
+  renderer_ref <- fig$x$spec$callback$layers[[ref_layer]][[nm]]
 
   tap_model <- tap_model(tap_id, fig$x$spec$ref, renderer_ref)
 
-  callback <- handle_tap_callback(callback, tap_model, fig$x$spec$layers$callback)
+  callback <- handle_tap_callback(callback, fig$x$spec$callback$layers)
 
   cb_id <- gen_id(fig, c(renderer_ref$id, "TapCallback"))
   cb_model <- customjs_model(id = cb_id,
