@@ -48,6 +48,8 @@ handle_tap_callback <- function(x, args)
 handle_hover_callback <- function(x, args)
   UseMethod("handle_hover_callback", x)
 
+handle_selection_callback <- function(x, args)
+  UseMethod("handle_selection_callback", x)
 
 ## console_callback
 ##---------------------------------------------------------
@@ -100,6 +102,9 @@ handle_hover_callback.customCallback <- function(x, fig_refs)
 handle_tap_callback.customCallback <- function(x, fig_refs)
   handle_custom_callback(x, fig_refs)
 
+handle_selection_callback.customCallback <- function(x, fig_refs)
+  handle_custom_callback(x, fig_refs)
+
 handle_custom_callback <- function(x, fig_refs) {
   x$args <- c(x$args, callback_lname2args(x$lnames, fig_refs))
   x
@@ -123,6 +128,15 @@ if(cb_data.index['1d'].indices.length > 0) {
 handle_tap_callback.debugCallback <- function(x, fig_refs)
   handle_debug_callback(x, fig_refs)
 
+handle_selection_callback.debugCallback <- function(x, fig_refs) {
+  x$args <- c(x$args, callback_lname2args(x$lnames, fig_refs))
+  x$code <- "
+if(cb_obj.get('selected')['1d'].indices.length > 0) {
+  debugger;
+}"
+  x
+}
+
 handle_debug_callback <- function(x, fig_refs) {
   x$args <- c(x$args, callback_lname2args(x$lnames, fig_refs))
   x
@@ -139,6 +153,9 @@ handle_hover_callback.character <- function(x, fig_refs)
   handle_character_callback(x, fig_refs)
 
 handle_tap_callback.character <- function(x, fig_refs)
+  handle_character_callback(x, fig_refs)
+
+handle_selection_callback.character <- function(x, fig_refs)
   handle_character_callback(x, fig_refs)
 
 handle_character_callback <- function(x, fig_refs) {
@@ -178,8 +195,8 @@ if (HTMLWidgets.shinyMode) {
         res[cols[i]].push(cb_obj.attributes.data[cols[i]][idx[j]]);
       }
     }
-    Shiny.onInputChange('%s', res);
   }
+  Shiny.onInputChange('%s', res);
 }
 ", as.character(x$id)),
     args = c(x$args, callback_lname2args(x$lnames, fig_refs))
@@ -198,6 +215,15 @@ if (HTMLWidgets.shinyMode) {
   )
 }
 
+handle_selection_callback.shinyCallback <- function(x, fig_refs) {
+  list(
+    code = sprintf("
+Shiny.onInputChange('%s', cb_obj.get('selected')['1d'].indices);
+", as.character(x$id)),
+    args = c(x$args, callback_lname2args(x$lnames, fig_refs))
+  )
+}
+
 ## default methods
 ##---------------------------------------------------------
 
@@ -211,6 +237,10 @@ handle_hover_callback.default <- function(x, fig_refs) {
 
 handle_range_callback.default <- function(x, fig_refs) {
   message("range callback not recognized - ignoring")
+}
+
+handle_selection_callback.default <- function(x, fig_refs) {
+  message("selection callback not recognized - ignoring")
 }
 
 # figure() %>% ly_points(1:10) %>%
