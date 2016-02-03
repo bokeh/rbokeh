@@ -28,7 +28,8 @@ add_hover_callback <- function(fig, callback, ref_layer) {
 
   callback <- handle_hover_callback(callback, fig$x$spec$callback$layers)
 
-  cb_id <- gen_id(fig, "hover_callback")
+  cb_id <- gen_id(fig, c(renderer_ref$id, "HoverCallback",
+    callback$args, callback$lname))
   cb_model <- customjs_model(id = cb_id,
     code = callback$code, args = callback$args)
   hov_model$model$attributes$callback <- cb_model$ref

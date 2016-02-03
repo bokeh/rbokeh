@@ -27,7 +27,8 @@ add_tap_callback <- function(fig, callback, ref_layer) {
 
   callback <- handle_tap_callback(callback, fig$x$spec$callback$layers)
 
-  cb_id <- gen_id(fig, c(renderer_ref$id, "TapCallback"))
+  cb_id <- gen_id(fig, c(renderer_ref$id, "TapCallback",
+    callback$args, callback$lnames))
   cb_model <- customjs_model(id = cb_id,
     code = callback$code, args = callback$args)
   tap_model$model$attributes$callback <- cb_model$ref

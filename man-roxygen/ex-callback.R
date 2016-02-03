@@ -39,7 +39,6 @@ figure() %>%
   tool_hover(console_callback(), "points")
 
 # two different glyphs with different hover callbacks
-# it seems that only the second one is honored?
 figure() %>%
   ly_points(1:10, lname = "points1") %>%
   ly_points(2:12, lname = "points2") %>%
@@ -48,7 +47,7 @@ figure() %>%
 
 # tool_hover with references to lnames made available callback
 # is only triggered on l1 hover
-p <- figure() %>%
+figure() %>%
   ly_points(1:10, lname = "l1") %>%
   ly_points(2:11, lname = "l2") %>%
   tool_hover(debug_callback(c("l1", "l2")), "l1")
@@ -82,7 +81,7 @@ figure() %>%
 # only first is honored (no matter what point is clicked)
 # would be good if could do both
 # https://github.com/bokeh/bokeh/issues/3804
-p <- figure() %>%
+figure() %>%
   ly_points(1:10, lname = "l1") %>%
   ly_points(2:11, lname = "l2") %>%
   tool_tap("console.log('l1')", "l1") %>%
