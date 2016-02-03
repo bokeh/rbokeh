@@ -87,6 +87,16 @@ figure() %>%
   tool_tap("console.log('l1')", "l1") %>%
   tool_tap("console.log('l2')", "l2")
 
+## selection
+
+figure(tools = "lasso_select") %>%
+  ly_points(1:10, lname = "points") %>%
+  selection_callback(debug_callback(), "points")
+
+figure(tools = "box_select") %>%
+  ly_points(1:10, lname = "points") %>%
+  selection_callback(debug_callback(), "points")
+
 
 # won't work when splitting up glyphs...
 # figure() %>% ly_points(1:10, glyph = rep(c("a", "b"), 5))
@@ -96,7 +106,6 @@ figure() %>%
 
 library("shiny")
 library("rbokeh")
-p <- print_model_json
 dat <- data.frame(x = 1:3, y = 1:3, z = "http://people.mozilla.com")
 
 ui <- fluidPage(
@@ -104,7 +113,8 @@ ui <- fluidPage(
   textOutput("x_range_text"),
   textOutput("hover_text"),
   "selected data:",
-  htmlOutput("tap_table")
+  htmlOutput("tap_table"),
+  textOutput("selection_text")
 )
 
 server <- function(input, output, session) {
@@ -113,6 +123,8 @@ server <- function(input, output, session) {
       hover = list(x, y), lname = "points") %>%
       tool_hover(shiny_callback("hover_info"), "points") %>%
       tool_tap(shiny_callback("tap_info"), "points") %>%
+      tool_box_select() %>%
+      selection_callback(shiny_callback("selection_info"), "points") %>%
       x_range(callback = shiny_callback("x_range"))
   })
 
@@ -140,6 +152,15 @@ server <- function(input, output, session) {
     ti <- input$tap_info
     if(!is.null(ti)) {
       data.frame(x = unlist(ti$x), y = unlist(ti$y))
+    }
+  })
+
+  output$selection_text <- reactive({
+    si <- input$selection_info
+    if(!is.null(si)) {
+      paste(si, collapse = ", ")
+    } else {
+      "waiting for selection event..."
     }
   })
 }
