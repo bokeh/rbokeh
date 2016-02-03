@@ -17,44 +17,8 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
   glyph <- spec$glyph
   glyph <- underscore2camel(glyph)
   spec$glyph <- NULL
-  spec_names <- names(spec)
-  spec_in_data <- spec_names %in% names(dat)
 
-  glyph_attrs <- lapply(seq_along(spec_in_data), function(ii) {
-    units <- "data"
-    if(grepl("angle$", spec_names[ii]))
-      units <- "rad"
-
-    if(length(spec[[ii]]) != 0) {
-      if(all(is.na(spec[[ii]]))) {
-        return(NULL)
-      } else {
-        if(spec_in_data[ii]) {
-          list(units = units, field = spec[[ii]])
-        } else {
-          list(units = units, value = spec[[ii]])
-        }
-      }
-    } else {
-      return(NULL)
-    }
-  })
-
-  names(glyph_attrs) <- names(spec)
-  if(!is.null(glyph_attrs$size))
-    glyph_attrs$size$units <- "screen"
-
-  if(!is.null(glyph_attrs$line_dash))
-    glyph_attrs$line_dash <- glyph_attrs$line_dash$value
-
-  if(!is.null(glyph_attrs$anchor))
-    glyph_attrs$anchor <- glyph_attrs$anchor$value
-
-  if(!is.null(glyph_attrs$dilate))
-    glyph_attrs$dilate <- glyph_attrs$dilate$value
-
-  if(!is.null(glyph_attrs$text))
-    glyph_attrs$text$field <- glyph_attrs$text$field$field
+  glyph_attrs <- get_glyph_attrs(spec, dat)
 
   if(glyph == "Image") {
     c_id <- gen_id(fig, "ColorMapper")
@@ -78,6 +42,7 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
           ns_glyph_attrs[[ii]]$value <- "#e1e1e1"
     }
   }
+
   nsgl_id <- gen_id(fig, c("ns", glyph, lgroup, lname))
   ns_glyph_mod <- glyph_model(nsgl_id, glyph, ns_glyph_attrs)
 
@@ -112,6 +77,49 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
   }
 
   fig
+}
+
+get_glyph_attrs <- function(spec, dat = NULL) {
+  spec_names <- names(spec)
+  spec_in_data <- spec_names %in% names(dat)
+
+  glyph_attrs <- lapply(seq_along(spec_in_data), function(ii) {
+    units <- "data"
+    if(grepl("angle$", spec_names[ii]))
+      units <- "rad"
+
+    if(length(spec[[ii]]) != 0) {
+      if(all(is.na(spec[[ii]]))) {
+        return(NULL)
+      } else {
+        if(spec_in_data[ii]) {
+          list(units = units, field = spec[[ii]])
+        } else {
+          list(units = units, value = spec[[ii]])
+        }
+      }
+    } else {
+      return(NULL)
+    }
+  })
+  names(glyph_attrs) <- names(spec)
+
+  if(!is.null(glyph_attrs$size))
+    glyph_attrs$size$units <- "screen"
+
+  if(!is.null(glyph_attrs$line_dash))
+    glyph_attrs$line_dash <- glyph_attrs$line_dash$value
+
+  if(!is.null(glyph_attrs$anchor))
+    glyph_attrs$anchor <- glyph_attrs$anchor$value
+
+  if(!is.null(glyph_attrs$dilate))
+    glyph_attrs$dilate <- glyph_attrs$dilate$value
+
+  if(!is.null(glyph_attrs$text))
+    glyph_attrs$text$field <- glyph_attrs$text$field$field
+
+  glyph_attrs
 }
 
 data_model <- function(dd, id = NULL) {

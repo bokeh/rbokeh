@@ -314,7 +314,7 @@ grab <- function(..., dots, null_data = FALSE) {
 
 
 
-#' retrieve and properly parse all data
+#' Retrieve and properly parse all data
 #'
 #' @param fig figure to be used
 #' @param data data to be used

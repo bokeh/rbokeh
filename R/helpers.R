@@ -295,7 +295,7 @@ resolve_line_args <- function(fig, args) {
 }
 
 ## take args color and alpha and translate them to f
-resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, solid = FALSE, theme = NULL) {
+resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly = NULL, solid = FALSE, theme = NULL) {
 
   ## if no color at all is specified, choose from the theme
   if(is.null(args$color) && is.null(args$fill_color) && is.null(args$line_color))
