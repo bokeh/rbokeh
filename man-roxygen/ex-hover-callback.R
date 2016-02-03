@@ -30,14 +30,14 @@ var data = {'x0': [], 'y0': [], 'x1': [], 'y1': []};
 var cdata = circle_data.get('data');
 var indices = cb_data.index['1d'].indices;
 for (i=0; i < indices.length; i++) {
-    ind0 = indices[i]
-    for (j=0; j < links[ind0].length; j++) {
-        ind1 = links[ind0][j];
-        data['x0'].push(cdata.x[ind0]);
-        data['y0'].push(cdata.y[ind0]);
-        data['x1'].push(cdata.x[ind1]);
-        data['y1'].push(cdata.y[ind1]);
-    }
+  ind0 = indices[i]
+  for (j=0; j < links[ind0].length; j++) {
+    ind1 = links[ind0][j];
+    data['x0'].push(cdata.x[ind0]);
+    data['y0'].push(cdata.y[ind0]);
+    data['x1'].push(cdata.x[ind1]);
+    data['y1'].push(cdata.y[ind1]);
+  }
 }
 segment_data.set('data', data);
 ", rjson::toJSON(links)), lnames = c("circle","segment"))
