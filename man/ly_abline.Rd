@@ -6,8 +6,7 @@
 \usage{
 ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   color = "black", alpha = NULL, width = 1, type = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, hover_callback = NULL,
-  tap_callback = NULL, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

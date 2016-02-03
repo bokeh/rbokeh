@@ -6,8 +6,7 @@
 \usage{
 ly_points(fig, x, y = NULL, data = figure_data(fig), glyph = 21,
   color = NULL, alpha = 1, size = 10, hover = NULL, url = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, hover_callback = NULL,
-  tap_callback = NULL, ...)
+  legend = NULL, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

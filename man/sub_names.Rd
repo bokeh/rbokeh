@@ -2,7 +2,7 @@
 % Please edit documentation in R/layer__utils.R
 \name{sub_names}
 \alias{sub_names}
-\title{retrieve and properly parse all data}
+\title{Retrieve and properly parse all data}
 \usage{
 sub_names(fig, data, arg_obj, process_data_and_names = TRUE)
 }
@@ -19,6 +19,6 @@ sub_names(fig, data, arg_obj, process_data_and_names = TRUE)
 list of three groups: data, info, and params.
 }
 \description{
-retrieve and properly parse all data
+Retrieve and properly parse all data
 }
 

@@ -4,7 +4,9 @@
 \alias{tool_lasso_select}
 \title{Add "lasso_select" tool to a Bokeh figure}
 \usage{
-tool_lasso_select(fig, select_every_mousemove = TRUE)
+tool_lasso_select(fig, line_color = "black", line_alpha = 1,
+  fill_color = "lightgrey", fill_alpha = 0.5, line_width = 2,
+  line_dash = c(4, 4), level = "overlay")
 }
 \arguments{
 \item{fig}{figure to modify}

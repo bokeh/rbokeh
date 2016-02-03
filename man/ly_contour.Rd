@@ -7,8 +7,7 @@
 ly_contour(fig, z, x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1,
   length.out = ncol(z)), nlevels = 10, levels = pretty(range(z, na.rm =
   TRUE), nlevels), color = "black", alpha = 1, width = 1, type = 1,
-  lname = NULL, lgroup = NULL, hover_callback = NULL,
-  tap_callback = NULL, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

@@ -7,8 +7,7 @@ Draws lines with the given coordinates.}
 \usage{
 ly_lines(fig, x, y = NULL, data = figure_data(fig), group = NULL,
   color = "black", type = 1, width = 1, alpha = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, hover_callback = NULL,
-  tap_callback = NULL, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}

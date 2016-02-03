@@ -4,7 +4,9 @@
 \alias{tool_box_zoom}
 \title{Add "box_zoom" tool to a Bokeh figure}
 \usage{
-tool_box_zoom(fig)
+tool_box_zoom(fig, line_color = "black", line_alpha = 1,
+  fill_color = "lightgrey", fill_alpha = 0.5, line_width = 2,
+  line_dash = c(4, 4), level = "overlay")
 }
 \arguments{
 \item{fig}{figure to modify}
