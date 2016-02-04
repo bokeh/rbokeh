@@ -157,7 +157,7 @@ check_opts <- function(opts, type, formals = NULL) {
 
   cur_glyph_props <- glyph_props[[type]]
 
-  valid_opts <- c("glyph", "xlab", "ylab", formals)
+  valid_opts <- c("glyph", "visible", "xlab", "ylab", formals)
   if(cur_glyph_props$lp)
     valid_opts <- c(valid_opts, line_prop_names)
   if(cur_glyph_props$fp)
