@@ -23,7 +23,8 @@ ly_annular_wedge <- function(
   inner_radius = 0.1, outer_radius = 0.3,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   color = NULL, alpha = 1,
-  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...
+  hover = NULL, url = NULL, legend = NULL,
+  lname = NULL, lgroup = NULL, visible = TRUE, ...
 ) {
 
   validate_fig(fig, "ly_annular_wedge")
@@ -44,6 +45,7 @@ ly_annular_wedge <- function(
       legend,
       lname,
       lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -91,7 +93,7 @@ ly_annulus <- function(
   inner_radius = 0.1, outer_radius = 0.2,
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL,
-  lname = NULL, lgroup = NULL,
+  lname = NULL, lgroup = NULL, visible = TRUE,
   ...
 ) {
 
@@ -110,6 +112,7 @@ ly_annulus <- function(
       legend,
       lname,
       lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -157,7 +160,7 @@ ly_arc <- function(
   color = NULL, alpha = 1, width = 2, type = 1,
   radius = 0.2,
   start_angle = 0, end_angle = 2*pi, direction = "anticlock",
-  legend = NULL, lname = NULL, lgroup = NULL,
+  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
   ...
 ) {
 
@@ -180,6 +183,7 @@ ly_arc <- function(
       legend,
       lname,
       lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -227,7 +231,8 @@ ly_wedge <- function(
   fig, x, y = NULL, data = figure_data(fig),
   radius = 0.3, start_angle = 0, end_angle = 2*pi, direction = "anticlock",
   color = NULL, alpha = 1,
-  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL,
+  hover = NULL, url = NULL, legend = NULL,
+  lname = NULL, lgroup = NULL, visible = TRUE,
   ...
 ) {
 
@@ -248,6 +253,7 @@ ly_wedge <- function(
       legend,
       lname,
       lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )

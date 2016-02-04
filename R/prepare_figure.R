@@ -36,6 +36,7 @@ prepare_figure <- function(fig) {
           did <- fig$x$spec$model[[entry$id]]$attributes$data_source$id
           gl <- fig$x$spec$model[[entry$id]]$attributes$glyph
           nsglid <- fig$x$spec$model[[entry$id]]$attributes$nonselection_glyph$id
+          hovglid <- fig$x$spec$model[[entry$id]]$attributes$hover_glyph$id
           data_attr_names <- names(fig$x$spec$model[[did]]$attributes$data)
           glyph_attr_names <- names(fig$x$spec$model[[gl$id]]$attributes)
           for(attr in entry$map_args) {
@@ -50,6 +51,10 @@ prepare_figure <- function(fig) {
               if(!is.null(nsglid)) {
                 fig$x$spec$model[[entry$id]]$attributes$nonselection_glyph$type <- new_type
                 fig$x$spec$model[[nsglid]]$type <- new_type
+              }
+              if(!is.null(hovglid)) {
+                fig$x$spec$model[[entry$id]]$attributes$hover_glyph$type <- new_type
+                fig$x$spec$model[[hovglid]]$type <- new_type
               }
             } else {
               if(attr %in% data_attr_names) {

@@ -20,7 +20,8 @@ ly_hexbin <- function(
   fig, x, y = NULL, data = figure_data(fig),
   xbins = 30, shape = 1, style = "colorscale",
   trans = NULL, inv = NULL,
-  palette = "RdYlGn11", line = FALSE, alpha = 1, hover = TRUE
+  palette = "RdYlGn11", line = FALSE, alpha = 1,
+  hover = TRUE, visible = TRUE
 ) {
 
   args <- sub_names(fig, data,
@@ -36,6 +37,7 @@ ly_hexbin <- function(
       line,
       alpha,
       hover,
+      visible,
       dots = lazy_dots()
     ),
     process_data_and_names = FALSE

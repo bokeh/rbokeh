@@ -11,7 +11,7 @@
 #' @import maps
 #' @export
 ly_map <- function(fig, database = "world", regions = ".",
-  color = NULL, alpha = 1, lname = NULL, lgroup = NULL, ...) {
+  color = NULL, alpha = 1, lname = NULL, lgroup = NULL, visible = TRUE, ...) {
 
   validate_fig(fig, "ly_map")
 
@@ -19,7 +19,9 @@ ly_map <- function(fig, database = "world", regions = ".",
     grab(
       color,
       alpha,
-      lname, lgroup,
+      lname,
+      lgroup,
+      visible,
       dots = lazy_dots(...),
       null_data = TRUE
     )

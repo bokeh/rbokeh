@@ -16,7 +16,7 @@ ly_polygons <- function(
   fig, xs, ys, group = NULL, data = figure_data(fig),
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, # legend = NULL,
-  lname = NULL, lgroup = NULL, ...
+  lname = NULL, lgroup = NULL, visible = TRUE, ...
 ) {
 
   validate_fig(fig, "ly_polygons")
@@ -32,6 +32,7 @@ ly_polygons <- function(
       url,
       lname,
       lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -125,7 +126,7 @@ ly_rect <- function(
   data = figure_data(fig),
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL,
-  lname = NULL, lgroup = NULL, ...
+  lname = NULL, lgroup = NULL, visible = TRUE, ...
 ) {
 
   validate_fig(fig, "ly_rect")
@@ -142,6 +143,7 @@ ly_rect <- function(
       url,
       lname,
       lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -205,7 +207,8 @@ ly_crect <- function(
   fig, x, y = NULL, data = figure_data(fig),
   width = 1, height = 1, angle = 0, dilate = FALSE,
   color = NULL, alpha = 1,
-  hover = NULL, url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  hover = NULL, url = NULL, legend = NULL,
+  lname = NULL, lgroup = NULL, visible = TRUE, ...) {
 
   validate_fig(fig, "ly_crect")
 
@@ -223,6 +226,7 @@ ly_crect <- function(
       url,
       lname,
       lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -282,7 +286,8 @@ ly_oval <- function(
   fig, x, y = NULL, data = figure_data(fig),
   width = 0.1, height = 0.1, angle = 0,
   color = NULL, alpha = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...
+  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  ...
 ) {
 
   validate_fig(fig, "ly_oval")
@@ -301,6 +306,7 @@ ly_oval <- function(
       legend,
       lname,
       lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -347,7 +353,8 @@ ly_patch <- function(
   fig, x, y, data = figure_data(fig),
   color = NULL, alpha = 1,
   hover = NULL, url = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  ...) {
 
   validate_fig(fig, "ly_patch")
 
@@ -362,6 +369,7 @@ ly_patch <- function(
       legend,
       lname,
       lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
