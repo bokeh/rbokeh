@@ -25,7 +25,7 @@ ly_bar <- function(
   color = NULL, alpha = 1,
   position = c("stack", "fill", "dodge"), width = 0.9,
   origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
-  lname = NULL, lgroup = NULL, legend = NULL, ...
+  lname = NULL, lgroup = NULL, legend = NULL, visible = TRUE, ...
 ) {
 
   position <- match.arg(position)
@@ -49,6 +49,7 @@ ly_bar <- function(
       legend,
       lname,
       lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )

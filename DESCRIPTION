@@ -1,11 +1,12 @@
 Package: rbokeh
 Title: R Interface for Bokeh
-Version: 0.3.4
+Version: 0.4.0
 Authors@R: c(
     person("Ryan", "Hafen", email = "rhafen@gmail.com", role = c("aut", "cre")),
     person("Kenton", "Russell", email = "kent.russell@timelyportfolio.com", role = "ctb"),
     person("Jonathan", "Owen", email = "jonathanro@gmail.com", role = "ctb"),
-    person("Schloerke", "Barret", email = "schloerke@gmail.com", role = "ctb"),
+    person("Barret", "Schloerkep", email = "schloerke@gmail.com", role = "ctb"),
+    person("Saptasrhi", "Guha", email = "saptarshi.guha@gmail.com", role = "ctb"),
     person("Continuum Analytics, Inc.", role = c("aut", "cph"),
       comment = "Bokeh library in htmlwidgets/lib, http://bokeh.pydata.org"
     ))

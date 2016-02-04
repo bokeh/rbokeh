@@ -11,6 +11,7 @@
 #' @param line logical - should hexagons have an outline?
 #' @param alpha the alpha transparency of the hexagons between 0 (transparent) and 1 (opaque)
 #' @param hover logical - should a hover tool be added to show the count in each hexagon?
+#' @param visible should the layer be visible?
 #' @examples
 #' \donttest{
 #' figure() %>% ly_hexbin(rnorm(10000), rnorm(10000))
@@ -20,7 +21,8 @@ ly_hexbin <- function(
   fig, x, y = NULL, data = figure_data(fig),
   xbins = 30, shape = 1, style = "colorscale",
   trans = NULL, inv = NULL,
-  palette = "RdYlGn11", line = FALSE, alpha = 1, hover = TRUE
+  palette = "RdYlGn11", line = FALSE, alpha = 1,
+  hover = TRUE, visible = TRUE
 ) {
 
   args <- sub_names(fig, data,
@@ -36,6 +38,7 @@ ly_hexbin <- function(
       line,
       alpha,
       hover,
+      visible,
       dots = lazy_dots()
     ),
     process_data_and_names = FALSE

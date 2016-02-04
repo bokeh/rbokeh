@@ -314,7 +314,7 @@ grab <- function(..., dots, null_data = FALSE) {
 
 
 
-#' retrieve and properly parse all data
+#' Retrieve and properly parse all data
 #'
 #' @param fig figure to be used
 #' @param data data to be used
@@ -359,6 +359,7 @@ sub_names <- function(
         legend    = get_legend(lazy_eval(arg_val)),
         lname     = as.character(lazy_eval(arg_val)),
         position  = as.character(lazy_eval(arg_val)),
+        lname     = as.character(lazy_eval(arg_val)),
         xlab      = as.character(lazy_eval(arg_val)),
         ylab      = as.character(lazy_eval(arg_val)),
         direction = as.character(lazy_eval(arg_val)),

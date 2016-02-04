@@ -15,7 +15,7 @@ ly_hist <- function(
   fig, x, data = figure_data(fig),
   breaks = "Sturges", freq = TRUE, include.lowest = TRUE, right = TRUE,
   color = NULL, alpha = 1,
-  lname = NULL, lgroup = NULL, ...
+  lname = NULL, lgroup = NULL, visible = TRUE, ...
 ) {
 
   validate_fig(fig, "ly_hist")
@@ -26,7 +26,9 @@ ly_hist <- function(
       color, # TODO If i supply color, it should stack or dodge by default
       alpha,
       # no legend?
-      lname, lgroup,
+      lname,
+      lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -84,7 +86,8 @@ ly_density <- function(
     "biweight", "cosine", "optcosine"),
   weights = NULL, window = kernel, n = 512, cut = 3, na.rm = FALSE,
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...
+  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  ...
 ) {
 
   validate_fig(fig, "ly_density")
@@ -96,7 +99,10 @@ ly_density <- function(
       alpha,
       width,
       type,
-      legend, lname, lgroup,
+      legend,
+      lname,
+      lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -151,7 +157,8 @@ ly_quantile <- function(
   fig, x, group = NULL, data = figure_data(fig),
   probs = NULL, distn = qunif, ncutoff = 200,
   color = NULL, alpha = 1,
-  legend = TRUE, lname = NULL, lgroup = NULL, ...
+  legend = TRUE, lname = NULL, lgroup = NULL, visible = TRUE,
+  ...
 ) {
 
   validate_fig(fig, "ly_quantile")
@@ -162,7 +169,10 @@ ly_quantile <- function(
       group,
       color,
       alpha,
-      legend, lname, lgroup,
+      legend,
+      lname,
+      lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -244,7 +254,8 @@ ly_boxplot <- function(
   fig, x, y = NULL, data = figure_data(fig),
   coef = 1.5,
   color = "blue", alpha = 1,
-  lname = NULL, lgroup = NULL, ...
+  lname = NULL, lgroup = NULL, visible = TRUE,
+  ...
 ) {
 
   validate_fig(fig, "ly_boxplot")
@@ -255,7 +266,9 @@ ly_boxplot <- function(
       color,
       alpha,
       # legend, # no legend?
-      lname, lgroup,
+      lname,
+      lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )

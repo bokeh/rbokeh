@@ -1,8 +1,6 @@
 rbokeh_prerender <- function(fig) {
-  # dots <- list(...)
-  # debug <- dots$debug
-  # if(is.null(debug))
-  #   debug <- FALSE
+
+  fig$x$debug <- getOption("rbokeh_debug", FALSE)
 
   if(fig$x$modeltype %in% c("Plot", "GMapPlot")) {
     if(length(fig$x$spec$layers) == 0 && fig$x$spec$model$plot$type != "GMapPlot") {

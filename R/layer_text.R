@@ -28,7 +28,7 @@ ly_text <- function(
   angle = 0, align = NULL, baseline = NULL,
   font = NULL, font_size = NULL, font_style = NULL,
   x_offset = NULL, y_offset = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL
+  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE
 ) {
 
   validate_fig(fig, "ly_text")
@@ -46,7 +46,10 @@ ly_text <- function(
       font_style,
       x_offset,
       y_offset,
-      legend, lname, lgroup,
+      legend,
+      lname,
+      lgroup,
+      visible,
       dots = lazy_dots()
     )
   )

@@ -7,7 +7,7 @@
 ly_wedge(fig, x, y = NULL, data = figure_data(fig), radius = 0.3,
   start_angle = 0, end_angle = 2 * pi, direction = "anticlock",
   color = NULL, alpha = 1, hover = NULL, url = NULL, legend = NULL,
-  lname = NULL, lgroup = NULL, ...)
+  lname = NULL, lgroup = NULL, visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -39,6 +39,8 @@ ly_wedge(fig, x, y = NULL, data = figure_data(fig), radius = 0.3,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

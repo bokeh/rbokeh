@@ -4,10 +4,14 @@
 \alias{tool_box_zoom}
 \title{Add "box_zoom" tool to a Bokeh figure}
 \usage{
-tool_box_zoom(fig)
+tool_box_zoom(fig, line_color = "black", line_alpha = 1,
+  fill_color = "lightgrey", fill_alpha = 0.5, line_width = 2,
+  line_dash = c(4, 4), level = "overlay")
 }
 \arguments{
 \item{fig}{figure to modify}
+
+\item{line_color, line_alpha, fill_color, fill_alpha, line_width, line_dash, level}{parameters to control the look of the selection bounding region}
 }
 \description{
 Add "box_zoom" tool to a Bokeh figure
@@ -23,9 +27,10 @@ figure() \%>\% ly_points(1:10) \%>\%
 }
 \seealso{
 Other tools: \code{\link{tool_box_select}},
-  \code{\link{tool_crosshair}},
+  \code{\link{tool_crosshair}}, \code{\link{tool_hover}},
   \code{\link{tool_lasso_select}}, \code{\link{tool_pan}},
   \code{\link{tool_reset}}, \code{\link{tool_resize}},
-  \code{\link{tool_save}}, \code{\link{tool_wheel_zoom}}
+  \code{\link{tool_save}}, \code{\link{tool_tap}},
+  \code{\link{tool_wheel_zoom}}
 }
 

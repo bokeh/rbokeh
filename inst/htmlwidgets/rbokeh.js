@@ -20,7 +20,7 @@ HTMLWidgets.widget({
     //clear el for Shiny/dynamic contexts
     el.innerHTML = "";
 
-    if(x.isJSON == true) {
+    if(x.isJSON === true) {
       x.docs_json = JSON.parse(x.docs_json);
     }
 
@@ -40,7 +40,7 @@ HTMLWidgets.widget({
     instance.modelid = x.modelid;
     instance.elementid = x.elementid;
 
-    if(x.debug == true) {
+    if(x.debug === true) {
       console.log(refs);
       console.log(JSON.stringify(refs));
     }
@@ -74,16 +74,16 @@ HTMLWidgets.widget({
       "modelid": x.modelid
     }];
 
+    if(x.debug !== true) {
+      Bokeh.set_log_level('info');
+    }
+
     Bokeh.embed.embed_items(x.docs_json, render_items);
   },
 
   resize: function(el, width, height, instance) {
     // var width = 800;
     // var height = 500;
-    // var instance = {
-    //   modelid: "4f205d18bb3373d73ba892f2eac70640",
-    //   elementid: "73b93d6f1c812a87ac5621bc622762e0"
-    // };
 
     var box = document.getElementById(instance.elementid).getElementsByTagName("table")[0];
 

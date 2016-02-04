@@ -1,3 +1,31 @@
+Version 0.4
+----------------------------------------------------------------------
+
+- add `visible` to list of valid opts for checking (0.4.0)
+- fix issue with hiding legend when mapping attributes (0.4.0)
+- propagate visible parameter to all glyphs (0.4.0)
+- add hover glyph to have same properties as specified glyph with full opacity (0.4.0)
+- fix issue with custom legend (0.4.0)
+- add `visible` parameter to all glyphs (0.4.0)
+- modularize `get_glyph_attrs()` so can be used for annotations (0.4.0)
+- add selection callbacks (0.4.0)
+- add annotation renderers to tools (0.4.0)
+- change default tooltip colors (0.4.0)
+- fix js callbacks to have unique ids (0.4.0)
+- add hover callback example - thanks @saptarshiguha (0.4.0)
+- refactor callback approach (0.4.0)
+- add `get_object_refs()` method (0.4.0)
+- fix bug in axis range introduced by range callback (0.4.0)
+- fix layer naming defaults (0.4.0)
+- add tool_tap with callback support (0.4.0)
+- update `layer_ref` to callback tools (0.4.0)
+- fix lname to be singleton (35 hours ago) <hafen> (0.4.0)
+- add callback examples (0.4.0)
+- make callback work with specified layer names (0.4.0)
+- add hover and tap callbacks (0.4.0)
+- add range callback support (0.4.0)
+- set default log level to 'info' with debug available through option (0.4.0)
+
 Version 0.3
 ----------------------------------------------------------------------
 
