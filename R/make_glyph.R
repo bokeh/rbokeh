@@ -102,18 +102,20 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
 
   ## deal with manual legend
   if(!is.null(legend)) {
-    legend <- as.character(legend)
-    if(!is.null(attr_maps)) {
-      if(legend == "FALSE") {
-        fig$x$spec$layers[[lgroup]]$do_legend <- FALSE
+    if(!(is.logical(legend) && !legend)) {
+      legend <- as.character(legend)
+      if(!is.null(attr_maps)) {
+        if(legend == "FALSE") {
+          fig$x$spec$layers[[lgroup]]$do_legend <- FALSE
+        } else {
+          message("Ignoring custom legend because an attribute is being mapped and therefore the legend is being taken care of automatically.")
+        }
       } else {
-        message("Ignoring custom legend because an attribute is being mapped and therefore the legend is being taken care of automatically.")
-      }
-    } else {
-      if(!is.null(fig$x$spec$common_legend[[legend]])) {
-        fig$x$spec$common_legend[[legend]]$args <- c(fig$x$spec$common_legend[[legend]]$args, list(args))
-      } else {
-        fig$x$spec$common_legend[[legend]] <- list(name = legend, args = list(args))
+        if(!is.null(fig$x$spec$common_legend[[legend]])) {
+          fig$x$spec$common_legend[[legend]]$args <- c(fig$x$spec$common_legend[[legend]]$args, list(args))
+        } else {
+          fig$x$spec$common_legend[[legend]] <- list(name = legend, args = list(args))
+        }
       }
     }
   }

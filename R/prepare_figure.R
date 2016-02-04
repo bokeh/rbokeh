@@ -102,7 +102,9 @@ prepare_figure <- function(fig) {
                 spec$radius <- 0
               if(is.null(spec$glyph))
                 spec$glyph <- "Circle"
-              fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
+              fig <- fig %>% add_layer(spec = spec,
+                dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)),
+                lname = lname, lgroup = lgroup)
 
               # add reference to glyph to legend object
               nn <- length(legend[[lgnd_id]][[1]][[2]]) + 1
@@ -130,7 +132,10 @@ prepare_figure <- function(fig) {
           spec$size <- 0
         if(!is.null(spec$radius))
           spec$radius <- 0
-        fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
+
+        fig <- fig %>% add_layer(spec = spec,
+          dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)),
+          lname = lname, lgroup = lgroup)
 
         # add reference to glyph to legend object
         nn <- length(legend[[lgroup]][[1]][[2]]) + 1
