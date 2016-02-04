@@ -6,6 +6,9 @@
 \usage{
 get_object_refs(fig)
 }
+\arguments{
+\item{fig}{a figure object}
+}
 \description{
 Get object ids and types from a figure
 }

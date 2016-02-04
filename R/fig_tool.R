@@ -76,11 +76,19 @@ tool_reset <- function(fig) {
   update_tool(fig, which = "reset", args = list(plot_ref = fig$x$spec$ref))
 }
 
+#' Add "hover" tool to a Bokeh figure
+#' @template tools
+#' @template callback
+#' @example man-roxygen/ex-hover-custom-callback.R
 #' @export
 tool_hover <- function(fig, callback, ref_layer) {
   fig %>% add_hover_callback(callback, ref_layer)
 }
 
+#' Add "tap" tool to a Bokeh figure
+#' @template tools
+#' @template callback
+#' @example man-roxygen/ex-tap-debug-callback.R
 #' @export
 tool_tap <- function(fig, callback, ref_layer) {
   fig %>% add_tap_callback(callback, ref_layer)
@@ -88,7 +96,7 @@ tool_tap <- function(fig, callback, ref_layer) {
 
 #' Add "lasso_select" tool to a Bokeh figure
 #' @template tools
-#' @param select_every_mousemove logical - should the tool's callback be triggered on every mouse move?
+#' @param line_color,line_alpha,fill_color,fill_alpha,line_width,line_dash,level parameters to control the look of the selection bounding region
 #' @examples
 #' \donttest{
 #' figure() %>% ly_points(1:10) %>%
@@ -125,7 +133,7 @@ tool_lasso_select <- function(fig, line_color = "black", line_alpha = 1,
 
 #' Add "box_select" tool to a Bokeh figure
 #' @template tools
-#' @param select_every_mousemove logical - should the tool's callback be triggered on every mouse move?
+#' @param line_color,line_alpha,fill_color,fill_alpha,line_width,line_dash,level parameters to control the look of the selection bounding region
 #' @examples
 #' \donttest{
 #' figure() %>% ly_points(1:10) %>%
@@ -166,6 +174,7 @@ tool_box_select <- function(fig,
 
 #' Add "box_zoom" tool to a Bokeh figure
 #' @template tools
+#' @param line_color,line_alpha,fill_color,fill_alpha,line_width,line_dash,level parameters to control the look of the selection bounding region
 #' @examples
 #' \donttest{
 #' figure() %>% ly_points(1:10) %>%

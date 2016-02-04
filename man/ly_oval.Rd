@@ -6,7 +6,7 @@
 \usage{
 ly_oval(fig, x, y = NULL, data = figure_data(fig), width = 0.1,
   height = 0.1, angle = 0, color = NULL, alpha = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, ...)
+  lname = NULL, lgroup = NULL, visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -32,6 +32,8 @@ ly_oval(fig, x, y = NULL, data = figure_data(fig), width = 0.1,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

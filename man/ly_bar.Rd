@@ -7,7 +7,7 @@
 ly_bar(fig, x, y = NULL, data = figure_data(fig), color = NULL,
   alpha = 1, position = c("stack", "fill", "dodge"), width = 0.9,
   origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
-  lname = NULL, lgroup = NULL, legend = NULL, ...)
+  lname = NULL, lgroup = NULL, legend = NULL, visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -33,6 +33,8 @@ ly_bar(fig, x, y = NULL, data = figure_data(fig), color = NULL,
 \item{lgroup}{layer group}
 
 \item{legend}{either a logical specifying not to plot a legend for this layer (FALSE) or a string indicating the name of the legend entry for this layer (note that when mapping plot attributes to variables in \code{data}, a legend is automatically created and does not need to be specified - see "Mapped plot attributes and legends" below)}
+
+\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

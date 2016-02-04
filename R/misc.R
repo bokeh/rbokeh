@@ -10,6 +10,8 @@ catjitter <- function(x, factor = 0.8) {
 }
 
 #' Get object ids and types from a figure
+#'
+#' @param fig a figure object
 #' @export
 get_object_refs <- function(fig) {
   tmp <- lapply(fig$x$spec$model, function(x) {

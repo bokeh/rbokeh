@@ -5,7 +5,8 @@
 \title{Add a "boxplot" layer to a Bokeh figure}
 \usage{
 ly_boxplot(fig, x, y = NULL, data = figure_data(fig), coef = 1.5,
-  color = "blue", alpha = 1, lname = NULL, lgroup = NULL, ...)
+  color = "blue", alpha = 1, lname = NULL, lgroup = NULL,
+  visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -25,6 +26,8 @@ ly_boxplot(fig, x, y = NULL, data = figure_data(fig), coef = 1.5,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

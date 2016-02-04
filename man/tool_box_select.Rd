@@ -11,7 +11,7 @@ tool_box_select(fig, line_color = "black", line_alpha = 1,
 \arguments{
 \item{fig}{figure to modify}
 
-\item{select_every_mousemove}{logical - should the tool's callback be triggered on every mouse move?}
+\item{line_color, line_alpha, fill_color, fill_alpha, line_width, line_dash, level}{parameters to control the look of the selection bounding region}
 }
 \description{
 Add "box_select" tool to a Bokeh figure
@@ -27,9 +27,10 @@ figure() \%>\% ly_points(1:10) \%>\%
 }
 \seealso{
 Other tools: \code{\link{tool_box_zoom}},
-  \code{\link{tool_crosshair}},
+  \code{\link{tool_crosshair}}, \code{\link{tool_hover}},
   \code{\link{tool_lasso_select}}, \code{\link{tool_pan}},
   \code{\link{tool_reset}}, \code{\link{tool_resize}},
-  \code{\link{tool_save}}, \code{\link{tool_wheel_zoom}}
+  \code{\link{tool_save}}, \code{\link{tool_tap}},
+  \code{\link{tool_wheel_zoom}}
 }
 

@@ -1,7 +1,11 @@
 
-
+#' Add "selection" tool callback to a Bokeh figure
+#'
+#' This adds a selection callback to be used with the box select or lasso select tools.
+#' @param fig figure to modify
+#' @template callback
 #' @export
-selection_callback <- function(fig, callback, ref_layer) {
+tool_selection <- function(fig, callback, ref_layer) {
 
   nm <- paste(ref_layer, "data", sep = "_")
   did <- fig$x$spec$callback$layers[[ref_layer]][[nm]]$id

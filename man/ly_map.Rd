@@ -5,7 +5,7 @@
 \title{Add a "map" layer to a Bokeh figure}
 \usage{
 ly_map(fig, database = "world", regions = ".", color = NULL, alpha = 1,
-  lname = NULL, lgroup = NULL, ...)
+  lname = NULL, lgroup = NULL, visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -19,6 +19,8 @@ ly_map(fig, database = "world", regions = ".", color = NULL, alpha = 1,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
