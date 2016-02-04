@@ -91,11 +91,11 @@ figure() %>%
 
 figure(tools = "lasso_select") %>%
   ly_points(1:10, lname = "points") %>%
-  selection_callback(debug_callback(), "points")
+  tool_selection(debug_callback(), "points")
 
 figure(tools = "box_select") %>%
   ly_points(1:10, lname = "points") %>%
-  selection_callback(debug_callback(), "points")
+  tool_selection(debug_callback(), "points")
 
 
 # won't work when splitting up glyphs...
@@ -112,8 +112,9 @@ ui <- fluidPage(
   rbokehOutput("rbokeh", width = 500, height = 540),
   textOutput("x_range_text"),
   textOutput("hover_text"),
-  "selected data:",
+  "selected triggered by tap:",
   htmlOutput("tap_table"),
+  "index of selected triggered by any selection:"
   textOutput("selection_text")
 )
 
@@ -124,7 +125,7 @@ server <- function(input, output, session) {
       tool_hover(shiny_callback("hover_info"), "points") %>%
       tool_tap(shiny_callback("tap_info"), "points") %>%
       tool_box_select() %>%
-      selection_callback(shiny_callback("selection_info"), "points") %>%
+      tool_selection(shiny_callback("selection_info"), "points") %>%
       x_range(callback = shiny_callback("x_range"))
   })
 
@@ -141,8 +142,8 @@ server <- function(input, output, session) {
   output$hover_text <- reactive({
     hi <- input$hover_info
     if(!is.null(hi)) {
-      paste0(" ", hi$index[["1d"]]$indices, " d ",
-        hi$geom$sx, " -> ", hi$geom$sy)
+      paste0("index: ", hi$index[["1d"]]$indices, ", x: ",
+        hi$geom$sx, ", y:", hi$geom$sy)
     } else {
       "waiting for hover event..."
     }
