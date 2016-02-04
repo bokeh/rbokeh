@@ -42,21 +42,37 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
           ns_glyph_attrs[[ii]]$value <- "#e1e1e1"
     }
   }
-
   nsgl_id <- gen_id(fig, c("ns", glyph, lgroup, lname))
   ns_glyph_mod <- glyph_model(nsgl_id, glyph, ns_glyph_attrs)
+
+  # hover glyph
+  hov_glyph_attrs <- glyph_attrs
+  alpha_ind <- which(grepl("_alpha", names(hov_glyph_attrs)))
+
+  for(ii in alpha_ind) {
+    if(!is.null(hov_glyph_attrs[[ii]])) {
+      names(hov_glyph_attrs[[ii]])[names(hov_glyph_attrs[[ii]]) == "field"] <- "value"
+      if(!is.null(hov_glyph_attrs[[ii]]$value))
+        if(!is.na(hov_glyph_attrs[[ii]]$value))
+          hov_glyph_attrs[[ii]]$value <- 1
+    }
+  }
+  hovgl_id <- gen_id(fig, c("hov", glyph, lgroup, lname))
+  hov_glyph_mod <- glyph_model(hovgl_id, glyph, hov_glyph_attrs)
 
   d_id <- gen_id(fig, digest(dat))
   dat_mod <- data_model(dat, d_id)
 
   glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
-  glyph_rend_mod <- glyph_renderer_model(glr_id, dat_mod$ref, glyph_mod$ref, ns_glyph_mod$ref)
+  glyph_rend_mod <- glyph_renderer_model(glr_id, dat_mod$ref, glyph_mod$ref,
+    ns_glyph_mod$ref, hov_glyph_mod$ref)
 
   fig$x$spec$model$plot$attributes$renderers[[glr_id]] <- glyph_rend_mod$ref
 
   fig$x$spec$model[[d_id]] <- dat_mod$model
   fig$x$spec$model[[gl_id]] <- glyph_mod$model
   fig$x$spec$model[[nsgl_id]] <- ns_glyph_mod$model
+  fig$x$spec$model[[hovgl_id]] <- hov_glyph_mod$model
   fig$x$spec$model[[glr_id]] <- glyph_rend_mod$model
 
   # add in mappings from lname to refs for use in custom js callbacks
@@ -68,10 +84,12 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
     cb <- list(
       glyph_mod$ref,
       ns_glyph_mod$ref,
+      hov_glyph_mod$ref,
       dat_mod$ref,
       glyph_rend_mod$ref
     )
-    names(cb) <- paste(lname, c("glyph", "ns_glyph", "data", "glyph_rend"), sep = "_")
+    names(cb) <- paste(lname, c("glyph", "ns_glyph", "hov_glyph",
+      "data", "glyph_rend"), sep = "_")
 
     fig$x$spec$callback$layers[[lname]] <- cb
   }
@@ -144,10 +162,14 @@ glyph_model <- function(id, glyph = "Circle", attrs) {
   res
 }
 
-glyph_renderer_model <- function(id, data_ref, glyph_ref, ns_glyph_ref) {
+glyph_renderer_model <- function(id, data_ref, glyph_ref,
+  ns_glyph_ref, hov_glyph_ref) {
+
   res <- base_model_object("GlyphRenderer", id)
   res$model$attributes["selection_glyph"] <- list(NULL)
   res$model$attributes$nonselection_glyph <- ns_glyph_ref
+  res$model$attributes["hover_glyph"] <- list(NULL)
+  res$model$attributes$hover_glyph <- hov_glyph_ref
   res$model$attributes["server_data_source"] <- list(NULL)
   res$model$attributes["name"] <- list(NULL)
   res$model$attributes$data_source <- data_ref
