@@ -4,12 +4,17 @@
 \alias{tool_box_select}
 \title{Add "box_select" tool to a Bokeh figure}
 \usage{
-tool_box_select(fig, line_color = "black", line_alpha = 1,
-  fill_color = "lightgrey", fill_alpha = 0.5, line_width = 2,
-  line_dash = c(4, 4), level = "overlay")
+tool_box_select(fig, callback = NULL, ref_layer = NULL,
+  line_color = "black", line_alpha = 1, fill_color = "lightgrey",
+  fill_alpha = 0.5, line_width = 2, line_dash = c(4, 4),
+  level = "overlay")
 }
 \arguments{
 \item{fig}{figure to modify}
+
+\item{callback}{a callback to be applied to this tool - either a character string of javascript code or any one of \code{\link{debug_callback}}, \code{\link{shiny_callback}}, \code{\link{console_callback}}, \code{\link{custom_callback}}}
+
+\item{ref_layer}{name of the layer that the callback should be applied to}
 
 \item{line_color, line_alpha, fill_color, fill_alpha, line_width, line_dash, level}{parameters to control the look of the selection bounding region}
 }

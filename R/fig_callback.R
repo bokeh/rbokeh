@@ -223,19 +223,19 @@ handle_tap_callback.shinyCallback <- function(x, fig_refs) {
   list(
     code = sprintf("
 if (HTMLWidgets.shinyMode) {
-  var cols = cb_obj.attributes.column_names;
-  var idx = cb_obj.attributes.selected['1d'].indices;
-  var res = null;
-  if(idx.length > 0) {
-    res = {}
-    for(var i = 0; i < cols.length; i++) {
-      res[cols[i]] = [];
-      for (var j = 0; j < idx.length; j++) {
-        res[cols[i]].push(cb_obj.attributes.data[cols[i]][idx[j]]);
-      }
-    }
-  }
-  Shiny.onInputChange('%s', res);
+  // var cols = cb_obj.attributes.column_names;
+  // var idx = cb_obj.attributes.selected['1d'].indices;
+  // var res = null;
+  // if(idx.length > 0) {
+  //   res = {}
+  //   for(var i = 0; i < cols.length; i++) {
+  //     res[cols[i]] = [];
+  //     for (var j = 0; j < idx.length; j++) {
+  //       res[cols[i]].push(cb_obj.attributes.data[cols[i]][idx[j]]);
+  //     }
+  //   }
+  // }
+  Shiny.onInputChange('%s', cb_obj.get('selected')['1d'].indices);
 }
 ", as.character(x$id)),
     args = c(x$args, callback_lname2args(x$lnames, fig_refs))

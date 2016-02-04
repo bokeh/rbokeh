@@ -106,15 +106,24 @@ figure(tools = "box_select") %>%
 
 library("shiny")
 library("rbokeh")
-dat <- data.frame(x = 1:3, y = 1:3, z = "http://people.mozilla.com")
+dat <- data.frame(x = rnorm(10), y = rnorm(10))
 
 ui <- fluidPage(
   rbokehOutput("rbokeh", width = 500, height = 540),
+
+  strong("x range change event:"),
   textOutput("x_range_text"),
+
+  strong("y range change event:"),
+  textOutput("y_range_text"),
+
+  strong("hover event:"),
   textOutput("hover_text"),
-  "selected triggered by tap:",
-  htmlOutput("tap_table"),
-  "index of selected triggered by any selection:"
+
+  strong("triggered by tap/click:"),
+  htmlOutput("tap_text"),
+
+  strong("index of selected triggered by any selection:"),
   textOutput("selection_text")
 )
 
@@ -124,18 +133,26 @@ server <- function(input, output, session) {
       hover = list(x, y), lname = "points") %>%
       tool_hover(shiny_callback("hover_info"), "points") %>%
       tool_tap(shiny_callback("tap_info"), "points") %>%
-      tool_box_select() %>%
-      tool_selection(shiny_callback("selection_info"), "points") %>%
-      x_range(callback = shiny_callback("x_range"))
+      tool_box_select(shiny_callback("selection_info"), "points") %>%
+      x_range(callback = shiny_callback("x_range")) %>%
+      y_range(callback = shiny_callback("y_range"))
   })
 
   output$x_range_text <- reactive({
     xrng <- input$x_range
     if(!is.null(xrng)) {
-      paste0("factors: ", xrng$factors, ", start: ", xrng$start,
-        ", end: ", xrng$end)
+      paste0("start: ", xrng$start, ", end: ", xrng$end)
     } else {
-      "waiting for axis event..."
+      "waiting for x-axis pan/zoom event (use pan/zoom to trigger)..."
+    }
+  })
+
+  output$y_range_text <- reactive({
+    yrng <- input$y_range
+    if(!is.null(yrng)) {
+      paste0("start: ", yrng$start,", end: ", yrng$end)
+    } else {
+      "waiting for y-axis pan/zoom event (use pan/zoom to trigger)..."
     }
   })
 
@@ -145,23 +162,25 @@ server <- function(input, output, session) {
       paste0("index: ", hi$index[["1d"]]$indices, ", x: ",
         hi$geom$sx, ", y:", hi$geom$sy)
     } else {
-      "waiting for hover event..."
+      "waiting for hover event (hover over plot or points on plot to trigger)..."
     }
   })
 
-  output$tap_table <- renderTable({
+  output$tap_text <- reactive({
     ti <- input$tap_info
     if(!is.null(ti)) {
-      data.frame(x = unlist(ti$x), y = unlist(ti$y))
+      paste("index:", paste(ti, collapse = ", "))
+    } else {
+      "waiting for tap/click event (click point(s) to trigger)..."
     }
   })
 
   output$selection_text <- reactive({
     si <- input$selection_info
     if(!is.null(si)) {
-      paste(si, collapse = ", ")
+      paste("index:", paste(si, collapse = ", "))
     } else {
-      "waiting for selection event..."
+      "waiting for selection event (click point(s) or use box select tool to trigger)..."
     }
   })
 }

@@ -96,6 +96,7 @@ tool_tap <- function(fig, callback, ref_layer) {
 
 #' Add "lasso_select" tool to a Bokeh figure
 #' @template tools
+#' @template callback
 #' @param line_color,line_alpha,fill_color,fill_alpha,line_width,line_dash,level parameters to control the look of the selection bounding region
 #' @examples
 #' \donttest{
@@ -103,7 +104,9 @@ tool_tap <- function(fig, callback, ref_layer) {
 #'  tool_lasso_select()
 #' }
 #' @export
-tool_lasso_select <- function(fig, line_color = "black", line_alpha = 1,
+tool_lasso_select <- function(fig,
+  callback = NULL, ref_layer = NULL,
+  line_color = "black", line_alpha = 1,
   fill_color = "lightgrey", fill_alpha = 0.5,
   line_width = 2, line_dash = c(4, 4),
   level = "overlay") {
@@ -126,13 +129,19 @@ tool_lasso_select <- function(fig, line_color = "black", line_alpha = 1,
   fig$x$spec$model$plot$attributes$renderers[[pa_model$ref$id]] <- pa_model$ref
   fig$x$spec$model[[pa_model$ref$id]] <- pa_model$model
 
-  update_tool(fig, which = "lasso_select",
+  fig <- update_tool(fig, which = "lasso_select",
     args = list(plot_ref = fig$x$spec$ref,
     overlay = pa_model$ref))
+
+  if(!is.null(callback))
+    fig <- fig %>% tool_selection(callback, ref_layer)
+
+  fig
 }
 
 #' Add "box_select" tool to a Bokeh figure
 #' @template tools
+#' @template callback
 #' @param line_color,line_alpha,fill_color,fill_alpha,line_width,line_dash,level parameters to control the look of the selection bounding region
 #' @examples
 #' \donttest{
@@ -141,6 +150,7 @@ tool_lasso_select <- function(fig, line_color = "black", line_alpha = 1,
 #' }
 #' @export
 tool_box_select <- function(fig,
+  callback = NULL, ref_layer = NULL,
   line_color = "black", line_alpha = 1,
   fill_color = "lightgrey", fill_alpha = 0.5,
   line_width = 2, line_dash = c(4, 4),
@@ -167,9 +177,14 @@ tool_box_select <- function(fig,
   fig$x$spec$model$plot$attributes$renderers[[ba_model$ref$id]] <- ba_model$ref
   fig$x$spec$model[[ba_model$ref$id]] <- ba_model$model
 
-  update_tool(fig, which = "box_select",
+  fig <- update_tool(fig, which = "box_select",
     args = list(plot_ref = fig$x$spec$ref,
     overlay = ba_model$ref))
+
+  if(!is.null(callback))
+    fig <- fig %>% tool_selection(callback, ref_layer)
+
+  fig
 }
 
 #' Add "box_zoom" tool to a Bokeh figure

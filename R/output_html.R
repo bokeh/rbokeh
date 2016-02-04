@@ -35,7 +35,7 @@ Bokeh.$(function() {
   var modelid = "', modelid, '";
   var elementid = "', elementid, '";
   var docid = "', docid, '";
-  var docs_json = JSON.parse(\'', fig, '\');
+  var docs_json = ', fig, ';
   var refkey = Object.keys(docs_json)[0]
   var refs = docs_json[refkey].roots.references
   function traverseObject(obj) {
