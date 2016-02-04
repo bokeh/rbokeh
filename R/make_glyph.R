@@ -117,6 +117,9 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
           fig$x$spec$common_legend[[legend]] <- list(name = legend, args = list(args))
         }
       }
+    } else {
+      if(is.logical(legend))
+        fig$x$spec$layers[[lgroup]]$do_legend <- legend
     }
   }
 
