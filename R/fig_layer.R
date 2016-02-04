@@ -119,6 +119,9 @@ get_glyph_attrs <- function(spec, dat = NULL) {
   if(!is.null(glyph_attrs$text))
     glyph_attrs$text$field <- glyph_attrs$text$field$field
 
+  if(!is.null(glyph_attrs$visible))
+    glyph_attrs$visible <- glyph_attrs$visible$value
+
   glyph_attrs
 }
 
