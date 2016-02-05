@@ -1,6 +1,7 @@
 Version 0.3
 ----------------------------------------------------------------------
 
+- update `ly_hexbin()` to have `xbnds`, `ybnds` and allow `hover = FALSE` (0.3.5)
 - change gist iframe to use rawgit because bl.ocks.org changed X-frame-options to SAMEORIGIN (0.3.4)
 - add 'secure' option to `rbokeh2html()` for using https cdn links (0.3.4)
 - add `desired_num_ticks` to axis options (0.3.4)
