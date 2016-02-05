@@ -7,6 +7,7 @@
 #' @param xbins,shape,xbnds,ybnds parameters passed to \code{\link[hexbin]{hexbin}}
 #' @param style type of plotting for hexbins (see \code{\link[hexbin]{grid.hexagons}}) - "colorramp" and "lattice" are currently supported
 #' @param trans,inv transformation and inverse transformation function for the bin counts
+#' @param lname layer name
 #' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
 #' @param line logical - should hexagons have an outline?
 #' @param alpha the alpha transparency of the hexagons between 0 (transparent) and 1 (opaque)
