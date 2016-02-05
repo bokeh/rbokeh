@@ -4,9 +4,10 @@
 #' @param x values or field name of center x coordinates to be binned
 #' @param y values or field name of center y coordinates to be binned
 #' @param data an optional data frame, providing the source for x and y
-#' @param xbins,shape parameters passed to \code{\link[hexbin]{hexbin}}
+#' @param xbins,shape,xbnds,ybnds parameters passed to \code{\link[hexbin]{hexbin}}
 #' @param style type of plotting for hexbins (see \code{\link[hexbin]{grid.hexagons}}) - "colorramp" and "lattice" are currently supported
 #' @param trans,inv transformation and inverse transformation function for the bin counts
+#' @param lname layer name
 #' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
 #' @param line logical - should hexagons have an outline?
 #' @param alpha the alpha transparency of the hexagons between 0 (transparent) and 1 (opaque)
@@ -19,8 +20,9 @@
 #' @export
 ly_hexbin <- function(
   fig, x, y = NULL, data = figure_data(fig),
-  xbins = 30, shape = 1, style = "colorscale",
-  trans = NULL, inv = NULL,
+  xbins = 30, shape = 1, xbnds = NULL, ybnds = NULL,
+  style = "colorscale",
+  trans = NULL, inv = NULL, lname = NULL,
   palette = "RdYlGn11", line = FALSE, alpha = 1,
   hover = TRUE, visible = TRUE
 ) {
@@ -35,9 +37,9 @@ ly_hexbin <- function(
       # trans,
       # inv,
       # palette,
+      hover,
       line,
       alpha,
-      hover,
       visible,
       dots = lazy_dots()
     ),
@@ -55,7 +57,7 @@ ly_hexbin <- function(
     args$info$y_name <- xy_names$y
 
     hbd <- get_hexbin_data(x = xy$x, y = xy$y, xbins = xbins,
-      shape = shape)
+      shape = shape, xbnds = xbnds, ybnds = ybnds)
   } else {
     args$info$x_name <- "x"
     args$info$y_name <- "y"
@@ -99,11 +101,15 @@ ly_hexbin <- function(
     line_color <- col
   }
 
+  if(is.logical(hover) && !hover)
+    hbd$data <- NULL
+
   fig %>% ly_polygons(
     xs = hbd$xs, ys = hbd$ys, color = NULL,
     fill_color = col, alpha = NULL,
     fill_alpha = args$params$alpha, line_color = line_color,
-    hover = hbd$data, xlab = args$info$x_name, ylab = args$info$y_name
+    hover = hbd$data, xlab = args$info$x_name, ylab = args$info$y_name,
+    lname = lname
   )
 }
 

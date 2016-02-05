@@ -5,9 +5,9 @@
 \title{Add a "hexbin" layer to a Bokeh figure}
 \usage{
 ly_hexbin(fig, x, y = NULL, data = figure_data(fig), xbins = 30,
-  shape = 1, style = "colorscale", trans = NULL, inv = NULL,
-  palette = "RdYlGn11", line = FALSE, alpha = 1, hover = TRUE,
-  visible = TRUE)
+  shape = 1, xbnds = NULL, ybnds = NULL, style = "colorscale",
+  trans = NULL, inv = NULL, lname = NULL, palette = "RdYlGn11",
+  line = FALSE, alpha = 1, hover = TRUE, visible = TRUE)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -18,11 +18,13 @@ ly_hexbin(fig, x, y = NULL, data = figure_data(fig), xbins = 30,
 
 \item{data}{an optional data frame, providing the source for x and y}
 
-\item{xbins, shape}{parameters passed to \code{\link[hexbin]{hexbin}}}
+\item{xbins, shape, xbnds, ybnds}{parameters passed to \code{\link[hexbin]{hexbin}}}
 
 \item{style}{type of plotting for hexbins (see \code{\link[hexbin]{grid.hexagons}}) - "colorramp" and "lattice" are currently supported}
 
 \item{trans, inv}{transformation and inverse transformation function for the bin counts}
+
+\item{lname}{layer name}
 
 \item{palette}{name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
 
