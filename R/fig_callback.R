@@ -43,23 +43,25 @@ console_callback <- function() {
 #' This registers a callback that allows you to specify your own custom callback javascript code.  A probalby more useful callback to use in conjunction with this for working on the javascript code is the \code{\link{debug_callback}} which will place you inside a debugger in your web browser allowing you to inspect the callback objects.
 #' @param code a string of javascript callback code
 #' @param lnames vector of layer names to be made available inside the callback in addition to the default callback objects (see details)
+#' @param args named list of additional references to objects to be addressable in the callback
 #' @details If we add a layer and provide it, for example the \code{lname} "points", then if we refer to it using the \code{lnames} parameter to the callback, several objects will be made available inside the callback for you to access, given the names "points_data", "points_glyph", "points_glyph_rend", "points_hov_glyph", "points_ns_glyph", all pointers to different objects associated with the "points" layer that your callback can manipulate.
 #' @example man-roxygen/ex-hover-custom-callback.R
 #' @export
-custom_callback <- function(code, lnames = NULL) {
+custom_callback <- function(code, lnames = NULL, args = NULL) {
   # TODO: checking that code and args are correct
   # code should be string
-  structure(list(code = code, lnames = lnames, args = NULL), class = "customCallback")
+  structure(list(code = code, lnames = lnames, args = args), class = "customCallback")
 }
 
 #' Specify a "debug" callback
 #'
 #' This registers a callback that simply places you inside a debugger in your web browser allowing you to inspect the callback objects.
 #' @param lnames vector of layer names to be made available inside the callback in addition to the default callback objects (see \code{\link{custom_callback}} for details)
+#' @param args named list of additional references to objects to be addressable in the callback
 #' @example man-roxygen/ex-tap-debug-callback.R
 #' @export
-debug_callback <- function(lnames = NULL) {
-  structure(list(code = "debugger", lnames = lnames, args = NULL), class = "debugCallback")
+debug_callback <- function(lnames = NULL, args = NULL) {
+  structure(list(code = "debugger", lnames = lnames, args = args), class = "debugCallback")
 }
 
 ## s3 methods

@@ -4,12 +4,14 @@
 \alias{custom_callback}
 \title{Specify a custom callback}
 \usage{
-custom_callback(code, lnames = NULL)
+custom_callback(code, lnames = NULL, args = NULL)
 }
 \arguments{
 \item{code}{a string of javascript callback code}
 
 \item{lnames}{vector of layer names to be made available inside the callback in addition to the default callback objects (see details)}
+
+\item{args}{named list of additional references to objects to be addressable in the callback}
 }
 \description{
 This registers a callback that allows you to specify your own custom callback javascript code.  A probalby more useful callback to use in conjunction with this for working on the javascript code is the \code{\link{debug_callback}} which will place you inside a debugger in your web browser allowing you to inspect the callback objects.

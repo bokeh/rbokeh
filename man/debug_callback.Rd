@@ -4,10 +4,12 @@
 \alias{debug_callback}
 \title{Specify a "debug" callback}
 \usage{
-debug_callback(lnames = NULL)
+debug_callback(lnames = NULL, args = NULL)
 }
 \arguments{
 \item{lnames}{vector of layer names to be made available inside the callback in addition to the default callback objects (see \code{\link{custom_callback}} for details)}
+
+\item{args}{named list of additional references to objects to be addressable in the callback}
 }
 \description{
 This registers a callback that simply places you inside a debugger in your web browser allowing you to inspect the callback objects.
