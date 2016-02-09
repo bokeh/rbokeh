@@ -399,7 +399,7 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
   # 2. evaluates to a list that can't evaluate. must look at data
   # 3. comes from a string that must have an '@' symbol
 
-  hover_symbol <- b_eval_get_symbol(lazy_hover_val)
+  hover_symbol <- lazy_hover_val$expr
   if (is.null(hover_symbol)) {
     return(NULL)
   }
@@ -469,7 +469,7 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
         symbol_val,
         env = lazy_hover_val$env
       )
-      sub_fn(lazy_val)
+      sub_fn(lazy_val, "hover")
     })
 
 

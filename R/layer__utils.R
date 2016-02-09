@@ -21,15 +21,15 @@ b_eval <- function(data) {
   }
 
   if(is.null(data)) {
-    fn <- function(x) {
+    fn <- function(x, key = stop("didn't supply key in b_eval fn")) {
       ans <- lazy_eval(x)
 
       # if it is an "data" variable name, set the stringName to the value used, such as "xVal"
-      if(!is.null(ans)) {
-        if(
-          paste0(deparse(x$expr), collapse = "") %in% data_name_list_c()
-        ) {
-          attr(ans, "stringName") <- deparse_or_string(b_eval_get_symbol(x))
+      if (!is.null(ans)) {
+        if (key %in% data_name_list_c()) {
+          if (is.language(x$expr) || is.symbol(x$expr)) {
+            attr(ans, "stringName") <- deparse(x$expr)
+          }
         }
       }
 
@@ -46,7 +46,7 @@ b_eval <- function(data) {
       )
     }
 
-    fn <- function(x) {
+    fn <- function(x, key = stop("didn't supply key in b_eval fn")) {
       # internal helper
       if(! inherits(x, "lazy")) {
         # print(x)
@@ -58,65 +58,31 @@ b_eval <- function(data) {
         return(NULL)
       }
 
-      x_symbol <- b_eval_get_symbol(x)
-
-      if(is.character(x_symbol))
-        x_symbol <- as.symbol(x_symbol)
-
-      x_name <- deparse(x_symbol)
-
-      return_ans <- function(ans) {
+      return_ans <- function(ans, x_name = stop("x_name not supplied")) {
         # attach the variable name from where it came
         if(!is.null(ans)) {
-          if(deparse(x$expr) %in% data_name_list_c()) {
-            # it's data, force the stringName
-            attr(ans, "stringName") <- deparse_or_string(b_eval_get_symbol(x))
-          } else if(x_name %in% names(data)) {
-            # it's parameter, add for fun
-            attr(ans, "stringName") <- deparse_or_string(b_eval_get_symbol(x))
+          if(! is.null(x_name)) {
+            # if a name can be supplied, add it
+            attr(ans, "stringName") <- x_name
           }
         }
         ans
       }
-      # cat("\n\n First\n");print(x)
 
-      # if the single item is in the data names, return that column
-      if(x_name %in% names(data)) {
-        res <- eval(x_symbol, data, globalenv())
-        return(return_ans(res))
+      if (is.symbol(x$expr) || is.language(x$expr)) {
+        # x$expr is symbol
+        x_name <- deparse(x$expr)
+        res <- lazy_eval(x, data = data)
+        return(return_ans(res, x_name))
       }
+      # is a real value (not symbol)
 
-      # check for "as is"
-      plain_lazy_eval <- try(lazy_eval(x), silent = TRUE)
-
-      # couldn't evaluate, therefore in data?
-      if(inherits(plain_lazy_eval, "try-error")) {
-        # assuming it is an expression that fails when evaluated
-        # must retrieve the symbol from the envir
-        # then retrieve the data with that symbol
-
-        # include the global env so things like "*" and "+" or global user functions work
-        res <- try(eval(x_symbol, data, globalenv()), silent = TRUE)
-        if(inherits(res, "try-error")) {
-          # print(str(data))
-          # browser()
-          stop("argument '", x_name, "' cannot be found in data")
-        }
-
-        return(return_ans(res))
-      }
-
-      # object exists as evaluated
-      res <- plain_lazy_eval
-
-      if(is.null(res)) {
-        return(return_ans(res))
-      }
+      res <- x$expr
 
       res_class <- class(res)
       if(identical(res_class, "AsIs")) {
         # this means it evaluated properly and is suppose to be "as is"
-        return(return_ans(res))
+        return(return_ans(res, NULL))
       }
 
       ## variable name could have been supplied in quotes
@@ -124,18 +90,18 @@ b_eval <- function(data) {
         if(res %in% names(data)) {
           nm <- res
           res <- data[[res]]
-          attr(res, "stringName") <- nm
+          return(return_ans(res, nm))
         } else {
           # # TODO. I vote to not repeat parameters unless given a vector to begin with
           res <- rep(res, nrow(data))
+          return(return_ans(res, NULL))
         }
       }
 
-      if(is.null(res)) {
-        return(return_ans(res))
-      }
-
-      return(return_ans(res))
+      # is not an expression
+      # is not an as is
+      # is not a single character string
+      return(return_ans(res, NULL))
     }
   }
 
@@ -277,9 +243,14 @@ grab <- function(..., dots, null_data = FALSE) {
     stop("'dots' must be supplied")
   }
 
-  arg_vals <- lazy_dots(...)
+  arg_val_names <- lazy_dots(...)
 
-  names(arg_vals) <- lapply(arg_vals, "[[", "expr") %>%
+  # .follow_symbols: If ‘TRUE’, the default, follows promises across
+  # function calls. See ‘vignette("chained-promises")’ for
+  # details.
+  arg_vals <- lazy_dots(..., .follow_symbols = TRUE)
+
+  names(arg_vals) <- lapply(arg_val_names, "[[", "expr") %>%
     unlist() %>%
     as.character()
 
@@ -364,7 +335,7 @@ sub_names <- function(
         ylab      = as.character(lazy_eval(arg_val)),
         direction = as.character(lazy_eval(arg_val)),
         anchor    = as.character(lazy_eval(arg_val)),
-        sub_fn(arg_val)
+        sub_fn(arg_val, arg_name)
       )
       ans
     })
