@@ -1,3 +1,7 @@
+#' @importFrom pryr named_dots
+NULL
+
+
 #' rbokeh: R interface for Bokeh
 #'
 #' R interface for creating plots in Bokeh.  Bokeh by Continuum Analytics, \url{http://bokeh.pydata.org/en/latest/}
@@ -51,5 +55,3 @@ NULL
 #' @param lhs a Bokeh figure
 #' @param rhs a layer to add to the figure
 NULL
-
-

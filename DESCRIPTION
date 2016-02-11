@@ -25,6 +25,7 @@ Imports:
     digest,
     hexbin,
     lazyeval,
+    pryr,
     magrittr,
     ggplot2,
     scales,
