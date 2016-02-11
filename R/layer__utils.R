@@ -248,7 +248,7 @@ grab <- function(..., dots, null_data = FALSE) {
 
   arg_vals <- pryr::named_dots(...) %>%
     lapply(function(expr) {
-      correct_value <- pryr:::promise_code(expr, pf)
+      correct_value <- pryr::substitute_q(expr, pf)
       lazy_(correct_value, pf2)
     })
 
