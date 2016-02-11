@@ -243,17 +243,16 @@ grab <- function(..., dots, null_data = FALSE) {
     stop("'dots' must be supplied")
   }
 
-  arg_val_names <- lazy_dots(...)
+  pf <- parent.frame()
+  pf2 <- parent.frame(2)
 
-  # .follow_symbols: If ‘TRUE’, the default, follows promises across
-  # function calls. See ‘vignette("chained-promises")’ for
-  # details.
-  arg_vals <- lazy_dots(..., .follow_symbols = TRUE)
+  arg_vals <- pryr::named_dots(...) %>%
+    lapply(function(expr) {
+      correct_value <- pryr:::promise_code(expr, pf)
+      lazy_(correct_value, pf2)
+    })
 
-  names(arg_vals) <- lapply(arg_val_names, "[[", "expr") %>%
-    unlist() %>%
-    as.character()
-
+  # forces a name stomp (but that shouldn't happen)
   for (key in names(dots)) {
     arg_vals[[key]] <- dots[[key]]
   }
