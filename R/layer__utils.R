@@ -73,16 +73,16 @@ b_eval <- function(data) {
         # x$expr is symbol
         x_name <- deparse(x$expr)
         res <- lazy_eval(x, data = data)
-        return(return_ans(res, x_name))
+      } else {
+        # is a real value (not symbol)
+        x_name <- NULL
+        res <- x$expr
       }
-      # is a real value (not symbol)
-
-      res <- x$expr
 
       res_class <- class(res)
       if(identical(res_class, "AsIs")) {
         # this means it evaluated properly and is suppose to be "as is"
-        return(return_ans(res, NULL))
+        return(return_ans(res, x_name))
       }
 
       ## variable name could have been supplied in quotes
@@ -94,14 +94,14 @@ b_eval <- function(data) {
         } else {
           # # TODO. I vote to not repeat parameters unless given a vector to begin with
           res <- rep(res, nrow(data))
-          return(return_ans(res, NULL))
+          return(return_ans(res, x_name))
         }
       }
 
       # is not an expression
       # is not an as is
       # is not a single character string
-      return(return_ans(res, NULL))
+      return(return_ans(res, x_name))
     }
   }
 
