@@ -66,9 +66,13 @@ prepare_figure <- function(fig) {
                   cur_dat <- fig$x$spec$model[[gl$id]]$attributes[[attr]]
                   fig$x$spec$model[[gl$id]]$attributes[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr,
                     fig$x$spec$theme)
+                  fig$x$spec$model[[hovglid]]$attributes[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr,
+                    fig$x$spec$theme)
                 } else {
                   cur_dat <- fig$x$spec$model[[gl$id]]$attributes[[attr]]$value
                   fig$x$spec$model[[gl$id]]$attributes[[attr]]$value <- get_theme_value(map_item$domain, cur_dat, attr,
+                    fig$x$spec$theme)
+                  fig$x$spec$model[[hovglid]]$attributes[[attr]]$value <- get_theme_value(map_item$domain, cur_dat, attr,
                     fig$x$spec$theme)
                 }
               }
