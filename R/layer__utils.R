@@ -5,6 +5,13 @@ b_eval_get_symbol <- function(x) {
   eval(parse(text = paste0("substitute(", x$expr, ", x$env)")))
 }
 
+# lazy_eval_unname <- function(x) {
+#   x <- lazy_eval(x)
+#   if(is.vector(x))
+#     x <- unname(x)
+#   x
+# }
+
 #' Eval lazy symbol
 #'
 #' Evaluate the argument from the env it came from, or from within the data.  The arg supplied to the returned function must be lazy.
@@ -22,7 +29,7 @@ b_eval <- function(data) {
 
   if(is.null(data)) {
     fn <- function(x, key = stop("didn't supply key in b_eval fn")) {
-      ans <- lazy_eval(x)
+      ans <- unname(lazy_eval(x))
 
       # if it is an "data" variable name, set the stringName to the value used, such as "xVal"
       if (!is.null(ans)) {
@@ -72,7 +79,7 @@ b_eval <- function(data) {
       if (is.symbol(x$expr) || is.language(x$expr)) {
         # x$expr is symbol
         x_name <- deparse(x$expr)
-        res <- lazy_eval(x, data = data)
+        res <- unname(lazy_eval(x, data = data))
       } else {
         # is a real value (not symbol)
         x_name <- NULL
@@ -324,16 +331,16 @@ sub_names <- function(
 
         # send symbol to hover; also sending "data finding" function
         hover     = get_hover2(arg_val, data, sub_fn),
-        lgroup    = get_lgroup(lazy_eval(arg_val), fig),
+        lgroup    = get_lgroup(unname(lazy_eval(arg_val)), fig),
         url       = get_url(arg_val, data, sub_fn),
-        legend    = get_legend(lazy_eval(arg_val)),
-        lname     = as.character(lazy_eval(arg_val)),
-        position  = as.character(lazy_eval(arg_val)),
-        lname     = as.character(lazy_eval(arg_val)),
-        xlab      = as.character(lazy_eval(arg_val)),
-        ylab      = as.character(lazy_eval(arg_val)),
-        direction = as.character(lazy_eval(arg_val)),
-        anchor    = as.character(lazy_eval(arg_val)),
+        legend    = get_legend(unname(lazy_eval(arg_val))),
+        lname     = as.character(unname(lazy_eval(arg_val))),
+        position  = as.character(unname(lazy_eval(arg_val))),
+        lname     = as.character(unname(lazy_eval(arg_val))),
+        xlab      = as.character(unname(lazy_eval(arg_val))),
+        ylab      = as.character(unname(lazy_eval(arg_val))),
+        direction = as.character(unname(lazy_eval(arg_val))),
+        anchor    = as.character(unname(lazy_eval(arg_val))),
         sub_fn(arg_val, arg_name)
       )
       ans
