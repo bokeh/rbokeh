@@ -14,7 +14,7 @@ test_that("svgs in css are base64 encoded", {
 # .bk-logo.grey{filter:url("data:image/svg+xml;base64,PHN2Z3htbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zyc+PGZpbHRlcmlkPSdncmF5c2NhbGUnPjxmZUNvbG9yTWF0cml4dHlwZT0nbWF0cml4J3ZhbHVlcz0nMC4zMzMzMC4zMzMzMC4zMzMzMDAwLjMzMzMwLjMzMzMwLjMzMzMwMDAuMzMzMzAuMzMzMzAuMzMzMzAwMDAwMTAnLz48L2ZpbHRlcj48L3N2Zz4=");filter:gray;-webkit-filter:grayscale(100%)}
 
 # also update css tooltip colors
-# #1e4b6c to #aaa
+# #1e4b6c to #aaa for background and to #888 for border
 # #9ab9b1 to #fff
 # #e2ddbd to #fff
 

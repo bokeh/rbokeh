@@ -1,6 +1,12 @@
 Version 0.4
 ----------------------------------------------------------------------
 
+- update BokehJS to 0.11.1 (0.4.1)
+- unname vectors to make jsonlite happy (0.4.1)
+- fix bug in hover glyph for lines with mapped attrs (0.4.1)
+- many fixes and streamlining of non-standard evaluation logic (0.4.1)
+- add args argument to some callbacks (0.4.1)
+- update hexbin to have xbnds, ybnds and allow `hover = FALSE` (0.4.1)
 - add `visible` to list of valid opts for checking (0.4.0)
 - fix issue with hiding legend when mapping attributes (0.4.0)
 - propagate visible parameter to all glyphs (0.4.0)
