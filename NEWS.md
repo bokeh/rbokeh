@@ -1,6 +1,7 @@
 Version 0.4
 ----------------------------------------------------------------------
 
+- add `width` argument to `ly_boxplot` (0.4.1)
 - update BokehJS to 0.11.1 (0.4.1)
 - unname vectors to make jsonlite happy (0.4.1)
 - fix bug in hover glyph for lines with mapped attrs (0.4.1)

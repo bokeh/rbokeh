@@ -244,6 +244,7 @@ ly_quantile <- function(
 #' @param x either a numeric vector or a factor
 #' @param y either a numeric vector or a factor
 #' @param data an optional data frame, providing the source for x and y
+#' @param width with of each box, a value between 0 (no width) and 1 (full width)
 #' @param coef see \code{\link[grDevices]{boxplot.stats}}
 #' @template par-coloralpha
 #' @template par-lnamegroup
@@ -252,7 +253,7 @@ ly_quantile <- function(
 #' @export
 ly_boxplot <- function(
   fig, x, y = NULL, data = figure_data(fig),
-  coef = 1.5,
+  width = 0.9, coef = 1.5,
   color = "blue", alpha = 1,
   lname = NULL, lgroup = NULL, visible = TRUE,
   ...
@@ -344,7 +345,7 @@ ly_boxplot <- function(
     fig <- do.call(ly_crect, c(
       list(
         fig = fig, x = rep(gp, 2), y = c(md1, md2),
-        width = 0.9, height = c(hgt1, hgt2),
+        width = width, height = c(hgt1, hgt2),
         xlab = x_name, ylab = y_name
       ),
       args$params
