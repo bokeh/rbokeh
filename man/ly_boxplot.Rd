@@ -4,8 +4,8 @@
 \alias{ly_boxplot}
 \title{Add a "boxplot" layer to a Bokeh figure}
 \usage{
-ly_boxplot(fig, x, y = NULL, data = figure_data(fig), coef = 1.5,
-  color = "blue", alpha = 1, lname = NULL, lgroup = NULL,
+ly_boxplot(fig, x, y = NULL, data = figure_data(fig), width = 0.9,
+  coef = 1.5, color = "blue", alpha = 1, lname = NULL, lgroup = NULL,
   visible = TRUE, ...)
 }
 \arguments{
@@ -16,6 +16,8 @@ ly_boxplot(fig, x, y = NULL, data = figure_data(fig), coef = 1.5,
 \item{y}{either a numeric vector or a factor}
 
 \item{data}{an optional data frame, providing the source for x and y}
+
+\item{width}{with of each box, a value between 0 (no width) and 1 (full width)}
 
 \item{coef}{see \code{\link[grDevices]{boxplot.stats}}}
 
