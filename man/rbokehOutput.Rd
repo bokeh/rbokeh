@@ -17,8 +17,7 @@ rbokehOutput(outputId, width = "100\%", height = "400px")
 Widget output function for use in Shiny
 }
 \examples{
-\donttest{
-# courtesy of Joe Cheng from RStudio
+\dontrun{
 library("shiny")
 library("rbokeh")
 

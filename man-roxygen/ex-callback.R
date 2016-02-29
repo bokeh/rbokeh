@@ -104,6 +104,7 @@ figure(tools = "box_select") %>%
 ## shiny example
 ##---------------------------------------------------------
 
+\dontrun{
 library("shiny")
 library("rbokeh")
 dat <- data.frame(x = rnorm(10), y = rnorm(10))
@@ -186,3 +187,4 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+}

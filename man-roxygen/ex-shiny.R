@@ -1,5 +1,4 @@
-\donttest{
-# courtesy of Joe Cheng from RStudio
+\dontrun{
 library("shiny")
 library("rbokeh")
 
