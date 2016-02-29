@@ -7,7 +7,8 @@
 ly_annular_wedge(fig, x, y = NULL, data = figure_data(fig),
   inner_radius = 0.1, outer_radius = 0.3, start_angle = 0, end_angle = 2
   * pi, direction = "anticlock", color = NULL, alpha = 1, hover = NULL,
-  url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...)
+  url = NULL, legend = NULL, lname = NULL, lgroup = NULL,
+  visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -41,6 +42,8 @@ ly_annular_wedge(fig, x, y = NULL, data = figure_data(fig),
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

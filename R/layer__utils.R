@@ -5,6 +5,13 @@ b_eval_get_symbol <- function(x) {
   eval(parse(text = paste0("substitute(", x$expr, ", x$env)")))
 }
 
+lazy_eval_unname <- function(x, data = NULL) {
+  x <- lazy_eval(x = x, data = data)
+  if(is.vector(x))
+    x <- unname(x)
+  x
+}
+
 #' Eval lazy symbol
 #'
 #' Evaluate the argument from the env it came from, or from within the data.  The arg supplied to the returned function must be lazy.
@@ -21,15 +28,15 @@ b_eval <- function(data) {
   }
 
   if(is.null(data)) {
-    fn <- function(x) {
-      ans <- lazy_eval(x)
+    fn <- function(x, key = stop("didn't supply key in b_eval fn")) {
+      ans <- lazy_eval_unname(x)
 
       # if it is an "data" variable name, set the stringName to the value used, such as "xVal"
-      if(!is.null(ans)) {
-        if(
-          paste0(deparse(x$expr), collapse = "") %in% data_name_list_c()
-        ) {
-          attr(ans, "stringName") <- deparse_or_string(b_eval_get_symbol(x))
+      if (!is.null(ans)) {
+        if (key %in% data_name_list_c()) {
+          if (is.language(x$expr) || is.symbol(x$expr)) {
+            attr(ans, "stringName") <- deparse(x$expr)
+          }
         }
       }
 
@@ -46,7 +53,7 @@ b_eval <- function(data) {
       )
     }
 
-    fn <- function(x) {
+    fn <- function(x, key = stop("didn't supply key in b_eval fn")) {
       # internal helper
       if(! inherits(x, "lazy")) {
         # print(x)
@@ -58,65 +65,31 @@ b_eval <- function(data) {
         return(NULL)
       }
 
-      x_symbol <- b_eval_get_symbol(x)
-
-      if(is.character(x_symbol))
-        x_symbol <- as.symbol(x_symbol)
-
-      x_name <- deparse(x_symbol)
-
-      return_ans <- function(ans) {
+      return_ans <- function(ans, x_name = stop("x_name not supplied")) {
         # attach the variable name from where it came
         if(!is.null(ans)) {
-          if(deparse(x$expr) %in% data_name_list_c()) {
-            # it's data, force the stringName
-            attr(ans, "stringName") <- deparse_or_string(b_eval_get_symbol(x))
-          } else if(x_name %in% names(data)) {
-            # it's parameter, add for fun
-            attr(ans, "stringName") <- deparse_or_string(b_eval_get_symbol(x))
+          if(! is.null(x_name)) {
+            # if a name can be supplied, add it
+            attr(ans, "stringName") <- x_name
           }
         }
         ans
       }
-      # cat("\n\n First\n");print(x)
 
-      # if the single item is in the data names, return that column
-      if(x_name %in% names(data)) {
-        res <- eval(x_symbol, data, globalenv())
-        return(return_ans(res))
-      }
-
-      # check for "as is"
-      plain_lazy_eval <- try(lazy_eval(x), silent = TRUE)
-
-      # couldn't evaluate, therefore in data?
-      if(inherits(plain_lazy_eval, "try-error")) {
-        # assuming it is an expression that fails when evaluated
-        # must retrieve the symbol from the envir
-        # then retrieve the data with that symbol
-
-        # include the global env so things like "*" and "+" or global user functions work
-        res <- try(eval(x_symbol, data, globalenv()), silent = TRUE)
-        if(inherits(res, "try-error")) {
-          # print(str(data))
-          # browser()
-          stop("argument '", x_name, "' cannot be found in data")
-        }
-
-        return(return_ans(res))
-      }
-
-      # object exists as evaluated
-      res <- plain_lazy_eval
-
-      if(is.null(res)) {
-        return(return_ans(res))
+      if (is.symbol(x$expr) || is.language(x$expr)) {
+        # x$expr is symbol
+        x_name <- deparse(x$expr)
+        res <- lazy_eval_unname(x, data = data)
+      } else {
+        # is a real value (not symbol)
+        x_name <- NULL
+        res <- x$expr
       }
 
       res_class <- class(res)
       if(identical(res_class, "AsIs")) {
         # this means it evaluated properly and is suppose to be "as is"
-        return(return_ans(res))
+        return(return_ans(res, x_name))
       }
 
       ## variable name could have been supplied in quotes
@@ -124,18 +97,18 @@ b_eval <- function(data) {
         if(res %in% names(data)) {
           nm <- res
           res <- data[[res]]
-          attr(res, "stringName") <- nm
+          return(return_ans(res, nm))
         } else {
           # # TODO. I vote to not repeat parameters unless given a vector to begin with
           res <- rep(res, nrow(data))
+          return(return_ans(res, x_name))
         }
       }
 
-      if(is.null(res)) {
-        return(return_ans(res))
-      }
-
-      return(return_ans(res))
+      # is not an expression
+      # is not an as is
+      # is not a single character string
+      return(return_ans(res, x_name))
     }
   }
 
@@ -277,12 +250,16 @@ grab <- function(..., dots, null_data = FALSE) {
     stop("'dots' must be supplied")
   }
 
-  arg_vals <- lazy_dots(...)
+  pf <- parent.frame()
+  pf2 <- parent.frame(2)
 
-  names(arg_vals) <- lapply(arg_vals, "[[", "expr") %>%
-    unlist() %>%
-    as.character()
+  arg_vals <- pryr::named_dots(...) %>%
+    lapply(function(expr) {
+      correct_value <- pryr::substitute_q(expr, pf)
+      lazy_(correct_value, pf2)
+    })
 
+  # forces a name stomp (but that shouldn't happen)
   for (key in names(dots)) {
     arg_vals[[key]] <- dots[[key]]
   }
@@ -314,7 +291,7 @@ grab <- function(..., dots, null_data = FALSE) {
 
 
 
-#' retrieve and properly parse all data
+#' Retrieve and properly parse all data
 #'
 #' @param fig figure to be used
 #' @param data data to be used
@@ -354,16 +331,17 @@ sub_names <- function(
 
         # send symbol to hover; also sending "data finding" function
         hover     = get_hover2(arg_val, data, sub_fn),
-        lgroup    = get_lgroup(lazy_eval(arg_val), fig),
+        lgroup    = get_lgroup(lazy_eval_unname(arg_val), fig),
         url       = get_url(arg_val, data, sub_fn),
-        legend    = get_legend(lazy_eval(arg_val)),
-        lname     = as.character(lazy_eval(arg_val)),
-        position  = as.character(lazy_eval(arg_val)),
-        xlab      = as.character(lazy_eval(arg_val)),
-        ylab      = as.character(lazy_eval(arg_val)),
-        direction = as.character(lazy_eval(arg_val)),
-        anchor    = as.character(lazy_eval(arg_val)),
-        sub_fn(arg_val)
+        legend    = get_legend(lazy_eval_unname(arg_val)),
+        lname     = as.character(lazy_eval_unname(arg_val)),
+        position  = as.character(lazy_eval_unname(arg_val)),
+        lname     = as.character(lazy_eval_unname(arg_val)),
+        xlab      = as.character(lazy_eval_unname(arg_val)),
+        ylab      = as.character(lazy_eval_unname(arg_val)),
+        direction = as.character(lazy_eval_unname(arg_val)),
+        anchor    = as.character(lazy_eval_unname(arg_val)),
+        sub_fn(arg_val, arg_name)
       )
       ans
     })

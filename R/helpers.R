@@ -157,7 +157,7 @@ check_opts <- function(opts, type, formals = NULL) {
 
   cur_glyph_props <- glyph_props[[type]]
 
-  valid_opts <- c("glyph", "xlab", "ylab", formals)
+  valid_opts <- c("glyph", "visible", "xlab", "ylab", formals)
   if(cur_glyph_props$lp)
     valid_opts <- c(valid_opts, line_prop_names)
   if(cur_glyph_props$fp)
@@ -295,7 +295,7 @@ resolve_line_args <- function(fig, args) {
 }
 
 ## take args color and alpha and translate them to f
-resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly, solid = FALSE, theme = NULL) {
+resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly = NULL, solid = FALSE, theme = NULL) {
 
   ## if no color at all is specified, choose from the theme
   if(is.null(args$color) && is.null(args$fill_color) && is.null(args$line_color))
@@ -399,7 +399,7 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
   # 2. evaluates to a list that can't evaluate. must look at data
   # 3. comes from a string that must have an '@' symbol
 
-  hover_symbol <- b_eval_get_symbol(lazy_hover_val)
+  hover_symbol <- lazy_hover_val$expr
   if (is.null(hover_symbol)) {
     return(NULL)
   }
@@ -469,7 +469,7 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
         symbol_val,
         env = lazy_hover_val$env
       )
-      sub_fn(lazy_val)
+      sub_fn(lazy_val, "hover")
     })
 
 

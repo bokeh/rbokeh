@@ -6,7 +6,7 @@
 \usage{
 ly_ray(fig, x, y = NULL, data = figure_data(fig), length = NULL,
   angle = 0, color = "black", type = 1, width = 1, alpha = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, ...)
+  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -34,6 +34,8 @@ ly_ray(fig, x, y = NULL, data = figure_data(fig), length = NULL,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }

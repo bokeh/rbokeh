@@ -7,7 +7,7 @@
 ly_contour(fig, z, x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1,
   length.out = ncol(z)), nlevels = 10, levels = pretty(range(z, na.rm =
   TRUE), nlevels), color = "black", alpha = 1, width = 1, type = 1,
-  lname = NULL, lgroup = NULL, ...)
+  lname = NULL, lgroup = NULL, visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -29,6 +29,8 @@ ly_contour(fig, z, x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }

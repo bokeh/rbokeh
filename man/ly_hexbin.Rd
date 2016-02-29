@@ -7,7 +7,7 @@
 ly_hexbin(fig, x, y = NULL, data = figure_data(fig), xbins = 30,
   shape = 1, xbnds = NULL, ybnds = NULL, style = "colorscale",
   trans = NULL, inv = NULL, lname = NULL, palette = "RdYlGn11",
-  line = FALSE, alpha = 1, hover = TRUE)
+  line = FALSE, alpha = 1, hover = TRUE, visible = TRUE)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -33,6 +33,8 @@ ly_hexbin(fig, x, y = NULL, data = figure_data(fig), xbins = 30,
 \item{alpha}{the alpha transparency of the hexagons between 0 (transparent) and 1 (opaque)}
 
 \item{hover}{logical - should a hover tool be added to show the count in each hexagon?}
+
+\item{visible}{should the layer be visible?}
 }
 \description{
 Add a "hexbin" layer to a Bokeh figure

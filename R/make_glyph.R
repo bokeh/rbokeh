@@ -5,7 +5,8 @@
 
 make_glyph <- function(fig, type, lname, lgroup, data, args,
   axis_type_range, hover = NULL, url = NULL, legend = NULL,
-  xname = NULL, yname = NULL, data_sig = NA, ly_call) {
+  xname = NULL, yname = NULL, data_sig = NA, ly_call,
+  dots = NULL) {
 
   if(is.null(args))
     args <- list()
@@ -18,8 +19,12 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   fig$x$spec$layers[[lgroup]]$lgroup <- lgroup
 
   ## give it a unique layer name if not provided
-  if(is.null(lname))
-    lname <- gen_layer_name(names(fig$x$spec$layers[[lgroup]]$glyph_ids), prefix = "layer")
+  prefix <- paste0(lgroup, "l")
+  if(grepl("^group", prefix))
+    prefix <- gsub("roup", "", prefix)
+
+  if(length(lname) == 0)
+    lname <- gen_layer_name(names(fig$x$spec$layers[[lgroup]]$glyph_ids), prefix = prefix)
   lname <- as.character(lname)
 
   ## some figure elements need a single index to a layer name/group combination
@@ -97,19 +102,24 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
 
   ## deal with manual legend
   if(!is.null(legend)) {
-    legend <- as.character(legend)
-    if(!is.null(attr_maps)) {
-      if(legend == "FALSE") {
-        fig$x$spec$layers[[lgroup]]$do_legend <- FALSE
+    if(!(is.logical(legend) && !legend)) {
+      legend <- as.character(legend)
+      if(!is.null(attr_maps)) {
+        if(legend == "FALSE") {
+          fig$x$spec$layers[[lgroup]]$do_legend <- FALSE
+        } else {
+          message("Ignoring custom legend because an attribute is being mapped and therefore the legend is being taken care of automatically.")
+        }
       } else {
-        message("Ignoring custom legend because an attribute is being mapped and therefore the legend is being taken care of automatically.")
+        if(!is.null(fig$x$spec$common_legend[[legend]])) {
+          fig$x$spec$common_legend[[legend]]$args <- c(fig$x$spec$common_legend[[legend]]$args, list(args))
+        } else {
+          fig$x$spec$common_legend[[legend]] <- list(name = legend, args = list(args))
+        }
       }
     } else {
-      if(!is.null(fig$x$spec$common_legend[[legend]])) {
-        fig$x$spec$common_legend[[legend]]$args <- c(fig$x$spec$common_legend[[legend]]$args, list(args))
-      } else {
-        fig$x$spec$common_legend[[legend]] <- list(name = legend, args = list(args))
-      }
+      if(is.logical(legend))
+        fig$x$spec$layers[[lgroup]]$do_legend <- legend
     }
   }
 
@@ -181,13 +191,13 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
     fig$x$spec$glyph_defer[[lgn]]$lname <- lname
   }
 
+  renderer_ref <- list(
+    type = "GlyphRenderer",
+    id = glr_id
+  )
+
   ## add hover info
   if(!is.null(hover)) {
-    renderer_ref <- list(
-      type = "GlyphRenderer",
-      id = glr_id
-    )
-
     # convert to character and make it a list so it shows up properly
     hover$data <- lapply(hover$data, function(x) {
       if(length(x) == 1) {
@@ -201,13 +211,13 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
     data <- c(data, hover$data)
   }
 
-  if(!is.null(url)) {
-    renderer_ref <- list(
-      type = "GlyphRenderer",
-      id = glr_id
-    )
+  # if(!is.null(url) && !is.null(tap_callback)) {
+  #   message("'url' and 'tap_callback' can't be specified simultaneously - honoring 'url'")
+  #   tap_callback <- NULL
+  # }
 
-    fig <- fig %>% add_tap_url(url$url, renderer_ref)
+  if(!is.null(url)) {
+    fig <- fig %>% add_url(url$url, renderer_ref)
     data <- c(data, url$data)
   }
 

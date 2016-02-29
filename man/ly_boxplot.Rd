@@ -4,8 +4,9 @@
 \alias{ly_boxplot}
 \title{Add a "boxplot" layer to a Bokeh figure}
 \usage{
-ly_boxplot(fig, x, y = NULL, data = figure_data(fig), coef = 1.5,
-  color = "blue", alpha = 1, lname = NULL, lgroup = NULL, ...)
+ly_boxplot(fig, x, y = NULL, data = figure_data(fig), width = 0.9,
+  coef = 1.5, color = "blue", alpha = 1, lname = NULL, lgroup = NULL,
+  visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -16,6 +17,8 @@ ly_boxplot(fig, x, y = NULL, data = figure_data(fig), coef = 1.5,
 
 \item{data}{an optional data frame, providing the source for x and y}
 
+\item{width}{with of each box, a value between 0 (no width) and 1 (full width)}
+
 \item{coef}{see \code{\link[grDevices]{boxplot.stats}}}
 
 \item{color}{color for the glyph - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' - for glyphs with both fill and line properties, see "Handling color" below}
@@ -25,6 +28,8 @@ ly_boxplot(fig, x, y = NULL, data = figure_data(fig), coef = 1.5,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

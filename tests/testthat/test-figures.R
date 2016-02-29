@@ -185,45 +185,54 @@ test_that("examples", {
   print_model_json(p, file = fname)
 
   # google map
-  print_model_json(gmap(), file = "/dev/null")
+  print_model_json(gmap(), file = fname)
 
   # axis tick formatters
   p <- figure() %>%
     ly_points(rnorm(10), rnorm(10) / 1000) %>%
     y_axis(use_scientific = FALSE)
-  print_model_json(p, file = "/dev/null")
+  print_model_json(p, file = fname)
 
   p <- figure() %>%
     ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-12-31"), by="days"),
              rnorm(366)) %>%
     x_axis(label = "Date", format = list(months="%b-%Y", days="%d"))
-  print_model_json(p, file = "/dev/null")
+  print_model_json(p, file = fname)
   p <- figure() %>%
     ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-02-01"), by="days"),
              rnorm(32)) %>%
     x_axis(label = "Date", format = list(months="%b-%Y", days="%d"))
-  print_model_json(p, file = "/dev/null")
+  print_model_json(p, file = fname)
 
   p <- figure() %>%
     ly_points(rnorm(10), rnorm(10) * 10000) %>%
     y_axis(number_formatter = "numeral", format = "0,000")
-  print_model_json(p, file = "/dev/null")
+  print_model_json(p, file = fname)
 
   p <- figure() %>%
     ly_points(rnorm(10), rnorm(10) * 100) %>%
     y_axis(number_formatter = "printf", format = "%0.1f%%")
-  print_model_json(p, file = "/dev/null")
+  print_model_json(p, file = fname)
+
+  # with names
+  t <- as.Date(c("2009-06-07", "2009-06-14", "2009-06-21", "2009-06-28"))
+  y <- rep(0.5, length(t))
+  names(y) <- as.character(1:length(y))
+  p <- figure(xlab = "x", ylab = "y") %>%
+    ly_points(x = t, y = rep(1, length(t))) %>%
+    ly_lines(x = t, y = unname(y), legend = "test", color = "red")
+  print_model_json(p, file = fname)
 
   # # data.table
   # library(data.table)
   # p <- figure() %>%
   #   ly_points(Sepal.Length, Sepal.Width, data = as.data.table(iris),
   #     color = Species, hover = as.data.table(iris)[, list(Species)])
-  # print_model_json(p, file = "/dev/null")
+  # print_model_json(p, file = fname)
 
   # p <- figure() %>%
   #   ly_points(Sepal.Length, Sepal.Width, data = as.data.table(iris),
   #     color = Species, hover = as.data.table(iris)[, list(Species)],
   #     url = "http://www.google.com?q=@Species")
-  # print_model_json(p, file = "/dev/null")
+  # print_model_json(p, file = fname)
 })

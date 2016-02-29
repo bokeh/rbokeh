@@ -6,7 +6,7 @@
 \usage{
 ly_quantile(fig, x, group = NULL, data = figure_data(fig), probs = NULL,
   distn = qunif, ncutoff = 200, color = NULL, alpha = 1,
-  legend = TRUE, lname = NULL, lgroup = NULL, ...)
+  legend = TRUE, lname = NULL, lgroup = NULL, visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -32,6 +32,8 @@ ly_quantile(fig, x, group = NULL, data = figure_data(fig), probs = NULL,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

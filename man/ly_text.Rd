@@ -8,7 +8,7 @@ ly_text(fig, x, y = NULL, text = NULL, data = figure_data(fig),
   color = "black", alpha = 1, angle = 0, align = NULL,
   baseline = NULL, font = NULL, font_size = NULL, font_style = NULL,
   x_offset = NULL, y_offset = NULL, legend = NULL, lname = NULL,
-  lgroup = NULL)
+  lgroup = NULL, visible = TRUE)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -46,6 +46,8 @@ ly_text(fig, x, y = NULL, text = NULL, data = figure_data(fig),
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 }
 \description{
 Add a "text" layer to a Bokeh figure

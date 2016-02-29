@@ -6,7 +6,7 @@
 \usage{
 ly_image_url(fig, x = 0, y = 0, data = figure_data(fig), w = 10,
   h = 10, image_url, dilate = TRUE, anchor = "top_left", angle = 0,
-  lname = NULL, lgroup = NULL)
+  lname = NULL, lgroup = NULL, visible = TRUE)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -30,6 +30,8 @@ ly_image_url(fig, x = 0, y = 0, data = figure_data(fig), w = 10,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 }
 \description{
 Renders raster images from URLs at provided coordinates

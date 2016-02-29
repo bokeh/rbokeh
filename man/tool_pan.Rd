@@ -27,9 +27,10 @@ figure() \%>\% ly_points(1:10) \%>\%
 \seealso{
 Other tools: \code{\link{tool_box_select}},
   \code{\link{tool_box_zoom}},
-  \code{\link{tool_crosshair}},
+  \code{\link{tool_crosshair}}, \code{\link{tool_hover}},
   \code{\link{tool_lasso_select}},
   \code{\link{tool_reset}}, \code{\link{tool_resize}},
-  \code{\link{tool_save}}, \code{\link{tool_wheel_zoom}}
+  \code{\link{tool_save}}, \code{\link{tool_tap}},
+  \code{\link{tool_wheel_zoom}}
 }
 

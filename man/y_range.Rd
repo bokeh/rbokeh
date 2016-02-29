@@ -4,12 +4,14 @@
 \alias{y_range}
 \title{Update y axis range in a Bokeh figure}
 \usage{
-y_range(fig, dat)
+y_range(fig, dat = NULL, callback = NULL)
 }
 \arguments{
 \item{fig}{figure to modify}
 
 \item{dat}{either a vector (min, max) if the axis is numeric, or a vector of values if the axis is categorical.  In the latter case, the order in which the values are supplied is how they will be arranged on the axis.}
+
+\item{callback}{TODO}
 }
 \description{
 Update y axis range in a Bokeh figure

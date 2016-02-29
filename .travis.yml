@@ -1,2 +1,7 @@
 language: r
-sudo: required
+cache: packages
+
+branches:
+  only:
+    - master
+    - dev

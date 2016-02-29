@@ -35,7 +35,7 @@ Bokeh.$(function() {
   var modelid = "', modelid, '";
   var elementid = "', elementid, '";
   var docid = "', docid, '";
-  var docs_json = JSON.parse(\'', fig, '\');
+  var docs_json = ', fig, ';
   var refkey = Object.keys(docs_json)[0]
   var refs = docs_json[refkey].roots.references
   function traverseObject(obj) {
@@ -59,6 +59,7 @@ Bokeh.$(function() {
     "elementid": elementid,
     "modelid": modelid
   }];
+  Bokeh.set_log_level(\'info\');
   Bokeh.embed.embed_items(docs_json, render_items);
 });
 </script>

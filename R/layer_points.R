@@ -28,12 +28,12 @@
 # ir <- iris
 # ir$glyph_val <- as.numeric(ir$Species)
 # ir$glyph_col <- c("red", "green", "blue")[ ir$glyph_val ]
-# load_all(); a <- figure() %>% ly_points(Sepal.Length, data = ir, fill_color = glyph_col); a
 ly_points <- function(
   fig, x, y = NULL, data = figure_data(fig),
   glyph = 21, color = NULL, alpha = 1, size = 10,
   hover = NULL, url = NULL, legend = NULL,
-  lname = NULL, lgroup = NULL, ...
+  lname = NULL, lgroup = NULL, visible = TRUE,
+  ...
 ) {
 
   validate_fig(fig, "ly_points")
@@ -55,6 +55,7 @@ ly_points <- function(
       legend,
       lname,
       lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )

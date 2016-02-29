@@ -15,7 +15,7 @@ ly_hist <- function(
   fig, x, data = figure_data(fig),
   breaks = "Sturges", freq = TRUE, include.lowest = TRUE, right = TRUE,
   color = NULL, alpha = 1,
-  lname = NULL, lgroup = NULL, ...
+  lname = NULL, lgroup = NULL, visible = TRUE, ...
 ) {
 
   validate_fig(fig, "ly_hist")
@@ -26,7 +26,9 @@ ly_hist <- function(
       color, # TODO If i supply color, it should stack or dodge by default
       alpha,
       # no legend?
-      lname, lgroup,
+      lname,
+      lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -84,7 +86,8 @@ ly_density <- function(
     "biweight", "cosine", "optcosine"),
   weights = NULL, window = kernel, n = 512, cut = 3, na.rm = FALSE,
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, ...
+  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  ...
 ) {
 
   validate_fig(fig, "ly_density")
@@ -96,7 +99,10 @@ ly_density <- function(
       alpha,
       width,
       type,
-      legend, lname, lgroup,
+      legend,
+      lname,
+      lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -151,7 +157,8 @@ ly_quantile <- function(
   fig, x, group = NULL, data = figure_data(fig),
   probs = NULL, distn = qunif, ncutoff = 200,
   color = NULL, alpha = 1,
-  legend = TRUE, lname = NULL, lgroup = NULL, ...
+  legend = TRUE, lname = NULL, lgroup = NULL, visible = TRUE,
+  ...
 ) {
 
   validate_fig(fig, "ly_quantile")
@@ -162,7 +169,10 @@ ly_quantile <- function(
       group,
       color,
       alpha,
-      legend, lname, lgroup,
+      legend,
+      lname,
+      lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -234,6 +244,7 @@ ly_quantile <- function(
 #' @param x either a numeric vector or a factor
 #' @param y either a numeric vector or a factor
 #' @param data an optional data frame, providing the source for x and y
+#' @param width with of each box, a value between 0 (no width) and 1 (full width)
 #' @param coef see \code{\link[grDevices]{boxplot.stats}}
 #' @template par-coloralpha
 #' @template par-lnamegroup
@@ -242,9 +253,10 @@ ly_quantile <- function(
 #' @export
 ly_boxplot <- function(
   fig, x, y = NULL, data = figure_data(fig),
-  coef = 1.5,
+  width = 0.9, coef = 1.5,
   color = "blue", alpha = 1,
-  lname = NULL, lgroup = NULL, ...
+  lname = NULL, lgroup = NULL, visible = TRUE,
+  ...
 ) {
 
   validate_fig(fig, "ly_boxplot")
@@ -255,7 +267,9 @@ ly_boxplot <- function(
       color,
       alpha,
       # legend, # no legend?
-      lname, lgroup,
+      lname,
+      lgroup,
+      visible,
       dots = lazy_dots(...)
     )
   )
@@ -331,7 +345,7 @@ ly_boxplot <- function(
     fig <- do.call(ly_crect, c(
       list(
         fig = fig, x = rep(gp, 2), y = c(md1, md2),
-        width = 0.9, height = c(hgt1, hgt2),
+        width = width, height = c(hgt1, hgt2),
         xlab = x_name, ylab = y_name
       ),
       args$params

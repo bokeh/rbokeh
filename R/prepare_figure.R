@@ -36,6 +36,7 @@ prepare_figure <- function(fig) {
           did <- fig$x$spec$model[[entry$id]]$attributes$data_source$id
           gl <- fig$x$spec$model[[entry$id]]$attributes$glyph
           nsglid <- fig$x$spec$model[[entry$id]]$attributes$nonselection_glyph$id
+          hovglid <- fig$x$spec$model[[entry$id]]$attributes$hover_glyph$id
           data_attr_names <- names(fig$x$spec$model[[did]]$attributes$data)
           glyph_attr_names <- names(fig$x$spec$model[[gl$id]]$attributes)
           for(attr in entry$map_args) {
@@ -51,6 +52,10 @@ prepare_figure <- function(fig) {
                 fig$x$spec$model[[entry$id]]$attributes$nonselection_glyph$type <- new_type
                 fig$x$spec$model[[nsglid]]$type <- new_type
               }
+              if(!is.null(hovglid)) {
+                fig$x$spec$model[[entry$id]]$attributes$hover_glyph$type <- new_type
+                fig$x$spec$model[[hovglid]]$type <- new_type
+              }
             } else {
               if(attr %in% data_attr_names) {
                 cur_dat <- fig$x$spec$model[[did]]$attributes$data[[attr]]
@@ -61,9 +66,13 @@ prepare_figure <- function(fig) {
                   cur_dat <- fig$x$spec$model[[gl$id]]$attributes[[attr]]
                   fig$x$spec$model[[gl$id]]$attributes[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr,
                     fig$x$spec$theme)
+                  fig$x$spec$model[[hovglid]]$attributes[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr,
+                    fig$x$spec$theme)
                 } else {
                   cur_dat <- fig$x$spec$model[[gl$id]]$attributes[[attr]]$value
                   fig$x$spec$model[[gl$id]]$attributes[[attr]]$value <- get_theme_value(map_item$domain, cur_dat, attr,
+                    fig$x$spec$theme)
+                  fig$x$spec$model[[hovglid]]$attributes[[attr]]$value <- get_theme_value(map_item$domain, cur_dat, attr,
                     fig$x$spec$theme)
                 }
               }
@@ -90,7 +99,7 @@ prepare_figure <- function(fig) {
                 glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg, fig$x$spec$theme)
               # render legend glyph
               spec <- c(glph$args, list(x = "x", y = "y"))
-              lgroup <- paste("legend_", nm, "_", cur_lab, sep = "")
+              lgroup <- paste("__legend_", nm, "_", cur_lab, sep = "")
               lname <- glph$args$glyph
               glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
               # make it so legend glyph doesn't show up on page
@@ -102,7 +111,9 @@ prepare_figure <- function(fig) {
                 spec$radius <- 0
               if(is.null(spec$glyph))
                 spec$glyph <- "Circle"
-              fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
+              fig <- fig %>% add_layer(spec = spec,
+                dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)),
+                lname = lname, lgroup = lgroup)
 
               # add reference to glyph to legend object
               nn <- length(legend[[lgnd_id]][[1]][[2]]) + 1
@@ -130,7 +141,10 @@ prepare_figure <- function(fig) {
           spec$size <- 0
         if(!is.null(spec$radius))
           spec$radius <- 0
-        fig <- fig %>% add_layer(spec = spec, dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)), lname = lname, lgroup = lgroup)
+
+        fig <- fig %>% add_layer(spec = spec,
+          dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)),
+          lname = lname, lgroup = lgroup)
 
         # add reference to glyph to legend object
         nn <- length(legend[[lgroup]][[1]][[2]]) + 1

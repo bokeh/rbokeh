@@ -7,7 +7,7 @@
 ly_arc(fig, x, y = NULL, data = figure_data(fig), color = NULL,
   alpha = 1, width = 2, type = 1, radius = 0.2, start_angle = 0,
   end_angle = 2 * pi, direction = "anticlock", legend = NULL,
-  lname = NULL, lgroup = NULL, ...)
+  lname = NULL, lgroup = NULL, visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -39,6 +39,8 @@ ly_arc(fig, x, y = NULL, data = figure_data(fig), color = NULL,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
+
+\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
