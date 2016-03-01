@@ -8,3 +8,4 @@ CONTRIBUTING\.md
 \.sublime\-
 .Rproj
 ^\.httr-oauth$
+cran-comments.md
