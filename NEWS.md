@@ -26,7 +26,7 @@ Version 0.4
 - fix layer naming defaults (0.4.0)
 - add tool_tap with callback support (0.4.0)
 - update `layer_ref` to callback tools (0.4.0)
-- fix lname to be singleton (35 hours ago) <hafen> (0.4.0)
+- fix lname to be singleton (0.4.0)
 - add callback examples (0.4.0)
 - make callback work with specified layer names (0.4.0)
 - add hover and tap callbacks (0.4.0)
