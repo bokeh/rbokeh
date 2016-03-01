@@ -4,7 +4,6 @@ man-roxygen
 \.DS_Store
 ..Rcheck
 CONTRIBUTING\.md
-NEWS\.md
 ^_ignore$
 \.sublime\-
 .Rproj
