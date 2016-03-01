@@ -1,4 +1,7 @@
+#' @importFrom stats aggregate complete.cases is.ts ppoints quantile qunif runif time
+#' @importFrom grDevices rgb2hsv hsv boxplot.stats col2rgb contourLines hsv rgb2hsv
 #' @importFrom pryr named_dots
+#' @importFrom utils head tail
 NULL
 
 

@@ -441,7 +441,8 @@ ly_contour <- function(
 
   args$params <- resolve_line_args(fig, args$params)
 
-  contr <- do.call(contourLines, list(x = x, y = y, z = z, nlevels = nlevels, levels = levels))
+  contr <- do.call(grDevices::contourLines,
+    list(x = x, y = y, z = z, nlevels = nlevels, levels = levels))
 
   xs <- lapply(contr, "[[", 2)
   ys <- lapply(contr, "[[", 3)

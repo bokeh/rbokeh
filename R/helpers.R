@@ -179,9 +179,11 @@ check_opts <- function(opts, type, formals = NULL) {
 ## take a hex color and reduce its saturation by a factor
 ## (used to get fill for pch=21:25)
 reduce_saturation <- function(col, factor = 0.5) {
-  col2 <- do.call(rgb2hsv, structure(as.list(col2rgb(col)[,1]), names = c("r", "g", "b")))
+  col2 <- do.call(grDevices::rgb2hsv,
+    structure(as.list(grDevices::col2rgb(col)[,1]),
+    names = c("r", "g", "b")))
   col2['s', ] <- col2['s', ] * factor
-  do.call(hsv, as.list(col2[,1]))
+  do.call(grDevices::hsv, as.list(col2[,1]))
 }
 
 ## handle different x, y input types
@@ -189,8 +191,8 @@ reduce_saturation <- function(col, factor = 0.5) {
 ## but this will suffice
 get_xy_data <- function(x, y) {
   if(is.null(y)) {
-    if(is.ts(x)) {
-      res <- list(x = as.vector(time(x)), y = as.vector(x))
+    if(stats::is.ts(x)) {
+      res <- list(x = as.vector(stats::time(x)), y = as.vector(x))
     } else if(is.list(x)) {
       res <- list(x = x[[1]], y = x[[2]])
     } else {
@@ -220,7 +222,7 @@ get_xy_names <- function(x, y, xname, yname, dots) {
     yname <- attr(y, "stringName")
 
   if(is.null(y)) {
-    if(is.ts(x)) {
+    if(stats::is.ts(x)) {
       res <- list(x = "time", y = xname)
     } else if(is.list(x)) {
       nms <- names(x)
@@ -739,7 +741,7 @@ fix_args <- function(args, n) {
 map2df <- function(a) {
   dd <- data.frame(lon = a$x, lat = a$y,
     group = cumsum(is.na(a$x) & is.na(a$y)) + 1)
-  dd[complete.cases(dd$lon, dd$lat), ]
+  dd[stats::complete.cases(dd$lon, dd$lat), ]
 }
 
 

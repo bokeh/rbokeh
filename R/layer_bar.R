@@ -69,11 +69,11 @@ ly_bar <- function(
   }
 
   if(is.null(args$params$color) || length(args$params$color) == 1) {
-    res <- aggregate(y ~ x, data = args$data, sum)
+    res <- stats::aggregate(y ~ x, data = args$data, sum)
   } else {
     data_and_color <- args$data
     data_and_color$color <- args$params$color
-    res <- aggregate(y ~ x + color, data = data_and_color, sum)
+    res <- stats::aggregate(y ~ x + color, data = data_and_color, sum)
     if(missing(legend)) {
       args$info$legend <- TRUE
     }
@@ -113,8 +113,8 @@ ly_bar <- function(
     res <- do.call(rbind, by(res, res$x, function(a) {
       nn <- nrow(a)
       pts <- seq(1 - width, width, length = nn + 1)
-      a$xleft <- paste0(a$x, ":", head(pts, nn))
-      a$xright <- paste0(a$x, ":", tail(pts, nn))
+      a$xleft <- paste0(a$x, ":", utils::head(pts, nn))
+      a$xright <- paste0(a$x, ":", utils::tail(pts, nn))
       a
     }))
   }

@@ -15,6 +15,7 @@
 #' rbokeh2gist("figure() %>% ly_points(1:10)", name = "test")
 #' }
 #' @importFrom gistr gist_create
+#' @importFrom utils browseURL
 #' @export
 rbokeh2gist <- function(fig_str, name, created = NULL, description = "", secure = TRUE, view = TRUE) {
 
@@ -61,7 +62,7 @@ rbokeh2gist <- function(fig_str, name, created = NULL, description = "", secure 
   message(paste0('   <iframe width="', p$width + 20, '" height="', p$height + 20, '" frameBorder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" sandbox="allow-forms allow-scripts allow-popups allow-same-origin allow-pointer-lock" src="', index_cdn,'"></iframe>'))
 
   if(view)
-    browseURL(bl_ocks)
+    utils::browseURL(bl_ocks)
 
   return(invisible(gst))
 }

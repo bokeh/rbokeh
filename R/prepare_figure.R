@@ -25,7 +25,7 @@ prepare_figure <- function(fig) {
           nl <- length(intervals) - 1
           map_item$domain <- intervals
           map_item$labels <- levels(cut(map_item$domain, intervals, include.lowest = TRUE))
-          map_item$values <- (head(intervals, nl) + tail(intervals, nl)) / 2
+          map_item$values <- (utils::head(intervals, nl) + utils::tail(intervals, nl)) / 2
         } else {
           ## categorical domain
           map_item$labels <- map_item$domain

@@ -126,7 +126,7 @@ get_hexbin_data <- function(x, y, xbins = 30, shape = 1,
   if(is.null(ybnds))
     ybnds <- range(y, na.rm = TRUE)
 
-  ind <- complete.cases(x, y)
+  ind <- stats::complete.cases(x, y)
   hexbin(x[ind], y[ind], shape = shape, xbins = xbins, xbnds = xbnds, ybnds = ybnds)
 }
 

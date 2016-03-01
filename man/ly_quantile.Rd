@@ -5,7 +5,7 @@
 \title{Add a "quantile" layer to a Bokeh figure}
 \usage{
 ly_quantile(fig, x, group = NULL, data = figure_data(fig), probs = NULL,
-  distn = qunif, ncutoff = 200, color = NULL, alpha = 1,
+  distn = stats::qunif, ncutoff = 200, color = NULL, alpha = 1,
   legend = TRUE, lname = NULL, lgroup = NULL, visible = TRUE, ...)
 }
 \arguments{

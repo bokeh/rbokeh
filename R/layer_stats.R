@@ -155,7 +155,7 @@ ly_density <- function(
 #' @export
 ly_quantile <- function(
   fig, x, group = NULL, data = figure_data(fig),
-  probs = NULL, distn = qunif, ncutoff = 200,
+  probs = NULL, distn = stats::qunif, ncutoff = 200,
   color = NULL, alpha = 1,
   legend = TRUE, lname = NULL, lgroup = NULL, visible = TRUE,
   ...
@@ -205,15 +205,15 @@ ly_quantile <- function(
         ## if the vector is too long, perhaps should default
         ## to some length, like 1000
         if(length(ii) > ncutoff) {
-          cur_probs <- ppoints(ncutoff)
-          qq <- quantile(args$data$x[ii], cur_probs, names = FALSE, na.rm = TRUE)
+          cur_probs <- stats::ppoints(ncutoff)
+          qq <- stats::quantile(args$data$x[ii], cur_probs, names = FALSE, na.rm = TRUE)
         } else {
-          cur_probs <- ppoints(length(args$data$x[ii]))
+          cur_probs <- stats::ppoints(length(args$data$x[ii]))
           qq <- sort(args$data$x[ii])
         }
       } else {
         cur_probs <- probs
-        qq <- quantile(args$data$x[ii], cur_probs, names = FALSE, na.rm = TRUE)
+        qq <- stats::quantile(args$data$x[ii], cur_probs, names = FALSE, na.rm = TRUE)
       }
       ff <- distn(cur_probs)
 
@@ -331,7 +331,7 @@ ly_boxplot <- function(
 
   idx <- split(seq_along(x), group)
   for(ii in seq_along(idx)) {
-    bp <- boxplot.stats(x = x[idx[[ii]]], coef = coef)
+    bp <- grDevices::boxplot.stats(x = x[idx[[ii]]], coef = coef)
 
     gp <- group[idx[[ii]][1]] ## doesn't work right now
     ## for lines and whiskers

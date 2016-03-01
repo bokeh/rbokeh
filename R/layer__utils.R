@@ -394,7 +394,7 @@ b_xy_data_and_names2 <- function(d2, xlab, ylab) {
 
 
   if(is.null(y)) {
-    if(is.ts(x)) {
+    if(stats::is.ts(x)) {
       y <- as.vector(x)
       x <- as.vector(time(x))
       y_name <- x_name
