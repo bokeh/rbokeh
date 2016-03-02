@@ -37,7 +37,9 @@ update_range <- function(fig, axis = "x", dat = NULL, callback = NULL) {
       dat <- to_epoch(dat)
 
     if(type == "Range1d") {
-      dat <- range(dat, na.rm = TRUE)
+      # preserve backward xlim/ylim specification
+      if(!(length(dat) == 2 && dat[1] > dat[2]))
+        dat <- range(dat, na.rm = TRUE)
       model$model$attributes$start <- dat[1]
       model$model$attributes$end <- dat[2]
     } else if(type == "FactorRange") {

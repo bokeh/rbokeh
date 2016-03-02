@@ -1,6 +1,7 @@
 Version 0.4
 ----------------------------------------------------------------------
 
+- honor backward specification of xlim/ylim (0.4.2)
 - add `width` argument to `ly_boxplot` (0.4.1)
 - update BokehJS to 0.11.1 (0.4.1)
 - unname vectors to make jsonlite happy (0.4.1)
