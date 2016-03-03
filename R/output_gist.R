@@ -4,6 +4,9 @@
 #' @param name name of the gist
 #' @param created optional string for a "Created by" to preceed the README
 #' @param description text to go in README.md
+#' @param license license under which gist is released - one of those accepted here: \url{http://bl.ocks.org/licenses.txt}
+#' @param border should the bl.ocks.org iframe have a border?
+#' @param scrolling should the bl.ocks.org iframe scroll?
 #' @param secure should https be used for cdn links?
 #' @param view should the resulting gist be opened in the browser on bl.ocks.org?
 #' @note
@@ -17,10 +20,16 @@
 #' @importFrom gistr gist_create
 #' @importFrom utils browseURL
 #' @export
-rbokeh2gist <- function(fig_str, name, created = NULL, description = "", secure = TRUE, view = TRUE) {
+rbokeh2gist <- function(fig_str, name,
+  created = NULL, description = "",
+  license = c("none", "apache-2.0", "bsd-2-clause", "bsd-3-clause", "cc-by-4.0", "cc-by-nc-4.0", "cc-by-nc-nd-4.0", "cc-by-nc-sa-4.0", "cc-by-nd-4.0", "cc-by-sa-4.0", "cddl-1.0", "epl-1.0", "gpl-2.0", "gpl-3.0", "lgpl-2.1", "lgpl-3.0", "mit", "mpl-2.0"),
+  border = TRUE, scrolling = FALSE,
+  secure = TRUE, view = TRUE) {
 
   if(!is.character(fig_str))
     stop("Argument 'fig_str' must be a string specifying an rbokeh plot")
+
+  license <- match.arg(license)
 
   # remove leading and trailing newlines
   fig_str <- gsub("\n+$", "", fig_str)
@@ -41,13 +50,18 @@ rbokeh2gist <- function(fig_str, name, created = NULL, description = "", secure 
   readme <- NULL
   if(!is.null(created))
     readme <- c(readme, paste0("Created by ", created), "")
-
   readme <- c(readme, description, "", "```r", fig_str, "```")
-
   writeLines(paste(readme, collapse = "\n"), file.path(dir, "README.md"))
 
-  ff <- list.files(dir, full.names = TRUE)
+  yaml <- c(
+    paste0("license: ", license),
+    paste0("height: ", p$height),
+    paste0("scrolling: ", ifelse(scrolling, "yes", "no")),
+    paste0("border: ", ifelse(border, "yes", "no"))
+  )
+  writeLines(yaml, file.path(dir, ".block"))
 
+  ff <- list.files(dir, full.names = TRUE, all.files = TRUE, no.. = TRUE)
   gst <- gistr::gist_create(files = ff, description = name, browse = FALSE)
 
   message("* Browse this gist on github:")

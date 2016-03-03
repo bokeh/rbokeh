@@ -5,7 +5,11 @@
 \title{Export rbokeh plot to a gist}
 \usage{
 rbokeh2gist(fig_str, name, created = NULL, description = "",
-  secure = TRUE, view = TRUE)
+  license = c("none", "apache-2.0", "bsd-2-clause", "bsd-3-clause",
+  "cc-by-4.0", "cc-by-nc-4.0", "cc-by-nc-nd-4.0", "cc-by-nc-sa-4.0",
+  "cc-by-nd-4.0", "cc-by-sa-4.0", "cddl-1.0", "epl-1.0", "gpl-2.0", "gpl-3.0",
+  "lgpl-2.1", "lgpl-3.0", "mit", "mpl-2.0"), border = TRUE,
+  scrolling = FALSE, secure = TRUE, view = TRUE)
 }
 \arguments{
 \item{fig_str}{a string containing R code to create an rbokeh figure}
@@ -15,6 +19,12 @@ rbokeh2gist(fig_str, name, created = NULL, description = "",
 \item{created}{optional string for a "Created by" to preceed the README}
 
 \item{description}{text to go in README.md}
+
+\item{license}{license under which gist is released - one of those accepted here: \url{http://bl.ocks.org/licenses.txt}}
+
+\item{border}{should the bl.ocks.org iframe have a border?}
+
+\item{scrolling}{should the bl.ocks.org iframe scroll?}
 
 \item{secure}{should https be used for cdn links?}
 
