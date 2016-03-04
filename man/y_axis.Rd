@@ -47,7 +47,7 @@ ignored if \code{log} is TRUE}
 Customize x axis of a Bokeh figure
 }
 \examples{
-\donttest{
+\dontrun{
 figure() \%>\%
   ly_points(rexp(1000), rexp(1000)) \%>\%
   x_axis(label = "x", log = TRUE) \%>\%

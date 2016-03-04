@@ -53,7 +53,7 @@ When \code{number_formatter} is "numeral", \code{format} specifies a human-reada
 When \code{number_formatter} is "printf", \code{format} is a printf-style format string. See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{PrintfTickFormatter}.
 }
 \examples{
-\donttest{
+\dontrun{
 figure() \%>\%
   ly_points(rexp(1000), rexp(1000)) \%>\%
   x_axis(label = "x", log = TRUE) \%>\%
