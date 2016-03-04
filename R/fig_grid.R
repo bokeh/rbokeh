@@ -5,6 +5,8 @@
 #' @param nrow number of rows in the grid
 #' @param ncol number of columns in the grid
 #' @param byrow populate the grid by row according to the order of figure elements supplied in \code{params}
+#' @param xlim the extent of the plotting area in the x-dimension to be applied to every panel (original individual panel limits will be honored if not specified).
+#' @param ylim the extent of the plotting area in the y-dimension to be applied to every panel (original individual panel limits will be honored if not specified).
 #' @param same_axes logical or vector of two logicals specifying whether the x and/or y axis limits should be the same for each plot in the grid
 #' @param simplify_axes logical or vector of logicals specifying whether to simply the x and/or y axes (only show the axes along the bottom and left sides of the grid) - only valid if \code{same_axes} is \code{TRUE} for the axis
 #' @param x_margin,y_margin specify the margin space in pixels to be left for axes when using \code{simplify_axes=TRUE}
@@ -14,7 +16,11 @@
 #'
 #' If \code{link_data} is \code{TRUE}, then an effort will be made to link all data sources that are common among the different figures in the plot.  Note that at this point, only data sources that are specified in the \code{data} argument to the different layer functions are checked.
 #' @export
-grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byrow = TRUE, same_axes = FALSE, simplify_axes = TRUE, y_margin = NULL, x_margin = NULL, link_data = FALSE) {
+grid_plot <- function(figs, width = NULL, height = NULL,
+  nrow = 1, ncol = 1, byrow = TRUE,
+  xlim = NULL, ylim = NULL,
+  same_axes = FALSE, simplify_axes = TRUE,
+  y_margin = NULL, x_margin = NULL, link_data = FALSE) {
 
   if(length(same_axes) == 1) {
     same_x <- same_y <- same_axes
@@ -127,7 +133,7 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
   if(same_x) {
     x_range <- get_grid_ranges(figs, "x")
     for(ii in seq_along(figs)) {
-      figs[[ii]]$x$spec$xlim <- x_range$range # prevents prepare_figure() from computing range
+      figs[[ii]]$x$spec$xlim <- x_range$range
       figs[[ii]]$x$spec$has_x_range <- TRUE # prevents prepare_figure() from adding range
       figs[[ii]]$x$spec$model$plot$attributes$x_range <- x_range$mod$ref
     }
@@ -154,7 +160,7 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
   if(same_y) {
     y_range <- get_grid_ranges(figs, "y")
     for(ii in seq_along(figs)) {
-      figs[[ii]]$x$spec$ylim <- y_range$range # prevents prepare_figure() from computing range
+      figs[[ii]]$x$spec$ylim <- y_range$range
       figs[[ii]]$x$spec$has_y_range <- TRUE # prevents prepare_figure() from adding range
       figs[[ii]]$x$spec$model$plot$attributes$y_range <- y_range$mod$ref
     }
@@ -165,6 +171,28 @@ grid_plot <- function(figs, width = NULL, height = NULL, nrow = 1, ncol = 1, byr
         figs[[ii]] <- figs[[ii]] %>% y_axis(visible = FALSE)
       if(is.null(y_margin))
         y_margin <- 45
+    }
+  }
+
+  if(!is.null(xlim)) {
+    id <- gen_id(figs[[1]], c("x", "GridRange"))
+    x_range <- list(range = xlim,
+      mod = range_model(ifelse(is.numeric(xlim), "Range1d", "FactorRange"), id, xlim))
+    for(ii in seq_along(figs)) {
+      figs[[ii]]$x$spec$xlim <- xlim
+      figs[[ii]]$x$spec$has_x_range <- TRUE
+      figs[[ii]]$x$spec$model$plot$attributes$x_range <- x_range$mod$ref
+    }
+  }
+
+  if(!is.null(ylim)) {
+    id <- gen_id(figs[[1]], c("y", "GridRange"))
+    y_range <- list(range = ylim,
+      mod = range_model(ifelse(is.numeric(ylim), "Range1d", "FactorRange"), id, ylim))
+    for(ii in seq_along(figs)) {
+      figs[[ii]]$x$spec$ylim <- ylim
+      figs[[ii]]$x$spec$has_y_range <- TRUE
+      figs[[ii]]$x$spec$model$plot$attributes$y_range <- y_range$mod$ref
     }
   }
 
@@ -308,7 +336,8 @@ prepare_gridplot <- function(obj) {
           for(jj in seq_along(figs[[ii]]$x$spec$data_sigs)) {
             if(!is.null(figs[[ii]]$x$spec$data_sigs[[jj]]$sig))
               if(figs[[ii]]$x$spec$data_sigs[[jj]]$sig == sig)
-                has_data[[length(has_data) + 1]] <- list(index = c(ii, jj), glr_id = figs[[ii]]$x$spec$data_sigs[[jj]]$glr_id)
+                has_data[[length(has_data) + 1]] <- list(index = c(ii, jj),
+                  glr_id = figs[[ii]]$x$spec$data_sigs[[jj]]$glr_id)
           }
         }
         d_id <- gen_id(NULL, sig)
@@ -391,9 +420,11 @@ get_grid_ranges <- function(objs, which = "x") {
   w1 <- paste0("glyph_", which, "_ranges")
   w2 <- paste0(which, "_axis_type")
   ranges <- unlist(lapply(objs, function(x) x$x$spec[[w1]]), recursive = FALSE)
-  rng <- get_all_glyph_range(ranges, objs[[1]]$x$spec$padding_factor, objs[[1]]$x$spec[[w2]])
-  id <- gen_id(objs[[1]]$x$spec, c(which, "GridRange"))
-  list(range = rng, mod = range_model(ifelse(is.numeric(rng), "Range1d", "FactorRange"), id, rng))
+  rng <- get_all_glyph_range(ranges,
+    objs[[1]]$x$spec$padding_factor, objs[[1]]$x$spec[[w2]])
+  id <- gen_id(objs[[1]], c(which, "GridRange"))
+  list(range = rng,
+    mod = range_model(ifelse(is.numeric(rng), "Range1d", "FactorRange"), id, rng))
 }
 
 update_grid_sizes <- function(obj) {
