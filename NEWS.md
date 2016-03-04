@@ -1,6 +1,11 @@
 Version 0.4
 ----------------------------------------------------------------------
 
+- fix bug in rbokeh.js resize (0.4.2)
+- rename save_figure to widget2png (0.4.2)
+- rename widget2gist input name (0.4.2)
+- add xlim/ylim args to grid_plot (0.4.2)
+- rename rbokeh2gist to widget2gist (0.4.2)
 - add bl.ocks.org yaml config options to `rbokeh2gist()` (0.4.2)
 - honor backward specification of xlim/ylim (0.4.2)
 - add `width` argument to `ly_boxplot` (0.4.1)
