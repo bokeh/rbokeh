@@ -4,7 +4,7 @@
 \alias{widget2gist}
 \title{Export htmlwidget plot to a gist}
 \usage{
-widget2gist(fig_str, name, created = NULL, description = "",
+widget2gist(widget_string, name, created = NULL, description = "",
   license = c("none", "apache-2.0", "bsd-2-clause", "bsd-3-clause",
   "cc-by-4.0", "cc-by-nc-4.0", "cc-by-nc-nd-4.0", "cc-by-nc-sa-4.0",
   "cc-by-nd-4.0", "cc-by-sa-4.0", "cddl-1.0", "epl-1.0", "gpl-2.0", "gpl-3.0",
@@ -12,7 +12,7 @@ widget2gist(fig_str, name, created = NULL, description = "",
   scrolling = FALSE, secure = TRUE, view = TRUE)
 }
 \arguments{
-\item{fig_str}{a string containing R code to create an htmlwidget}
+\item{widget_string}{a string containing R code to create an htmlwidget}
 
 \item{name}{name of the gist}
 

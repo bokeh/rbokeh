@@ -5,8 +5,9 @@
 \title{Create a Bokeh grid plot from a list of Bokeh figures}
 \usage{
 grid_plot(figs, width = NULL, height = NULL, nrow = 1, ncol = 1,
-  byrow = TRUE, same_axes = FALSE, simplify_axes = TRUE,
-  y_margin = NULL, x_margin = NULL, link_data = FALSE)
+  byrow = TRUE, xlim = NULL, ylim = NULL, same_axes = FALSE,
+  simplify_axes = TRUE, y_margin = NULL, x_margin = NULL,
+  link_data = FALSE)
 }
 \arguments{
 \item{figs}{list of Bokeh figures - see details for what is acceptable}
@@ -20,6 +21,10 @@ grid_plot(figs, width = NULL, height = NULL, nrow = 1, ncol = 1,
 \item{ncol}{number of columns in the grid}
 
 \item{byrow}{populate the grid by row according to the order of figure elements supplied in \code{params}}
+
+\item{xlim}{the extent of the plotting area in the x-dimension to be applied to every panel (original individual panel limits will be honored if not specified).}
+
+\item{ylim}{the extent of the plotting area in the y-dimension to be applied to every panel (original individual panel limits will be honored if not specified).}
 
 \item{same_axes}{logical or vector of two logicals specifying whether the x and/or y axis limits should be the same for each plot in the grid}
 
@@ -48,6 +53,8 @@ figs <- lapply(idx, function(x) {
 
 # 1 row, 3 columns
 grid_plot(figs)
+# specify xlim and ylim to be applied to all panels
+grid_plot(figs, xlim = c(4, 8), ylim = c(1.5, 4.5))
 # unnamed list will remove labels
 grid_plot(unname(figs))
 # 2 rows, 2 columns
@@ -56,6 +63,8 @@ grid_plot(figs, nrow = 2)
 grid_plot(figs, same_axes = TRUE)
 # x axis with same (and linked) limits
 grid_plot(figs, same_axes = c(TRUE, FALSE))
+# x axis with same (and linked) limits and custom xlim
+grid_plot(figs, same_axes = c(TRUE, FALSE), xlim = c(5, 7))
 # send lists instead of specifying nrow and ncol
 grid_plot(list(
   c(list(figs[[1]]), list(figs[[2]])),
