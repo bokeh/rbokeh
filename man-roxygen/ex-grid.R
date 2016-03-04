@@ -8,6 +8,8 @@ figs <- lapply(idx, function(x) {
 
 # 1 row, 3 columns
 grid_plot(figs)
+# specify xlim and ylim to be applied to all panels
+grid_plot(figs, xlim = c(4, 8), ylim = c(1.5, 4.5))
 # unnamed list will remove labels
 grid_plot(unname(figs))
 # 2 rows, 2 columns
@@ -16,6 +18,8 @@ grid_plot(figs, nrow = 2)
 grid_plot(figs, same_axes = TRUE)
 # x axis with same (and linked) limits
 grid_plot(figs, same_axes = c(TRUE, FALSE))
+# x axis with same (and linked) limits and custom xlim
+grid_plot(figs, same_axes = c(TRUE, FALSE), xlim = c(5, 7))
 # send lists instead of specifying nrow and ncol
 grid_plot(list(
   c(list(figs[[1]]), list(figs[[2]])),
