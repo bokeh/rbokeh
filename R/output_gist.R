@@ -1,6 +1,6 @@
 #' Export htmlwidget plot to a gist
 #'
-#' @param fig_str a string containing R code to create an htmlwidget
+#' @param widget_string a string containing R code to create an htmlwidget
 #' @param name name of the gist
 #' @param created optional string for a "Created by" to preceed the README
 #' @param description optional text to go in README.md to describe the gist
@@ -20,29 +20,29 @@
 #' @importFrom gistr gist_create
 #' @importFrom utils browseURL
 #' @export
-widget2gist <- function(fig_str, name,
+widget2gist <- function(widget_string, name,
   created = NULL, description = "",
   license = c("none", "apache-2.0", "bsd-2-clause", "bsd-3-clause", "cc-by-4.0", "cc-by-nc-4.0", "cc-by-nc-nd-4.0", "cc-by-nc-sa-4.0", "cc-by-nd-4.0", "cc-by-sa-4.0", "cddl-1.0", "epl-1.0", "gpl-2.0", "gpl-3.0", "lgpl-2.1", "lgpl-3.0", "mit", "mpl-2.0"),
   border = TRUE, scrolling = FALSE,
   secure = TRUE, view = TRUE) {
 
-  if(!is.character(fig_str))
-    stop("Argument 'fig_str' must be a string specifying an rbokeh plot")
+  if(!is.character(widget_string))
+    stop("Argument 'widget_string' must be a string specifying an htmlwidget")
 
   license <- match.arg(license)
 
   # remove leading and trailing newlines
-  fig_str <- gsub("\n+$", "", fig_str)
-  fig_str <- gsub("^\n+", "", fig_str)
+  widget_string <- gsub("\n+$", "", widget_string)
+  widget_string <- gsub("^\n+", "", widget_string)
 
-  p <- eval(parse(text = fig_str))
+  p <- eval(parse(text = widget_string))
 
   dir <- tempfile(pattern = "widget_gist_", fileext = "")
   dir.create(dir)
 
   if(inherits(p, "rbokeh")) {
     rbokeh2html(p, file = file.path(dir, "index.html"), secure = secure)
-    # save_figure(p, file = file.path(dir, "thumbnail.png"))
+    # widget2png(p, file = file.path(dir, "thumbnail.png"))
   } else if(inherits(p, "htmlwidget")) {
     try_res <- try(htmlwidgets::saveWidget(p,
       file = file.path(dir, "index.html"),
@@ -55,7 +55,7 @@ widget2gist <- function(fig_str, name,
   readme <- NULL
   if(!is.null(created))
     readme <- c(readme, paste0("Created by ", created), "")
-  readme <- c(readme, description, "", "```r", fig_str, "```")
+  readme <- c(readme, description, "", "```r", widget_string, "```")
   writeLines(paste(readme, collapse = "\n"), file.path(dir, "README.md"))
 
   yaml <- c(
@@ -80,8 +80,10 @@ widget2gist <- function(fig_str, name,
   index_cdn <- gsub("gist\\.githubusercontent\\.com", "cdn.rawgit.com", index_raw)
   message(paste0('   <iframe width="', p$width + 20, '" height="', p$height + 20, '" frameBorder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" sandbox="allow-forms allow-scripts allow-popups allow-same-origin allow-pointer-lock" src="', index_cdn,'"></iframe>'))
 
-  if(view)
+  if(view) {
+    Sys.sleep(0.5) # wait so it has time to populate
     utils::browseURL(bl_ocks)
+  }
 
   return(invisible(gst))
 }
