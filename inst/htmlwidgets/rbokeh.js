@@ -1,5 +1,3 @@
-var xx;
-
 HTMLWidgets.widget({
 
   name: 'rbokeh',
@@ -12,7 +10,7 @@ HTMLWidgets.widget({
       elementid: "",
       width: width,
       height: height
-    }
+    };
   },
 
   renderValue: function(el, x, instance) {
@@ -24,8 +22,8 @@ HTMLWidgets.widget({
       x.docs_json = JSON.parse(x.docs_json);
     }
 
-    var refkey = Object.keys(x.docs_json)[0]
-    var refs = x.docs_json[refkey].roots.references
+    var refkey = Object.keys(x.docs_json)[0];
+    var refs = x.docs_json[refkey].roots.references;
 
     // set size from initialize if "figure" (doesn't work for gridplot now)
     if(x.padding.type === "figure") {
@@ -54,14 +52,14 @@ HTMLWidgets.widget({
           for (var i = 0; i < obj[key].length; i++) {
             if(obj[key][i] === null)
               obj[key][i] = NaN;
-          };
+          }
         }
-      };
+      }
     }
     for(var i = 0; i < refs.length; i++) {
       if(refs[i].type === "ColumnDataSource")
         traverseObject(refs[i].attributes.data);
-    };
+    }
 
     var dv = document.createElement('div');
     dv.id = x.elementid;
@@ -85,7 +83,7 @@ HTMLWidgets.widget({
     // var width = 800;
     // var height = 500;
 
-    var box = document.getElementById(instance.elementid).getElementsByTagName("table")[0];
+    var box = el.getElementsByTagName("table")[0];
 
     if(Bokeh.index[instance.modelid].model.attributes.children) {
       // it is a gridplot (TODO)
@@ -93,7 +91,7 @@ HTMLWidgets.widget({
       // Bokeh.index[instance.modelid].child_views["_id_"].canvas._set_dims([300,300])
     } else {
       // it's a regular plot
-      var bk_canvas = document.getElementById(instance.elementid).getElementsByClassName("bk-canvas-wrapper")[0];
+      var bk_canvas = el.getElementsByClassName("bk-canvas-wrapper")[0];
       var h_pad = box.clientHeight - bk_canvas.clientHeight;
       var w_pad = box.clientWidth - bk_canvas.clientWidth;
 
