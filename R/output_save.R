@@ -1,17 +1,17 @@
-#' Make a static png file for an rbokeh figure
+#' Make a static png file for an htmlwidget
 #'
-#' @param p Bokeh figure object
+#' @param p htmlwidget object
 #' @param file where to save png file
 #' @param timeout plot render timeout in milliseconds (see details)
-#' @details This uses phantomjs (\url{http://phantomjs.org}) to render your rbokeh figure in a headless browser and take a screenshot of it, creating a static output.  This assumes that phantomjs has been installed on your machine and is available as a system call.  For plots that take longer to load and render, you may need to increase the value of \code{timeout}.  Note that this function is experimental.
+#' @details This uses phantomjs (\url{http://phantomjs.org}) to render your htmlwidget in a headless browser and take a screenshot of it, creating a static output.  This assumes that phantomjs has been installed on your machine and is available as a system call.  For plots that take longer to load and render, you may need to increase the value of \code{timeout}.  Note that this function is experimental.
 #' @examples
 #' \donttest{
 #' figure(tools = NULL) %>%
 #'   ly_points(1:10) %>%
-#'   save_figure("/tmp/test.png")
+#'   widget2png("/tmp/test.png")
 #' }
 #' @export
-save_figure <- function(p, file, timeout = 500) {
+widget2png <- function(p, file, timeout = 500) {
   phantom <- find_phantom()
   file <- path.expand(file)
 
@@ -22,10 +22,13 @@ save_figure <- function(p, file, timeout = 500) {
       ff <- tempfile(fileext = ".html")
       ffjs <- tempfile(fileext = ".js")
 
-      # don't want any padding
-      p$sizingPolicy$padding <- 0
-      # suppressMessages(saveWidget(p, ff, selfcontained = FALSE))
-      suppressMessages(rbokeh2html(p, file = ff))
+      if(inherits(p, "rbokeh")) {
+        # don't want any padding
+        p$sizingPolicy$padding <- 0
+        suppressMessages(rbokeh2html(p, file = ff))
+      } else if(inherits(p, "htmlwidget")) {
+        suppressMessages(htmlwidgets::saveWidget(p, file = ff))
+      }
 
       js <- paste0("var page = require('webpage').create();
 page.open('file://", ff, "', function() {
