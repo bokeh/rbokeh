@@ -223,6 +223,7 @@ grid_plot <- function(figs, width = NULL, height = NULL,
           references = NULL
       )))
     ),
+    sizingPolicy = htmlwidgets::sizingPolicy(defaultWidth = 840, defaultHeight = 800),
     preRenderHook = rbokeh_prerender,
     width = width,
     height = height,

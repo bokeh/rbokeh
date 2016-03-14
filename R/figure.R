@@ -59,8 +59,8 @@
 #' @import methods
 figure <- function(
   data = NULL,
-  width = 480,
-  height = 520,
+  width = NULL,
+  height = NULL,
   title = NULL,
   xlab = NULL,
   ylab = NULL,
@@ -179,25 +179,26 @@ figure <- function(
   spec$model$plot$attributes <- c(spec$model$plot$attributes, extra_pars)
 
   fig <- htmlwidgets::createWidget(
-     name = 'rbokeh',
-     x = list(
-        spec = spec,
-        elementid = digest(Sys.time()),
-        modeltype = type,
-        modelid = id,
-        docid = digest::digest(paste("rbokehfigure", Sys.time())),
-        docs_json = list(list(
-          version = get_bokeh_version(),
-          title = "Bokeh Figure",
-          roots = list(
-            root_ids = list(id),
-            references = NULL
-        )))
-     ),
-     preRenderHook = rbokeh_prerender,
-     width = spec$width,
-     height = spec$height,
-     package = 'rbokeh'
+    name = 'rbokeh',
+    x = list(
+      spec = spec,
+      elementid = digest(Sys.time()),
+      modeltype = type,
+      modelid = id,
+      docid = digest::digest(paste("rbokehfigure", Sys.time())),
+      docs_json = list(list(
+        version = get_bokeh_version(),
+        title = "Bokeh Figure",
+        roots = list(
+          root_ids = list(id),
+          references = NULL
+      )))
+    ),
+    sizingPolicy = htmlwidgets::sizingPolicy(defaultWidth = 500, defaultHeight = 540),
+    preRenderHook = rbokeh_prerender,
+    width = spec$width,
+    height = spec$height,
+    package = 'rbokeh'
   )
   names(fig$x$docs_json) <- fig$x$docid
 

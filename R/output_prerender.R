@@ -30,7 +30,7 @@ rbokeh_prerender <- function(fig) {
   ## we need to preserve "NaN" (which is NA in R) for bokeh to render properly
   # attr(fig$x, "TOJSON_ARGS") <- list(na = "string")
   ## actually this causes problems with categorical and date data
-  ## se we'll handle it in the js prior to rendering
+  ## so we'll handle it in the js prior to rendering
 
   fig
 }
