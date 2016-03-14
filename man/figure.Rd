@@ -4,7 +4,7 @@
 \alias{figure}
 \title{Initialize a Bokeh figure}
 \usage{
-figure(data = NULL, width = 480, height = 520, title = NULL,
+figure(data = NULL, width = NULL, height = NULL, title = NULL,
   xlab = NULL, ylab = NULL, xlim = NULL, ylim = NULL,
   padding_factor = 0.07, xgrid = TRUE, ygrid = TRUE, xaxes = "below",
   yaxes = "left", legend_location = "top_right", tools = c("pan",

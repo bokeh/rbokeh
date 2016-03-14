@@ -249,8 +249,14 @@ grid_plot <- function(figs, width = NULL, height = NULL,
         wmat[ii, jj] <- NA
         hmat[ii, jj] <- NA
       } else {
-        wmat[ii, jj] <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$width
-        hmat[ii, jj] <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$height
+        ww <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$width
+        if(is.null(ww))
+          ww <- 800 / ncol(wmat)
+        wmat[ii, jj] <- ww
+        hh <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$width
+        if(is.null(hh))
+          hh <- 800 / nrow(hmat)
+        hmat[ii, jj] <- hh
       }
     }
   }
