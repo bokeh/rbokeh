@@ -135,6 +135,11 @@ ly_bar <- function(
 
   remaining_args$width <- NULL
 
+  # b_eval doesn't know how to deal with quoted inputs with a single-row data frame
+  # so instead tag the data so it knows the input is quoted
+  if(nrow(res) == 1)
+    class(res) <- c(class(res), "quoted")
+
   color_value <- if(is.null(colorname)) args$params$color else colorname
   do.call(ly_rect, append(list(fig = fig,
     xleft = "xleft", ybottom = "ybottom", xright = "xright", ytop = "ytop",

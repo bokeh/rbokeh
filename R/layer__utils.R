@@ -93,7 +93,7 @@ b_eval <- function(data) {
       }
 
       ## variable name could have been supplied in quotes
-      if(length(res) == 1 && is.character(res) && nrow(data) > 1) {
+      if(length(res) == 1 && is.character(res) && (nrow(data) > 1 || inherits(data, "quoted"))) {
         if(res %in% names(data)) {
           nm <- res
           res <- data[[res]]
@@ -297,7 +297,7 @@ grab <- function(..., dots, null_data = FALSE) {
 #' @param data data to be used
 #' @param arg_obj args object supplied by \code{grab}
 #' @param process_data_and_names boolean to determine if the data and x_name and y_name should be post processed
-#' @return list of three groups: data, info, and params.
+#' @return list of three groups: data, info, and params
 sub_names <- function(
   fig, data, arg_obj,
   process_data_and_names = TRUE
