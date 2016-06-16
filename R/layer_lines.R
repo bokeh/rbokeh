@@ -268,10 +268,10 @@ ly_abline <- function(
   }
 
   defer_fn <- function(data, xlim, ylim) {
-    if(length(data$x0[[1]]) == 1) {
+    if(length(data$x0) == 1) {
       if(data$x0 == "x0")
         return(data)
-    } else if(length(data$x0[[1]]) == 0) {
+    } else if(length(data$x0) == 0) {
       return(data)
     }
     # unlist because of json encoding issues
