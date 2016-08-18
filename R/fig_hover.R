@@ -49,7 +49,14 @@ hover_model <- function(id, plot_ref, renderer_ref, tooltips) {
     res$model$attributes$renderers <- list(renderer_ref)
   }
   res$model$attributes$names <- list()
-  res$model$attributes$always_active <- TRUE
+
+  # TODO: expose any of these to user?
+  res$model$attributes$anchor <- "center"
+  res$model$attributes$attachment <- "horizontal"
+  res$model$attributes$line_policy <- "prev"
+  res$model$attributes$mode <- "mouse"
+  res$model$attributes$point_policy <- "snap_to_data"
+
   res$model$attributes$tooltips <- tooltips
   res
 }
