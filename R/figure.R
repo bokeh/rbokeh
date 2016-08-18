@@ -308,3 +308,9 @@ figure_par_validator_map <- list(
 # attrs %>%
 #   html_nodes("code.descname") %>%
 #   html_text()
+
+# glyphs <- read_html("http://bokeh.pydata.org/en/latest/docs/reference/models/glyphs.html")
+# classes <- glyphs %>%
+#   html_nodes("dl.class>:first-child") %>%
+#   html_nodes("code.descname") %>%
+#   html_text()
