@@ -148,8 +148,6 @@ data_model <- function(dd, id = NULL) {
 
   res$model$attributes$column_names <- I(names(dd))
   res$model$attributes$selected <- I(NULL)
-  res$model$attributes$discrete_ranges <- structure(list(), .Names = character(0))
-  res$model$attributes$cont_ranges <- structure(list(), .Names = character(0))
   res$model$attributes$data <- as.list(dd)
 
   res
@@ -170,7 +168,6 @@ glyph_renderer_model <- function(id, data_ref, glyph_ref,
   res$model$attributes$nonselection_glyph <- ns_glyph_ref
   res$model$attributes["hover_glyph"] <- list(NULL)
   res$model$attributes$hover_glyph <- hov_glyph_ref
-  res$model$attributes["server_data_source"] <- list(NULL)
   res$model$attributes["name"] <- list(NULL)
   res$model$attributes$data_source <- data_ref
   res$model$attributes$glyph <- glyph_ref

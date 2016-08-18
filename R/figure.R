@@ -250,12 +250,10 @@ fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plo
       right = list(),
       above = list(),
       renderers = list(),
-      tools = list(),
       tool_events = list(),
       extra_y_ranges = structure(list(), .Names = character(0)),
       extra_x_ranges = structure(list(), .Names = character(0)),
-      tags = list(),
-      doc = NULL
+      tags = list()
     )
   ))
   model$plot$subtype <- subtype

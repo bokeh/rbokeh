@@ -249,8 +249,17 @@ prepare_figure <- function(fig) {
   }
 
   fig$x$padding <- list(type = "figure", y_pad = y_pad, x_pad = x_pad)
-  fig$x$spec$model$plot$attributes$plot_width <- fig$width - y_pad
-  fig$x$spec$model$plot$attributes$plot_height <- fig$height - x_pad
+
+  if(is.null(fig$width)) {
+    fig$x$spec$model$plot$attributes$plot_width <- NULL
+  } else {
+    fig$x$spec$model$plot$attributes$plot_width <- fig$width - y_pad
+  }
+  if(is.null(fig$height)) {
+    fig$x$spec$model$plot$attributes$plot_height <- NULL
+  } else {
+    fig$x$spec$model$plot$attributes$plot_height <- fig$height - x_pad
+  }
 
   # handle plot/axis/grid/legend themes
   if(!is.null(fig$x$spec$theme$plot))

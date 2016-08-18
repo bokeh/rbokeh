@@ -26,14 +26,14 @@ HTMLWidgets.widget({
     var refs = x.docs_json[refkey].roots.references;
 
     // set size from initialize if "figure" (doesn't work for gridplot now)
-    if(x.padding.type === "figure") {
-      if(instance.width) {
-        refs[0].attributes.plot_width = instance.width - x.padding.y_pad;
-      }
-      if(instance.height) {
-        refs[0].attributes.plot_height = instance.height - x.padding.x_pad;
-      }
-    }
+    // if(x.padding.type === "figure") {
+    //   if(instance.width) {
+    //     refs[0].attributes.plot_width = instance.width - x.padding.y_pad;
+    //   }
+    //   if(instance.height) {
+    //     refs[0].attributes.plot_height = instance.height - x.padding.x_pad;
+    //   }
+    // }
 
     instance.modelid = x.modelid;
     instance.elementid = x.elementid;
@@ -61,10 +61,13 @@ HTMLWidgets.widget({
         traverseObject(refs[i].attributes.data);
     }
 
+    var dv1 = document.createElement('div');
+    dv1.setAttribute("class", "bk-root");
     var dv = document.createElement('div');
     dv.id = x.elementid;
     dv.setAttribute("class", "plotdiv");
-    el.appendChild(dv);
+    dv1.appendChild(dv);
+    el.appendChild(dv1);
 
     var render_items = [{
       "docid": x.docid,
