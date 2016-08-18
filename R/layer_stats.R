@@ -246,6 +246,8 @@ ly_quantile <- function(
 #' @param data an optional data frame, providing the source for x and y
 #' @param width with of each box, a value between 0 (no width) and 1 (full width)
 #' @param coef see \code{\link[grDevices]{boxplot.stats}}
+#' @param with_outliers \code{logical} indicating whether or not the outlier
+#'   points should be drawn outside of the whiskers of the boxplot.
 #' @template par-coloralpha
 #' @template par-lnamegroup
 #' @template dots-fillline
@@ -254,6 +256,7 @@ ly_quantile <- function(
 ly_boxplot <- function(
   fig, x, y = NULL, data = figure_data(fig),
   width = 0.9, coef = 1.5,
+  with_outliers = TRUE,
   color = "blue", alpha = 1,
   lname = NULL, lgroup = NULL, visible = TRUE,
   ...
@@ -362,16 +365,18 @@ ly_boxplot <- function(
       args$params[!fill_ind])
     )
 
-    if(length(bp$out) > 0) {
-      fig <- do.call(ly_points, c(
-        list(
-          fig = fig,
-          x = rep(gp, length(bp$out)), y = bp$out,
-          glyph = 1,
-          xlab = x_name, ylab = y_name
-        ),
-        args$params
-      ))
+    if (with_outliers) {
+      if(length(bp$out) > 0) {
+        fig <- do.call(ly_points, c(
+          list(
+            fig = fig,
+            x = rep(gp, length(bp$out)), y = bp$out,
+            glyph = 1,
+            xlab = x_name, ylab = y_name
+          ),
+          args$params
+        ))
+      }
     }
   }
 
