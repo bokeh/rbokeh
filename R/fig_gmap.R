@@ -10,6 +10,7 @@
 #' @param lat latitude where the map should be centered
 #' @param lng longitude where the map should be centered
 #' @param zoom initial \href{https://developers.google.com/maps/documentation/staticmaps/#Zoomlevels}{zoom level} to use when displaying the map
+#' @param api_key Google Maps API key (see \url{})
 #' @param map_type \href{https://developers.google.com/maps/documentation/staticmaps/#MapTypes}{map type} to use for the plot - one of "hybrid", "satellite", "roadmap", "terrain"
 #' @param map_style a json string of a Google Maps style - see \code{\link{gmap_style}}
 #' @note This can be used in the same way as \code{\link{figure}}, adding layers on top of the Google Map.
@@ -19,7 +20,7 @@
 #' @seealso \code{\link{gmap_style}}
 #' @example man-roxygen/ex-gmap.R
 #' @export
-gmap <- function(lat = 0, lng = 0, zoom = 0,
+gmap <- function(lat = 0, lng = 0, zoom = 0, api_key = NULL,
   map_type = "hybrid",
   map_style = NULL,
   width = 480,
@@ -36,6 +37,18 @@ gmap <- function(lat = 0, lng = 0, zoom = 0,
   yaxes = FALSE,
   tools = c("pan", "wheel_zoom", "save"),
   theme = getOption("bokeh_theme")) {
+
+  if(missing(api_key)) {
+    # try to get it from options
+    api_key <- getOption("GMAP_API_KEY")
+    # if not successful try to get it from an environment variable
+    if(is.null(api_key)) {
+      api_key <- Sys.getenv("GMAP_API_KEY")
+    }
+    if(is.null(api_key)) {
+      stop("'api_key' is required for Google Map plots. See https://developers.google.com/maps/documentation/javascript/get-api-key for more information on how to obtain your own.", call. = FALSE)
+    }
+  }
 
   if(length(setdiff(tools, c("pan", "wheel_zoom", "save"))) > 0) {
     message("For gmap, tools can only be 'pan', 'wheel_zoom', and 'save' - setting accordingly.")
@@ -74,6 +87,7 @@ gmap <- function(lat = 0, lng = 0, zoom = 0,
   fig$x$spec$model$plot$type <- "GMapPlot"
   fig$x$spec$ref$type <- "GMapPlot"
 
+  fig$x$spec$model$plot$attributes$api_key <- api_key
   fig$x$spec$model$plot$attributes$map_options <- list(
     lat      = lat,
     lng      = lng,
