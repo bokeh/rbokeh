@@ -77,7 +77,7 @@ figure <- function(
   toolbar_location = "above",
   h_symmetry = TRUE,
   v_symmetry = FALSE,
-  logo = "normal",
+  logo = NULL,
   lod_factor = 10,
   lod_interval = 300,
   lod_threshold = NULL,
@@ -175,6 +175,9 @@ figure <- function(
 
   if(is.null(tools))
     extra_pars["toolbar_location"] <- list(NULL)
+
+  spec["logo"] <- list(logo)
+  extra_pars$logo <- NULL
 
   spec$model$plot$attributes <- c(spec$model$plot$attributes, extra_pars)
 

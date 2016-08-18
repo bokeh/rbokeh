@@ -241,6 +241,7 @@ update_tool <- function(fig, which, args) {
   if(is.null(fig$x$spec$model$toolbar)) {
     tbid <- gen_id(fig, "Toolbar")
     tbmodel <- toolbar_model(tbid)
+    tbmodel$model$attributes["logo"] <- list(fig$x$spec$logo)
 
     fig$x$spec$model$plot$attributes$toolbar <- tbmodel$ref
     fig$x$spec$model$toolbar <- tbmodel$model
