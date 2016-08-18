@@ -131,7 +131,7 @@ prepare_figure <- function(fig) {
       lgroup <- paste("common_legend", lg$name, sep = "_")
       legend[[lgroup]] <- list(list(lg$name, list()))
       for(lg_args in lg$args) {
-        spec <- c(lg_args, list(x = "x", y = "y"))
+        spec <- c(lg_args)
         lname <- lg_args$glyph
         glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
         # make it so legend glyph doesn't show up on page
