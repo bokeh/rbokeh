@@ -39,8 +39,10 @@ ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
 
   if(is.vector(z)) {
     z <- matrix(z, nrow = rows, byrow = byrow)
-  } else {
+  } else if(is.matrix(z)) {
     z <- t(z)
+  } else {
+    stop("argument 'z' to ly_image must be a matrix or vector", call. = FALSE)
   }
 
   # really ugly nested if else
