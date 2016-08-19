@@ -245,6 +245,8 @@ update_tool <- function(fig, which, args) {
 
     fig$x$spec$model$plot$attributes$toolbar <- tbmodel$ref
     fig$x$spec$model$toolbar <- tbmodel$model
+
+    fig$x$spec$model$plot$attributes$tool_events <- list()
   }
 
   id <- gen_id(fig, which)

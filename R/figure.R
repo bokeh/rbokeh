@@ -253,7 +253,6 @@ fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plo
       right = list(),
       above = list(),
       renderers = list(),
-      tool_events = list(),
       extra_y_ranges = structure(list(), .Names = character(0)),
       extra_x_ranges = structure(list(), .Names = character(0)),
       tags = list()
@@ -296,21 +295,3 @@ figure_par_validator_map <- list(
   "lod_timeout" = "int",
   "webgl" = "logical"
 )
-
-
-# library(rvest)
-
-# plots <- read_html("http://bokeh.pydata.org/en/latest/docs/reference/models/plots.html")
-
-# attrs <- plots %>%
-#   html_nodes("dl.attribute")
-
-# attrs %>%
-#   html_nodes("code.descname") %>%
-#   html_text()
-
-# glyphs <- read_html("http://bokeh.pydata.org/en/latest/docs/reference/models/glyphs.html")
-# classes <- glyphs %>%
-#   html_nodes("dl.class>:first-child") %>%
-#   html_nodes("code.descname") %>%
-#   html_text()
