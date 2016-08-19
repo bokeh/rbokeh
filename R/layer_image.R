@@ -5,7 +5,7 @@
 #' @param fig figure to modify
 #' @param z matrix or vector of image values
 #' @param rows if \code{z} is a vector, how many rows should be used in treating it as a matrix
-#' @param cols if \code{z} is a vector, how many columns should be used in treating it as a matrix
+#' @param byrow if \code{z} is a vector, should it be turned into a matrix by row
 #' @param x lower left x coordinates
 #' @param y lower left y coordinates
 #' @param dw image width distances
@@ -16,7 +16,7 @@
 #' @example man-roxygen/ex-image.R
 #' @family layer functions
 #' @export
-ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
+ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
   palette = "Spectral10", dilate = FALSE,
   lname = NULL, lgroup = NULL, visible = TRUE) {
 
@@ -37,10 +37,10 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
 
   axis_type_range <- get_glyph_axis_type_range(c(x, dw), c(y, dh), assert_x = "numeric", assert_y = "numeric")
 
-  if(is.matrix(z)) {
-    cols <- nrow(z)
-    rows <- ncol(z)
-    z <- c(z)  # coerce the matrix to a vector
+  if(is.vector(z)) {
+    z <- matrix(z, nrow = rows, byrow = byrow)
+  } else {
+    z <- t(z)
   }
 
   # really ugly nested if else
@@ -68,12 +68,9 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
   mc <- lapply(match.call(), deparse)
 
   make_glyph(fig, type = "image", lname = args$info$lname, lgroup = args$info$lgroup,
-    data = list(
-      image = list(z), rows = rows, cols = cols,
-      x = x, y = y, dw = dw, dh = dh,
-      palette = palette, dilate = dilate
-    ),
-    args = NULL, axis_type_range = axis_type_range, ly_call = mc)
+    data = list(image = list(z), palette = palette),
+    args = list(x = x, y = y, dw = dw, dh = dh, dilate = dilate),
+    axis_type_range = axis_type_range, ly_call = mc)
 }
 
 #' Add an "image_url" layer to a Bokeh figure
@@ -168,18 +165,3 @@ ly_image_url <- function(
     axis_type_range = axis_type_range, ly_call = mc
   )
 }
-
-
-# ly_image_rgba <- function(fig, image, rows, cols, x = 0, y = 0, dw = 1, dh = 1, lname = NULL, lgroup = NULL, ...) {
-#   axis_type_range <- get_glyph_axis_type_range(c(x, dw), c(y, dh), assert_x = "numeric", assert_y = "numeric")
-
-#   if(is.matrix(image)) {
-#     cols <- nrow(image)
-#     rows <- ncol(image)
-#     image <- array(image)
-#   }
-
-#   make_glyph(fig, type = "image_RGBA", lname = lname, lgroup = lgroup,
-#     data = list(image = list(image), rows = rows, cols = cols, x = x, y = y, dw = dw, dh = dh),
-#     args = list(...), axis_type_range = axis_type_range)
-# }

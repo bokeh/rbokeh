@@ -24,6 +24,8 @@ add_layer <- function(fig, spec, dat, lname, lgroup) {
     c_id <- gen_id(fig, "ColorMapper")
     cmap <- color_mapper_model(c_id, palette = dat$palette)
     glyph_attrs$color_mapper <- cmap$ref
+    dat$palette <- NULL
+    glyph_attrs$palette <- NULL
     fig$x$spec$model[[c_id]] <- cmap$model
   }
 
