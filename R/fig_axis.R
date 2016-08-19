@@ -232,8 +232,10 @@ ticker_model <- function(type = "BasicTicker", id,
   desired_num_ticks = NULL, num_minor_ticks = 5, log = NULL) {
 
   res <- base_model_object(type, id)
-  res$model$attributes$num_minor_ticks <- num_minor_ticks
-  res$model$attributes$desired_num_ticks <- desired_num_ticks
+  if(type != "CategoricalTicker") {
+    res$model$attributes$num_minor_ticks <- num_minor_ticks
+    res$model$attributes$desired_num_ticks <- desired_num_ticks
+  }
   if(!is.null(log))
     res$model$attributes$base <- log
 
