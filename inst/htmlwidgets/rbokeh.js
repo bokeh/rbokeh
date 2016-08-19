@@ -25,16 +25,6 @@ HTMLWidgets.widget({
     var refkey = Object.keys(x.docs_json)[0];
     var refs = x.docs_json[refkey].roots.references;
 
-    // set size from initialize if "figure" (doesn't work for gridplot now)
-    // if(x.padding.type === "figure") {
-    //   if(instance.width) {
-    //     refs[0].attributes.plot_width = instance.width - x.padding.y_pad;
-    //   }
-    //   if(instance.height) {
-    //     refs[0].attributes.plot_height = instance.height - x.padding.x_pad;
-    //   }
-    // }
-
     instance.modelid = x.modelid;
     instance.elementid = x.elementid;
 

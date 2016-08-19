@@ -231,34 +231,15 @@ prepare_figure <- function(fig) {
   fig$x$spec$height <- fig$x$spec$model$plot$attributes$plot_height
   fig$x$spec$id <- fig$x$spec$model$plot$id
 
-  # handle toolbar padding
-  if(!is.null(fig$x$parenttype)) {
-    # parenttype is set when plot is part of GridPlot, which has different padding
-    x_pad <- y_pad <- 4
-  } else {
-    x_pad <- y_pad <- 10
-  }
-  tb <- fig$x$spec$model$plot$attributes$toolbar_location
-  if(is.null(tb)) {
-    if(!"toolbar_location" %in% names(fig$x$spec$model$plot$attributes))
-      x_pad <- 46
-  } else if(tb %in% c("above", "below")) {
-    y_pad <- 46
-  } else if(tb %in% c("left", "right")) {
-    x_pad <- 46
-  }
-
-  fig$x$padding <- list(type = "figure", y_pad = y_pad, x_pad = x_pad)
-
   if(is.null(fig$width)) {
     fig$x$spec$model$plot$attributes$plot_width <- NULL
   } else {
-    fig$x$spec$model$plot$attributes$plot_width <- fig$width - y_pad
+    fig$x$spec$model$plot$attributes$plot_width <- fig$width
   }
   if(is.null(fig$height)) {
     fig$x$spec$model$plot$attributes$plot_height <- NULL
   } else {
-    fig$x$spec$model$plot$attributes$plot_height <- fig$height - x_pad
+    fig$x$spec$model$plot$attributes$plot_height <- fig$height
   }
 
   # handle plot/axis/grid/legend themes

@@ -21,7 +21,7 @@ bokeh_render_json <- function(json_file) {
   # forward options using x
   x <- list(
     docs_json = paste(readLines(json_file), collapse = "\n"),
-    padding = list(type = "figure", y_pad = 0, x_pad = 0),
+    padding = list(type = "figure"),
     elementid = digest::digest(Sys.time()),
     modelid = modelid,
     docid = docid,
