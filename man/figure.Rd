@@ -10,9 +10,9 @@ figure(data = NULL, width = NULL, height = NULL, title = NULL,
   yaxes = "left", legend_location = "top_right", tools = c("pan",
   "wheel_zoom", "box_zoom", "resize", "reset", "save", "help"),
   theme = getOption("bokeh_theme"), toolbar_location = "above",
-  h_symmetry = TRUE, v_symmetry = FALSE, logo = "normal",
-  lod_factor = 10, lod_interval = 300, lod_threshold = NULL,
-  lod_timeout = 500, webgl = FALSE, ...)
+  h_symmetry = TRUE, v_symmetry = FALSE, logo = NULL, lod_factor = 10,
+  lod_interval = 300, lod_threshold = NULL, lod_timeout = 500,
+  webgl = FALSE, ...)
 }
 \arguments{
 \item{data}{data to be supplied to all layers, if the layer doesn't supply a data value}

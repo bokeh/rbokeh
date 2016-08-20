@@ -4,7 +4,7 @@
 \alias{gmap}
 \title{Initialize a Bokeh Google Map plot}
 \usage{
-gmap(lat = 0, lng = 0, zoom = 0, map_type = "hybrid",
+gmap(lat = 0, lng = 0, zoom = 0, api_key = NULL, map_type = "hybrid",
   map_style = NULL, width = 480, height = 480, title = NULL,
   xlab = NULL, ylab = NULL, xlim = NULL, ylim = NULL,
   padding_factor = 0.07, xgrid = FALSE, ygrid = FALSE, xaxes = FALSE,
@@ -17,6 +17,8 @@ gmap(lat = 0, lng = 0, zoom = 0, map_type = "hybrid",
 \item{lng}{longitude where the map should be centered}
 
 \item{zoom}{initial \href{https://developers.google.com/maps/documentation/staticmaps/#Zoomlevels}{zoom level} to use when displaying the map}
+
+\item{api_key}{Google Maps API key (see \url{})}
 
 \item{map_type}{\href{https://developers.google.com/maps/documentation/staticmaps/#MapTypes}{map type} to use for the plot - one of "hybrid", "satellite", "roadmap", "terrain"}
 
