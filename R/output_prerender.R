@@ -34,4 +34,3 @@ rbokeh_prerender <- function(fig) {
 
   fig
 }
-

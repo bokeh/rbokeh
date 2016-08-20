@@ -197,7 +197,7 @@ figure <- function(
           references = NULL
       )))
     ),
-    sizingPolicy = htmlwidgets::sizingPolicy(defaultWidth = 500, defaultHeight = 540),
+    sizingPolicy = htmlwidgets::sizingPolicy(defaultWidth = 500, defaultHeight = 500),
     preRenderHook = rbokeh_prerender,
     width = spec$width,
     height = spec$height,
@@ -246,6 +246,7 @@ fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plo
       id = id,
       plot_width = width,
       plot_height = height,
+      sizing_mode = "scale_both",
       x_range = list(),
       y_range = list(),
       left = list(),

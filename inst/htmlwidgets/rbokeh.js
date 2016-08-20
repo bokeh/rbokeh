@@ -73,25 +73,6 @@ HTMLWidgets.widget({
   },
 
   resize: function(el, width, height, instance) {
-    // var width = 800;
-    // var height = 500;
-
-    var box = el.getElementsByTagName("table")[0];
-
-    if(Bokeh.index[instance.modelid].model.attributes.children) {
-      // it is a gridplot (TODO)
-      // need to get dimensions and set dimensions of all plots
-      // Bokeh.index[instance.modelid].child_views["_id_"].canvas._set_dims([300,300])
-    } else {
-      // it's a regular plot
-      var bk_canvas = el.getElementsByClassName("bk-canvas-wrapper")[0];
-      var h_pad = box.clientHeight - bk_canvas.clientHeight;
-      var w_pad = box.clientWidth - bk_canvas.clientWidth;
-
-      // TODO: also shrink font sizes, etc., to a certain degree?
-      Bokeh.index[instance.modelid].canvas._set_dims([width - w_pad,height - h_pad]);
-    }
   }
-
 });
 
