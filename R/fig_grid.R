@@ -120,11 +120,11 @@ grid_plot <- function(figs, width = NULL, height = NULL,
   if(!is.null(names(figs))) {
     fig_names <- names(figs)
     for(ii in seq_along(figs)) {
-      figs[[ii]]$x$spec$model$plot$attributes$title <- fig_names[ii]
-      figs[[ii]]$x$spec$model$plot$attributes$title_text_align <- "center"
-      figs[[ii]]$x$spec$model$plot$attributes$title_text_baseline = "middle"
-      figs[[ii]]$x$spec$model$plot$attributes$title_text_font <- "Courier New"
-      figs[[ii]]$x$spec$model$plot$attributes$title_text_font_size <- "12pt"
+      # figs[[ii]]$x$spec$model$plot$attributes$title <- fig_names[ii]
+      # figs[[ii]]$x$spec$model$plot$attributes$title_text_align <- "center"
+      # figs[[ii]]$x$spec$model$plot$attributes$title_text_baseline <- "middle"
+      # figs[[ii]]$x$spec$model$plot$attributes$title_text_font <- "Courier New"
+      # figs[[ii]]$x$spec$model$plot$attributes$title_text_font_size <- "12pt"
     }
   }
 
@@ -196,7 +196,72 @@ grid_plot <- function(figs, width = NULL, height = NULL,
     }
   }
 
+  # hide individual toolbars in each figure
+  # and remove sizing_mode from each
+  for(ii in seq_along(figs)) {
+    figs[[ii]]$x$spec$model$plot$attributes["toolbar_location"] <- list(NULL)
+    figs[[ii]]$x$spec$model$plot$attributes$sizing_mode <- NULL
+  }
+
+  # this will hold all of the models for new elements we need to add
+  layoutspec <- list()
+
+  # set up master column for plots
+  mcid <- gen_id(figs[[1]], "MasterColumn")
+  mcmod <- base_model_object("Column", mcid)
+
+  # set up row and column models pointing to each figure
+  rrefs <- list()
+  for(row in seq_len(nrow(idxm))) {
+    refs <- list()
+    for(col in seq_along(idxm[row, ])) {
+      idx <- idxm[row, col]
+      if(is.na(idx)) {
+        spid <- gen_id(figs[[idx]], "Spacer")
+        spmod <- base_model_object("Spacer", spid)
+        layoutspec[[spid]] <- spmod$model
+        refs[[col]] <- spmod$ref
+      } else {
+        refs[[col]] <- figs[[idx]]$x$spec$ref
+      }
+    }
+    rid <- gen_id(figs[[1]], paste0("Row", row))
+    rowmod <- base_model_object("Row", rid)
+    rowmod$model$attributes$children <- refs
+    rowmod$model$attributes$id <- NULL
+    rowmod$model$attributes$tags <- NULL
+    layoutspec[[rid]] <- rowmod$model
+    rrefs[[row]] <- rowmod$ref
+  }
+
+  mcmod$model$attributes$children <- rrefs
+  mcmod$model$attributes$id <- NULL
+  mcmod$model$attributes$tags <- NULL
+  layoutspec$mastercolumn <- mcmod$model
+
+  # set up a ToolbarBox for the whole grid plot
+  tbbid <- gen_id(figs[[1]], "ToolbarBox")
+  tbbmod <- base_model_object("ToolbarBox", tbbid)
+  tbbmod$model$attributes$sizing_mode <- "scale_width"
+  tbbmod$model$attributes$toolbar_location <- "above"
+  # gather all tools from all figures
+  alltools <- unname(unlist(lapply(figs, function(a) {
+    unname(a$x$spec$model$toolbar$attributes$tools)
+  }), recursive = FALSE))
+  tbbmod$model$attributes$tools <- alltools
+  tbbmod$model$attributes$sizing_mode <- "scale_width"
+  layoutspec$toolbarbox <- tbbmod$model
+
+  # set up root column
+  rcid <- gen_id(list(x = list(spec = list(time = Sys.time()))), "rootColumn")
+  rootColumn <- base_model_object("Column", rcid)
+  rootColumn$model$attributes$children <- list(tbbmod$ref, mcmod$ref)
+  rootColumn$model$attributes$id <- NULL
+  rootColumn$model$attributes$tags <- NULL
+  layoutspec$root <- rootColumn$model
+
   spec <- structure(list(
+    layout = layoutspec,
     plot_refs = plot_refs,
     figs = figs,
     x_range = x_range$mod$model,
@@ -205,29 +270,27 @@ grid_plot <- function(figs, width = NULL, height = NULL,
     x_margin = x_margin, y_margin = y_margin,
     nrow = nrow, ncol = ncol), class = "BokehGridPlot")
 
-  id <- gen_id(list(x = list(spec = list(time = Sys.time()))), "GridPlot")
-
   obj <- htmlwidgets::createWidget(
-    name = 'rbokeh',
+    name = "rbokeh",
     x = list(
       spec = spec,
       elementid = digest(Sys.time()),
       modeltype = "GridPlot",
-      modelid = id,
+      modelid = rcid,
       docid = digest::digest(paste("rbokehgridplot", Sys.time())),
       docs_json = list(list(
         version = get_bokeh_version(),
         title = "Bokeh GridPlot",
         roots = list(
-          root_ids = list(id),
+          root_ids = list(rcid),
           references = NULL
       )))
     ),
-    sizingPolicy = htmlwidgets::sizingPolicy(defaultWidth = 840, defaultHeight = 800),
+    sizingPolicy = htmlwidgets::sizingPolicy(defaultWidth = 800, defaultHeight = 800),
     preRenderHook = rbokeh_prerender,
     width = width,
     height = height,
-    package = 'rbokeh'
+    package = "rbokeh"
   )
   names(obj$x$docs_json) <- obj$x$docid
 
@@ -276,34 +339,13 @@ grid_plot <- function(figs, width = NULL, height = NULL,
 
   names(obj$x$spec$figs) <- sapply(obj$x$spec$figs, function(x) x$x$spec$model$plot$id)
 
-  # set attributes to help set the padding for each individual panel
-  for(ii in seq_along(obj$x$spec$figs)) {
-    obj$x$spec$figs[[ii]]$x$spec$model$plot$attributes["toolbar_location"] <- list(NULL)
-    obj$x$spec$figs[[ii]]$x$parenttype <- "GridPlot"
-  }
+  # # set attributes to help set the padding for each individual panel
+  # for(ii in seq_along(obj$x$spec$figs)) {
+  #   obj$x$spec$figs[[ii]]$x$spec$model$plot$attributes["toolbar_location"] <- list(NULL)
+  #   obj$x$spec$figs[[ii]]$x$parenttype <- "GridPlot"
+  # }
 
   obj
-}
-
-grid_plot_model <- function(id, plot_refs, tool_event_ref, width, height) {
-  res <- base_model_object("GridPlot", id)
-
-  res$model$attributes$children <- plot_refs
-  res$model$attributes$tool_events <- tool_event_ref
-
-  res$model$attributes$plot_width <- width
-  res$model$attributes$plot_height <- height
-  res$model$attributes$x_range <- NULL
-  res$model$attributes$y_range <- NULL
-  res$model$attributes$left <- list()
-  res$model$attributes$below <- list()
-  res$model$attributes$right <- list()
-  res$model$attributes$above <- list()
-  res$model$attributes$renderers <- list()
-  res$model$attributes$extra_y_ranges <- structure(list(), .Names = character(0))
-  res$model$attributes$extra_x_ranges <- structure(list(), .Names = character(0))
-
-  res
 }
 
 ## add a figure to a BokehGridPlot object/
@@ -398,27 +440,29 @@ prepare_gridplot <- function(obj) {
   mod <- unlist(lapply(figs, function(fig) remove_model_names(fig$x$spec$model)), recursive = FALSE)
 
   # id <- gen_id(list(x = list(spec = list(time = Sys.time()))), "GridPlot")
-  id <- obj$x$modelid
+  # id <- obj$x$modelid
 
-  tid <- gen_id(list(x = list(spec = list(time = Sys.time()))), c("GridPlot", "tool"))
-  tool_evt <- tool_events(tid)
+  # tid <- gen_id(list(x = list(spec = list(time = Sys.time()))), c("GridPlot", "tool"))
+  # tool_evt <- tool_events(tid)
 
-  mod$grid_plot <- grid_plot_model(id, obj$x$spec$plot_refs, tool_evt$ref, obj$width, obj$height)$model
-  mod$tool_evt <- tool_evt$model
-  mod$x_range <- obj$x$spec$x_range
-  mod$y_range <- obj$x$spec$y_range
+  # mod$grid_plot <- grid_plot_model(id, obj$x$spec$plot_refs, tool_evt$ref, obj$width, obj$height)$model
+  # mod$tool_evt <- tool_evt$model
+  # mod$x_range <- obj$x$spec$x_range
+  # mod$y_range <- obj$x$spec$y_range
 
-  mod$tool_evt <- tool_evt$model
+  # mod$tool_evt <- tool_evt$model
 
-  for(md in data_mods) {
-    mod[[md$ref$id]] <- md$model
-  }
+  # for(md in data_mods) {
+  #   mod[[md$ref$id]] <- md$model
+  # }
+
+  mod <- c(mod, remove_model_names(obj$x$spec$layout))
 
   names(mod) <- NULL
 
   obj$x$padding <- list(type = "gridplot")
   obj$x$spec$model <- mod
-  obj$x$modelid <- id
+  # obj$x$modelid <- id
 
   obj
 }
@@ -479,4 +523,3 @@ update_grid_sizes <- function(obj) {
   }
   obj
 }
-
