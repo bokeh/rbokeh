@@ -144,17 +144,6 @@ grid_plot <- function(figs, width = NULL, height = NULL,
         figs[[ii]] <- figs[[ii]] %>% x_axis(visible = FALSE)
       if(is.null(x_margin))
         x_margin <- 70
-
-      # add spaces to title on leftmost column of plots
-      idxs <- idxm[,1]
-      idxs <- idxs[!is.na(idxs)]
-      title_pad <- paste(rep(" ", ceiling(x_margin / 10)), collapse = "")
-      for(ii in idxs) {
-        title <- figs[[ii]]$x$spec$model$plot$attributes$title
-        if(!is.null(title)) {
-          figs[[ii]]$x$spec$model$plot$attributes$title <- paste0(title_pad, title)
-        }
-      }
     }
   }
   if(same_y) {
@@ -210,6 +199,9 @@ grid_plot <- function(figs, width = NULL, height = NULL,
   mcid <- gen_id(figs[[1]], "MasterColumn")
   mcmod <- base_model_object("Column", mcid)
 
+  # spacer_refs is used for dimensions later on
+  spacer_id_mat <- matrix(nrow = nrow(idxm), ncol = ncol(idxm), data = NA)
+
   # set up row and column models pointing to each figure
   rrefs <- list()
   for(row in seq_len(nrow(idxm))) {
@@ -217,10 +209,11 @@ grid_plot <- function(figs, width = NULL, height = NULL,
     for(col in seq_along(idxm[row, ])) {
       idx <- idxm[row, col]
       if(is.na(idx)) {
-        spid <- gen_id(figs[[idx]], "Spacer")
+        spid <- gen_id(figs[[idx]], paste0("spacer", row, "_", col))
         spmod <- base_model_object("Spacer", spid)
         layoutspec[[spid]] <- spmod$model
         refs[[col]] <- spmod$ref
+        spacer_id_mat[row, col] <- spmod$ref$id
       } else {
         refs[[col]] <- figs[[idx]]$x$spec$ref
       }
@@ -263,6 +256,7 @@ grid_plot <- function(figs, width = NULL, height = NULL,
   spec <- structure(list(
     layout = layoutspec,
     plot_refs = plot_refs,
+    spacer_id_mat = spacer_id_mat,
     figs = figs,
     x_range = x_range$mod$model,
     y_range = y_range$mod$model,
@@ -324,13 +318,28 @@ grid_plot <- function(figs, width = NULL, height = NULL,
     }
   }
 
+  # fill in blank dimensions with row or column max
+  cmax <- apply(wmat, 2, max, na.rm = TRUE)
+  rmax <- apply(hmat, 1, max, na.rm = TRUE)
+  wna <- which(is.na(wmat), arr.ind = TRUE)
+  if(length(wna) > 0) {
+    for(ii in seq_len(nrow(wna))) {
+      wmat[wna[ii, 1], wna[ii, 2]] <- cmax[wna[ii, 2]]
+    }
+  }
+  hna <- which(is.na(hmat), arr.ind = TRUE)
+  if(length(hna) > 0) {
+    for(ii in seq_len(nrow(hna))) {
+      hmat[hna[ii, 1], hna[ii, 2]] <- rmax[hna[ii, 1]]
+    }
+  }
+
   obj$x$spec$wmat <- wmat
   obj$x$spec$hmat <- hmat
 
   obj_width <- sum(apply(wmat, 2, function(x) max(x, na.rm = TRUE))) + 46
   obj_height <- sum(apply(hmat, 1, function(x) max(x, na.rm = TRUE)))
 
-  update_fig_dims <- FALSE
   if(is.null(obj$width))
     obj$width <- obj_width
 
@@ -447,16 +456,23 @@ prepare_gridplot <- function(obj) {
 
   # mod$grid_plot <- grid_plot_model(id, obj$x$spec$plot_refs, tool_evt$ref, obj$width, obj$height)$model
   # mod$tool_evt <- tool_evt$model
-  # mod$x_range <- obj$x$spec$x_range
-  # mod$y_range <- obj$x$spec$y_range
 
-  # mod$tool_evt <- tool_evt$model
+  xxrange <- obj$x$spec$x_range
+  if(!is.null(xxrange)) {
+    xxrange <- list(xxrange)
+  }
+  yyrange <- obj$x$spec$y_range
+  if(!is.null(yyrange)) {
+    yyrange <- list(yyrange)
+  }
 
-  # for(md in data_mods) {
-  #   mod[[md$ref$id]] <- md$model
-  # }
+  dmods <- unname(lapply(data_mods, function(x) x$model))
+  if(length(dmods) == 0)
+    dmods <- NULL
 
-  mod <- c(mod, remove_model_names(obj$x$spec$layout))
+  a <- unname(unlist(data_mods, recursive = FALSE))
+
+  mod <- c(mod, remove_model_names(obj$x$spec$layout), xxrange, yyrange, dmods)
 
   names(mod) <- NULL
 
@@ -518,6 +534,10 @@ update_grid_sizes <- function(obj) {
         if(ii == length(obj$x$spec$plot_refs)) {
           obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_bottom <- x_margin
         }
+      } else {
+        spid <- obj$x$spec$spacer_id_mat[ii][jj]
+        obj$x$spec$layout[[spid]]$attributes$width <- new_wmat[ii, jj]
+        obj$x$spec$layout[[spid]]$attributes$height <- new_hmat[ii, jj]
       }
     }
   }
