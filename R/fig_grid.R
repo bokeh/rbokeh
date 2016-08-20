@@ -120,11 +120,11 @@ grid_plot <- function(figs, width = NULL, height = NULL,
   if(!is.null(names(figs))) {
     fig_names <- names(figs)
     for(ii in seq_along(figs)) {
-      # figs[[ii]]$x$spec$model$plot$attributes$title <- fig_names[ii]
-      # figs[[ii]]$x$spec$model$plot$attributes$title_text_align <- "center"
-      # figs[[ii]]$x$spec$model$plot$attributes$title_text_baseline <- "middle"
-      # figs[[ii]]$x$spec$model$plot$attributes$title_text_font <- "Courier New"
-      # figs[[ii]]$x$spec$model$plot$attributes$title_text_font_size <- "12pt"
+      figs[[ii]] <- add_title(figs[[ii]], fig_names[ii])
+    }
+  } else {
+    for(ii in seq_along(figs)) {
+      figs[[ii]]$x$spec$model$plot$attributes$title <- NULL
     }
   }
 
