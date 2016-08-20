@@ -38,6 +38,9 @@ par_type_validate_fns <- list(
   text_align = function(name, val) {
     validate_enum(name, val, c("left", "right", "center"))
   },
+  align = function(name, val) {
+    validate_enum(name, val, c("left", "right", "center"))
+  },
   font_style = function(name, val) {
     validate_enum(name, val, c("normal", "italic", "bold"))
   },

@@ -213,6 +213,10 @@ figure <- function(
   for(tl in tool_list)
     fig <- eval(parse(text = paste("tool_", tl, "(fig)", sep = "")))
 
+  if(is.character(title)) {
+    fig <- fig %>% add_title(title)
+  }
+
   fig
 }
 
@@ -242,7 +246,6 @@ fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plo
     type       = type,
     id         =  id,
     attributes = list(
-      title = title,
       id = id,
       plot_width = width,
       plot_height = height,
