@@ -17,4 +17,3 @@ test_that("svgs in css are base64 encoded", {
 # #1e4b6c to #aaa for background and to #888 for border
 # #9ab9b1 to #fff
 # #e2ddbd to #fff
-

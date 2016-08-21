@@ -30,10 +30,10 @@ bokeh_render_json <- function(json_file) {
 
   # create widget
   htmlwidgets::createWidget(
-    name = 'rbokeh',
+    name = "rbokeh",
     x,
     width = NULL,
     height = NULL,
-    package = 'rbokeh'
+    package = "rbokeh"
   )
 }

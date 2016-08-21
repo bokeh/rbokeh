@@ -57,24 +57,24 @@ ly_bar <- function(
   # will give NULL if it was not a variable
   colorname <- attr(args$params$color, "stringName")
 
-  if(missing(y)) {
+  if (missing(y)) {
     args$data$x <- args$data$y
     args$data$y <- rep(1, length(args$data$x))
     args$info$x_name <- attr(args$data$x, "stringName")
     args$info$y_name <- "count"
   }
 
-  if(is.numeric(args$data$x)) {
+  if (is.numeric(args$data$x)) {
     stop("numeric values for x in ly_bar are not yet supported", call. = FALSE)
   }
 
-  if(is.null(args$params$color) || length(args$params$color) == 1) {
+  if (is.null(args$params$color) || length(args$params$color) == 1) {
     res <- stats::aggregate(y ~ x, data = args$data, sum)
   } else {
     data_and_color <- args$data
     data_and_color$color <- args$params$color
     res <- stats::aggregate(y ~ x + color, data = data_and_color, sum)
-    if(missing(legend)) {
+    if (missing(legend)) {
       args$info$legend <- TRUE
     }
   }
@@ -82,14 +82,14 @@ ly_bar <- function(
   ## handle y values
   ##---------------------------------------------------------
 
-  if(position == "stack") {
+  if (position == "stack") {
     res <- do.call(rbind, by(res, res$x, function(a) {
       a$ytop <- cumsum(a$y)
       a$ybottom <- a$ytop - a$y
       a
     }))
 
-  } else if(position == "fill") {
+  } else if (position == "fill") {
     res <- do.call(rbind, by(res, res$x, function(a) {
       tmp <- a$y / sum(a$y)
       a$ytop <- cumsum(tmp)
@@ -97,7 +97,7 @@ ly_bar <- function(
       a
     }))
 
-  } else if(position == "dodge") {
+  } else if (position == "dodge") {
     res$ytop <- res$y
     res$ybottom <- 0
   }
@@ -105,7 +105,7 @@ ly_bar <- function(
   ## handle x values
   ##---------------------------------------------------------
 
-  if(position %in% c("stack", "fill")) {
+  if (position %in% c("stack", "fill")) {
     res$xleft <- paste0(res$x, ":", 1 - width)
     res$xright <- paste0(res$x, ":", width)
 
@@ -120,13 +120,13 @@ ly_bar <- function(
   }
 
   ind <- which(names(res) == "color")
-  if(length(ind) > 0) {
+  if (length(ind) > 0) {
     names(res)[ind] <- colorname
   }
 
-  bad_param_names = c("color", "origin","breaks","right","binwidth", "position")
-  remaining_args = args$params
-  remaining_args = remaining_args[! (names(remaining_args) %in% bad_param_names)]
+  bad_param_names <- c("color", "origin", "breaks", "right", "binwidth", "position")
+  remaining_args <- args$params
+  remaining_args <- remaining_args[! (names(remaining_args) %in% bad_param_names)]
 
   # get rid of x and y as they are no longer needed
   # and may conflict with xname, yname
@@ -137,10 +137,10 @@ ly_bar <- function(
 
   # b_eval doesn't know how to deal with quoted inputs with a single-row data frame
   # so instead tag the data so it knows the input is quoted
-  if(nrow(res) == 1)
+  if (nrow(res) == 1)
     class(res) <- c(class(res), "quoted")
 
-  color_value <- if(is.null(colorname)) args$params$color else colorname
+  color_value <- if (is.null(colorname)) args$params$color else colorname
   do.call(ly_rect, append(list(fig = fig,
     xleft = "xleft", ybottom = "ybottom", xright = "xright", ytop = "ytop",
     xlab = args$info$x_name, ylab = args$info$y_name,

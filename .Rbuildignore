@@ -9,3 +9,4 @@ CONTRIBUTING\.md
 .Rproj
 ^\.httr-oauth$
 cran-comments.md
+.lintr.*

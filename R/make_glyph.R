@@ -8,11 +8,11 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   xname = NULL, yname = NULL, data_sig = NA, ly_call,
   dots = NULL) {
 
-  if(is.null(args))
+  if (is.null(args))
     args <- list()
 
   ## give it a unique layer group name if not provided
-  if(is.null(lgroup))
+  if (is.null(lgroup))
     lgroup <- gen_layer_name(names(fig$x$spec$layers))
   lgroup <- as.character(lgroup)
 
@@ -20,10 +20,10 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
 
   ## give it a unique layer name if not provided
   prefix <- paste0(lgroup, "l")
-  if(grepl("^group", prefix))
+  if (grepl("^group", prefix))
     prefix <- gsub("roup", "", prefix)
 
-  if(length(lname) == 0)
+  if (length(lname) == 0)
     lname <- gen_layer_name(names(fig$x$spec$layers[[lgroup]]$glyph_ids), prefix = prefix)
   lname <- as.character(lname)
 
@@ -39,7 +39,7 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   fig$x$spec$layers[[lgroup]]$glyph_ids[lname] <- list(glr_id)
 
   ## keep track of data sources
-  if(is.na(data_sig))
+  if (is.na(data_sig))
     data_sig <- NULL
   fig$x$spec$data_sigs[[glr_id]] <- list(glr_id = glr_id, sig = data_sig)
 
@@ -54,31 +54,31 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   fig$x$spec$y_axis_type <- axis_type_range$y_axis_type
 
   ## get rid of factors
-  for(ii in seq_along(args)) {
-    if(is.factor(args[[ii]]))
+  for (ii in seq_along(args)) {
+    if (is.factor(args[[ii]]))
       args[[ii]] <- as.character(args[[ii]])
   }
 
   ## get names of data in args that were specified by user
   ## and get whether variable is mapped
-  for(nm in names(args)) {
-    if(!is.null(args[[nm]])) {
+  for (nm in names(args)) {
+    if (!is.null(args[[nm]])) {
       arg_nm <- ly_call[[nm]][1]
 
       ## deal with 'color' and 'alpha' higher-level parameters
-      if(is.null(arg_nm)) {
-        if(nm %in% c("fill_alpha", "line_alpha"))
+      if (is.null(arg_nm)) {
+        if (nm %in% c("fill_alpha", "line_alpha"))
           arg_nm <- ly_call[["alpha"]]
-        if(nm %in% c("fill_color", "line_color"))
+        if (nm %in% c("fill_color", "line_color"))
           arg_nm <- ly_call[["color"]]
       }
 
-      if(!is.null(arg_nm)) {
+      if (!is.null(arg_nm)) {
         attr(args[[nm]], "name") <- arg_nm
         ## see if named args are valid
         ## if they are not, they will be marked as mapped
-        if(!is.null(needs_map_fns[[nm]]))
-          if(needs_map_fns[[nm]](args[[nm]]) && !is.na(args[[nm]]))
+        if (!is.null(needs_map_fns[[nm]]))
+          if (needs_map_fns[[nm]](args[[nm]]) && !is.na(args[[nm]]))
             attr(args[[nm]], "mapped") <- TRUE
       }
     }
@@ -96,38 +96,42 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   ## in which case we need to track its domain
   ## and its range will be filled in from a theme
   ## when the figure is printed
-  if(is.null(args$glyph))
+  if (is.null(args$glyph))
     args$glyph <- type
   attr_maps <- get_attr_maps(args, glr_id)
 
   ## deal with manual legend
-  if(!is.null(legend)) {
-    if(!(is.logical(legend) && !legend)) {
+  if (!is.null(legend)) {
+    if (!(is.logical(legend) && !legend)) {
       legend <- as.character(legend)
-      if(!is.null(attr_maps)) {
-        if(legend == "FALSE") {
+      if (!is.null(attr_maps)) {
+        if (legend == "FALSE") {
           fig$x$spec$layers[[lgroup]]$do_legend <- FALSE
         } else {
-          message("Ignoring custom legend because an attribute is being mapped and therefore the legend is being taken care of automatically.")
+          message(
+            "Ignoring custom legend because an attribute is being mapped and ",
+            "therefore the legend is being taken care of automatically.")
         }
       } else {
-        if(!is.null(fig$x$spec$common_legend[[legend]])) {
-          fig$x$spec$common_legend[[legend]]$args <- c(fig$x$spec$common_legend[[legend]]$args, list(args))
+        if (!is.null(fig$x$spec$common_legend[[legend]])) {
+          fig$x$spec$common_legend[[legend]]$args <- c(
+            fig$x$spec$common_legend[[legend]]$args, list(args))
         } else {
           fig$x$spec$common_legend[[legend]] <- list(name = legend, args = list(args))
         }
       }
     } else {
-      if(is.logical(legend))
+      if (is.logical(legend))
         fig$x$spec$layers[[lgroup]]$do_legend <- legend
     }
   }
 
   ## merge in attribute mappings (if any)
-  fig$x$spec$layers[[lgroup]]$maps <- merge_attr_maps(fig$x$spec$layers[[lgroup]]$maps, attr_maps)
+  fig$x$spec$layers[[lgroup]]$maps <- merge_attr_maps(
+    fig$x$spec$layers[[lgroup]]$maps, attr_maps)
 
   ## save defer function (if any) and remove from data
-  if(!is.null(data$defer)) {
+  if (!is.null(data$defer)) {
     fig$x$spec$glyph_defer[[lgn]] <- list(fn = data$defer)
     data$defer <- NULL
   }
@@ -142,7 +146,7 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   max_data_length <- max(data_lengths)
   scalar_ind <- which(data_lengths == 1 & !data_is_list & max_data_length != 1)
 
-  for(ii in scalar_ind)
+  for (ii in scalar_ind)
     args[[data_names[ii]]] <- data[[ii]]
   data[scalar_ind] <- NULL
 
@@ -151,20 +155,20 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   arg_lengths <- sapply(args, length)
   arg_names <- names(args)
   long_ind <- which(arg_lengths > 1 & arg_names != "line_dash")
-  for(ii in long_ind) {
+  for (ii in long_ind) {
     data[[arg_names[ii]]] <- args[[ii]]
   }
   args[long_ind] <- NULL
 
   ## data elements of length 1 must be lists (since toJSON auto_unbox = TRUE)
   length_one <- which(sapply(data, length) == 1 & !sapply(data, is.list))
-  for(ii in length_one) {
+  for (ii in length_one) {
     data[[ii]] <- list(data[[ii]])
   }
 
   # ## NAs must be changed to NaN for bokeh to be happy
-  # for(ii in seq_along(data)) {
-  #   if(inherits(data[[ii]], c("Date", "POSIXct")))
+  # for (ii in seq_along(data)) {
+  #   if (inherits(data[[ii]], c("Date", "POSIXct")))
   #     data[[ii]] <- as.character(data[[ii]])
   #   data[[ii]][which(is.na(data[[ii]]))] <- NaN
   # }
@@ -173,18 +177,18 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
 
   ## spec needs to point to corresponding data
   data_names <- names(data)
-  for(nm in data_names)
+  for (nm in data_names)
     args[[nm]] <- nm
 
   ## data must have something in it or it won't work
-  if(length(data) == 0)
+  if (length(data) == 0)
     data <- list(dummy = list(1))
 
   ## fix spec for "text" glyph
-  if("text" %in% names(args))
+  if ("text" %in% names(args))
      args$text <- list(field = "text")
 
-  if(!is.null(fig$x$spec$glyph_defer[[lgn]])) {
+  if (!is.null(fig$x$spec$glyph_defer[[lgn]])) {
     fig$x$spec$glyph_defer[[lgn]]$spec <- args
     fig$x$spec$glyph_defer[[lgn]]$data <- data
     fig$x$spec$glyph_defer[[lgn]]$lgroup <- lgroup
@@ -197,10 +201,10 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   )
 
   ## add hover info
-  if(!is.null(hover)) {
+  if (!is.null(hover)) {
     # convert to character and make it a list so it shows up properly
     hover$data <- lapply(hover$data, function(x) {
-      if(length(x) == 1) {
+      if (length(x) == 1) {
         return(list(as.character(x)))
       } else {
         return(as.character(x))
@@ -211,43 +215,43 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
     data <- c(data, hover$data)
   }
 
-  # if(!is.null(url) && !is.null(tap_callback)) {
+  # if (!is.null(url) && !is.null(tap_callback)) {
   #   message("'url' and 'tap_callback' can't be specified simultaneously - honoring 'url'")
   #   tap_callback <- NULL
   # }
 
-  if(!is.null(url)) {
+  if (!is.null(url)) {
     fig <- fig %>% add_url(url$url, renderer_ref)
     data <- c(data, url$data)
   }
 
   args$glyph <- type
 
-  if(axis_type_range$x_axis_type == "datetime") {
+  if (axis_type_range$x_axis_type == "datetime") {
     axis_type_range$x_range <- to_epoch(axis_type_range$x_range)
-    if(!is.null(data$x))
+    if (!is.null(data$x))
       data$x <- handle_singleton(data$x, to_epoch)
-    if(!is.null(data$x0))
+    if (!is.null(data$x0))
       data$x0 <- handle_singleton(data$x0, to_epoch)
-    if(!is.null(data$x1))
+    if (!is.null(data$x1))
       data$x1 <- handle_singleton(data$x1, to_epoch)
-    if(!is.null(data$left))
+    if (!is.null(data$left))
       data$left <- handle_singleton(data$left, to_epoch)
-    if(!is.null(data$right))
+    if (!is.null(data$right))
       data$right <- handle_singleton(data$right, to_epoch)
   }
 
-  if(axis_type_range$y_axis_type == "datetime") {
+  if (axis_type_range$y_axis_type == "datetime") {
     axis_type_range$y_range <- to_epoch(axis_type_range$y_range)
-    if(!is.null(data$y))
+    if (!is.null(data$y))
       data$y <- handle_singleton(data$y, to_epoch)
-    if(!is.null(data$y0))
+    if (!is.null(data$y0))
       data$y0 <- handle_singleton(data$y0, to_epoch)
-    if(!is.null(data$y1))
+    if (!is.null(data$y1))
       data$y1 <- handle_singleton(data$y1, to_epoch)
-    if(!is.null(data$top))
+    if (!is.null(data$top))
       data$top <- handle_singleton(data$top, to_epoch)
-    if(!is.null(data$bottom))
+    if (!is.null(data$bottom))
       data$bottom <- handle_singleton(data$bottom, to_epoch)
   }
 
@@ -258,10 +262,10 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
   fig$x$spec$glyph_y_ranges[[lgn]] <- axis_type_range$y_range
 
   ## add x and y labels if missing
-  if(is.null(fig$x$spec$xlab) && length(xname) > 0)
+  if (is.null(fig$x$spec$xlab) && length(xname) > 0)
     fig$x$spec$xlab <- xname
 
-  if(is.null(fig$x$spec$ylab) && length(yname) > 0)
+  if (is.null(fig$x$spec$ylab) && length(yname) > 0)
     fig$x$spec$ylab <- yname
 
   fig

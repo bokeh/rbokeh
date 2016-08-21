@@ -22,40 +22,41 @@ grid_plot <- function(figs, width = NULL, height = NULL,
   same_axes = FALSE, simplify_axes = TRUE,
   y_margin = NULL, x_margin = NULL, link_data = FALSE) {
 
-  if(length(same_axes) == 1) {
+  if (length(same_axes) == 1) {
     same_x <- same_y <- same_axes
   } else {
     same_x <- same_axes[1]
     same_y <- same_axes[2]
   }
 
-  if(length(simplify_axes) == 1) {
+  if (length(simplify_axes) == 1) {
     simplify_x <- simplify_y <- simplify_axes
   } else {
     simplify_x <- simplify_axes[1]
     simplify_y <- simplify_axes[2]
   }
 
-  if(!is.list(figs))
+  if (!is.list(figs))
     stop("'figs' must be a list")
 
   is_fig_list <- sapply(figs, function(x)
     inherits(x$x$spec, "BokehFigure") || is.null(x))
 
-  if(any(is_fig_list)) {
+  if (any(is_fig_list)) {
     ## list of BokehFigure objects
 
-    if(!all(is_fig_list))
-      stop("'figs' argument to makeGrid must be a list of BokehFigure objects or a list of lists of BokehFigure objects", call. = FALSE)
+    if (!all(is_fig_list))
+      stop(paste("'figs' argument to makeGrid must be a list of BokehFigure objects",
+        "or a list of lists of BokehFigure objects"), call. = FALSE)
 
     nn <- length(figs)
-    if(missing(ncol))
+    if (missing(ncol))
       ncol <- ceiling(nn / nrow)
-    if(missing(nrow))
+    if (missing(nrow))
       nrow <- ceiling(nn / ncol)
 
-    if((nrow * ncol) < nn) {
-      if(byrow) {
+    if ((nrow * ncol) < nn) { # nolint
+      if (byrow) {
         ncol <- ceiling(nn / nrow)
       } else {
         nrow <- ceiling(nn / ncol)
@@ -69,8 +70,8 @@ grid_plot <- function(figs, width = NULL, height = NULL,
     ## arrange plot references for gridplot
     idx <- rep(NA, length(tmp))
     cur_fig <- 1
-    for(ii in seq_along(idx)) {
-      if(!is.null(figs[[ii]])) {
+    for (ii in seq_along(idx)) {
+      if (!is.null(figs[[ii]])) {
         idx[ii] <- cur_fig
         cur_fig <- cur_fig + 1
       }
@@ -80,10 +81,10 @@ grid_plot <- function(figs, width = NULL, height = NULL,
     idxm <- matrix(idx, nrow = nrow, ncol = ncol, byrow = byrow)
 
     plot_refs <- vector("list", nrow)
-    for(ii in seq_len(nrow(idxm))) {
+    for (ii in seq_len(nrow(idxm))) {
       plot_refs[[ii]] <- vector("list", ncol)
-      for(jj in seq_len(ncol(idxm)))
-        plot_refs[[ii]][[jj]] <- tmp[[idxm[ii,jj]]]
+      for (jj in seq_len(ncol(idxm)))
+        plot_refs[[ii]][[jj]] <- tmp[[idxm[ii, jj]]]
     }
   } else {
     ## list of lists of BokehFigure objects
@@ -91,8 +92,9 @@ grid_plot <- function(figs, width = NULL, height = NULL,
       all(sapply(x, function(y)
         inherits(y$x$spec, "BokehFigure") || is.null(y)))
     })
-    if(!all(ok))
-      stop("'figs' argument to makeGrid must be a list of BokehFigure objects or a list of lists of BokehFigure objects", call. = FALSE)
+    if (!all(ok))
+      stop(paste("'figs' argument to makeGrid must be a list of BokehFigure objects",
+        "or a list of lists of BokehFigure objects"), call. = FALSE)
 
     ## get plot refs
     plot_refs <- lapply(figs, function(x) {
@@ -104,9 +106,9 @@ grid_plot <- function(figs, width = NULL, height = NULL,
     ncol <- max(sapply(plot_refs, length))
     idxm <- matrix(nrow = nrow, ncol = ncol, data = NA)
     cur_fig <- 1
-    for(ii in seq_along(figs)) {
-      for(jj in seq_along(figs[[ii]])) {
-        if(!is.null(figs[[ii]][[jj]])) {
+    for (ii in seq_along(figs)) {
+      for (jj in seq_along(figs[[ii]])) {
+        if (!is.null(figs[[ii]][[jj]])) {
           idxm[ii, jj] <- cur_fig
           cur_fig <- cur_fig + 1
         }
@@ -117,68 +119,68 @@ grid_plot <- function(figs, width = NULL, height = NULL,
   figs[sapply(figs, is.null)] <- NULL
 
   ## give panels names if figs is named list
-  if(!is.null(names(figs))) {
+  if (!is.null(names(figs))) {
     fig_names <- names(figs)
-    for(ii in seq_along(figs)) {
+    for (ii in seq_along(figs)) {
       figs[[ii]] <- add_title(figs[[ii]], fig_names[ii])
     }
   } else {
-    for(ii in seq_along(figs)) {
+    for (ii in seq_along(figs)) {
       figs[[ii]]$x$spec$model$plot$attributes$title <- NULL
     }
   }
 
   ## deal with axes
   x_range <- y_range <- NULL
-  if(same_x) {
+  if (same_x) {
     x_range <- get_grid_ranges(figs, "x")
-    for(ii in seq_along(figs)) {
+    for (ii in seq_along(figs)) {
       figs[[ii]]$x$spec$xlim <- x_range$range
       figs[[ii]]$x$spec$has_x_range <- TRUE # prevents prepare_figure() from adding range
       figs[[ii]]$x$spec$model$plot$attributes$x_range <- x_range$mod$ref
     }
-    if(simplify_x) {
-      idxs <- as.vector(idxm[-nrow(idxm),])
+    if (simplify_x) {
+      idxs <- as.vector(idxm[-nrow(idxm), ])
       idxs <- idxs[!is.na(idxs)]
-      for(ii in idxs)
+      for (ii in idxs)
         figs[[ii]] <- figs[[ii]] %>% x_axis(visible = FALSE)
-      if(is.null(x_margin))
+      if (is.null(x_margin))
         x_margin <- 70
     }
   }
-  if(same_y) {
+  if (same_y) {
     y_range <- get_grid_ranges(figs, "y")
-    for(ii in seq_along(figs)) {
+    for (ii in seq_along(figs)) {
       figs[[ii]]$x$spec$ylim <- y_range$range
       figs[[ii]]$x$spec$has_y_range <- TRUE # prevents prepare_figure() from adding range
       figs[[ii]]$x$spec$model$plot$attributes$y_range <- y_range$mod$ref
     }
-    if(simplify_y) {
-      idxs <- as.vector(idxm[,-1])
+    if (simplify_y) {
+      idxs <- as.vector(idxm[, -1])
       idxs <- idxs[!is.na(idxs)]
-      for(ii in idxs)
+      for (ii in idxs)
         figs[[ii]] <- figs[[ii]] %>% y_axis(visible = FALSE)
-      if(is.null(y_margin))
+      if (is.null(y_margin))
         y_margin <- 45
     }
   }
 
-  if(!is.null(xlim)) {
+  if (!is.null(xlim)) {
     id <- gen_id(figs[[1]], c("x", "GridRange"))
     x_range <- list(range = xlim,
       mod = range_model(ifelse(is.numeric(xlim), "Range1d", "FactorRange"), id, xlim))
-    for(ii in seq_along(figs)) {
+    for (ii in seq_along(figs)) {
       figs[[ii]]$x$spec$xlim <- xlim
       figs[[ii]]$x$spec$has_x_range <- TRUE
       figs[[ii]]$x$spec$model$plot$attributes$x_range <- x_range$mod$ref
     }
   }
 
-  if(!is.null(ylim)) {
+  if (!is.null(ylim)) {
     id <- gen_id(figs[[1]], c("y", "GridRange"))
     y_range <- list(range = ylim,
       mod = range_model(ifelse(is.numeric(ylim), "Range1d", "FactorRange"), id, ylim))
-    for(ii in seq_along(figs)) {
+    for (ii in seq_along(figs)) {
       figs[[ii]]$x$spec$ylim <- ylim
       figs[[ii]]$x$spec$has_y_range <- TRUE
       figs[[ii]]$x$spec$model$plot$attributes$y_range <- y_range$mod$ref
@@ -187,7 +189,7 @@ grid_plot <- function(figs, width = NULL, height = NULL,
 
   # hide individual toolbars in each figure
   # and remove sizing_mode from each
-  for(ii in seq_along(figs)) {
+  for (ii in seq_along(figs)) {
     figs[[ii]]$x$spec$model$plot$attributes["toolbar_location"] <- list(NULL)
     figs[[ii]]$x$spec$model$plot$attributes$sizing_mode <- NULL
   }
@@ -204,11 +206,11 @@ grid_plot <- function(figs, width = NULL, height = NULL,
 
   # set up row and column models pointing to each figure
   rrefs <- list()
-  for(row in seq_len(nrow(idxm))) {
+  for (row in seq_len(nrow(idxm))) {
     refs <- list()
-    for(col in seq_along(idxm[row, ])) {
+    for (col in seq_along(idxm[row, ])) {
       idx <- idxm[row, col]
-      if(is.na(idx)) {
+      if (is.na(idx)) {
         spid <- gen_id(figs[[idx]], paste0("spacer", row, "_", col))
         spmod <- base_model_object("Spacer", spid)
         layoutspec[[spid]] <- spmod$model
@@ -238,20 +240,22 @@ grid_plot <- function(figs, width = NULL, height = NULL,
   tbbmod$model$attributes$sizing_mode <- "scale_width"
   tbbmod$model$attributes$toolbar_location <- "above"
   # gather all tools from all figures
-  alltools <- unname(unlist(lapply(figs, function(a) {
-    unname(a$x$spec$model$toolbar$attributes$tools)
-  }), recursive = FALSE))
+  alltools <- unname(unlist(lapply(figs,
+    function(a) {
+      unname(a$x$spec$model$toolbar$attributes$tools)
+    }
+  ), recursive = FALSE))
   tbbmod$model$attributes$tools <- alltools
   tbbmod$model$attributes$sizing_mode <- "scale_width"
   layoutspec$toolbarbox <- tbbmod$model
 
   # set up root column
-  rcid <- gen_id(list(x = list(spec = list(time = Sys.time()))), "rootColumn")
-  rootColumn <- base_model_object("Column", rcid)
-  rootColumn$model$attributes$children <- list(tbbmod$ref, mcmod$ref)
-  rootColumn$model$attributes$id <- NULL
-  rootColumn$model$attributes$tags <- NULL
-  layoutspec$root <- rootColumn$model
+  rcid <- gen_id(list(x = list(spec = list(time = Sys.time()))), "root_column")
+  root_column <- base_model_object("Column", rcid)
+  root_column$model$attributes$children <- list(tbbmod$ref, mcmod$ref)
+  root_column$model$attributes$id <- NULL
+  root_column$model$attributes$tags <- NULL
+  layoutspec$root <- root_column$model
 
   spec <- structure(list(
     layout = layoutspec,
@@ -300,18 +304,18 @@ grid_plot <- function(figs, width = NULL, height = NULL,
 
   wmat <- matrix(0, nrow = obj$x$spec$nrow, ncol = obj$x$spec$ncol)
   hmat <- matrix(0, nrow = obj$x$spec$nrow, ncol = obj$x$spec$ncol)
-  for(ii in seq_along(obj$x$spec$plot_refs)) {
-    for(jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
-      if(is.null(obj$x$spec$plot_refs[[ii]][[jj]])) {
+  for (ii in seq_along(obj$x$spec$plot_refs)) {
+    for (jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
+      if (is.null(obj$x$spec$plot_refs[[ii]][[jj]])) {
         wmat[ii, jj] <- NA
         hmat[ii, jj] <- NA
       } else {
         ww <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$width
-        if(is.null(ww))
+        if (is.null(ww))
           ww <- 800 / ncol(wmat)
         wmat[ii, jj] <- ww
         hh <- dims[[obj$x$spec$plot_refs[[ii]][[jj]]$id]]$width
-        if(is.null(hh))
+        if (is.null(hh))
           hh <- 800 / nrow(hmat)
         hmat[ii, jj] <- hh
       }
@@ -322,14 +326,14 @@ grid_plot <- function(figs, width = NULL, height = NULL,
   cmax <- apply(wmat, 2, max, na.rm = TRUE)
   rmax <- apply(hmat, 1, max, na.rm = TRUE)
   wna <- which(is.na(wmat), arr.ind = TRUE)
-  if(length(wna) > 0) {
-    for(ii in seq_len(nrow(wna))) {
+  if (length(wna) > 0) {
+    for (ii in seq_len(nrow(wna))) {
       wmat[wna[ii, 1], wna[ii, 2]] <- cmax[wna[ii, 2]]
     }
   }
   hna <- which(is.na(hmat), arr.ind = TRUE)
-  if(length(hna) > 0) {
-    for(ii in seq_len(nrow(hna))) {
+  if (length(hna) > 0) {
+    for (ii in seq_len(nrow(hna))) {
       hmat[hna[ii, 1], hna[ii, 2]] <- rmax[hna[ii, 1]]
     }
   }
@@ -340,16 +344,16 @@ grid_plot <- function(figs, width = NULL, height = NULL,
   obj_width <- sum(apply(wmat, 2, function(x) max(x, na.rm = TRUE))) + 46
   obj_height <- sum(apply(hmat, 1, function(x) max(x, na.rm = TRUE)))
 
-  if(is.null(obj$width))
+  if (is.null(obj$width))
     obj$width <- obj_width
 
-  if(is.null(obj$height))
+  if (is.null(obj$height))
     obj$height <- obj_height
 
   names(obj$x$spec$figs) <- sapply(obj$x$spec$figs, function(x) x$x$spec$model$plot$id)
 
   # # set attributes to help set the padding for each individual panel
-  # for(ii in seq_along(obj$x$spec$figs)) {
+  # for (ii in seq_along(obj$x$spec$figs)) {
   #   obj$x$spec$figs[[ii]]$x$spec$model$plot$attributes["toolbar_location"] <- list(NULL)
   #   obj$x$spec$figs[[ii]]$x$parenttype <- "GridPlot"
   # }
@@ -377,23 +381,23 @@ prepare_gridplot <- function(obj) {
 
   data_mods <- list()
   ## deal with linked data
-  if(obj$x$spec$link_data) {
+  if (obj$x$spec$link_data) {
     ## find data signatures that match
     sigs <- do.call(c, lapply(figs, function(x)
       unique(do.call(c, lapply(x$x$spec$data_sigs, function(y) y$sig)))))
     sigst <- table(sigs)
     idx <- which(sigst > 1)
-    if(length(idx) > 0) {
+    if (length(idx) > 0) {
       ## take each data source that has at least one match
       ## find figures with this data source
       ## merge the data sources
       ## and then point the glyphrenderers of each to this new data source
-      for(sig in names(idx)) {
+      for (sig in names(idx)) {
         has_data <- list()
-        for(ii in seq_along(figs)) {
-          for(jj in seq_along(figs[[ii]]$x$spec$data_sigs)) {
-            if(!is.null(figs[[ii]]$x$spec$data_sigs[[jj]]$sig))
-              if(figs[[ii]]$x$spec$data_sigs[[jj]]$sig == sig)
+        for (ii in seq_along(figs)) {
+          for (jj in seq_along(figs[[ii]]$x$spec$data_sigs)) {
+            if (!is.null(figs[[ii]]$x$spec$data_sigs[[jj]]$sig))
+              if (figs[[ii]]$x$spec$data_sigs[[jj]]$sig == sig)
                 has_data[[length(has_data) + 1]] <- list(index = c(ii, jj),
                   glr_id = figs[[ii]]$x$spec$data_sigs[[jj]]$glr_id)
           }
@@ -408,29 +412,31 @@ prepare_gridplot <- function(obj) {
         new_data <- d1
         figs[[hd1[1]]]$x$spec$model[[ds1]] <- NULL
         ## do the naive thing for now and don't check for identical columns
-        for(ii in seq_along(has_data)[-1]) {
+        for (ii in seq_along(has_data)[-1]) {
           hd <- has_data[[ii]]$index
           glr <- has_data[[ii]]$glr_id
           ds <- figs[[hd[1]]]$x$spec$model[[glr]]$attributes$data_source$id
           gl <- figs[[hd[1]]]$x$spec$model[[glr]]$attributes$glyph$id
           nsgl <- figs[[hd[1]]]$x$spec$model[[glr]]$attributes$nonselection_glyph$id
           d <- figs[[hd[1]]]$x$spec$model[[ds]]$attributes$data
-          merge_names <- intersect(names(d), c("x", "y", "fill_color", "fill_alpha", "line_color", "line_width", "line_alpha"))
+          merge_names <- intersect(names(d),
+            c("x", "y", "fill_color", "fill_alpha", "line_color",
+              "line_width", "line_alpha"))
           new_names <- paste0(merge_names, ii)
           d2 <- d[merge_names]
           names(d2) <- new_names
           new_data <- c(new_data, d2, d[setdiff(names(d), c(new_names, names(new_data)))])
           ## update references
           upd <- figs[[hd[1]]]$x$spec$model[[gl]]$attributes[merge_names]
-          for(nm in names(upd)) {
-            if(!is.null(upd[[nm]]$field))
+          for (nm in names(upd)) {
+            if (!is.null(upd[[nm]]$field))
               upd[[nm]]$field <- paste0(upd[[nm]]$field, ii)
           }
           figs[[hd[1]]]$x$spec$model[[gl]]$attributes[merge_names] <- upd
 
           upd <- figs[[hd[1]]]$x$spec$model[[nsgl]]$attributes[merge_names]
-          for(nm in names(upd)) {
-            if(!is.null(upd[[nm]]$field))
+          for (nm in names(upd)) {
+            if (!is.null(upd[[nm]]$field))
               upd[[nm]]$field <- paste0(upd[[nm]]$field, ii)
           }
           figs[[hd[1]]]$x$spec$model[[nsgl]]$attributes[merge_names] <- upd
@@ -442,35 +448,25 @@ prepare_gridplot <- function(obj) {
         data_mods[[sig]] <- data_model(new_data, d_id)
       }
     } else {
-      message("'link_data' was set to TRUE, but none of the figures in the grid have the same data source.")
+      message(paste("'link_data' was set to TRUE, but none of the figures",
+        "in the grid have the same data source."))
     }
   }
 
   mod <- unlist(lapply(figs, function(fig) remove_model_names(fig$x$spec$model)), recursive = FALSE)
 
-  # id <- gen_id(list(x = list(spec = list(time = Sys.time()))), "GridPlot")
-  # id <- obj$x$modelid
-
-  # tid <- gen_id(list(x = list(spec = list(time = Sys.time()))), c("GridPlot", "tool"))
-  # tool_evt <- tool_events(tid)
-
-  # mod$grid_plot <- grid_plot_model(id, obj$x$spec$plot_refs, tool_evt$ref, obj$width, obj$height)$model
-  # mod$tool_evt <- tool_evt$model
-
   xxrange <- obj$x$spec$x_range
-  if(!is.null(xxrange)) {
+  if (!is.null(xxrange)) {
     xxrange <- list(xxrange)
   }
   yyrange <- obj$x$spec$y_range
-  if(!is.null(yyrange)) {
+  if (!is.null(yyrange)) {
     yyrange <- list(yyrange)
   }
 
   dmods <- unname(lapply(data_mods, function(x) x$model))
-  if(length(dmods) == 0)
+  if (length(dmods) == 0)
     dmods <- NULL
-
-  a <- unname(unlist(data_mods, recursive = FALSE))
 
   mod <- c(mod, remove_model_names(obj$x$spec$layout), xxrange, yyrange, dmods)
 
@@ -501,9 +497,9 @@ update_grid_sizes <- function(obj) {
   wmat <- obj$x$spec$wmat
   x_margin <- obj$x$spec$x_margin
   y_margin <- obj$x$spec$y_margin
-  if(is.null(x_margin))
+  if (is.null(x_margin))
     x_margin <- 0
-  if(is.null(y_margin))
+  if (is.null(y_margin))
     y_margin <- 0
 
   widths <- apply(wmat, 2, function(x) max(x, na.rm = TRUE))
@@ -516,22 +512,22 @@ update_grid_sizes <- function(obj) {
 
   new_wmat <- wmat * new_width_factor
   new_hmat <- hmat * new_height_factor
-  new_wmat[,1] <- new_wmat[,1] + y_margin
-  new_hmat[nrow(new_hmat),] <- new_hmat[nrow(new_hmat),] + x_margin
+  new_wmat[, 1] <- new_wmat[, 1] + y_margin
+  new_hmat[nrow(new_hmat), ] <- new_hmat[nrow(new_hmat), ] + x_margin
 
   obj$width <- sum(apply(new_wmat, 2, function(x) max(x, na.rm = TRUE))) + 46
   obj$height <- sum(apply(new_hmat, 1, function(x) max(x, na.rm = TRUE)))
 
-  for(ii in seq_along(obj$x$spec$plot_refs)) {
-    for(jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
-      if(!is.null(obj$x$spec$plot_refs[[ii]][[jj]])) {
+  for (ii in seq_along(obj$x$spec$plot_refs)) {
+    for (jj in seq_along(obj$x$spec$plot_refs[[ii]])) {
+      if (!is.null(obj$x$spec$plot_refs[[ii]][[jj]])) {
         cur_id <- obj$x$spec$plot_refs[[ii]][[jj]]$id
         obj$x$spec$figs[[cur_id]]$width <- new_wmat[ii, jj]
         obj$x$spec$figs[[cur_id]]$height <- new_hmat[ii, jj]
-        if(jj == 1) {
+        if (jj == 1) {
           obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_left <- y_margin
         }
-        if(ii == length(obj$x$spec$plot_refs)) {
+        if (ii == length(obj$x$spec$plot_refs)) {
           obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_bottom <- x_margin
         }
       } else {

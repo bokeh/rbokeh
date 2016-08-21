@@ -15,13 +15,14 @@
 # -> map_args (vector of glyph attribute names that need to be mapped)
 
 get_attr_maps <- function(args, glr_id) {
-  nms <- names(args)
+  # nms <- names(args)
+
   ## get an index of arguments that need a map
   ## name attribute is used in the legend so we know what variable created the map
   mappable <- sapply(args, function(x) !is.null(attr(x, "mapped")))
 
-  if(length(mappable) > 0) {
-    if(length(which(mappable)) == 0)
+  if (length(mappable) > 0) {
+    if (length(which(mappable)) == 0)
       return(NULL)
 
     # build an attrMap object with an entry for each unique name
@@ -32,7 +33,7 @@ get_attr_maps <- function(args, glr_id) {
     layer_attr_map <- structure(vector("list",
       length = length(u_arg_names)), names = u_arg_names)
 
-    for(nm in u_arg_names) {
+    for (nm in u_arg_names) {
       ## args we need to map
       margs <- args[mappable][arg_names == nm]
       ## args we need to maintain for legend glyphs
@@ -48,12 +49,14 @@ get_attr_maps <- function(args, glr_id) {
       layer_attr_map[[nm]]$domain <- dmn
 
       glyph_name <- as.character(args$glyph[1])
-      if(!glyph_name %in% names(glyph_props))
+      if (!glyph_name %in% names(glyph_props))
         glyph_name <- "mappedGlyph"
 
-      layer_attr_map[[nm]]$legend_glyphs[[glyph_name]] <- list(name = glyph_name, args = gargs, map_args = names(margs))
+      layer_attr_map[[nm]]$legend_glyphs[[glyph_name]] <- list(
+        name = glyph_name, args = gargs, map_args = names(margs))
 
-      layer_attr_map[[nm]]$map_entries[[glr_id]] <- list(id = glr_id, map_args = names(margs), args = gargs)
+      layer_attr_map[[nm]]$map_entries[[glr_id]] <- list(
+        id = glr_id, map_args = names(margs), args = gargs)
     }
     return(layer_attr_map)
   }
@@ -66,15 +69,16 @@ merge_attr_maps <- function(map1, map2) {
   m2n <- names(map2)
   same_var <- intersect(m1n, m2n)
   new_var <- setdiff(m2n, same_var)
-  if(length(new_var) > 0) {
+  if (length(new_var) > 0) {
     map1[new_var] <- map2[new_var]
   }
-  if(length(same_var) > 0) {
-    for(nm in same_var) {
+  if (length(same_var) > 0) {
+    for (nm in same_var) {
       ## merge the domains
       map1[[nm]]$domain <- merge_attr_domains(map1[[nm]]$domain, map2[[nm]]$domain)
       ## merge map entries
-      map1[[nm]]$legend_glyphs <- merge_attr_legend_glyphs(map1[[nm]]$legend_glyphs, map2[[nm]]$legend_glyphs)
+      map1[[nm]]$legend_glyphs <- merge_attr_legend_glyphs(map1[[nm]]$legend_glyphs,
+        map2[[nm]]$legend_glyphs)
       id <- map2[[nm]]$map_entries[[1]]$id
       map1[[nm]]$map_entries[[id]] <- map2[[nm]]$map_entries[[1]]
     }
@@ -87,27 +91,29 @@ merge_attr_legend_glyphs <- function(gly1, gly2) {
   g2n <- names(gly2)
   same_var <- intersect(g1n, g2n)
   new_var <- setdiff(g2n, same_var)
-  if(length(new_var) > 0) {
+  if (length(new_var) > 0) {
     gly1[new_var] <- gly2[new_var]
   }
-  # if(length(same_var) > 0) {
-  #   if(any(same_var == "mappedGlyph")) {
-  #     if(!identical(gly1[[same_var]], gly2[[same_var]]))
-  #       message("A layer added to an existing layer group has the same glyph mapped to a same attribute... it will be ignored.")
+  # if (length(same_var) > 0) {
+  #   if (any(same_var == "mappedGlyph")) {
+  #     if (!identical(gly1[[same_var]], gly2[[same_var]]))
+  #       message(paste("A layer added to an existing layer group has the same glyph",
+  #         "mapped to a same attribute... it will be ignored."))
   #   } else {
-  #     message("A layer added to an existing layer group has the same glyph mapped to a same attribute... it will be ignored.")
+  #     message(paste0("A layer added to an existing layer group has the same glyph",
+  #       "mapped to a same attribute... it will be ignored."))
   #   }
   # }
   gly1
 }
 
 merge_attr_domains <- function(d1, d2) {
-  if(is.null(d1))
+  if (is.null(d1))
     return(d2)
-  if(is.null(d2))
+  if (is.null(d2))
     return(d1)
 
-  if(is.character(d1)) {
+  if (is.character(d1)) {
     return(unique(c(d1, d2)))
   } else {
     return(range(c(d1, d2), na.rm = TRUE))
@@ -115,9 +121,9 @@ merge_attr_domains <- function(d1, d2) {
 }
 
 get_domain <- function(x) {
-  if(is.factor(x)) {
+  if (is.factor(x)) {
     return(levels(x))
-  } else if(is.character(x)) {
+  } else if (is.character(x)) {
     return(sort(unique(x)))
   } else {
     return(range(x, na.rm = TRUE))
@@ -127,7 +133,7 @@ get_domain <- function(x) {
 get_theme_value <- function(domain, values, type, theme) {
   is_discrete <- ifelse(is.numeric(domain), FALSE, TRUE)
   mode <- ifelse(is_discrete, "discrete", "continuous")
-  if(is_discrete) {
+  if (is_discrete) {
     idx <- match(values, domain)
     vals <- theme[[mode]][[type]](length(domain))
   } else {
@@ -135,7 +141,7 @@ get_theme_value <- function(domain, values, type, theme) {
     vals <- theme[[mode]][[type]](length(levels(ct)))
     idx <- as.integer(ct)
   }
-  if(length(idx) == 1) {
+  if (length(idx) == 1) {
     return(vals[[idx]])
   } else {
     return(vals[idx])
@@ -178,9 +184,9 @@ needs_map_fns <- list(
 )
 
 override_legend_glyph_args <- function(args) {
-  if(!is.null(args$end_angle))
-    args$end_angle <- 2*pi
-  if(!is.null(args$start_angle))
+  if (!is.null(args$end_angle))
+    args$end_angle <- 2 * pi
+  if (!is.null(args$start_angle))
     args$start_angle <- 0
   args
 }

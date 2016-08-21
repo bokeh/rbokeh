@@ -4,7 +4,6 @@
 #' @importFrom utils head tail
 NULL
 
-
 #' rbokeh: R interface for Bokeh
 #'
 #' R interface for creating plots in Bokeh.  Bokeh by Continuum Analytics, \url{http://bokeh.pydata.org/en/latest/}
@@ -36,7 +35,6 @@ NULL
 #' @keywords data
 #' @example man-roxygen/ex-flightfreq.R
 NULL
-
 
 #' Hexagon binned counts of NYC taxi pickup locations
 #'

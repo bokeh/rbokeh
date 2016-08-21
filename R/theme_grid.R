@@ -44,7 +44,7 @@ theme_grid <- function(fig,
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  if(is.null(pars)) {
+  if (is.null(pars)) {
     specified <- names(as.list(match.call())[-1])
     pars <- as.list(environment())[specified]
   }
@@ -56,20 +56,18 @@ theme_grid <- function(fig,
   ## if an axis hasn't been created yet (usually done in prepare_figure)
   ## then create it here and apply attributes
   ## could alternatively save attributes and apply in prepare_figure
-  if("x" %in% which && fig$x$spec$xaxes != FALSE) {
-    if(is.null(fig$x$spec$model[["x_grid"]]))
+  if ("x" %in% which && fig$x$spec$xaxes != FALSE) {
+    if (is.null(fig$x$spec$model[["x_grid"]]))
       fig <- fig %>% x_axis()
-    for(nm in parnames)
+    for (nm in parnames)
       fig$x$spec$model[["x_grid"]]$attributes[[nm]] <- pars[[nm]]
   }
-  if("y" %in% which && fig$x$spec$yaxes != FALSE) {
-    if(is.null(fig$x$spec$model[["y_grid"]]))
+  if ("y" %in% which && fig$x$spec$yaxes != FALSE) {
+    if (is.null(fig$x$spec$model[["y_grid"]]))
       fig <- fig %>% y_axis()
-    for(nm in parnames)
+    for (nm in parnames)
       fig$x$spec$model[["y_grid"]]$attributes[[nm]] <- pars[[nm]]
   }
 
   fig
 }
-
-

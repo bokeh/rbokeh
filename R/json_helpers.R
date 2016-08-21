@@ -70,4 +70,3 @@ underscore2camel <- function(x) {
 #   library(httr)
 #   a <- POST("http://codepen.io/pen/define/", body = list(data = data), encode = "json")
 # }
-

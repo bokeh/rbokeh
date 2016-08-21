@@ -4,7 +4,7 @@
 #' @param theme theme
 #' @export
 set_theme <- function(fig, theme) {
-  if(is.function(theme))
+  if (is.function(theme))
     theme <- theme()
   fig$x$spec$theme <- theme
   fig

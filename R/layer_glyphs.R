@@ -21,7 +21,7 @@
 ly_annular_wedge <- function(
   fig, x, y = NULL, data = figure_data(fig),
   inner_radius = 0.1, outer_radius = 0.3,
-  start_angle = 0, end_angle = 2*pi, direction = "anticlock",
+  start_angle = 0, end_angle = 2 * pi, direction = "anticlock",
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL,
   lname = NULL, lgroup = NULL, visible = TRUE, ...
@@ -51,15 +51,17 @@ ly_annular_wedge <- function(
   )
   args$params$glyph <- "annular_wedge"
 
-  if(missing(alpha))
+  if (missing(alpha))
     args$params$alpha <- NULL
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
+    fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args$params, "annular_wedge", names(formals(ly_annular_wedge)))
 
-  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y, assert_x = "numeric", assert_y = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y,
+    assert_x = "numeric", assert_y = "numeric")
 
   mc <- lapply(match.call(), deparse)
 
@@ -121,12 +123,14 @@ ly_annulus <- function(
     args$params$alpha <- NULL
   }
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
+    fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args$params, "annulus", formals = names(formals(ly_annulus)))
 
-  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y, assert_x = "numeric", assert_y = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y,
+    assert_x = "numeric", assert_y = "numeric")
 
   mc <- lapply(match.call(), deparse)
 
@@ -158,7 +162,7 @@ ly_arc <- function(
   fig, x, y = NULL, data = figure_data(fig),
   color = NULL, alpha = 1, width = 2, type = 1,
   radius = 0.2,
-  start_angle = 0, end_angle = 2*pi, direction = "anticlock",
+  start_angle = 0, end_angle = 2 * pi, direction = "anticlock",
   legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
   ...
 ) {
@@ -192,7 +196,8 @@ ly_arc <- function(
   ## see if any options won't be used and give a message
   check_opts(args$params, "arc", formals = names(formals(ly_arc)))
 
-  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y, assert_x = "numeric", assert_y = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y,
+    assert_x = "numeric", assert_y = "numeric")
 
   mc <- lapply(match.call(), deparse)
 
@@ -225,7 +230,7 @@ ly_arc <- function(
 #' @export
 ly_wedge <- function(
   fig, x, y = NULL, data = figure_data(fig),
-  radius = 0.3, start_angle = 0, end_angle = 2*pi, direction = "anticlock",
+  radius = 0.3, start_angle = 0, end_angle = 2 * pi, direction = "anticlock",
   color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL,
   lname = NULL, lgroup = NULL, visible = TRUE,
@@ -259,14 +264,16 @@ ly_wedge <- function(
     args$params$alpha <- NULL
   }
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
+    fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args$params, "wedge", formals = names(formals(ly_wedge)))
 
   check_arc_direction(direction)
 
-  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y, assert_x = "numeric", assert_y = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y,
+    assert_x = "numeric", assert_y = "numeric")
 
   mc <- lapply(match.call(), deparse)
 

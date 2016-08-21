@@ -65,7 +65,7 @@ ly_text <- function(
   arg_params$text_baseline <- baseline
   arg_params$visible <- visible
 
-  if(is.null(args$params$text)) {
+  if (is.null(args$params$text)) {
     args$params$text <- seq_along(args$data$x)
   }
 
