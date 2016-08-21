@@ -1,6 +1,7 @@
 Version 0.4
 ----------------------------------------------------------------------
 
+- fix issue with single-row input to `ly_bar()` (0.4.3)
 - fix bug in rbokeh.js resize (0.4.2)
 - rename save_figure to widget2png (0.4.2)
 - rename widget2gist input name (0.4.2)

@@ -77,7 +77,7 @@ figure <- function(
   toolbar_location = "above",
   h_symmetry = TRUE,
   v_symmetry = FALSE,
-  logo = "normal",
+  logo = NULL,
   lod_factor = 10,
   lod_interval = 300,
   lod_threshold = NULL,
@@ -92,16 +92,16 @@ figure <- function(
   dots <- list(...)
 
   ## figure of another type (like GMapPlot)
-  if("type" %in% names(dots)) {
+  if ("type" %in% names(dots)) {
     type <- dots$type
   } else {
     type <- "Plot"
   }
 
-  if(is.null(xlab) && !missing(xlab))
+  if (is.null(xlab) && !missing(xlab))
     xlab <- ""
 
-  if(is.null(ylab) && !missing(ylab))
+  if (is.null(ylab) && !missing(ylab))
     ylab <- ""
 
   tt <- Sys.time()
@@ -114,7 +114,7 @@ figure <- function(
   )
   ref$subtype <- model$plot$subtype
 
-  if(is.function(theme))
+  if (is.function(theme))
     theme <- theme()
 
   spec <- structure(list(
@@ -150,36 +150,39 @@ figure <- function(
   extra_pars <- handle_extra_pars(attr_pars, figure_par_validator_map)
   epn <- names(extra_pars)
 
-  if(!is.null(extra_pars[["min_border"]])) {
-    if(is.null(extra_pars$min_border_left))
+  if (!is.null(extra_pars[["min_border"]])) {
+    if (is.null(extra_pars$min_border_left))
       extra_pars$min_border_left <- extra_pars$min_border
-    if(is.null(extra_pars$min_border_right))
+    if (is.null(extra_pars$min_border_right))
       extra_pars$min_border_right <- extra_pars$min_border
-    if(is.null(extra_pars$min_border_top))
+    if (is.null(extra_pars$min_border_top))
       extra_pars$min_border_top <- extra_pars$min_border
-    if(is.null(extra_pars$min_border_bottom))
+    if (is.null(extra_pars$min_border_bottom))
       extra_pars$min_border_bottom <- extra_pars$min_border
     extra_pars$min_border <- NULL
   }
-  if(is.null(extra_pars$min_border_left))
+  if (is.null(extra_pars$min_border_left))
     extra_pars$min_border_left <- 4
-  if(is.null(extra_pars$min_border_right))
+  if (is.null(extra_pars$min_border_right))
     extra_pars$min_border_right <- 4
-  if(is.null(extra_pars$min_border_top))
+  if (is.null(extra_pars$min_border_top))
     extra_pars$min_border_top <- 4
-  if(is.null(extra_pars$min_border_bottom))
+  if (is.null(extra_pars$min_border_bottom))
     extra_pars$min_border_bottom <- 4
 
-  if(!"lod_threshold" %in% epn)
+  if (!"lod_threshold" %in% epn)
     extra_pars["lod_threshold"] <- list(NULL)
 
-  if(is.null(tools))
+  if (is.null(tools))
     extra_pars["toolbar_location"] <- list(NULL)
+
+  spec["logo"] <- list(logo)
+  extra_pars$logo <- NULL
 
   spec$model$plot$attributes <- c(spec$model$plot$attributes, extra_pars)
 
   fig <- htmlwidgets::createWidget(
-    name = 'rbokeh',
+    name = "rbokeh",
     x = list(
       spec = spec,
       elementid = digest(Sys.time()),
@@ -194,21 +197,26 @@ figure <- function(
           references = NULL
       )))
     ),
-    sizingPolicy = htmlwidgets::sizingPolicy(defaultWidth = 500, defaultHeight = 540),
+    sizingPolicy = htmlwidgets::sizingPolicy(defaultWidth = 500, defaultHeight = 500),
     preRenderHook = rbokeh_prerender,
     width = spec$width,
     height = spec$height,
-    package = 'rbokeh'
+    package = "rbokeh"
   )
   names(fig$x$docs_json) <- fig$x$docid
 
   ## check and add tools
-  tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize", "crosshair", "box_select", "lasso_select", "reset", "save", "help")]
+  tool_list <- tools[tools %in% c("pan", "wheel_zoom", "box_zoom", "resize",
+    "crosshair", "box_select", "lasso_select", "reset", "save", "help")]
   not_used <- setdiff(tool_list, tools)
-  if(length(not_used) > 0)
+  if (length(not_used) > 0)
     message("Note: tools not used: ", paste(not_used, collapse = ", "))
-  for(tl in tool_list)
+  for (tl in tool_list)
     fig <- eval(parse(text = paste("tool_", tl, "(fig)", sep = "")))
+
+  if (is.character(title)) {
+    fig <- fig %>% add_title(title)
+  }
 
   fig
 }
@@ -229,7 +237,7 @@ figure_data <- function(fig) {
 
 fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plot") {
 
-  if(type == "GMapPlot") {
+  if (type == "GMapPlot") {
     subtype <- NULL
   } else {
     subtype <- "Figure"
@@ -239,10 +247,10 @@ fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plo
     type       = type,
     id         =  id,
     attributes = list(
-      title = title,
       id = id,
       plot_width = width,
       plot_height = height,
+      sizing_mode = "scale_both",
       x_range = list(),
       y_range = list(),
       left = list(),
@@ -250,12 +258,9 @@ fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plo
       right = list(),
       above = list(),
       renderers = list(),
-      tools = list(),
-      tool_events = list(),
       extra_y_ranges = structure(list(), .Names = character(0)),
       extra_x_ranges = structure(list(), .Names = character(0)),
-      tags = list(),
-      doc = NULL
+      tags = list()
     )
   ))
   model$plot$subtype <- subtype
@@ -295,15 +300,3 @@ figure_par_validator_map <- list(
   "lod_timeout" = "int",
   "webgl" = "logical"
 )
-
-
-# library(rvest)
-
-# plots <- read_html("http://bokeh.pydata.org/en/latest/docs/reference/models/plots.html")
-
-# attrs <- plots %>%
-#   html_nodes("dl.attribute")
-
-# attrs %>%
-#   html_nodes("code.descname") %>%
-#   html_text()

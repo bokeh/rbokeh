@@ -16,7 +16,7 @@ sub_names(fig, data, arg_obj, process_data_and_names = TRUE)
 \item{process_data_and_names}{boolean to determine if the data and x_name and y_name should be post processed}
 }
 \value{
-list of three groups: data, info, and params.
+list of three groups: data, info, and params
 }
 \description{
 Retrieve and properly parse all data

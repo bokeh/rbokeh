@@ -22,7 +22,7 @@ ly_lines <- function(
   validate_fig(fig, "ly_lines")
 
   ## deal with possible named inputs from a data source
-  bv <- b_eval(data)
+  # bv <- b_eval(data)
   args <- sub_names(fig, data,
     grab(
       x,
@@ -41,7 +41,7 @@ ly_lines <- function(
   )
   args$params$glyph <- "line"
 
-  if(missing(color) && !is.null(args$params$line_color))
+  if (missing(color) && !is.null(args$params$line_color))
     args$params$color <- NULL
 
   # args$params$alpha <- alpha
@@ -74,7 +74,7 @@ ly_lines <- function(
 
   axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y)
   mc <- attr(fig, "ly_call")
-  if(is.null(mc)) {
+  if (is.null(mc)) {
     mc <- lapply(match.call(), deparse)
   }
 
@@ -82,11 +82,11 @@ ly_lines <- function(
     arg_obj <- subset_arg_obj(args, split_list[[ii]])
 
     ## b_eval will repeat these, but the line glyph doesn't like this
-    if(length(unique(arg_obj$params$color)) == 1)
+    if (length(unique(arg_obj$params$color)) == 1)
       arg_obj$params$color <- subset_with_attributes(arg_obj$params$color, 1)
-    if(length(unique(args$params$type)) == 1)
+    if (length(unique(args$params$type)) == 1)
       arg_obj$params$type <- subset_with_attributes(arg_obj$params$type, 1)
-    if(length(unique(args$params$width)) == 1)
+    if (length(unique(args$params$width)) == 1)
       arg_obj$params$width <- subset_with_attributes(arg_obj$params$width, 1)
 
     arg_obj$params <- resolve_line_args(fig, arg_obj$params)
@@ -148,7 +148,7 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = figure_data(fig),
   )
   args$params$glyph <- "segment"
 
-  if(missing(color) && !is.null(args$params$line_color))
+  if (missing(color) && !is.null(args$params$line_color))
     args$params$color <- NULL
 
   args$params <- resolve_line_args(fig, args$params)
@@ -212,7 +212,7 @@ ly_abline <- function(
   )
   args$params$glyph <- "segment"
 
-  if(missing(color) && !is.null(args$params$line_color)) {
+  if (missing(color) && !is.null(args$params$line_color)) {
     args$params$color <- NULL
   }
 
@@ -225,28 +225,28 @@ ly_abline <- function(
   y_axis_type <- "numeric"
 
   # manage data
-  if(!is.null(coef) || inherits(a, "lm")) {
-    if(is.null(coef))
+  if (!is.null(coef) || inherits(a, "lm")) {
+    if (is.null(coef))
       coef <- a
-    if(inherits(coef, "lm"))
+    if (inherits(coef, "lm"))
       coef <- coef(coef)
     coef <- as.numeric(coef)
     a <- coef[1]
     b <- coef[2]
   }
 
-  if(!is.null(a) && !is.null(b)) {
+  if (!is.null(a) && !is.null(b)) {
     nn <- max(c(length(a), length(b)))
-    if(length(a) < nn)
+    if (length(a) < nn)
       a <- rep(a, nn)[1:nn]
-    if(length(b) < nn)
+    if (length(b) < nn)
       b <- rep(b, nn)[1:nn]
     x0 <- rep(0, nn)
     y0 <- a
     x1 <- rep(1, nn)
     y1 <- b * x1 + a
-  } else if(!is.null(h)) {
-    if(inherits(h, c("Date", "POSIXt"))) {
+  } else if (!is.null(h)) {
+    if (inherits(h, c("Date", "POSIXt"))) {
       y_axis_type <- "datetime"
       h <- to_epoch(h)
     }
@@ -255,8 +255,8 @@ ly_abline <- function(
     y0 <- h
     x1 <- rep(1, nn)
     y1 <- h
-  } else if(!is.null(v)) {
-    if(inherits(v, c("Date", "POSIXt"))) {
+  } else if (!is.null(v)) {
+    if (inherits(v, c("Date", "POSIXt"))) {
       x_axis_type <- "datetime"
       v <- to_epoch(v)
     }
@@ -268,20 +268,20 @@ ly_abline <- function(
   }
 
   defer_fn <- function(data, xlim, ylim) {
-    if(length(data$x0[[1]]) == 1) {
-      if(data$x0 == "x0")
+    if (length(data$x0[[1]]) == 1) {
+      if (data$x0 == "x0")
         return(data)
-    } else if(length(data$x0[[1]]) == 0) {
+    } else if (length(data$x0[[1]]) == 0) {
       return(data)
     }
     # unlist because of json encoding issues
     # (json wants each as a list but we want to work with scalars here)
     data <- unlist(data, recursive = FALSE)
-    if(all(data$x0 == data$x1)) {
+    if (all(data$x0 == data$x1)) {
       ## vertical lines
       data$y0 <- rep(ylim[1], length(data$y0))
       data$y1 <- rep(ylim[2], length(data$y1))
-    } else if(all(data$y0 == data$y1)) {
+    } else if (all(data$y0 == data$y1)) {
       ## horizontal line
       data$x0 <- rep(xlim[1], length(data$x0))
       data$x1 <- rep(xlim[2], length(data$x1))
@@ -353,9 +353,12 @@ ly_curve <- function(
     expr <- call(as.character(sexpr), as.name(xname))
   } else {
     yname <- deparse(sexpr)
-    if (!((is.call(sexpr) || is.expression(sexpr)) && xname %in%
-      all.vars(sexpr)))
-      stop(gettextf("'expr' must be a function, or a call or an expression containing '%s'", xname), domain = NA)
+    chk1 <- is.call(sexpr) || is.expression(sexpr)
+    chk <- !(chk1 && xname %in% all.vars(sexpr))
+    if (chk)
+      stop(
+        gettextf("'expr' must be a function, or a call or an expression containing '%s'",
+          xname), domain = NA)
     expr <- sexpr
   }
 
@@ -382,7 +385,7 @@ ly_curve <- function(
   ## see if any options won't be used and give a message
   check_opts(args$params, "line", formals = names(formals(ly_curve)))
 
-  if(missing(color) && !is.null(args$params$line_color))
+  if (missing(color) && !is.null(args$params$line_color))
     args$params$color <- NULL
 
   args$params <- resolve_line_args(fig, args$params)
@@ -505,7 +508,7 @@ ly_ray <- function(
     )
   )
 
-  if(missing(color) && !is.null(args$params$line_color)) {
+  if (missing(color) && !is.null(args$params$line_color)) {
     args$params$color <- NULL
   }
 
@@ -573,9 +576,9 @@ ly_bezier <- function(
       dots = lazy_dots(...)
     )
   )
-  args$params$glyph = "bezier"
+  args$params$glyph <- "bezier"
 
-  if(missing(color) && !is.null(args$params$line_color)) {
+  if (missing(color) && !is.null(args$params$line_color)) {
     args$params$color <- NULL
   }
 
@@ -646,7 +649,7 @@ ly_quadratic <- function(
   )
   args$params$glyph <- "quadratic"
 
-  if(missing(color) && !is.null(args$params$line_color)) {
+  if (missing(color) && !is.null(args$params$line_color)) {
     args$color <- NULL
   }
 
@@ -713,14 +716,14 @@ ly_multi_line <- function(
   )
   args$params$glyph <- "line"
 
-  if(missing(color) && !is.null(args$params$line_color)) {
+  if (missing(color) && !is.null(args$params$line_color)) {
     args$color <- NULL
   }
 
   ## see if any options won't be used and give a message
   # can't pass in color, alpha, width, or type
-  good_names = names(args$params)
-  good_names = good_names[! (good_names %in% c("color", "alpha", "width", "type"))]
+  good_names <- names(args$params)
+  good_names <- good_names[! (good_names %in% c("color", "alpha", "width", "type"))]
   check_opts(args$params[good_names], "multi_line")
 
   args$params <- resolve_line_args(fig, args$params)

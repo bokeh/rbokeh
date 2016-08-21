@@ -2,14 +2,14 @@ rbokeh_prerender <- function(fig) {
 
   fig$x$debug <- getOption("rbokeh_debug", FALSE)
 
-  if(fig$x$modeltype %in% c("Plot", "GMapPlot")) {
-    if(length(fig$x$spec$layers) == 0 && fig$x$spec$model$plot$type != "GMapPlot") {
+  if (fig$x$modeltype %in% c("Plot", "GMapPlot")) {
+    if (length(fig$x$spec$layers) == 0 && fig$x$spec$model$plot$type != "GMapPlot") {
       message("This figure is empty...")
       return(NULL)
     } else {
       fig <- prepare_figure(fig)
     }
-  } else if(fig$x$modeltype == "GridPlot") {
+  } else if (fig$x$modeltype == "GridPlot") {
     fig <- prepare_gridplot(fig)
   } else {
     stop("Unsupported model type: ", fig$x$modeltype)
@@ -23,7 +23,7 @@ rbokeh_prerender <- function(fig) {
   fig$x$docs_json[[1]]$roots$references <- fig$x$spec$model
   fig$x$docs_json[[1]]$roots$references <- remove_model_names(fig$x$docs_json[[1]]$roots$references)
   fig$x$spec <- NULL
-  fig$preRenderHook <- NULL
+  fig$preRenderHook <- NULL # nolint
 
   # attr(fig$x, "TOJSON_ARGS") <- list(auto_unbox = FALSE)
 
@@ -34,4 +34,3 @@ rbokeh_prerender <- function(fig) {
 
   fig
 }
-

@@ -3,7 +3,7 @@
 ## currently just run a wide variety of things and make
 ## sure there are no errors in creating or preparing
 
-fname = ifelse(Sys.info()["sysname"] == "Windows", "nul", "/dev/null")
+fname <- ifelse(Sys.info()["sysname"] == "Windows", "nul", "/dev/null") # nolint
 
 test_that("examples", {
 
@@ -72,7 +72,7 @@ test_that("examples", {
 
   print_model_json(p, file = fname)
 
-  data(flightFreq, package = "rbokeh")
+  data(flightfreq, package = "rbokeh")
   p <- figure(width = 1000) %>%
     ly_points(date, Freq, data = flightfreq,
       hover = list(date, Freq, dow), size = 5) %>%
@@ -139,7 +139,7 @@ test_that("examples", {
   url <- c("http://bokeh.pydata.org/en/latest/_static/bokeh-transparent.png",
     "http://developer.r-project.org/Logo/Rlogo-4.png")
 
-  ss <- seq(0, 2*pi, length = 13)[-1]
+  ss <- seq(0, 2 * pi, length = 13)[-1]
   ws <- runif(12, 2.5, 5) * rep(c(1, 0.8), 6)
 
   imgdat <- data.frame(
@@ -194,14 +194,14 @@ test_that("examples", {
   print_model_json(p, file = fname)
 
   p <- figure() %>%
-    ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-12-31"), by="days"),
-             rnorm(366)) %>%
-    x_axis(label = "Date", format = list(months="%b-%Y", days="%d"))
+    ly_lines(seq(as.Date("2012-01-01"), as.Date("2012-12-31"), by = "days"),
+      rnorm(366)) %>%
+      x_axis(label = "Date", format = list(months = "%b-%Y", days = "%d"))
   print_model_json(p, file = fname)
   p <- figure() %>%
-    ly_lines(seq(as.Date("2012-01-01"),as.Date("2012-02-01"), by="days"),
-             rnorm(32)) %>%
-    x_axis(label = "Date", format = list(months="%b-%Y", days="%d"))
+    ly_lines(seq(as.Date("2012-01-01"), as.Date("2012-02-01"), by = "days"),
+      rnorm(32)) %>%
+      x_axis(label = "Date", format = list(months = "%b-%Y", days = "%d"))
   print_model_json(p, file = fname)
 
   p <- figure() %>%

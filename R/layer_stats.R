@@ -35,7 +35,7 @@ ly_hist <- function(
 
   tryres <- try(identity(x), silent = TRUE)
 
-  if(inherits(tryres, "histogram")) {
+  if (inherits(tryres, "histogram")) {
     hh <- x
     args$info$x_name <- x$xname
   } else {
@@ -47,9 +47,10 @@ ly_hist <- function(
   }
   args$info$y_name <- ifelse(freq, "Frequency", "Density")
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
+    fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
-  y <- if(freq) {
+  y <- if (freq) {
     hh$counts
   } else {
     hh$density
@@ -114,16 +115,17 @@ ly_density <- function(
 
 
   ## b_eval will repeat these, but the line glyph doesn't like this
-  if(length(unique(args$params$color)) == 1)
+  if (length(unique(args$params$color)) == 1)
     args$params$color <- subset_with_attributes(args$params$color, 1)
-  if(length(unique(args$params$type)) == 1)
+  if (length(unique(args$params$type)) == 1)
     args$params$type <- subset_with_attributes(args$params$type, 1)
-  if(length(unique(args$params$width)) == 1)
+  if (length(unique(args$params$width)) == 1)
     args$params$width <- subset_with_attributes(args$params$width, 1)
 
   args$params <- resolve_line_args(fig, args$params)
 
-  dd <- stats::density.default(x = args$data$x, bw = bw, adjust = adjust, kernel = kernel, n = n, cut = 3, na.rm = na.rm)
+  dd <- stats::density.default(x = args$data$x, bw = bw, adjust = adjust,
+    kernel = kernel, n = n, cut = 3, na.rm = na.rm)
 
   do.call(ly_lines, c(
     list(
@@ -181,7 +183,7 @@ ly_quantile <- function(
   args$info$x_name <- "f-value"
   # args$info$y_name <- deparse(substitute(x)) # already done!
 
-  if(is.null(args$info$group)) {
+  if (is.null(args$info$group)) {
     args$info$group <- rep(1, length(args$data$x))
   }
 
@@ -194,17 +196,17 @@ ly_quantile <- function(
   ## quantile plot with no groups needs explicit legend
   ## but with groups, legend can simply be "TRUE" in which case
   ## an entry is automatically added for each group
-  if(length(idx) == 1) {
-    if(is.logical(args$info$legend))
+  if (length(idx) == 1) {
+    if (is.logical(args$info$legend))
       args$info$legend <- NULL
   }
 
-  for(ii in idx) {
-    if(length(ii) > 0) {
-      if(is.null(probs)) {
+  for (ii in idx) {
+    if (length(ii) > 0) {
+      if (is.null(probs)) {
         ## if the vector is too long, perhaps should default
         ## to some length, like 1000
-        if(length(ii) > ncutoff) {
+        if (length(ii) > ncutoff) {
           cur_probs <- stats::ppoints(ncutoff)
           qq <- stats::quantile(args$data$x[ii], cur_probs, names = FALSE, na.rm = TRUE)
         } else {
@@ -218,8 +220,8 @@ ly_quantile <- function(
       ff <- distn(cur_probs)
 
       cur_legend <- NULL
-      if(is.logical(args$info$legend)) {
-        if(args$info$legend) {
+      if (is.logical(args$info$legend)) {
+        if (args$info$legend) {
           cur_legend <- args$info$group[[ii[1]]]
         }
       } else {
@@ -246,6 +248,8 @@ ly_quantile <- function(
 #' @param data an optional data frame, providing the source for x and y
 #' @param width with of each box, a value between 0 (no width) and 1 (full width)
 #' @param coef see \code{\link[grDevices]{boxplot.stats}}
+#' @param with_outliers \code{logical} indicating whether or not the outlier
+#'   points should be drawn outside of the whiskers of the boxplot.
 #' @template par-coloralpha
 #' @template par-lnamegroup
 #' @template dots-fillline
@@ -254,6 +258,7 @@ ly_quantile <- function(
 ly_boxplot <- function(
   fig, x, y = NULL, data = figure_data(fig),
   width = 0.9, coef = 1.5,
+  with_outliers = TRUE,
   color = "blue", alpha = 1,
   lname = NULL, lgroup = NULL, visible = TRUE,
   ...
@@ -297,15 +302,17 @@ ly_boxplot <- function(
   x <- args$data$x
   y <- args$data$y
 
-  if(is.null(y)) {
+  if (is.null(y)) {
     x_name <- " "
     y_name <- args$info$x_name
     group <- rep(x_name, length(x))
   } else {
     num_ind <- c(is.numeric(x), is.numeric(y))
-    if(all(num_ind)) {
-      message("both x and y are numeric -- choosing numeric variable based on which has the most unique values")
-      if(length(unique(x)) > length(unique(y))) {
+    if (all(num_ind)) {
+      message(
+        "both x and y are numeric -- choosing numeric variable based on ",
+        "which has the most unique values")
+      if (length(unique(x)) > length(unique(y))) {
         x_name <- args$info$y_name
         y_name <- args$info$x_name
         group <- y
@@ -315,11 +322,11 @@ ly_boxplot <- function(
         group <- x
         x <- y
       }
-    } else if(num_ind[1]) {
+    } else if (num_ind[1]) {
       x_name <- args$info$y_name
       y_name <- args$info$x_name
       group <- y
-    } else if(num_ind[2]) {
+    } else if (num_ind[2]) {
       x_name <- args$info$x_name
       y_name <- args$info$y_name
       group <- x
@@ -330,7 +337,7 @@ ly_boxplot <- function(
   }
 
   idx <- split(seq_along(x), group)
-  for(ii in seq_along(idx)) {
+  for (ii in seq_along(idx)) {
     bp <- grDevices::boxplot.stats(x = x[idx[[ii]]], coef = coef)
 
     gp <- group[idx[[ii]][1]] ## doesn't work right now
@@ -362,16 +369,18 @@ ly_boxplot <- function(
       args$params[!fill_ind])
     )
 
-    if(length(bp$out) > 0) {
-      fig <- do.call(ly_points, c(
-        list(
-          fig = fig,
-          x = rep(gp, length(bp$out)), y = bp$out,
-          glyph = 1,
-          xlab = x_name, ylab = y_name
-        ),
-        args$params
-      ))
+    if (with_outliers) {
+      if (length(bp$out) > 0) {
+        fig <- do.call(ly_points, c(
+          list(
+            fig = fig,
+            x = rep(gp, length(bp$out)), y = bp$out,
+            glyph = 1,
+            xlab = x_name, ylab = y_name
+          ),
+          args$params
+        ))
+      }
     }
   }
 

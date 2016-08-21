@@ -4,7 +4,7 @@
 \alias{ly_image}
 \title{Add an "image" layer to a Bokeh figure}
 \usage{
-ly_image(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
+ly_image(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
   palette = "Spectral10", dilate = FALSE, lname = NULL, lgroup = NULL,
   visible = TRUE)
 }
@@ -15,7 +15,7 @@ ly_image(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
 
 \item{rows}{if \code{z} is a vector, how many rows should be used in treating it as a matrix}
 
-\item{cols}{if \code{z} is a vector, how many columns should be used in treating it as a matrix}
+\item{byrow}{if \code{z} is a vector, should it be turned into a matrix by row}
 
 \item{x}{lower left x coordinates}
 

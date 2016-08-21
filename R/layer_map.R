@@ -32,7 +32,8 @@ ly_map <- function(fig, database = "world", regions = ".",
   dd <- map2df(map(database = database,
     regions = regions, fill = TRUE, plot = FALSE))
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
+    fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   do.call(ly_polygons,
     c(

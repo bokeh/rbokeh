@@ -7,8 +7,9 @@
 pal_tableau <- function(pal = "Tableau10") {
   pal <- tableau_colors[[pal]]
   function(n) {
-    # if(n > length(pal))
-    #   message("There are more levels to color than there are available colors in this palette... repeating colors")
+    # if (n > length(pal))
+    #   message("There are more levels to color than there are available colors ",
+    #     "in this palette... repeating colors")
     pal[(seq_len(n) - 1) %% length(pal) + 1]
   }
 }
@@ -18,9 +19,13 @@ pal_tableau <- function(pal = "Tableau10") {
 #' @export
 pal_bk_glyph <- function() {
   function(n) {
-    pal <- c("circle", "square", "triangle", "diamond", "circle_cross", "circle_x", "cross", "diamond_cross", "inverted_triangle","square_cross", "square_x", "x", "asterisk")
-    # if(n > length(pal))
-    #   message("There are more levels to color than there are available colors in this palette... repeating colors")
+    pal <- c("circle", "square", "triangle", "diamond", "circle_cross", "circle_x",
+      "cross", "diamond_cross", "inverted_triangle", "square_cross", "square_x", "x",
+      "asterisk")
+    # if (n > length(pal))
+    #   message(
+    #     "There are more levels to color than there are available colors ",
+    #     "in this palette... repeating colors")
     pal[(seq_len(n) - 1) %% length(pal) + 1]
   }
 }
@@ -45,8 +50,9 @@ pal_size <- function(min = 2, max = 20) {
 pal_bk_line_dash <- function() {
   function(n) {
     dashes <- as.character(1:6)
-    # if(n > 6)
-    #   message("There are more levels for line dash than there are available line dash styles in this theme... repeating line dash")
+    # if (n > 6)
+    #   message("There are more levels for line dash than there are available ",
+    #     "line dash styles in this theme... repeating line dash")
     lty_dict[dashes[(seq_len(n) - 1) %% length(dashes) + 1]]
   }
 }
@@ -56,13 +62,15 @@ pal_bk_line_dash <- function() {
 pal_bk_line_width <- function() {
   function(n) {
     dashes <- as.character(1:6)
-    # if(n > 6)
-    #   message("There are more levels for line dash than there are available line dash styles in this theme... repeating line dash")
+    # if (n > 6)
+    #   message("There are more levels for line dash than there are available ",
+    #     "line dash styles in this theme... repeating line dash")
     dashes[(seq_len(n) - 1) %% length(dashes) + 1]
   }
 }
 
 # http://bokeh.pydata.org/en/latest/docs/reference/palettes.html
+# nolint start
 bk_gradient_palettes <- list(
   Spectral3 = c("#99d594", "#ffffbf", "#fc8d59"),
   Spectral4 = c("#2b83ba", "#abdda4", "#fdae61", "#d7191c"),
@@ -272,6 +280,6 @@ bk_gradient_palettes <- list(
   PuBuGn8 = c("#016450", "#02818a", "#3690c0", "#67a9cf", "#a6bddb", "#d0d1e6", "#ece2f0", "#fff7fb"),
   PuBuGn9 = c("#014636", "#016c59", "#02818a", "#3690c0", "#67a9cf", "#a6bddb", "#d0d1e6", "#ece2f0", "#fff7fb")
 )
+# nolint end
 
 bk_gradient_palette_names <- names(bk_gradient_palettes)
-

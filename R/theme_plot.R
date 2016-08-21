@@ -52,7 +52,7 @@ theme_plot <- function(fig,
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  if(is.null(pars)) {
+  if (is.null(pars)) {
     specified <- names(as.list(match.call())[-1])
     pars <- as.list(environment())[specified]
   }
@@ -61,10 +61,8 @@ theme_plot <- function(fig,
   pars <- handle_extra_pars(pars, figure_par_validator_map)
   parnames <- names(pars)
 
-  for(nm in parnames)
+  for (nm in parnames)
     fig$x$spec$model$plot$attributes[[nm]] <- pars[[nm]]
 
   fig
 }
-
-

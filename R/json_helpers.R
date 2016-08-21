@@ -5,8 +5,7 @@ base_model_object <- function(type, id) {
       id = id,
       attributes = list(
         id = id,
-        tags = list(),
-        doc = NULL
+        tags = list()
       )
     ),
     ref = list(
@@ -22,7 +21,7 @@ gen_id <- function(obj, name = NULL) {
 }
 
 remove_model_names <- function(obj) {
-  names(obj$plot$attributes$tools) <- NULL
+  names(obj$toolbar$attributes$tools) <- NULL
   names(obj$plot$attributes$renderers) <- NULL
   names(obj) <- NULL
   obj
@@ -71,4 +70,3 @@ underscore2camel <- function(x) {
 #   library(httr)
 #   a <- POST("http://codepen.io/pen/define/", body = list(data = data), encode = "json")
 # }
-

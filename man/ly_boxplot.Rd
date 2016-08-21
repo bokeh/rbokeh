@@ -5,8 +5,8 @@
 \title{Add a "boxplot" layer to a Bokeh figure}
 \usage{
 ly_boxplot(fig, x, y = NULL, data = figure_data(fig), width = 0.9,
-  coef = 1.5, color = "blue", alpha = 1, lname = NULL, lgroup = NULL,
-  visible = TRUE, ...)
+  coef = 1.5, with_outliers = TRUE, color = "blue", alpha = 1,
+  lname = NULL, lgroup = NULL, visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -20,6 +20,9 @@ ly_boxplot(fig, x, y = NULL, data = figure_data(fig), width = 0.9,
 \item{width}{with of each box, a value between 0 (no width) and 1 (full width)}
 
 \item{coef}{see \code{\link[grDevices]{boxplot.stats}}}
+
+\item{with_outliers}{\code{logical} indicating whether or not the outlier
+points should be drawn outside of the whiskers of the boxplot.}
 
 \item{color}{color for the glyph - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' - for glyphs with both fill and line properties, see "Handling color" below}
 

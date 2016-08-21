@@ -5,7 +5,7 @@
 #' @param fig figure to modify
 #' @param z matrix or vector of image values
 #' @param rows if \code{z} is a vector, how many rows should be used in treating it as a matrix
-#' @param cols if \code{z} is a vector, how many columns should be used in treating it as a matrix
+#' @param byrow if \code{z} is a vector, should it be turned into a matrix by row
 #' @param x lower left x coordinates
 #' @param y lower left y coordinates
 #' @param dw image width distances
@@ -16,7 +16,7 @@
 #' @example man-roxygen/ex-image.R
 #' @family layer functions
 #' @export
-ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
+ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
   palette = "Spectral10", dilate = FALSE,
   lname = NULL, lgroup = NULL, visible = TRUE) {
 
@@ -35,45 +35,58 @@ ly_image <- function(fig, z, rows, cols, x = 0, y = 0, dw = 1, dh = 1,
     )
   )
 
-  axis_type_range <- get_glyph_axis_type_range(c(x, dw), c(y, dh), assert_x = "numeric", assert_y = "numeric")
+  axis_type_range <- get_glyph_axis_type_range(c(x, dw), c(y, dh),
+    assert_x = "numeric", assert_y = "numeric")
 
-  if(is.matrix(z)) {
-    cols <- nrow(z)
-    rows <- ncol(z)
-    z <- c(z)  # coerce the matrix to a vector
+  if (is.vector(z)) {
+    z <- matrix(z, nrow = rows, byrow = byrow)
+  } else if (is.matrix(z)) {
+    z <- t(z)
+  } else {
+    stop("argument 'z' to ly_image must be a matrix or vector", call. = FALSE)
   }
 
   # really ugly nested if else
   # palette checker / transformer from layer_hexbin minus function
   #   plus added check for length 1
-  if( is.character(palette) && length(palette) == 1 ) {
-    if(valid_color(palette)) {
-      stop("'palette' specified in ly_image is a single color; please supply a vector of colors or name of a bokeh palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
+  if ( is.character(palette) && length(palette) == 1 ) {
+    if (valid_color(palette)) {
+      stop(
+        "'palette' specified in ly_image is a single color; please supply a ",
+        "vector of colors or name of a bokeh palette - see here: ",
+        "http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+        call. = FALSE)
     } else {
-      if(!palette %in% bk_gradient_palette_names){
-        stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
+      if (!palette %in% bk_gradient_palette_names){
+        stop(
+          "'palette' specified in ly_image is not a valid color name or palette - ",
+          "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+          call. = FALSE)
       } else {
         palette <- bk_gradient_palettes[[palette]]
       }
     }
-  } else if( is.character(palette) && length(palette) > 1 ) {
+  } else if ( is.character(palette) && length(palette) > 1 ) {
     # check for valid colors in the palette
-    if(!valid_color(palette)){
-      stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
+    if (!valid_color(palette)){
+      stop(
+        "'palette' specified in ly_image is not a valid color name or palette - ",
+        "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+        call. = FALSE)
     }
   } else {
-    stop("'palette' specified in ly_image is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
+    stop(
+      "'palette' specified in ly_image is not a valid color name or palette - ",
+      "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+      call. = FALSE)
   }
 
   mc <- lapply(match.call(), deparse)
 
   make_glyph(fig, type = "image", lname = args$info$lname, lgroup = args$info$lgroup,
-    data = list(
-      image = list(z), rows = rows, cols = cols,
-      x = x, y = y, dw = dw, dh = dh,
-      palette = palette, dilate = dilate
-    ),
-    args = NULL, axis_type_range = axis_type_range, ly_call = mc)
+    data = list(image = list(z), palette = palette),
+    args = list(x = x, y = y, dw = dw, dh = dh, dilate = dilate),
+    axis_type_range = axis_type_range, ly_call = mc)
 }
 
 #' Add an "image_url" layer to a Bokeh figure
@@ -102,7 +115,7 @@ ly_image_url <- function(
 
   anchor_opts <- c("top_left", "top_center", "top_right", "right_center",
     "bottom_right", "bottom_center", "bottom_left", "left_center", "center")
-  if(! anchor %in% anchor_opts) {
+  if (! anchor %in% anchor_opts) {
     stop("anchor must be one of: ", paste(anchor_opts, collapse = ", "), call. = FALSE)
   }
 
@@ -127,10 +140,10 @@ ly_image_url <- function(
   args$params$url <- args$params$image_url
   args$params$image_url <- NULL
 
-  if(missing(x)) {
+  if (missing(x)) {
     args$info$x_name <- "x"
   }
-  if(missing(y)) {
+  if (missing(y)) {
     args$info$y_name <- "y"
   }
 
@@ -141,18 +154,18 @@ ly_image_url <- function(
   w <- args$params$w
 
   ## range stuff
-  if(grepl("left", anchor)) {
+  if (grepl("left", anchor)) {
     x2 <- max(x + w)
-  } else if(grepl("right", anchor)) {
+  } else if (grepl("right", anchor)) {
     x2 <- min(x - w)
-  } else if(anchor %in% c("top_center", "bottom_center", "center")) {
+  } else if (anchor %in% c("top_center", "bottom_center", "center")) {
     x2 <- range(c(x +  w / 2, x - w / 2))
   }
-  if(grepl("top", anchor)) {
+  if (grepl("top", anchor)) {
     y2 <- min(y - h)
-  } else if(grepl("bottom", anchor)) {
+  } else if (grepl("bottom", anchor)) {
     y2 <- max(y + h)
-  } else if(anchor %in% c("left_center", "right_center", "center")) {
+  } else if (anchor %in% c("left_center", "right_center", "center")) {
     y2 <- range(c(y + h / 2, y - h / 2))
   }
   # can this have "categorical" axes?
@@ -168,18 +181,3 @@ ly_image_url <- function(
     axis_type_range = axis_type_range, ly_call = mc
   )
 }
-
-
-# ly_image_rgba <- function(fig, image, rows, cols, x = 0, y = 0, dw = 1, dh = 1, lname = NULL, lgroup = NULL, ...) {
-#   axis_type_range <- get_glyph_axis_type_range(c(x, dw), c(y, dh), assert_x = "numeric", assert_y = "numeric")
-
-#   if(is.matrix(image)) {
-#     cols <- nrow(image)
-#     rows <- ncol(image)
-#     image <- array(image)
-#   }
-
-#   make_glyph(fig, type = "image_RGBA", lname = lname, lgroup = lgroup,
-#     data = list(image = list(image), rows = rows, cols = cols, x = x, y = y, dw = dw, dh = dh),
-#     args = list(...), axis_type_range = axis_type_range)
-# }

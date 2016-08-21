@@ -1,21 +1,21 @@
 # rbokeh
 
 [![Build Status](https://travis-ci.org/bokeh/rbokeh.svg?branch=master)](https://travis-ci.org/bokeh/rbokeh)
+[![CRAN](http://www.r-pkg.org/badges/version/rbokeh)](https://cran.r-project.org/web/packages/rbokeh/index.html)
 
 R interface to Bokeh.
 
 ### Install
 
-rbokeh will be put on CRAN soon.  Until then, you can install from an alternative repo:
+```r
+# from CRAN:
+install.packages("rbokeh")
 
-```s
+# from packages.tessera.io:
 options(repos = c(tessera = "http://packages.tessera.io", getOption("repos")))
 install.packages("rbokeh")
-```
 
-Alternatively, you can install directly from github:
-
-```
+# from github:
 devtools::install_github("bokeh/rbokeh")
 ```
 

@@ -25,7 +25,8 @@ tool_pan <- function(fig, dimensions = c("width", "height")) {
 #' }
 #' @export
 tool_wheel_zoom <- function(fig, dimensions = c("width", "height")) {
-  update_tool(fig, which = "wheel_zoom", args = list(dimensions = dimensions, plot_ref = fig$x$spec$ref))
+  update_tool(fig, which = "wheel_zoom",
+    args = list(dimensions = dimensions, plot_ref = fig$x$spec$ref))
 }
 
 #' Add "save" tool to a Bokeh figure
@@ -37,7 +38,7 @@ tool_wheel_zoom <- function(fig, dimensions = c("width", "height")) {
 #' }
 #' @export
 tool_save <- function(fig) {
-  update_tool(fig, which = "preview_save", args = list(plot_ref = fig$x$spec$ref))
+  update_tool(fig, which = "save", args = list(plot_ref = fig$x$spec$ref))
 }
 
 #' Add "crosshair" tool to a Bokeh figure
@@ -133,7 +134,7 @@ tool_lasso_select <- function(fig,
     args = list(plot_ref = fig$x$spec$ref,
     overlay = pa_model$ref))
 
-  if(!is.null(callback))
+  if (!is.null(callback))
     fig <- fig %>% tool_selection(callback, ref_layer)
 
   fig
@@ -181,7 +182,7 @@ tool_box_select <- function(fig,
     args = list(plot_ref = fig$x$spec$ref,
     overlay = ba_model$ref))
 
-  if(!is.null(callback))
+  if (!is.null(callback))
     fig <- fig %>% tool_selection(callback, ref_layer)
 
   fig
@@ -238,12 +239,23 @@ tool_help <- function(fig, redirect = "http://hafen.github.io/rbokeh",
 ## internal methods
 
 update_tool <- function(fig, which, args) {
+  if (is.null(fig$x$spec$model$toolbar)) {
+    tbid <- gen_id(fig, "Toolbar")
+    tbmodel <- toolbar_model(tbid)
+    tbmodel$model$attributes["logo"] <- list(fig$x$spec$logo)
+
+    fig$x$spec$model$plot$attributes$toolbar <- tbmodel$ref
+    fig$x$spec$model$toolbar <- tbmodel$model
+
+    fig$x$spec$model$plot$attributes$tool_events <- list()
+  }
+
   id <- gen_id(fig, which)
   args$id <- id
   args$tool_name <- get_tool_name(which)
   model <- do.call(tool_model, args)
 
-  fig$x$spec$model$plot$attributes$tools[[model$ref$id]] <- model$ref
+  fig$x$spec$model$toolbar$attributes$tools[[model$ref$id]] <- model$ref
   fig$x$spec$model[[id]] <- model$model
 
   fig <- update_tool_events(fig)
@@ -260,8 +272,8 @@ tool_model <- function(id, tool_name, plot_ref, ...) {
   res$model$attributes$plot <- plot_ref
   dots <- list(...)
   dotnms <- names(dots)
-  for(nm in dotnms) {
-    trns <- ifelse(is.logical(dots[[nm]]), identity, I)
+  for (nm in dotnms) {
+    trns <- ifelse(is.logical(dots[[nm]]) || nm %in% c("help_tooltip", "redirect"), identity, I)
     res$model$attributes[[nm]] <- trns(dots[[nm]])
   }
 
@@ -282,4 +294,15 @@ update_tool_events <- function(fig) {
   fig$x$spec$model[[id]] <- model$model
 
   fig
+}
+
+toolbar_model <- function(id) {
+  res <- base_model_object("Toolbar", id)
+
+  res$model$attributes$active_drag <- "auto"
+  res$model$attributes$active_scroll <- "auto"
+  res$model$attributes$active_tap <- "auto"
+  res$model$attributes["tools"] <- list(NULL)
+
+  res
 }
