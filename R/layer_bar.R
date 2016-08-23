@@ -8,6 +8,7 @@
 #' @template par-coloralpha
 #' @param position either "stack", "fill", or "dodge" (see details)
 #' @param width with of each bar, a value between 0 (no width) and 1 (full width)
+#' @param hover logical - should a hover tool be added to show the value of each bar?
 #' @param origin,breaks,right,binwidth parameters to be used for binning x when it is continuous (not yet implemented)
 #' @template par-lnamegroup
 #' @template par-legend

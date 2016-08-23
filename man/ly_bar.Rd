@@ -6,8 +6,9 @@
 \usage{
 ly_bar(fig, x, y = NULL, data = figure_data(fig), color = NULL,
   alpha = 1, position = c("stack", "fill", "dodge"), width = 0.9,
-  origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
-  lname = NULL, lgroup = NULL, legend = NULL, visible = TRUE, ...)
+  hover = TRUE, origin = NULL, breaks = NULL, right = FALSE,
+  binwidth = NULL, lname = NULL, lgroup = NULL, legend = NULL,
+  visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -25,6 +26,8 @@ ly_bar(fig, x, y = NULL, data = figure_data(fig), color = NULL,
 \item{position}{either "stack", "fill", or "dodge" (see details)}
 
 \item{width}{with of each bar, a value between 0 (no width) and 1 (full width)}
+
+\item{hover}{logical - should a hover tool be added to show the value of each bar?}
 
 \item{origin, breaks, right, binwidth}{parameters to be used for binning x when it is continuous (not yet implemented)}
 
