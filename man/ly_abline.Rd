@@ -54,6 +54,11 @@ Draws one or more straight lines.
  }
 }
 \examples{
+# abline with mixed axes for h and v
+figure() \%>\%
+  ly_points(1:26, letters) \%>\%
+  ly_abline(h = "j") \%>\%
+  ly_abline(v = 10)
 \donttest{
 z <- lm(dist ~ speed, data = cars)
 p <- figure() \%>\%

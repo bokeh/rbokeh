@@ -186,6 +186,12 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = figure_data(fig),
 #' @template par-lnamegroup
 #' @template dots-line
 #' @example man-roxygen/ex-lines.R
+#' @examples
+#' # abline with mixed axes for h and v
+#' figure() %>%
+#'   ly_points(1:26, letters) %>%
+#'   ly_abline(h = "j") %>%
+#'   ly_abline(v = 10)
 #' @family layer functions
 #' @export
 ly_abline <- function(
@@ -223,6 +229,10 @@ ly_abline <- function(
 
   x_axis_type <- "numeric"
   y_axis_type <- "numeric"
+  if (!is.null(h) || !is.null(v)) {
+    x_axis_type <- fig$x$spec$x_axis_type
+    y_axis_type <- fig$x$spec$y_axis_type
+  }
 
   # manage data
   if (!is.null(coef) || inherits(a, "lm")) {
@@ -279,19 +289,31 @@ ly_abline <- function(
     data <- unlist(data, recursive = FALSE)
     if (all(data$x0 == data$x1)) {
       ## vertical lines
-      data$y0 <- rep(ylim[1], length(data$y0))
-      data$y1 <- rep(ylim[2], length(data$y1))
+      lo <- head(ylim, 1)
+      up <- tail(ylim, 1)
+      if (is.character(lo)) {
+        lo <- paste0(lo, ":0")
+        up <- paste0(up, ":1")
+      }
+      data$y0 <- rep(lo, length(data$y0))
+      data$y1 <- rep(up, length(data$y1))
     } else if (all(data$y0 == data$y1)) {
       ## horizontal line
-      data$x0 <- rep(xlim[1], length(data$x0))
-      data$x1 <- rep(xlim[2], length(data$x1))
+      lo <- head(xlim, 1)
+      up <- tail(xlim, 1)
+      if (is.character(lo)) {
+        lo <- paste0(lo, ":0")
+        up <- paste0(up, ":1")
+      }
+      data$x0 <- rep(lo, length(data$x0))
+      data$x1 <- rep(up, length(data$x1))
     } else {
       ## line
       b <- (data$y1 - data$y0) / (data$x1 - data$x0)
       a <- data$y1 - b * data$x1
       nn <- length(a)
-      data$x0 <- rep(xlim[1], nn)
-      data$x1 <- rep(xlim[2], nn)
+      data$x0 <- rep(head(xlim, 1), nn)
+      data$x1 <- rep(tail(xlim, 1), nn)
       data$y0 <- data$x0 * b + a
       data$y1 <- data$x1 * b + a
     }
