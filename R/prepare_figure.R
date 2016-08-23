@@ -104,18 +104,10 @@ prepare_figure <- function(fig) {
               for (mrg in glph$map_args)
                 glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg, fig$x$spec$theme)
               # render legend glyph
-              if (glph$name == "quad") {
-                spec <- c(glph$args, list(left = "left", right = "right",
-                  top = "top", bottom = "bottom"))
-              } else {
-                spec <- c(glph$args, list(x = "x", y = "y"))
-              }
+              spec <- glph$args
               lgroup <- paste("__legend_", nm, "_", cur_lab, sep = "")
               lname <- glph$args$glyph
               glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
-              # make it so legend glyph doesn't show up on page
-              oox <- ifelse(fig$x$spec$x_axis_type == "categorical", "", NA)
-              ooy <- ifelse(fig$x$spec$y_axis_type == "categorical", "", NA)
               if (!is.null(spec$size))
                 spec$size <- 0
               if (!is.null(spec$radius))
@@ -123,9 +115,7 @@ prepare_figure <- function(fig) {
               if (is.null(spec$glyph))
                 spec$glyph <- "Circle"
               fig <- fig %>% add_layer(spec = spec,
-                dat = data.frame(x = c(oox, oox), y = c(ooy, ooy),
-                  left = c(oox, oox), right = c(oox, oox),
-                  top = c(ooy, ooy), bottom = c(ooy, ooy)),
+                dat = NULL,
                 lname = lname, lgroup = lgroup)
 
               # add reference to glyph to legend object

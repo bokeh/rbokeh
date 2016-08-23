@@ -46,6 +46,10 @@ ly_polygons <- function(
     args$params$alpha <- NULL
   }
 
+  # if color is not a valid color then we want to group on it too
+  if (needs_map_fns[["color"]](args$params$color))
+    group <- args$params$color
+
   if (!is.null(group)) {
     if (is.factor(group)) {
       group <- as.character(group)
