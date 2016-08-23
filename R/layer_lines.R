@@ -64,7 +64,8 @@ ly_lines <- function(
     # split works with a data.frame as the groups.
     split_list <- split(
       seq_along(args$data$x),
-      as.data.frame(group_dt[names(groupable)])
+      as.data.frame(group_dt[names(groupable)]),
+      drop = TRUE
     )
   } else {
     # no groups to split on.  will split on "one" group
