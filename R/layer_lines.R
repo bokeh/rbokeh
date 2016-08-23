@@ -192,6 +192,17 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = figure_data(fig),
 #'   ly_points(1:26, letters) %>%
 #'   ly_abline(h = "j") %>%
 #'   ly_abline(v = 10)
+#'
+#' # multiple hv lines
+#' figure() %>%
+#'   ly_points(1:10) %>%
+#'   ly_abline(v = 1:10) %>%
+#'   ly_abline(h = 1:10)
+#'
+#' # multiple ab lines
+#' figure() %>%
+#'   ly_points(0:10) %>%
+#'   ly_abline(0, seq(0, 1, by = 0.1))
 #' @family layer functions
 #' @export
 ly_abline <- function(
@@ -278,15 +289,14 @@ ly_abline <- function(
   }
 
   defer_fn <- function(data, xlim, ylim) {
-    if (length(data$x0[[1]]) == 1) {
+    if (length(data$x0) == 1) {
       if (data$x0 == "x0")
         return(data)
-    } else if (length(data$x0[[1]]) == 0) {
+    } else if (length(data$x0) == 0) {
       return(data)
     }
-    # unlist because of json encoding issues
-    # (json wants each as a list but we want to work with scalars here)
-    data <- unlist(data, recursive = FALSE)
+    if (is.list(data$x0))
+      data <- unlist(data, recursive = FALSE)
     if (all(data$x0 == data$x1)) {
       ## vertical lines
       lo <- head(ylim, 1)
@@ -318,10 +328,12 @@ ly_abline <- function(
       data$y1 <- data$x1 * b + a
     }
     # now below wrap each result with list so json encoding is happy
-    data$x0 <- list(data$x0)
-    data$x1 <- list(data$x1)
-    data$y0 <- list(data$y0)
-    data$y1 <- list(data$y1)
+    if (length(data$x0) == 1) {
+      data$x0 <- list(data$x0)
+      data$x1 <- list(data$x1)
+      data$y0 <- list(data$y0)
+      data$y1 <- list(data$y1)
+    }
     data
   }
 

@@ -59,6 +59,17 @@ figure() \%>\%
   ly_points(1:26, letters) \%>\%
   ly_abline(h = "j") \%>\%
   ly_abline(v = 10)
+
+# multiple hv lines
+figure() \%>\%
+  ly_points(1:10) \%>\%
+  ly_abline(v = 1:10) \%>\%
+  ly_abline(h = 1:10)
+
+# multiple ab lines
+figure() \%>\%
+  ly_points(0:10) \%>\%
+  ly_abline(0, seq(0, 1, by = 0.1))
 \donttest{
 z <- lm(dist ~ speed, data = cars)
 p <- figure() \%>\%
