@@ -9,8 +9,16 @@
 #' @export
 rbokeh2html <- function(fig, file = tempfile(fileext = ".html"), pretty = FALSE,
   secure = TRUE) {
-  fig <- rbokeh_prerender(fig)
 
+  if(is.null(fig$width))
+    fig$width <- 500
+  if(is.null(fig$height))
+    fig$height <- 500
+
+  width <- fig$width
+  height <- fig$height
+
+  fig <- rbokeh_prerender(fig)
   modelid <- fig$x$modelid
   elementid <- fig$x$elementid
   docid <- fig$x$docid
@@ -29,7 +37,10 @@ rbokeh2html <- function(fig, file = tempfile(fileext = ".html"), pretty = FALSE,
 <link href='http", sc, "://cdn.pydata.org/bokeh/release/bokeh-", ver, ".min.css' rel='stylesheet'>
 </head>
 <body>
+<div class='bk-root' class='plotdiv' style=' width: ",
+  width, "px; height: ", width, "px;'>
 <div id='", elementid, "' class='plotdiv'></div>
+<div>
 <script type='text/javascript'>
 Bokeh.$(function() {
   var modelid = '", modelid, "';
