@@ -2,7 +2,7 @@
 #'
 #' Draws a bar chart
 #' @param fig figure to modify
-#' @param x values or field name for x variable
+#' @param x values or field name for x variable, or if NULL, x-axis will be counts of y
 #' @param y values or field name for y variable, or if NULL, y-axis will be counts of x
 #' @param data an optional data frame, providing the source for inputs x, y, and color properties
 #' @template par-coloralpha
@@ -14,15 +14,13 @@
 #' @template par-legend
 #' @template dots-fillline
 #' @details
-#' The y variable is summed for each x variable and bars are plotted.  If no y variable is supplied, the unique values of x will be tabulated.  Within each x variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each x, stacking the bars.  The "dodge" choice will plot the bars for each x side by side.
-#'
-#' Note that currently x cannot be numeric but support will soon be added for numeric x by first binning the x values.
+#' This function expects one of either x or y to be categorical and the other to be numeric or NULL.  The numeric variable is summed for each categorical variable and bars are plotted.  If no numeric variable is supplied, the unique values of the categorical variable will be tabulated.  Within each categorical variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each categorical variable level, stacking the bars.  The "dodge" choice will plot the bars for each level of the categorical variable side by side.
 #'
 #' @family layer functions
 #' @example man-roxygen/ex-bar.R
 #' @export
 ly_bar <- function(
-  fig, x, y = NULL, data = figure_data(fig),
+  fig, x = NULL, y = NULL, data = figure_data(fig),
   color = NULL, alpha = 1,
   position = c("stack", "fill", "dodge"), width = 0.9, hover = TRUE,
   origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
@@ -45,7 +43,6 @@ ly_bar <- function(
       breaks,
       right,
       binwidth,
-      # hover, # no hover
       # url, # no url
       legend,
       lname,
@@ -58,15 +55,37 @@ ly_bar <- function(
   # will give NULL if it was not a variable
   colorname <- attr(args$params$color, "stringName")
 
-  if (missing(y)) {
+  # we'll do everything as if x is the factor
+  # but if the y variable was specified as the factor we'll swap back
+  swap_axes <- FALSE
+
+  x_miss <- missing(x)
+  y_miss <- missing(y)
+
+  if (x_miss && y_miss) {
+    stop("must specify at least one of 'x' or 'y' for ly_bar", call. = FALSE)
+  }
+
+  if (y_miss) {
+    # when y is missing, it automatically makes y->x and makes x a sequence
     args$data$x <- args$data$y
     args$data$y <- rep(1, length(args$data$x))
     args$info$x_name <- attr(args$data$x, "stringName")
     args$info$y_name <- "count"
+  } else if (x_miss) {
+    args$data$x <- rep(1, length(args$data$y))
+    args$info$x_name <- "count"
   }
 
-  if (is.numeric(args$data$x)) {
-    stop("numeric values for x in ly_bar are not yet supported", call. = FALSE)
+  if (!is.numeric(args$data$x) && is.numeric(args$data$y)) {
+    # nothing  to do
+  } else if (is.numeric(args$data$x) && !is.numeric(args$data$y)) {
+    tmp <- args$data$x
+    args$data$x <- args$data$y
+    args$data$y <- tmp
+    swap_axes <- TRUE
+  } else {
+    stop("in ly_bar one of 'x' or 'y' must be numeric and the other not numeric", call. = FALSE)
   }
 
   if (is.null(args$params$color) || length(args$params$color) == 1) {
@@ -155,6 +174,11 @@ ly_bar <- function(
     class(res) <- c(class(res), "quoted")
 
   color_value <- if (is.null(colorname)) args$params$color else colorname
+
+  if (swap_axes) {
+    ind <- match(c("ytop", "ybottom", "xright", "xleft"), names(res))
+    names(res)[ind] <- c("xright", "xleft", "ybottom", "ytop")
+  }
 
   do.call(ly_rect, append(list(fig = fig,
     xleft = "xleft", ybottom = "ybottom", xright = "xright", ytop = "ytop",
