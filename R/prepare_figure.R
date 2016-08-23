@@ -88,6 +88,11 @@ prepare_figure <- function(fig) {
           # if (nm != mapnames[1])
           #   legend[[paste0("lgnd_spacer_", nm)]] <- list(list("", list()))
           nm <- gsub("^\"|\"$", "", nm)
+          # sometimes the name can be quote("name") so remove it in this case
+          if (grepl("^quote\\(", nm)) {
+            nm <- gsub("^quote\\(\\\"", "", nm)
+            nm <- gsub("\\\"\\)$", "", nm)
+          }
           legend[[paste0("lgnd_header_", nm)]] <- list(list(nm, list()))
           for (ii in seq_along(map_item$labels)) {
             cur_val <- map_item$values[[ii]]
@@ -99,7 +104,12 @@ prepare_figure <- function(fig) {
               for (mrg in glph$map_args)
                 glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg, fig$x$spec$theme)
               # render legend glyph
-              spec <- c(glph$args, list(x = "x", y = "y"))
+              if (glph$name == "quad") {
+                spec <- c(glph$args, list(left = "left", right = "right",
+                  top = "top", bottom = "bottom"))
+              } else {
+                spec <- c(glph$args, list(x = "x", y = "y"))
+              }
               lgroup <- paste("__legend_", nm, "_", cur_lab, sep = "")
               lname <- glph$args$glyph
               glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
@@ -113,7 +123,9 @@ prepare_figure <- function(fig) {
               if (is.null(spec$glyph))
                 spec$glyph <- "Circle"
               fig <- fig %>% add_layer(spec = spec,
-                dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)),
+                dat = data.frame(x = c(oox, oox), y = c(ooy, ooy),
+                  left = c(oox, oox), right = c(oox, oox),
+                  top = c(ooy, ooy), bottom = c(ooy, ooy)),
                 lname = lname, lgroup = lgroup)
 
               # add reference to glyph to legend object

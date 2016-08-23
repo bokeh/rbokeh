@@ -8,6 +8,7 @@
 #' @template par-coloralpha
 #' @param position either "stack", "fill", or "dodge" (see details)
 #' @param width with of each bar, a value between 0 (no width) and 1 (full width)
+#' @param hover logical - should a hover tool be added to show the value of each bar?
 #' @param origin,breaks,right,binwidth parameters to be used for binning x when it is continuous (not yet implemented)
 #' @template par-lnamegroup
 #' @template par-legend
@@ -23,7 +24,7 @@
 ly_bar <- function(
   fig, x, y = NULL, data = figure_data(fig),
   color = NULL, alpha = 1,
-  position = c("stack", "fill", "dodge"), width = 0.9,
+  position = c("stack", "fill", "dodge"), width = 0.9, hover = TRUE,
   origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
   lname = NULL, lgroup = NULL, legend = NULL, visible = TRUE, ...
 ) {
@@ -92,6 +93,7 @@ ly_bar <- function(
   } else if (position == "fill") {
     res <- do.call(rbind, by(res, res$x, function(a) {
       tmp <- a$y / sum(a$y)
+      a$p_ <- tmp
       a$ytop <- cumsum(tmp)
       a$ybottom <- a$ytop - tmp
       a
@@ -108,7 +110,6 @@ ly_bar <- function(
   if (position %in% c("stack", "fill")) {
     res$xleft <- paste0(res$x, ":", 1 - width)
     res$xright <- paste0(res$x, ":", width)
-
   } else {
     res <- do.call(rbind, by(res, res$x, function(a) {
       nn <- nrow(a)
@@ -128,10 +129,23 @@ ly_bar <- function(
   remaining_args <- args$params
   remaining_args <- remaining_args[! (names(remaining_args) %in% bad_param_names)]
 
+  if (hover) {
+    hovdat <- data.frame(
+      variable = res$x,
+      value = res$y
+    )
+    if (position == "fill") {
+      hovdat$proportion <- res$p_
+    }
+  } else {
+    hovdat <- NULL
+  }
+
   # get rid of x and y as they are no longer needed
   # and may conflict with xname, yname
   res$x <- NULL
   res$y <- NULL
+  res$p_ <- NULL
 
   remaining_args$width <- NULL
 
@@ -141,10 +155,12 @@ ly_bar <- function(
     class(res) <- c(class(res), "quoted")
 
   color_value <- if (is.null(colorname)) args$params$color else colorname
+
   do.call(ly_rect, append(list(fig = fig,
     xleft = "xleft", ybottom = "ybottom", xright = "xright", ytop = "ytop",
     xlab = args$info$x_name, ylab = args$info$y_name,
-    data = res,
+    data = res, hover = hovdat,
     color = color_value,
-    lname = args$info$lname, lgroup = args$info$lgroup, legend = args$info$legend), remaining_args))
+    lname = args$info$lname, lgroup = args$info$lgroup, legend = args$info$legend),
+    remaining_args), quote = TRUE) # quote = TRUE needed for lazy_
 }
