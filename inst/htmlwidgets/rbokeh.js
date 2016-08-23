@@ -6,8 +6,8 @@ HTMLWidgets.widget({
 
   initialize: function(el, width, height) {
     return {
-      modelid: "",
-      elementid: "",
+      modelid: '',
+      elementid: '',
       width: width,
       height: height
     };
@@ -16,7 +16,7 @@ HTMLWidgets.widget({
   renderValue: function(el, x, instance) {
 
     //clear el for Shiny/dynamic contexts
-    el.innerHTML = "";
+    el.innerHTML = '';
 
     if(x.isJSON === true) {
       x.docs_json = JSON.parse(x.docs_json);
@@ -33,7 +33,7 @@ HTMLWidgets.widget({
       console.log(JSON.stringify(refs));
     }
 
-    // change "nulls" in data to NaN
+    // change 'nulls' in data to NaN
     function traverseObject(obj) {
       for(var key in obj) {
         if(obj[key].constructor === Object) {
@@ -47,22 +47,22 @@ HTMLWidgets.widget({
       }
     }
     for(var i = 0; i < refs.length; i++) {
-      if(refs[i].type === "ColumnDataSource")
+      if(refs[i].type === 'ColumnDataSource')
         traverseObject(refs[i].attributes.data);
     }
 
     var dv1 = document.createElement('div');
-    dv1.setAttribute("class", "bk-root");
+    dv1.setAttribute('class', 'bk-root');
     var dv = document.createElement('div');
     dv.id = x.elementid;
-    dv.setAttribute("class", "plotdiv");
+    dv.setAttribute('class', 'plotdiv');
     dv1.appendChild(dv);
     el.appendChild(dv1);
 
     var render_items = [{
-      "docid": x.docid,
-      "elementid": x.elementid,
-      "modelid": x.modelid
+      'docid': x.docid,
+      'elementid': x.elementid,
+      'modelid': x.modelid
     }];
 
     if(x.debug !== true) {
