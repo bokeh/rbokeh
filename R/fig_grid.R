@@ -341,7 +341,7 @@ grid_plot <- function(figs, width = NULL, height = NULL,
   obj$x$spec$wmat <- wmat
   obj$x$spec$hmat <- hmat
 
-  obj_width <- sum(apply(wmat, 2, function(x) max(x, na.rm = TRUE))) + 46
+  obj_width <- sum(apply(wmat, 2, function(x) max(x, na.rm = TRUE)))
   obj_height <- sum(apply(hmat, 1, function(x) max(x, na.rm = TRUE)))
 
   if (is.null(obj$width))
@@ -531,7 +531,7 @@ update_grid_sizes <- function(obj) {
           obj$x$spec$figs[[cur_id]]$x$spec$model$plot$attributes$min_border_bottom <- x_margin
         }
       } else {
-        spid <- obj$x$spec$spacer_id_mat[ii][jj]
+        spid <- obj$x$spec$spacer_id_mat[ii, jj]
         obj$x$spec$layout[[spid]]$attributes$width <- new_wmat[ii, jj]
         obj$x$spec$layout[[spid]]$attributes$height <- new_hmat[ii, jj]
       }
