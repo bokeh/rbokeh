@@ -80,15 +80,20 @@ ly_points <- function(
 
   # split data up for each glyph
   split_list <- split(seq_along(args$params$glyph), args$params$glyph, drop = TRUE)
-  for (ii in seq_along(split_list)) {
+  sln <- length(split_list)
+  for (ii in seq_len(sln)) {
     arg_obj <- subset_arg_obj(args, split_list[[ii]])
 
     arg_obj$params$glyph <- arg_obj$params$glyph[1]
 
+    ly <- fig$x$spec$layers[[arg_obj$info$lgroup]]
+    if (is.null(args$params$color) && sln > 1)
+      ly <- NULL
+
     arg_obj$params <- resolve_color_alpha(
       arg_obj$params,
       has_line = TRUE, has_fill = TRUE,
-      ly    = fig$x$spec$layers[[arg_obj$info$lgroup]],
+      ly    = ly,
       solid = arg_obj$params$glyph %in% as.character(15:20),
       theme = fig$x$spec$theme
     )
