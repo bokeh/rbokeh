@@ -6,7 +6,7 @@
 \usage{
 ly_bar(fig, x = NULL, y = NULL, data = figure_data(fig), color = NULL,
   alpha = 1, position = c("stack", "fill", "dodge"), width = 0.9,
-  hover = TRUE, origin = NULL, breaks = NULL, right = FALSE,
+  hover = FALSE, origin = NULL, breaks = NULL, right = FALSE,
   binwidth = NULL, lname = NULL, lgroup = NULL, legend = NULL,
   visible = TRUE, ...)
 }
@@ -93,16 +93,16 @@ figure() \%>\%
 
 # total yield per variety
 figure() \%>\%
-  ly_bar(variety, yield, data = lattice::barley) \%>\%
+  ly_bar(variety, yield, data = lattice::barley, hover = TRUE) \%>\%
   theme_axis("x", major_label_orientation = 90)
 
-# swap axes
+# swap axes and add hover
 figure() \%>\%
-  ly_bar(yield, variety, data = lattice::barley)
+  ly_bar(yield, variety, data = lattice::barley, hover = TRUE)
 
 # stack by year
 figure() \%>\%
-  ly_bar(variety, yield, color = year, data = lattice::barley) \%>\%
+  ly_bar(variety, yield, color = year, data = lattice::barley, hover = TRUE) \%>\%
   theme_axis("x", major_label_orientation = 90)
 
 # proportional bars
