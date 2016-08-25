@@ -102,20 +102,61 @@ prepare_figure <- function(fig) {
 
             for (glph in map_item$legend_glyphs) {
               for (mrg in glph$map_args)
-                glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg, fig$x$spec$theme)
+                glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg,
+                  fig$x$spec$theme)
               # render legend glyph
               spec <- glph$args
               lgroup <- paste("__legend_", nm, "_", cur_lab, sep = "")
               lname <- glph$args$glyph
               glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
+              # make it so legend glyph doesn't show up on page
+              oox <- ifelse(fig$x$spec$x_axis_type == "categorical", "", NA)
+              ooy <- ifelse(fig$x$spec$y_axis_type == "categorical", "", NA)
               if (!is.null(spec$size))
                 spec$size <- 0
               if (!is.null(spec$radius))
                 spec$radius <- 0
               if (is.null(spec$glyph))
-                spec$glyph <- "Circle"
-              fig <- fig %>% add_layer(spec = spec,
-                dat = NULL,
+                spec$glyph <- "circle"
+              if (spec$glyph %in% c("patches", "multi_line")) {
+                dat <- data.frame(
+                  xs = c(oox, oox),
+                  ys = c(ooy, ooy)
+                )
+                spec <- c(glph$args, list(xs = "xs", ys = "ys"))
+              } else if (spec$glyph == "segment") {
+                dat <- data.frame(
+                  x0 = c(oox, oox),
+                  y0 = c(ooy, ooy),
+                  x1 = c(oox, oox),
+                  y1 = c(ooy, ooy)
+                )
+                spec <- c(glph$args, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1"))
+              } else if (spec$glyph == "quadratic") {
+                dat <- data.frame(
+                  x0 = c(oox, oox),
+                  y0 = c(ooy, ooy),
+                  x1 = c(oox, oox),
+                  y1 = c(ooy, ooy),
+                  cx = c(oox, oox),
+                  cy = c(ooy, ooy)
+                )
+                spec <- c(glph$args, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1",
+                  cx = "cx", cy = "cy"))
+              } else if (spec$glyph == "quad") {
+                dat <- data.frame(
+                  left = c(oox, oox),
+                  bottom = c(ooy, ooy),
+                  right = c(oox, oox),
+                  top = c(ooy, ooy)
+                )
+                spec <- c(glph$args, list(left = "left", bottom = "bottom",
+                  right = "right", top = "top"))
+              } else {
+                dat <- data.frame(x = c(oox, oox), y = c(ooy, ooy))
+                spec <- c(glph$args, list(x = "x", y = "y"))
+              }
+              fig <- fig %>% add_layer(spec = spec, dat = dat,
                 lname = lname, lgroup = lgroup)
 
               # add reference to glyph to legend object
