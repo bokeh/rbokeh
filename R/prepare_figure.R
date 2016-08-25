@@ -10,6 +10,16 @@ prepare_figure <- function(fig) {
   if (is.null(fig$x$spec$theme))
     fig$x$spec$theme <- bk_default_theme()
 
+  if (!is.null(fig$x$spec$theme_update)) {
+    for (type in c("discrete", "continuous")) {
+      if (!is.null(fig$x$spec$theme_update[[type]])) {
+        for (nm in names(fig$x$spec$theme_update[[type]])) {
+          fig$x$spec$theme[[type]][[nm]] <- fig$x$spec$theme_update[[type]][[nm]]
+        }
+      }
+    }
+  }
+
   ## resolve attribute mappings
   ## step through each layer
   for (ly in fig$x$spec$layers) {
