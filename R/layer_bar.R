@@ -22,7 +22,7 @@
 ly_bar <- function(
   fig, x = NULL, y = NULL, data = figure_data(fig),
   color = NULL, alpha = 1,
-  position = c("stack", "fill", "dodge"), width = 0.9, hover = TRUE,
+  position = c("stack", "fill", "dodge"), width = 0.9, hover = FALSE,
   origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
   lname = NULL, lgroup = NULL, legend = NULL, visible = TRUE, ...
 ) {
@@ -155,6 +155,10 @@ ly_bar <- function(
     )
     if (position == "fill") {
       hovdat$proportion <- res$p_
+    }
+    extra_names <- setdiff(names(res), c("x", "y", "ytop", "ybottom", "xleft", "xright"))
+    if (length(extra_names) > 0) {
+      hovdat <- cbind(hovdat, res[, extra_names, drop = FALSE])
     }
   } else {
     hovdat <- NULL
