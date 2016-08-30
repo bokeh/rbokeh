@@ -268,8 +268,10 @@ fig_model_skeleton <- function(id, title, width = 480, height = 480, type = "Plo
 }
 
 figure_par_validator_map <- list(
-  "background_fill" = "color",
-  "border_fill" = "color",
+  "background_fill_color" = "color",
+  "background_fill_alpha" = "num_data_spec",
+  "border_fill_color" = "color",
+  "border_fill_alpha" = "alpha",
   "outline_line_color" = "color",
   "title_text_color" = "color",
   "min_border" = "int",
