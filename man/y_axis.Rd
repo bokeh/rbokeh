@@ -47,7 +47,6 @@ ignored if \code{log} is TRUE}
 Customize x axis of a Bokeh figure
 }
 \examples{
-\dontrun{
 figure() \%>\%
   ly_points(rexp(1000), rexp(1000)) \%>\%
   x_axis(label = "x", log = TRUE) \%>\%
@@ -83,7 +82,6 @@ figure() \%>\%
 figure() \%>\%
   ly_points(rnorm(10), rnorm(10) * 100) \%>\%
   y_axis(number_formatter = "printf", format = "\%0.1f\%\%")
-}
 }
 \seealso{
 Other axes: \code{\link{x_axis}}
