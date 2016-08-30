@@ -30,6 +30,10 @@ pal_bk_line_width()
 
 \item{pal}{palette name}
 
+\item{cols}{a vector of colors to ramp across for a continuous palette}
+
+\item{space}{passed on to \code{\link{colorRampPalette}[grDevices]}}
+
 \item{min}{minimum value}
 
 \item{max}{maximum value}

@@ -136,6 +136,8 @@ pal_bk_glyph <- function() {
 
 #' @rdname palettes
 #' @export
+#' @param cols a vector of colors to ramp across for a continuous palette
+#' @param space passed on to \code{\link{colorRampPalette}[grDevices]}
 #' @importFrom grDevices colorRampPalette
 pal_gradient <- function(
   cols = c("#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B"), space = "rgb") {

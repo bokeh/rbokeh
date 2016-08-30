@@ -10,3 +10,4 @@ CONTRIBUTING\.md
 ^\.httr-oauth$
 cran-comments.md
 .lintr.*
+_gh-pages
