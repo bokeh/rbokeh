@@ -41,7 +41,7 @@ page.open('file://", ff, "', function() {
   }, ", timeout, ");
 });")
       cat(js, file = ffjs)
-      system2(phantom, ffjs)
+      system2(phantom, ffjs, stdout = TRUE, stderr = TRUE)
     })
     if (inherits(res, "try-error"))
       message("** could not create static plot...")
@@ -49,6 +49,7 @@ page.open('file://", ff, "', function() {
     # system(paste("open ", ffjs))
     # system(paste("open ", dirname(ffjs)))
   }
+  invisible(res)
 }
 
 #' Instructions for installing phantomjs
