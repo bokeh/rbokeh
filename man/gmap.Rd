@@ -18,7 +18,7 @@ gmap(lat = 0, lng = 0, zoom = 0, api_key = NULL, map_type = "hybrid",
 
 \item{zoom}{initial \href{https://developers.google.com/maps/documentation/staticmaps/#Zoomlevels}{zoom level} to use when displaying the map}
 
-\item{api_key}{Google Maps API key (see \href{https://developers.google.com/maps/documentation/javascript/get-api-key})}
+\item{api_key}{Google Maps \href{https://developers.google.com/maps/documentation/javascript/get-api-key}{API key}}
 
 \item{map_type}{\href{https://developers.google.com/maps/documentation/staticmaps/#MapTypes}{map type} to use for the plot - one of "hybrid", "satellite", "roadmap", "terrain"}
 
