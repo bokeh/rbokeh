@@ -201,7 +201,7 @@ Hovering will show the counts in the hexagon bin.
 
 Here's a combination of many layers using hexbins to show the density of the fielding location of all doubles in the 2014 MLB season, inspired by [this](https://baseballwithr.wordpress.com/2014/06/06/creating-hexbin-plots/):
 
-```{r baseball, lazy=TRUE, message=FALSE, cache = TRUE}
+```{r baseball, lazy=TRUE, message=FALSE}
 doubles <- read.csv("https://gist.githubusercontent.com/hafen/77f25b556725b3d0066b/raw/10f0e811f09f2b9f0f9ccfb542e296dfac2761d4/doubles.csv")
 
 ly_baseball <- function(x) {
@@ -244,8 +244,12 @@ p
 Log axes:
 
 ```{r cranpkgs, lazy=TRUE, message=FALSE}
-figure() %>%
-  ly_points(Date, Packages, Ecdat::CRANpackages) %>%
+# get data on number of CRAN packages over time (from Ecdat)
+packages <- read.csv("https://gist.githubusercontent.com/hafen/117d731ad93c03bd5ec0079cbb38ab94/raw/04e7dc3aed1c6f5d82b1bb21460c0b589ef09d96/rpackages.csv",
+  colClasses = c("numeric", "Date", "integer", "character"))
+
+figure(data = packages) %>%
+  ly_points(Date, Packages, hover = c(Version, Date, Packages)) %>%
   y_axis(log = TRUE)
 ```
 
