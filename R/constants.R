@@ -1,8 +1,9 @@
 option_names <- c("width", "height", "title", "ylim", "xlim", "plot_width",
   "plot_height", "x_axis_type", "y_axis_type", "x_mapper_type", "y_mapper_type",
-  "background_fill", "border_fill", "min_border", "min_border_left",
-  "min_border_right", "min_border_top", "min_border_bottom", "h_symmetry",
-  "v_symmetry", "outline_line_color", "xaxes", "yaxes", "tools")
+  "background_fill_color", "background_fill_alpha", "border_fill_color",
+  "border_fill_alpha", "min_border", "min_border_left", "min_border_right",
+  "min_border_top", "min_border_bottom", "h_symmetry", "v_symmetry",
+  "outline_line_color", "xaxes", "yaxes", "tools")
 
 line_prop_names <- c("line_color", "line_width", "line_alpha", "line_join",
   "line_cap", "line_dash", "line_dash_offset")

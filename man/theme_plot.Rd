@@ -4,8 +4,9 @@
 \alias{theme_plot}
 \title{Override theme parameters for general plot attributes}
 \usage{
-theme_plot(fig, pars = NULL, background_fill = "white",
-  border_fill = "white", outline_line_alpha = 1,
+theme_plot(fig, pars = NULL, background_fill_color = "white",
+  background_fill_alpha = 1, border_fill_color = "white",
+  border_fill_alpha = 1, outline_line_alpha = 1,
   outline_line_cap = "butt", outline_line_color = "black",
   outline_line_dash = NULL, outline_line_dash_offset = 0,
   outline_line_join = "miter", outline_line_width = 1,
@@ -21,9 +22,13 @@ theme_plot(fig, pars = NULL, background_fill = "white",
 
 \item{pars}{optionally specify a named list of all parameters - useful when dealing with theme lists}
 
-\item{background_fill}{(color) background color of plot}
+\item{background_fill_color}{(color) background color of plot}
 
-\item{border_fill}{(color) fill color of border area of plot}
+\item{background_fill_alpha}{(numeric) background color alpha of plot}
+
+\item{border_fill_color}{(color) fill color of border area of plot}
+
+\item{border_fill_alpha}{(numeric) fill color alpha of border area of plot}
 
 \item{outline_line_alpha}{(numeric) The line alpha for the plot border outline.}
 
@@ -71,7 +76,7 @@ Override theme parameters for general plot attributes
 # manually specify a ggplot-like grid and background
 figure() \%>\%
   ly_points(1:10) \%>\%
-  theme_plot(background_fill = "#E6E6E6",
+  theme_plot(background_fill_color = "#E6E6E6",
     outline_line_color = "white") \%>\%
   theme_grid(c("x", "y"), grid_line_color = "white",
     minor_grid_line_color = "white",
@@ -82,10 +87,11 @@ figure() \%>\%
     minor_tick_line_alpha = 0, num_minor_ticks = 2)
 
 # or use the built in ggplot theme (under development)
-figure() \%>\%
-  ly_points(1:10) \%>\%
+figure(data = iris, legend = "top_left", tools = NULL) \%>\%
+  ly_points(Sepal.Length, Petal.Length, color = Species) \%>\%
   set_theme(bk_ggplot_theme)
-
+}
+\dontrun{
 # or to set the theme for all future plots
 options(bokeh_theme = bk_ggplot_theme)
 
@@ -94,7 +100,6 @@ figure() \%>\%
 
 figure() \%>\%
   ly_boxplot(1:10)
-
 }
 }
 

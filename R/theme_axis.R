@@ -102,6 +102,7 @@ theme_axis <- function(fig,
     specified <- names(as.list(match.call())[-1])
     pars <- as.list(environment())[specified]
   }
+  num_minor_ticks <- pars$num_minor_ticks
   pars <- pars[names(pars) %in% names(axis_par_validator_map)]
 
   pars <- handle_extra_pars(pars, axis_par_validator_map)
@@ -115,16 +116,16 @@ theme_axis <- function(fig,
       fig <- fig %>% x_axis()
     for (nm in parnames)
       fig$x$spec$model[["x_axis"]]$attributes[[nm]] <- pars[[nm]]
-    if (!is.null(pars$num_minor_ticks))
-      fig$x$spec$model$x_tickformatter$attributes$num_minor_ticks <- pars$num_minor_ticks
+    if (!is.null(num_minor_ticks))
+      fig$x$spec$model$x_tickformatter$attributes$num_minor_ticks <- num_minor_ticks
   }
   if ("y" %in% which && fig$x$spec$yaxes != FALSE) {
     if (is.null(fig$x$spec$model[["y_axis"]]))
       fig <- fig %>% y_axis()
     for (nm in parnames)
       fig$x$spec$model[["y_axis"]]$attributes[[nm]] <- pars[[nm]]
-    if (!is.null(pars$num_minor_ticks))
-      fig$x$spec$model$y_tickformatter$attributes$num_minor_ticks <- pars$num_minor_ticks
+    if (!is.null(num_minor_ticks))
+      fig$x$spec$model$y_tickformatter$attributes$num_minor_ticks <- num_minor_ticks
   }
 
   fig

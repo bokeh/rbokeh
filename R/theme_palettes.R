@@ -137,8 +137,9 @@ pal_bk_glyph <- function() {
 #' @rdname palettes
 #' @export
 #' @importFrom grDevices colorRampPalette
-pal_gradient <- function() {
-  grDevices::colorRampPalette(c("#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B"))
+pal_gradient <- function(
+  cols = c("#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B"), space = "rgb") {
+  grDevices::colorRampPalette(cols, space = space)
 }
 
 #' @rdname palettes
