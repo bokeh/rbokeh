@@ -12,7 +12,7 @@ Authors@R: c(
     ))
 Description: R interface for creating plots in Bokeh. Bokeh by Continuum
     Analytics, \url{http://bokeh.pydata.org/en/latest/}.
-URL: https://hafen.github.io/rbokeh
+URL: https://hafen.github.io/rbokeh https://github.com/bokeh/rbokeh
 BugReports: https://github.com/bokeh/rbokeh/issues
 License: MIT + file LICENSE
 LazyData: true
@@ -38,3 +38,4 @@ Suggests:
     roxygen2 (>= 5.0.0)
 Enhances: shiny (>= 0.12)
 RoxygenNote: 5.0.1
+VignetteBuilder: packagedocs
