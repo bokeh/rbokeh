@@ -129,7 +129,6 @@ figure() \%>\%
   ly_bar(variety, yield, color = year,
     data = lattice::barley, position = "dodge") \%>\%
   theme_axis("x", major_label_orientation = 90)
-
 }
 }
 \seealso{
