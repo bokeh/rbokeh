@@ -5,7 +5,7 @@
 [![CRAN](http://www.r-pkg.org/badges/version/rbokeh)](https://cran.r-project.org/web/packages/rbokeh/index.html)
 [![](http://cranlogs.r-pkg.org/badges/rbokeh)](http://cran.r-project.org/package=rbokeh)
 
-R interface to Bokeh.
+A native R plotting library that provides a flexible declarative interface for creating interactive web-based graphics, backed by the Bokeh visualization library.
 
 ### Install
 
