@@ -265,16 +265,16 @@ ly_boxplot <- function(
   validate_fig(fig, "ly_boxplot")
 
   args <- sub_names(fig, data,
-                    grab(
-                      x, y,
-                      color,
-                      alpha,
-                      # legend, # no legend?
-                      lname,
-                      lgroup,
-                      visible,
-                      dots = lazy_dots(...)
-                    )
+    grab(
+      x, y,
+      color,
+      alpha,
+      # legend, # no legend?
+      lname,
+      lgroup,
+      visible,
+      dots = lazy_dots(...)
+    )
   )
 
   if (missing(y)) {
@@ -292,7 +292,7 @@ ly_boxplot <- function(
   }
 
   args$params <- resolve_color_alpha(args$params, has_line = TRUE,
-                                     has_fill = TRUE, theme = fig$x$spec$theme)
+    has_fill = TRUE, theme = fig$x$spec$theme)
 
   fill_ind <- grepl("^fill_", names(args$params))
 
