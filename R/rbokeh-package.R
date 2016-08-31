@@ -58,3 +58,4 @@ NULL
 #' @param lhs a Bokeh figure
 #' @param rhs a layer to add to the figure
 NULL
+
