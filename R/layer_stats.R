@@ -368,37 +368,39 @@ ly_boxplot <- function(
     hgt2 <- bp$stats[4] - bp$stats[3]
     md2 <- hgt2 / 2 + bp$stats[3]
 
-    fig <- do.call(ly_crect, c(
-      list(
-        fig = fig, x = rep(gp, 2), y = c(md1, md2),
-        width = width, height = c(hgt1, hgt2),
-        xlab = x_name, ylab = y_name
-      ),
-      args$params
-    ))
-    fig <- do.call(ly_segments, c(
-      list(
-        fig = fig,
-        x0 = c(gp, gp, gpr, gpr),
-        y0 = c(bp$stats[1], bp$stats[4], bp$stats[1], bp$stats[5]),
-        x1 = c(gp, gp, gpl, gpl),
-        y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5]),
-        xlab = x_name, ylab = y_name
-      ),
-      args$params[!fill_ind])
-    )
+    fig <- ly_crect(
+      fig = fig, x = rep(gp, 2), y = c(md1, md2),
+      width = width, height = c(hgt1, hgt2),
+      xlab = x_name, ylab = y_name,
+      visible = args$params$visible,
+      line_color = args$params$line_color,
+      fill_color = args$params$fill_color,
+      line_alpha = args$params$line_alpha,
+      fill_alpha = args$params$fill_alpha)
+
+    fig <- ly_segments(
+      fig = fig,
+      x0 = c(gp, gp, gpr, gpr),
+      y0 = c(bp$stats[1], bp$stats[4], bp$stats[1], bp$stats[5]),
+      x1 = c(gp, gp, gpl, gpl),
+      y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5]),
+      xlab = x_name, ylab = y_name,
+      visible = args$params$visible,
+      line_color = args$params$line_color,
+      line_alpha = args$params$line_alpha)
 
     if (with_outliers) {
       if (length(bp$out) > 0) {
-        fig <- do.call(ly_points, c(
-          list(
-            fig = fig,
-            x = rep(gp, length(bp$out)), y = bp$out,
-            glyph = 1,
-            xlab = x_name, ylab = y_name
-          ),
-          args$params
-        ))
+        fig <- ly_points(
+          fig = fig,
+          x = rep(gp, length(bp$out)), y = bp$out,
+          glyph = 1,
+          xlab = x_name, ylab = y_name,
+          visible = args$params$visible,
+          line_color = args$params$line_color,
+          fill_color = args$params$fill_color,
+          line_alpha = args$params$line_alpha,
+          fill_alpha = args$params$fill_alpha)
       }
     }
   }
