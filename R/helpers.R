@@ -399,7 +399,7 @@ get_lgroup <- function(lgroup, fig) {
   lgroup <- as.character(lgroup)
 }
 
-get_hover2 <- function(lazy_hover_val, data, sub_fn) {
+get_hover <- function(lazy_hover_val, data, sub_fn) {
 
   # three cases
   # 1. evaluates right away
@@ -533,100 +533,6 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
   ), class = "hoverSpec"))
 }
 
-# get the "hover" argument and turn it into data and dict
-# if a string was provided, parse the @var values
-# if a data frame was provided, the arg sould be a
-# list of column names
-# otherwise it should be a named list or data frame
-get_hover <- function(hn, data, sub_fn) {
-
-  # try to get the raw data
-  tmp <- try(lazy_eval(hn), silent = TRUE)
-
-  if (is.null(tmp)) {
-    return(NULL)
-  }
-
-  # if failed, it's a "fancy symbol", so retrieve and eval that
-  if (inherits(tmp, "try-error")) {
-    tmp <- sub_fn(hn)
-    # to work with code below
-    hn <- b_eval_get_symbol(hn)
-
-    # there is also a sub_fn to retrieve data, but didn't want to mess with code
-  }
-
-  # is.character is bad because it's true for try-error
-  if (inherits(tmp, "character")) {
-    # extract variable names
-    tmp_split <- strsplit(tmp, "@")[[1]][-1]
-    hn <- NULL
-    if (length(tmp_split) > 0) {
-      hn <- gsub("^([a-zA-Z0-9_]+).*", "\\1", tmp_split)
-      hn_miss <- setdiff(hn, names(data))
-      if (length(hn_miss) > 0) {
-        message("hover tool couldn't find following variables in the data: ",
-          paste(hn_miss, collapse = ", "), " - ignoring them...")
-        hn <- setdiff(hn, hn_miss)
-      }
-      data <- subset(data, select = hn)
-    }
-  } else if (is.data.frame(tmp)) {
-    data <- tmp
-    hn <- names(data)
-  } else if (inherits(tmp, "hoverSpec")) {
-    return(tmp)
-  } else {
-    if (deparse(hn)[1] == "NULL")
-      return(NULL)
-    if (is.null(data)) {
-      if (!is.data.frame(hn)) {
-        message(
-          "hover tool not added - 'hover' must be a data frame or list of ",
-          "variables present in the data frame supplied as the 'data' argument")
-        return(NULL)
-      } else {
-        data <- hn
-        hn <- names(data)
-      }
-    } else {
-      hn <- deparse(hn)[1]
-      hn <- gsub("c\\(|list\\(|\\)| +", "", hn)
-      hn <- strsplit(hn, ",")[[1]]
-      if (all(! hn %in% names(data))) {
-        message(
-          "There were no columns: ", paste(hn, collapse = ", "),
-          " in the data for the hover tool - hover not added")
-        return(NULL)
-      }
-      data <- subset(data, select = hn)
-    }
-  }
-  ## to be safe, give hover columns their own name and format them as strings
-  hn2 <- paste("hover_", gsub("\\.|\\(|\\)| ", "_", hn), sep = "")
-  names(data) <- hn2
-
-  for (ii in seq_len(ncol(data)))
-    data[[ii]] <- format(data[[ii]])
-
-  if (inherits(tmp, "character")) {
-    for (ii in seq_along(hn))
-      tmp <- gsub(paste0("@", hn[ii]), paste0("@hover_", hn[ii]), tmp)
-    hdict <- tmp
-  } else {
-    hdict <- lapply(seq_along(hn), function(ii) list(hn[ii], paste("@", hn2[ii], sep = "")))
-  }
-
-  if (nrow(data) == 1)
-    data <- lapply(data, I)
-
-  return(structure(list(
-    data = data,
-    dict = hdict
-  ), class = "hoverSpec"))
-}
-
-
 # get the "url" argument and turn it into data and "dict"
 # must be a vector or a string referencing variables in data
 get_url <- function(url, data, sub_fn) {
@@ -666,49 +572,6 @@ get_url <- function(url, data, sub_fn) {
     data = data,
     url = url
   ), class = "urlSpec"))
-}
-
-v_eval <- function(x, data) {
-  res <- try(eval(x, data), silent = TRUE)
-
-  if (inherits(res, "try-error")) {
-    res <- try(eval(x), silent = TRUE)
-    if (inherits(res, "try-error")) {
-      stop("argument '", deparse(x), "' cannot be found")
-    }
-    ## In this case, the user has specified a 'data' argument
-    ## but has also specified an "additional parameter" argument
-    ## such as fill_alpha, etc. which has been set to a variable
-    ## in the calling frame
-    ## for example:
-    ##  col <- "blue"
-    ##  figure() %>% ly_polygon(..., data = d, fill_color = col)
-    ## it is looking for "col" in 'data' but instead should get it from the calling frame
-    ## but right now, we throw an error
-    ## and the way around it is to not use the 'data' argument
-    ## and specify everything explicitly
-  }
-
-  ## variable name could have been supplied in quotes
-  if (length(res) == 1 && is.character(res) && nrow(data) > 0) {
-    if (res %in% names(data)) {
-      nm <- res
-      res <- data[[res]]
-      attr(res, "stringName") <- nm
-    } else {
-      res <- rep(res, nrow(data))
-    }
-  }
-
-  if (is.null(res))
-    return(res)
-
-  # # if the variable came from the data, give it a name
-  # dp <- deparse(x)
-  # if (dp[1] %in% names(data))
-  #   attr(res, "nseName") <- dp
-
-  res
 }
 
 fix_args <- function(args, n) {

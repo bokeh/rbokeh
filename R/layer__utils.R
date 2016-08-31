@@ -330,7 +330,7 @@ sub_names <- function(
         params    = parse_values(arg_val),
 
         # send symbol to hover; also sending "data finding" function
-        hover     = get_hover2(arg_val, data, sub_fn),
+        hover     = get_hover(arg_val, data, sub_fn),
         lgroup    = get_lgroup(lazy_eval_unname(arg_val), fig),
         url       = get_url(arg_val, data, sub_fn),
         legend    = get_legend(lazy_eval_unname(arg_val)),
