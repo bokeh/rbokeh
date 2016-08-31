@@ -49,6 +49,22 @@ NULL
 #' @example man-roxygen/ex-gmap.R
 NULL
 
+#' Character co-occurence from Les Miserables
+#'
+#' @name lesmis
+#' @docType data
+#' @description
+#' Number of times two characters from Les Miserables appear in the same
+#' scene(?). This dataset is used as an example to generate a heatmap-like
+#' visualization in the main bokeh distribution
+#' \href{http://bokeh.pydata.org/en/latest/docs/gallery/les_mis.html}{here}.
+#' The data is stored in a list with \code{data.frames} \code{lesmis$nodes} and
+#' \code{lesmis$links}
+#' @usage lesmis
+#' @keywords data
+#' @example man-roxygen/ex-rect.R
+NULL
+
 #' Pipe figures
 #'
 #' @importFrom magrittr %>%
@@ -58,3 +74,4 @@ NULL
 #' @param lhs a Bokeh figure
 #' @param rhs a layer to add to the figure
 NULL
+

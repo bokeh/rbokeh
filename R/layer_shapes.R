@@ -118,6 +118,7 @@ ly_polygons <- function(
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
+#' @example man-roxygen/ex-rect.R
 #' @family layer functions
 #' @export
 ly_rect <- function(
