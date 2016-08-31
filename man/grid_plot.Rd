@@ -47,7 +47,7 @@ If \code{link_data} is \code{TRUE}, then an effort will be made to link all data
 idx <- split(1:150, iris$Species)
 figs <- lapply(idx, function(x) {
   figure(width = 300, height = 300) \%>\%
-    ly_points(Sepal.Length, Sepal.Width, data = iris[x,],
+    ly_points(Sepal.Length, Sepal.Width, data = iris[x, ],
       hover = list(Sepal.Length, Sepal.Width))
 })
 

@@ -10,9 +10,9 @@
 rbokeh2html <- function(fig, file = tempfile(fileext = ".html"), pretty = FALSE,
   secure = TRUE) {
 
-  if(is.null(fig$width))
+  if (is.null(fig$width))
     fig$width <- 500
-  if(is.null(fig$height))
+  if (is.null(fig$height))
     fig$height <- 500
 
   width <- fig$width
@@ -38,7 +38,7 @@ rbokeh2html <- function(fig, file = tempfile(fileext = ".html"), pretty = FALSE,
 </head>
 <body>
 <div class='bk-root' class='plotdiv' style=' width: ",
-  width, "px; height: ", width, "px;'>
+  width, "px; height: ", height, "px;'>
 <div id='", elementid, "' class='plotdiv'></div>
 <div>
 <script type='text/javascript'>

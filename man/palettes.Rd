@@ -16,7 +16,8 @@ pal_tableau(pal = "Tableau10")
 
 pal_bk_glyph()
 
-pal_gradient()
+pal_gradient(cols = c("#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B"),
+  space = "rgb")
 
 pal_size(min = 2, max = 20)
 
@@ -28,6 +29,10 @@ pal_bk_line_width()
 \item{colors}{a vector of colors to be used in the color palette}
 
 \item{pal}{palette name}
+
+\item{cols}{a vector of colors to ramp across for a continuous palette}
+
+\item{space}{passed on to \code{\link{colorRampPalette}[grDevices]}}
 
 \item{min}{minimum value}
 

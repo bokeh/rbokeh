@@ -10,3 +10,8 @@
 .Rproj.user/
 rbokeh.sublime*
 .httr-oauth
+_ignore
+.lintr_cache
+inst/doc
+_gh-pages
+vignettes/index_cache/

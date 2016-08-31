@@ -18,7 +18,7 @@ gmap(lat = 0, lng = 0, zoom = 0, api_key = NULL, map_type = "hybrid",
 
 \item{zoom}{initial \href{https://developers.google.com/maps/documentation/staticmaps/#Zoomlevels}{zoom level} to use when displaying the map}
 
-\item{api_key}{Google Maps API key (see \url{})}
+\item{api_key}{Google Maps \href{https://developers.google.com/maps/documentation/javascript/get-api-key}{API key}}
 
 \item{map_type}{\href{https://developers.google.com/maps/documentation/staticmaps/#MapTypes}{map type} to use for the plot - one of "hybrid", "satellite", "roadmap", "terrain"}
 
@@ -62,21 +62,18 @@ Google has its own terms of service for using Google Maps API and any use of rbo
 }
 \examples{
 \donttest{
-gmap(title = "NYC taxi pickups January 2013",
-  lat = 40.74, lng = -73.95, zoom = 11,
-  map_type = "roadmap", width = 1000, height = 800) \%>\%
-  ly_hexbin(nyctaxihex, alpha = 0.5,
-    palette = "Spectral10", trans = log, inv = exp)
-
 # custom map style
 gmap(lat = 40.74, lng = -73.95, zoom = 11,
   width = 600, height = 600,
   map_style = gmap_style("blue_water"))
 }
-
-
-
-
+\dontrun{
+gmap(title = "NYC taxi pickups January 2013",
+  lat = 40.74, lng = -73.95, zoom = 11,
+  map_type = "roadmap", width = 1000, height = 800) \%>\%
+  ly_hexbin(nyctaxihex, alpha = 0.5,
+    palette = "Spectral10", trans = log, inv = exp)
+}
 }
 \seealso{
 \code{\link{gmap_style}}

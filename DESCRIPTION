@@ -5,14 +5,13 @@ Authors@R: c(
     person("Ryan", "Hafen", email = "rhafen@gmail.com", role = c("aut", "cre")),
     person("Kenton", "Russell", email = "kent.russell@timelyportfolio.com", role = "ctb"),
     person("Jonathan", "Owen", email = "jonathanro@gmail.com", role = "ctb"),
-    person("Barret", "Schloerkep", email = "schloerke@gmail.com", role = "ctb"),
+    person("Barret", "Schloerke", email = "schloerke@gmail.com", role = "ctb"),
     person("Saptasrhi", "Guha", email = "saptarshi.guha@gmail.com", role = "ctb"),
     person("Continuum Analytics, Inc.", role = c("aut", "cph"),
       comment = "Bokeh library in htmlwidgets/lib, http://bokeh.pydata.org"
     ))
-Description: R interface for creating plots in Bokeh. Bokeh by Continuum
-    Analytics, \url{http://bokeh.pydata.org/en/latest/}.
-URL: https://hafen.github.io/rbokeh
+Description: A native R plotting library that provides a flexible declarative interface for creating interactive web-based graphics, backed by the Bokeh visualization library.
+URL: https://hafen.github.io/rbokeh https://github.com/bokeh/rbokeh
 BugReports: https://github.com/bokeh/rbokeh/issues
 License: MIT + file LICENSE
 LazyData: true
@@ -35,6 +34,10 @@ Suggests:
     data.table,
     lattice,
     lintr,
-    roxygen2 (>= 5.0.0)
+    roxygen2 (>= 5.0.0),
+    packagedocs
+Remotes:
+    schloerke/packagedocs
 Enhances: shiny (>= 0.12)
 RoxygenNote: 5.0.1
+VignetteBuilder: packagedocs

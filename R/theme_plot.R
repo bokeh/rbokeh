@@ -1,8 +1,10 @@
 #' Override theme parameters for general plot attributes
 #'
 #' @param fig figure to modify
-#' @param background_fill (color) background color of plot
-#' @param border_fill (color) fill color of border area of plot
+#' @param background_fill_color (color) background color of plot
+#' @param background_fill_alpha (numeric) background color alpha of plot
+#' @param border_fill_color (color) fill color of border area of plot
+#' @param border_fill_alpha (numeric) fill color alpha of border area of plot
 #' @param outline_line_alpha (numeric) The line alpha for the plot border outline.
 #' @param outline_line_cap ('butt', 'round', 'square') The line cap for the plot border outline.
 #' @param outline_line_color (color) The line color for the plot border outline.
@@ -27,8 +29,10 @@
 #' @export
 theme_plot <- function(fig,
   pars = NULL,
-  background_fill = "white",
-  border_fill = "white",
+  background_fill_color = "white",
+  background_fill_alpha = 1,
+  border_fill_color = "white",
+  border_fill_alpha = 1,
   outline_line_alpha = 1,
   outline_line_cap = "butt",
   outline_line_color = "black",
