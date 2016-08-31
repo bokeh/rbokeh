@@ -16,4 +16,7 @@ point_types(size = 25, color = "blue", width = 800, height = 450)
 \description{
 Display glyph types available for ly_points()
 }
+\examples{
+point_types()
+}
 

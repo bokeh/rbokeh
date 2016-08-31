@@ -3,6 +3,8 @@
 #' @param size size of the glyph
 #' @param color color to use for line and fill properties
 #' @param width,height dimensions of output plot
+#' @examples
+#' point_types()
 #' @export
 point_types <- function(size = 25, color = "blue", width = 800, height = 450) {
 
