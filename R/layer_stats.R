@@ -261,8 +261,11 @@ ly_quantile <- function(
 #' @param data an optional data frame, providing the source for x and y
 #' @param width with of each box, a value between 0 (no width) and 1 (full width)
 #' @param coef see \code{\link[grDevices]{boxplot.stats}}
-#' @param with_outliers \code{logical} indicating whether or not the outlier
-#'   points should be drawn outside of the whiskers of the boxplot.
+#' @param outlier_glyph the glyph used to plot the outliers. If set to
+#'   \code{NA}, no outlier points are plotted. Run \code{point_types()} for
+#'   possible values.
+#' @param outlier_size the size of the glyph used to plot outliers. If set to
+#'   \code{NA}, no outlier points are plotted.
 #' @template par-coloralpha
 #' @template par-lnamegroup
 #' @template dots-fillline
@@ -274,8 +277,8 @@ ly_quantile <- function(
 ly_boxplot <- function(
   fig, x, y = NULL, data = figure_data(fig),
   width = 0.9, coef = 1.5,
-  with_outliers = TRUE,
   color = "blue", alpha = 1,
+  outlier_glyph = 1, outlier_size = 10,
   lname = NULL, lgroup = NULL, visible = TRUE,
   ...
 ) {
@@ -389,19 +392,18 @@ ly_boxplot <- function(
       line_color = args$params$line_color,
       line_alpha = args$params$line_alpha)
 
-    if (with_outliers) {
-      if (length(bp$out) > 0) {
-        fig <- ly_points(
-          fig = fig,
-          x = rep(gp, length(bp$out)), y = bp$out,
-          glyph = 1,
-          xlab = x_name, ylab = y_name,
-          visible = args$params$visible,
-          line_color = args$params$line_color,
-          fill_color = args$params$fill_color,
-          line_alpha = args$params$line_alpha,
-          fill_alpha = args$params$fill_alpha)
-      }
+    if (length(bp$out) > 0 && !(is.na(outlier_size) || is.na(outlier_glyph))) {
+      fig <- ly_points(
+        fig = fig,
+        x = rep(gp, length(bp$out)), y = bp$out,
+        glyph = rep(outlier_glyph, length(bp$out)),
+        size = outlier_size,
+        xlab = x_name, ylab = y_name,
+        visible = args$params$visible,
+        line_color = args$params$line_color,
+        fill_color = args$params$fill_color,
+        line_alpha = args$params$line_alpha,
+        fill_alpha = args$params$fill_alpha)
     }
   }
 
