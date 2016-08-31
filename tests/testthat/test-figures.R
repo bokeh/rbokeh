@@ -7,7 +7,7 @@
 
 fname <- ifelse(Sys.info()["sysname"] == "Windows", "nul", "/dev/null") # nolint
 
-p <- vector(length = 102, mode = "list")
+p <- vector(length = 103, mode = "list")
 
 test_that("examples", {
 
@@ -37,10 +37,6 @@ test_that("examples", {
     x_axis(label = "x", log = TRUE) %>%
     y_axis(label = "y", log = TRUE)
   print_model_json(p[[5]], file = fname)
-
-  p[[6]] <- figure(ylab = "Height (inches)", width = 600) %>%
-    ly_boxplot(voice.part, height, data = lattice::singer)
-  print_model_json(p[[6]], file = fname)
 
   # prepare data
   data(elements, package = "rbokeh")
@@ -284,6 +280,11 @@ test_that("examples", {
     ly_boxplot(voice.part, height, data = lattice::singer) %>%
     theme_axis("x", major_label_orientation = 90)
   print_model_json(p[[44]], file = fname)
+
+  d <- data.frame(x = rnorm(1000), y = sample(letters[1:5], 1000, replace = TRUE))
+  p[[103]] <- figure() %>%
+    ly_boxplot(y, x, outlier_glyph = NA, data = d)
+  print_model_json(p[[103]], file = fname)
 
   ## callbacks
   ##---------------------------------------------------------
@@ -529,10 +530,6 @@ test_that("examples", {
   p[[86]] <- figure(legend_location = "top_left") %>%
     ly_quantile(Sepal.Length, group = Species, data = iris)
   print_model_json(p[[86]], file = fname)
-
-  p[[87]] <- figure(ylab = "Height (inches)", width = 600) %>%
-    ly_boxplot(voice.part, height, data = lattice::singer)
-  print_model_json(p[[87]], file = fname)
 
   # wa_cancer <- droplevels(subset(latticeExtra::USCancerRates, state == "Washington"))
   # rownames(wa_cancer) <- NULL
