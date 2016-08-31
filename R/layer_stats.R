@@ -10,6 +10,11 @@
 #' @template par-lnamegroup
 #' @template dots-fillline
 #' @family layer functions
+#' @examples
+#' h <- figure(width = 600, height = 400) %>%
+#'   ly_hist(eruptions, data = faithful, breaks = 40, freq = FALSE) %>%
+#'   ly_density(eruptions, data = faithful)
+#' h
 #' @export
 ly_hist <- function(
   fig, x, data = figure_data(fig),
@@ -79,6 +84,11 @@ ly_hist <- function(
 #' @template par-lnamegroup
 #' @template dots-line
 #' @family layer functions
+#' @examples
+#' h <- figure(width = 600, height = 400) %>%
+#'   ly_hist(eruptions, data = faithful, breaks = 40, freq = FALSE) %>%
+#'   ly_density(eruptions, data = faithful)
+#' h
 #' @export
 ly_density <- function(
   fig, x, data = figure_data(fig),
@@ -154,6 +164,9 @@ ly_density <- function(
 #' @template par-lnamegroup
 #' @template dots-fillline
 #' @family layer functions
+#' @examples
+#' figure(legend_location = "top_left") %>%
+#'   ly_quantile(Sepal.Length, group = Species, data = iris)
 #' @export
 ly_quantile <- function(
   fig, x, group = NULL, data = figure_data(fig),
@@ -254,6 +267,9 @@ ly_quantile <- function(
 #' @template par-lnamegroup
 #' @template dots-fillline
 #' @family layer functions
+#' @examples
+#' figure(ylab = "Height (inches)", width = 600) %>%
+#'   ly_boxplot(voice.part, height, data = lattice::singer)
 #' @export
 ly_boxplot <- function(
   fig, x, y = NULL, data = figure_data(fig),
@@ -302,6 +318,8 @@ ly_boxplot <- function(
   x <- args$data$x
   y <- args$data$y
 
+  group_is_numeric <- FALSE
+
   if (is.null(y)) {
     x_name <- " "
     y_name <- args$info$x_name
@@ -309,17 +327,18 @@ ly_boxplot <- function(
   } else {
     num_ind <- c(is.numeric(x), is.numeric(y))
     if (all(num_ind)) {
+      group_is_numeric <- TRUE
       message(
         "both x and y are numeric -- choosing numeric variable based on ",
         "which has the most unique values")
       if (length(unique(x)) > length(unique(y))) {
         x_name <- args$info$y_name
         y_name <- args$info$x_name
-        group <- y
+        group <- as.character(y)
       } else {
         x_name <- args$info$x_name
         y_name <- args$info$y_name
-        group <- x
+        group <- as.character(x)
         x <- y
       }
     } else if (num_ind[1]) {
@@ -384,12 +403,13 @@ ly_boxplot <- function(
     }
   }
 
+  if (group_is_numeric && !fig$x$spec$has_x_axis)
+    fig <- fig %>% x_range(as.character(sort(unique(as.numeric(group)))))
+
   fig
 }
 
 # ly_violin
-
-# ly_bar
 
 # ly_dotplot
 
