@@ -19,6 +19,10 @@ theme_legend(fig, background_fill_alpha = 0.95,
 \arguments{
 \item{fig}{figure to modify}
 
+\item{background_fill_alpha}{(numeric) background color alpha of plot}
+
+\item{background_fill_color}{(color) background color of plot}
+
 \item{border_line_alpha}{The line alpha for the legend border outline.}
 
 \item{border_line_cap}{('butt', 'round', 'square') The line cap for the legend border outline.}

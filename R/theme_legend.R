@@ -1,6 +1,8 @@
 #' Override theme parameters for legend attributes
 #'
 #' @param fig figure to modify
+#' @param background_fill_color (color) background color of plot
+#' @param background_fill_alpha (numeric) background color alpha of plot
 #' @param border_line_alpha The line alpha for the legend border outline.
 #' @param border_line_cap ('butt', 'round', 'square') The line cap for the legend border outline.
 #' @param border_line_color The line color for the legend border outline.
