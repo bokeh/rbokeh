@@ -162,6 +162,19 @@ prepare_figure <- function(fig) {
                 )
                 spec <- c(spec, list(left = "left", bottom = "bottom",
                   right = "right", top = "top"))
+              } else if (spec$glyph == "bezier") {
+                dat <- data.frame(
+                  x0 = c(oox, oox),
+                  y0 = c(ooy, ooy),
+                  x1 = c(oox, oox),
+                  y1 = c(ooy, ooy),
+                  cx0 = c(oox, oox),
+                  cy0 = c(ooy, ooy),
+                  cx1 = c(oox, oox),
+                  cy1 = c(ooy, ooy)
+                )
+                spec <- c(spec, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1",
+                  cx0 = "cx0", cy0 = "cy0", cx1 = "cx1", cy1 = "cy1"))
               } else {
                 dat <- data.frame(x = c(oox, oox), y = c(ooy, ooy))
                 spec <- c(spec, list(x = "x", y = "y"))
