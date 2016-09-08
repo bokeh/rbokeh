@@ -315,7 +315,7 @@ ly_boxplot <- function(
   args$params <- resolve_color_alpha(args$params, has_line = TRUE,
     has_fill = TRUE, theme = fig$x$spec$theme)
 
-  fill_ind <- grepl("^fill_", names(args$params))
+  # fill_ind <- grepl("^fill_", names(args$params))
 
   # pull out x and y as they are used a lot
   x <- args$data$x

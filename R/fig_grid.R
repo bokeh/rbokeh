@@ -142,8 +142,13 @@ grid_plot <- function(figs, width = NULL, height = NULL,
     if (simplify_x) {
       idxs <- as.vector(idxm[-nrow(idxm), ])
       idxs <- idxs[!is.na(idxs)]
-      for (ii in idxs)
-        figs[[ii]] <- figs[[ii]] %>% x_axis(visible = FALSE)
+      for (ii in idxs) {
+        if (figs[[ii]]$x$spec$has_x_axis) {
+          figs[[ii]]$x$spec$model$x_axis$attributes$visible <- FALSE
+        } else {
+          figs[[ii]] <- figs[[ii]] %>% x_axis(visible = FALSE)
+        }
+      }
       if (is.null(x_margin))
         x_margin <- 70
     }
@@ -158,8 +163,13 @@ grid_plot <- function(figs, width = NULL, height = NULL,
     if (simplify_y) {
       idxs <- as.vector(idxm[, -1])
       idxs <- idxs[!is.na(idxs)]
-      for (ii in idxs)
-        figs[[ii]] <- figs[[ii]] %>% y_axis(visible = FALSE)
+      for (ii in idxs) {
+        if (figs[[ii]]$x$spec$has_y_axis) {
+          figs[[ii]]$x$spec$model$y_axis$attributes$visible <- FALSE
+        } else {
+          figs[[ii]] <- figs[[ii]] %>% y_axis(visible = FALSE)
+        }
+      }
       if (is.null(y_margin))
         y_margin <- 45
     }

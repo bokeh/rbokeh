@@ -126,14 +126,23 @@ prepare_figure <- function(fig) {
                 spec$size <- 0
               if (!is.null(spec$radius))
                 spec$radius <- 0
-              if (is.null(spec$glyph))
-                spec$glyph <- "circle"
-              if (spec$glyph %in% c("patches", "multi_line")) {
+              if (is.null(spec$glyph)) {
+                # if a glyph is being used for both glyph and other attributes
+                # the color attribute will be denoted with a filled large sqaure
+                # so we'll use a patch glyph
+                spec$glyph <- "patch"
+                dat <- data.frame(
+                  x = c(oox, oox),
+                  y = c(ooy, ooy)
+                )
+                spec$size <- NULL
+                spec <- c(spec, list(x = "x", y = "y"))
+              } else if (spec$glyph %in% c("patches", "multi_line")) {
                 dat <- data.frame(
                   xs = c(oox, oox),
                   ys = c(ooy, ooy)
                 )
-                spec <- c(glph$args, list(xs = "xs", ys = "ys"))
+                spec <- c(spec, list(xs = "xs", ys = "ys"))
               } else if (spec$glyph == "segment") {
                 dat <- data.frame(
                   x0 = c(oox, oox),
@@ -141,7 +150,7 @@ prepare_figure <- function(fig) {
                   x1 = c(oox, oox),
                   y1 = c(ooy, ooy)
                 )
-                spec <- c(glph$args, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1"))
+                spec <- c(spec, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1"))
               } else if (spec$glyph == "quadratic") {
                 dat <- data.frame(
                   x0 = c(oox, oox),
@@ -151,7 +160,7 @@ prepare_figure <- function(fig) {
                   cx = c(oox, oox),
                   cy = c(ooy, ooy)
                 )
-                spec <- c(glph$args, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1",
+                spec <- c(spec, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1",
                   cx = "cx", cy = "cy"))
               } else if (spec$glyph == "quad") {
                 dat <- data.frame(
@@ -160,11 +169,24 @@ prepare_figure <- function(fig) {
                   right = c(oox, oox),
                   top = c(ooy, ooy)
                 )
-                spec <- c(glph$args, list(left = "left", bottom = "bottom",
+                spec <- c(spec, list(left = "left", bottom = "bottom",
                   right = "right", top = "top"))
+              } else if (spec$glyph == "bezier") {
+                dat <- data.frame(
+                  x0 = c(oox, oox),
+                  y0 = c(ooy, ooy),
+                  x1 = c(oox, oox),
+                  y1 = c(ooy, ooy),
+                  cx0 = c(oox, oox),
+                  cy0 = c(ooy, ooy),
+                  cx1 = c(oox, oox),
+                  cy1 = c(ooy, ooy)
+                )
+                spec <- c(spec, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1",
+                  cx0 = "cx0", cy0 = "cy0", cx1 = "cx1", cy1 = "cy1"))
               } else {
                 dat <- data.frame(x = c(oox, oox), y = c(ooy, ooy))
-                spec <- c(glph$args, list(x = "x", y = "y"))
+                spec <- c(spec, list(x = "x", y = "y"))
               }
               fig <- fig %>% add_layer(spec = spec, dat = dat,
                 lname = lname, lgroup = lgroup)
