@@ -126,9 +126,18 @@ prepare_figure <- function(fig) {
                 spec$size <- 0
               if (!is.null(spec$radius))
                 spec$radius <- 0
-              if (is.null(spec$glyph))
-                spec$glyph <- "circle"
-              if (spec$glyph %in% c("patches", "multi_line")) {
+              if (is.null(spec$glyph)) {
+                # if a glyph is being used for both glyph and other attributes
+                # the color attribute will be denoted with a filled large sqaure
+                # so we'll use a patch glyph
+                spec$glyph <- "patch"
+                dat <- data.frame(
+                  x = c(oox, oox),
+                  y = c(ooy, ooy)
+                )
+                spec$size <- NULL
+                spec <- c(spec, list(x = "x", y = "y"))
+              } else if (spec$glyph %in% c("patches", "multi_line")) {
                 dat <- data.frame(
                   xs = c(oox, oox),
                   ys = c(ooy, ooy)
