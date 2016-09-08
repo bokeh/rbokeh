@@ -133,7 +133,7 @@ prepare_figure <- function(fig) {
                   xs = c(oox, oox),
                   ys = c(ooy, ooy)
                 )
-                spec <- c(glph$args, list(xs = "xs", ys = "ys"))
+                spec <- c(spec, list(xs = "xs", ys = "ys"))
               } else if (spec$glyph == "segment") {
                 dat <- data.frame(
                   x0 = c(oox, oox),
@@ -141,7 +141,7 @@ prepare_figure <- function(fig) {
                   x1 = c(oox, oox),
                   y1 = c(ooy, ooy)
                 )
-                spec <- c(glph$args, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1"))
+                spec <- c(spec, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1"))
               } else if (spec$glyph == "quadratic") {
                 dat <- data.frame(
                   x0 = c(oox, oox),
@@ -151,7 +151,7 @@ prepare_figure <- function(fig) {
                   cx = c(oox, oox),
                   cy = c(ooy, ooy)
                 )
-                spec <- c(glph$args, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1",
+                spec <- c(spec, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1",
                   cx = "cx", cy = "cy"))
               } else if (spec$glyph == "quad") {
                 dat <- data.frame(
@@ -160,11 +160,11 @@ prepare_figure <- function(fig) {
                   right = c(oox, oox),
                   top = c(ooy, ooy)
                 )
-                spec <- c(glph$args, list(left = "left", bottom = "bottom",
+                spec <- c(spec, list(left = "left", bottom = "bottom",
                   right = "right", top = "top"))
               } else {
                 dat <- data.frame(x = c(oox, oox), y = c(ooy, ooy))
-                spec <- c(glph$args, list(x = "x", y = "y"))
+                spec <- c(spec, list(x = "x", y = "y"))
               }
               fig <- fig %>% add_layer(spec = spec, dat = dat,
                 lname = lname, lgroup = lgroup)
