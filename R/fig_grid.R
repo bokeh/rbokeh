@@ -526,14 +526,14 @@ update_grid_sizes <- function(obj) {
   full_height <- sum(heights)
 
   new_width_factor <- (width - y_margin) / full_width
-  new_height_factor <- (height - x_margin) / full_height
+  new_height_factor <- (height - x_margin - 30) / full_height
 
   new_wmat <- wmat * new_width_factor
   new_hmat <- hmat * new_height_factor
   new_wmat[, 1] <- new_wmat[, 1] + y_margin
   new_hmat[nrow(new_hmat), ] <- new_hmat[nrow(new_hmat), ] + x_margin
 
-  obj$width <- sum(apply(new_wmat, 2, function(x) max(x, na.rm = TRUE)))
+  obj$width <- sum(apply(new_wmat, 2, function(x) max(x, na.rm = TRUE))) + 30
   obj$height <- sum(apply(new_hmat, 1, function(x) max(x, na.rm = TRUE)))
 
   for (ii in seq_along(obj$x$spec$plot_refs)) {
