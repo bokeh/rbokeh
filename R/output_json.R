@@ -5,7 +5,7 @@
 #' @param file parameter passed on to \code{\link[base]{cat}}
 #' @param pbcopy logical - if on OSX, should the results be passed to the clipboard (TRUE) instead of printed to the screen (FALSE)?
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' p <- figure() %>% ly_points(1:10) %>%
 #'  tool_pan(dimensions = "height")
 #' print_model_json(p)
