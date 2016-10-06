@@ -1,16 +1,13 @@
 ---
-title: "rbokeh"
-subtitle: "R Interface for Bokeh"
-author: "Ryan Hafen"
-copyright: "Ryan Hafen"
-output:
-  packagedocs:
-    toc: true
-vignette: |
-  %\VignetteIndexEntry{rbokeh_rd}
-  %\VignetteEngine{packagedocs::rd}
-navpills: |
-  <li><a href='index.html'>Docs</a></li>
-  <li class="active"><a href='rd.html'>Package Ref</a></li>
-  <li><a href='https://github.com/bokeh/rbokeh'>Github <i class='fa fa-github'></i></a></li>
+title: "rbokeh Function Reference"
+output: rmarkdown::html_vignette
+vignette: >
+ %\VignetteEngine{knitr::rmarkdown}
+ %\VignetteIndexEntry{rbokeh Function Reference}
+ %\VignetteEncoding{UTF-8}
 ---
+
+<meta http-equiv="refresh" content="0; URL='http://hafen.github.io/rbokeh/rd.html'" />
+
+<p>If not automatically redirected, please visit (<a href="http://hafen.github.io/rbokeh/rd.html">http://hafen.github.io/rbokeh/rd.html</a>) for the latest vignette.</p>
+

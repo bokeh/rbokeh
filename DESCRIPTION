@@ -35,9 +35,7 @@ Suggests:
     lattice,
     lintr,
     roxygen2 (>= 5.0.0),
-    packagedocs
-Remotes:
-    schloerke/packagedocs
+    knitr
 Enhances: shiny (>= 0.12)
 RoxygenNote: 5.0.1
-VignetteBuilder: packagedocs
+VignetteBuilder: knitr
