@@ -5,8 +5,8 @@
 \title{Create a Bokeh grid plot from a list of Bokeh figures}
 \usage{
 grid_plot(figs, width = NULL, height = NULL, nrow = 1, ncol = 1,
-  byrow = TRUE, xlim = NULL, ylim = NULL, toolbar_location = "above",
-  logo = NULL, same_axes = FALSE, simplify_axes = TRUE, y_margin = NULL,
+  byrow = TRUE, xlim = NULL, ylim = NULL, logo = NULL,
+  same_axes = FALSE, simplify_axes = TRUE, y_margin = NULL,
   x_margin = NULL, link_data = FALSE)
 }
 \arguments{

@@ -19,8 +19,7 @@
 #' @export
 grid_plot <- function(figs, width = NULL, height = NULL,
   nrow = 1, ncol = 1, byrow = TRUE,
-  xlim = NULL, ylim = NULL,
-  toolbar_location = "above", logo = NULL,
+  xlim = NULL, ylim = NULL, logo = NULL,
   same_axes = FALSE, simplify_axes = TRUE,
   y_margin = NULL, x_margin = NULL, link_data = FALSE) {
 
