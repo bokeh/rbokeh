@@ -18,8 +18,8 @@ src <- data.frame(
   x1 = numeric(0), y1 = numeric(0))
 
 p <- figure(width = 400, height = 500, toolbar_location = NULL,
-  title="Hover Over Points", tools = NULL) %>%
-  ly_segments(x0 = x0, y0 = y0, x1 = x1,y1 = y1, color = "olive",
+  title = "Hover Over Points", tools = NULL) %>%
+  ly_segments(x0 = x0, y0 = y0, x1 = x1, y1 = y1, color = "olive",
     alpha = 0.6, line_width = 3, data = src, lname = "segment") %>%
   ly_points(x = x, y = y, data = D, color = "olive", size = 30,
     alpha = 0.4, lname = "circle")
@@ -40,7 +40,7 @@ for (i=0; i < indices.length; i++) {
   }
 }
 segment_data.set('data', data);
-", rjson::toJSON(links)), lnames = c("circle","segment"))
+", jsonlite::toJSON(links)), lnames = c("circle", "segment"))
 
 p <- tool_hover(p, callback = callback, c("circle"))
 p

@@ -7,7 +7,7 @@
 
 fname <- ifelse(Sys.info()["sysname"] == "Windows", "nul", "/dev/null") # nolint
 
-p <- vector(length = 103, mode = "list")
+p <- vector(length = 105, mode = "list")
 
 test_that("examples", {
 
@@ -42,7 +42,7 @@ test_that("examples", {
   data(elements, package = "rbokeh")
 
   # create figure
-  p[[7]] <- figure(title = "Periodic Table", tools = c("resize", "hover"),
+  p[[7]] <- figure(title = "Periodic Table", tools = c("hover"),
     ylim = as.character(c(7:1)), xlim = as.character(1:18),
     xgrid = FALSE, ygrid = FALSE, xlab = "", ylab = "",
     height = 600, width = 1200) %>%
@@ -449,7 +449,7 @@ test_that("examples", {
 
   # link data across plots in the grid (try box_select tool)
   # (data sources must be the same)
-  tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "resize", "reset")
+  tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "reset")
   p1 <- figure(tools = tools, width = 500, height = 500) %>%
     ly_points(Sepal.Length, Sepal.Width, data = iris, color = Species)
   p2 <- figure(tools = tools, width = 500, height = 500) %>%
@@ -651,6 +651,23 @@ test_that("examples", {
   p[[102]] <- figure() %>%
     ly_boxplot(sample(1:20, 500, replace = TRUE), rnorm(500))
   print_model_json(p[[102]], file = fname)
+
+  p[[103]] <- grid_plot(figs) %>%
+    theme_title(text_color = "red") %>%
+    theme_plot(background_fill_color = "#E6E6E6",
+      outline_line_color = "white") %>%
+    theme_grid(c("x", "y"), grid_line_color = "white",
+      minor_grid_line_color = "white",
+      minor_grid_line_alpha = 0.4) %>%
+    theme_axis(c("x", "y"), axis_line_color = "white",
+      major_label_text_color = "#7F7F7F",
+      major_tick_line_color = "#7F7F7F",
+      minor_tick_line_alpha = 0, num_minor_ticks = 2)
+  print_model_json(p[[103]], file = fname)
+
+  p[[104]] <- grid_plot(figs) %>%
+    set_theme(bk_ggplot_theme)
+  print_model_json(p[[104]], file = fname)
 
   pp <- figure() %>% ly_points(1:10)
   rbokeh2html(pp)

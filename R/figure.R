@@ -72,7 +72,7 @@ figure <- function(
   xaxes = "below",
   yaxes = "left",
   legend_location = "top_right",
-  tools = c("pan", "wheel_zoom", "box_zoom", "resize", "reset", "save", "help"),
+  tools = c("pan", "wheel_zoom", "box_zoom", "reset", "save", "help"),
   theme = getOption("bokeh_theme"),
   toolbar_location = "above",
   h_symmetry = TRUE,

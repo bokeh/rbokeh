@@ -47,7 +47,7 @@ grid_plot(figs) %>%
 
 # link data across plots in the grid (try box_select tool)
 # (data sources must be the same)
-tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "resize", "reset")
+tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "reset")
 p1 <- figure(tools = tools, width = 500, height = 500) %>%
   ly_points(Sepal.Length, Sepal.Width, data = iris, color = Species)
 p2 <- figure(tools = tools, width = 500, height = 500) %>%
