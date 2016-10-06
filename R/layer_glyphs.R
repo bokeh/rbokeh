@@ -15,7 +15,14 @@
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
-#' @example man-roxygen/ex-annwedge.R
+#' @examples
+#' rescale <- function(x)
+#'   (x - min(x)) / diff(range(x))
+#' figure() %>%
+#'   ly_annular_wedge(Sepal.Length, Sepal.Width, data = iris,
+#'     end_angle = rescale(Petal.Length) * 2 * pi, color = Species,
+#'     inner_radius = 0.1, outer_radius = 0.15, alpha = 0.5,
+#'     hover = Species)
 #' @family layer functions
 #' @export
 ly_annular_wedge <- function(
@@ -86,7 +93,14 @@ ly_annular_wedge <- function(
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
-#' @example man-roxygen/ex-annwedge.R
+#' @examples
+#' rescale <- function(x)
+#'   (x - min(x)) / diff(range(x))
+#' figure() %>%
+#'   ly_annulus(Sepal.Length, Sepal.Width, data = iris,
+#'     color = Species, hover = Species, alpha = 0.5,
+#'     outer_radius = rescale(Petal.Length) * 0.3,
+#'     inner_radius = rescale(Petal.Length) * 0.1)
 #' @family layer functions
 #' @export
 ly_annulus <- function(
@@ -155,7 +169,13 @@ ly_annulus <- function(
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-line
-#' @example man-roxygen/ex-annwedge.R
+#' @examples
+#' rescale <- function(x)
+#'   (x - min(x)) / diff(range(x))
+#' figure() %>%
+#'   ly_arc(Sepal.Length, Sepal.Width, data = iris,
+#'     end_angle = rescale(Petal.Length) * 2 * pi, color = Species,
+#'     alpha = 0.5)
 #' @family layer functions
 #' @export
 ly_arc <- function(
@@ -225,7 +245,14 @@ ly_arc <- function(
 #' @template par-legend
 #' @template par-lnamegroup
 #' @template dots-fillline
-#' @example man-roxygen/ex-annwedge.R
+#' @examples
+#' rescale <- function(x)
+#'   (x - min(x)) / diff(range(x))
+#' figure() %>%
+#'   ly_wedge(Sepal.Length, Sepal.Width, data = iris,
+#'     end_angle = rescale(Petal.Length) * 2 * pi, color = Species,
+#'     radius = 0.15, alpha = 0.5,
+#'     hover = Species)
 #' @family layer functions
 #' @export
 ly_wedge <- function(

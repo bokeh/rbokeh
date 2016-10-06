@@ -631,13 +631,13 @@ test_that("examples", {
     ly_oval(Sepal.Length, Sepal.Width, data = iris, color = Species, alpha = 0.5)
   print_model_json(p[[97]], file = fname)
 
-  # broken!!
-  p[[98]] <- figure() %>%
-    ly_patch(Sepal.Length, Sepal.Width, data = iris, color = Species, alpha = 0.5)
-  print_model_json(p[[98]], file = fname)
-  p[[99]] <- figure() %>%
-    ly_patch(Sepal.Length, Sepal.Width, data = iris, color = "blue", alpha = 0.5)
-  print_model_json(p[[99]], file = fname)
+  # single patch doesn't allow line and fill color to come from data source
+  # p[[98]] <- figure() %>%
+  #   ly_patch(Sepal.Length, Sepal.Width, data = iris, color = Species, alpha = 0.5)
+  # print_model_json(p[[98]], file = fname)
+  # p[[99]] <- figure() %>%
+  #   ly_patch(Sepal.Length, Sepal.Width, data = iris, color = "blue", alpha = 0.5)
+  # print_model_json(p[[99]], file = fname)
 
   p[[100]] <- figure() %>%
     ly_points(disp, mpg, data = mtcars, color = cyl,

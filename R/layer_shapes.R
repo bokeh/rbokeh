@@ -402,7 +402,7 @@ ly_patch <- function(
   axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y)
 
   mc <- lapply(match.call(), deparse)
-
+browser()
   make_glyph(
     fig, type = "patch", data = args$data, args = args$params,
     legend = args$info$legend, hover = args$info$hover, url = args$info$url,
