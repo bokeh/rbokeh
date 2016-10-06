@@ -11,6 +11,19 @@
 add_hover <- function(fig, tooltips, renderer_ref) {
   id <- gen_id(fig, c(renderer_ref$id, "hover"))
   hov_model <- hover_model(id, fig$x$spec$ref, renderer_ref, tooltips)
+
+  if (is.null(fig$x$spec$model$toolbar)) {
+    tbid <- gen_id(fig, "Toolbar")
+    tbmodel <- toolbar_model(tbid)
+    tbmodel$model$attributes["logo"] <- list(fig$x$spec$logo)
+    fig$x$spec$model$plot$attributes$toolbar <- tbmodel$ref
+    fig$x$spec$model$toolbar <- tbmodel$model
+    fig$x$spec$model$plot$attributes$tool_events <- list()
+    fig <- update_tool_events(fig)
+  }
+
+  fig$x$spec$model$toolbar
+
   fig$x$spec$model$toolbar$attributes$tools[[id]] <- hov_model$ref
   fig$x$spec$model[[id]] <- hov_model$model
 
@@ -18,6 +31,16 @@ add_hover <- function(fig, tooltips, renderer_ref) {
 }
 
 add_hover_callback <- function(fig, callback, ref_layer) {
+
+  if (is.null(fig$x$spec$model$toolbar)) {
+    tbid <- gen_id(fig, "Toolbar")
+    tbmodel <- toolbar_model(tbid)
+    tbmodel$model$attributes["logo"] <- list(fig$x$spec$logo)
+    fig$x$spec$model$plot$attributes$toolbar <- tbmodel$ref
+    fig$x$spec$model$toolbar <- tbmodel$model
+    fig$x$spec$model$plot$attributes$tool_events <- list()
+    fig <- update_tool_events(fig)
+  }
 
   hov_id <- gen_id(fig, c(callback, ref_layer, "hov_callback"))
 
