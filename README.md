@@ -13,8 +13,8 @@ A native R plotting library that provides a flexible declarative interface for c
 # from CRAN:
 install.packages("rbokeh")
 
-# from packages.tessera.io:
-options(repos = c(tessera = "http://packages.tessera.io", getOption("repos")))
+# from packages.deltarho.org:
+options(repos = c(deltarho = "http://packages.deltarho.org", getOption("repos")))
 install.packages("rbokeh")
 
 # from github:
@@ -24,4 +24,3 @@ devtools::install_github("bokeh/rbokeh")
 ### Use
 
 Please see [here](http://hafen.github.io/rbokeh).
-

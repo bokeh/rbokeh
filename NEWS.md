@@ -1,3 +1,69 @@
+Version 0.5
+----------------------------------------------------------------------
+
+- Remove resize tool as default
+- Make theme_ functions propagate across grid plot figures
+- Add theme_title to address issue with title props being moved to new element
+- Remove logo by default in grid plot
+- Fix bug in grid plot height calculation
+- Fix parameter in grid_plot
+- Fix issue with multiple mapped attributes and legend
+- Fix issue with bezier legend
+- Fix bug when using custom axes in grid plots
+- Update to BokehJS 0.12.2
+- Add background fill options to theme_legend
+- Add boxplot test using outlier_glyph=NA and remove superfluous boxplot tests
+- Outlier points in `ly_boxplot` can be customized
+- Replace do.call's with explicit function calls in ly_boxplot (thanks Steve Lianoglou)
+- Add code coverage
+- Add many more tests for good coverage
+- Update and add examples to docs
+- Add example for point_types
+- Update boxplot to work correctly with both numeric axes and add stat examples
+- Fix bug in html output dimension specification
+- Use independent data source for CRAN packages example in vignette
+- Fix bug in axis updates with num_minor_ticks
+- Fix background and border fill color/alpha
+- Update widget2png to return any JS error messages as string
+- Update catjitter and add example
+- Update gmap documentation
+- Update themes to work better with BokehJS 0.12
+- Add vignettes
+- Add remote for packagedocs in DESCRIPTION
+- Add github url and VignetteBuilder entry to DESCRIPTION
+- Make it easier to specify color palettes
+- Update ly_bar to include group information in hover and make hover FALSE by default
+- Fix bug in grid spacer computation
+- Fix bug in 'empty' legend glyph attributes to deal with picky 0.12
+- Fix ly_points so it doesn't progress colors when grouping by other things
+- Fix rbokeh2html to work with Bokeh 0.12 layouts
+- Fix issue with grouping by color in ly_polygons
+- Remove data from legend glyphs to avoid trouble
+- Fix splitting issue with ly_points and ly_lines
+- Make ly_abline work with vectors
+- Make abline with h= or v= work for mixed axis types (date, cat, etc.)
+- Allow ly_bar to use either axis for bars
+- Fix bug where legend glyphs have incorrect data types
+- Add hover to ly_bar
+- Major lintr overhaul
+- Grid plot working with 0.12
+- Make titles work in new grid plots
+- Add title spec for 0.12
+- Fix default sizing for RStudio
+- Better type checking in ly_image
+- Remove padding logic as it is handled in 0.12 now
+- Fix 0.12 compatibility issues with ly_image
+- Fix tool rendering issues
+- Fix unneeded attributes in CategoricalTicker
+- Fix text layer attributes
+- Add notes about how to scrape glyphs from docs
+- Fix bug in glyphs used for legend entries
+- Add comments about possible new hover parameters
+- Remove logo by default
+- Add `with_outliers` to `ly_boxplot` to toggle visibility of points outside the whiskers (thanks Steve Lianoglou)
+- Add api_key to gmap
+- Update BokehJS to 0.12.1 and initial adjustment of R code to adapt
+
 Version 0.4
 ----------------------------------------------------------------------
 
