@@ -51,8 +51,15 @@ theme_plot <- function(fig,
   pars <- handle_extra_pars(pars, figure_par_validator_map)
   parnames <- names(pars)
 
-  for (nm in parnames)
-    fig$x$spec$model$plot$attributes[[nm]] <- pars[[nm]]
+  if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
+    for (ii in seq_along(fig$x$spec$figs)) {
+      for (nm in parnames)
+        fig$x$spec$figs[[ii]]$x$spec$model$plot$attributes[[nm]] <- pars[[nm]]
+    }
+  } else {
+    for (nm in parnames)
+      fig$x$spec$model$plot$attributes[[nm]] <- pars[[nm]]
+  }
 
   fig
 }

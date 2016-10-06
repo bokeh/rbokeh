@@ -2,11 +2,19 @@
 #'
 #' @param fig a figure to set the theme for
 #' @param theme theme
+#' @example man-roxygen/ex-theme.R
 #' @export
 set_theme <- function(fig, theme) {
   if (is.function(theme))
     theme <- theme()
-  fig$x$spec$theme <- theme
+
+  if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
+    for (ii in seq_along(fig$x$spec$figs))
+      fig$x$spec$figs[[ii]]$x$spec$theme <- theme
+  } else {
+    fig$x$spec$theme <- theme
+  }
+
   fig
 }
 

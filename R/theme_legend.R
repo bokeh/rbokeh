@@ -68,8 +68,15 @@ theme_legend <- function(fig,
   pars <- handle_extra_pars(pars, legend_par_validator_map)
   parnames <- names(pars)
 
-  for (nm in parnames)
-    fig$x$spec$legend_attrs[[nm]] <- pars[[nm]]
+  if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
+    for (ii in seq_along(fig$x$spec$figs)) {
+      for (nm in parnames)
+        fig$x$spec$figs[[ii]]$x$spec$legend_attrs[[nm]] <- pars[[nm]]
+    }
+  } else {
+    for (nm in parnames)
+      fig$x$spec$legend_attrs[[nm]] <- pars[[nm]]
+  }
 
   fig
 }

@@ -56,17 +56,35 @@ theme_grid <- function(fig,
   ## if an axis hasn't been created yet (usually done in prepare_figure)
   ## then create it here and apply attributes
   ## could alternatively save attributes and apply in prepare_figure
-  if ("x" %in% which && fig$x$spec$xaxes != FALSE) {
-    if (is.null(fig$x$spec$model[["x_grid"]]))
-      fig <- fig %>% x_axis()
-    for (nm in parnames)
-      fig$x$spec$model[["x_grid"]]$attributes[[nm]] <- pars[[nm]]
-  }
-  if ("y" %in% which && fig$x$spec$yaxes != FALSE) {
-    if (is.null(fig$x$spec$model[["y_grid"]]))
-      fig <- fig %>% y_axis()
-    for (nm in parnames)
-      fig$x$spec$model[["y_grid"]]$attributes[[nm]] <- pars[[nm]]
+
+  if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
+    for (ii in seq_along(fig$x$spec$figs)) {
+      if ("x" %in% which && fig$x$spec$figs[[ii]]$x$spec$xaxes != FALSE) {
+        if (is.null(fig$x$spec$figs[[ii]]$x$spec$model[["x_grid"]]))
+          fig$x$spec$figs[[ii]] <- fig$x$spec$figs[[ii]] %>% x_axis()
+        for (nm in parnames)
+          fig$x$spec$figs[[ii]]$x$spec$model[["x_grid"]]$attributes[[nm]] <- pars[[nm]]
+      }
+      if ("y" %in% which && fig$x$spec$figs[[ii]]$x$spec$yaxes != FALSE) {
+        if (is.null(fig$x$spec$figs[[ii]]$x$spec$model[["y_grid"]]))
+          fig$x$spec$figs[[ii]] <- fig$x$spec$figs[[ii]] %>% y_axis()
+        for (nm in parnames)
+          fig$x$spec$figs[[ii]]$x$spec$model[["y_grid"]]$attributes[[nm]] <- pars[[nm]]
+      }
+    }
+  } else {
+    if ("x" %in% which && fig$x$spec$xaxes != FALSE) {
+      if (is.null(fig$x$spec$model[["x_grid"]]))
+        fig <- fig %>% x_axis()
+      for (nm in parnames)
+        fig$x$spec$model[["x_grid"]]$attributes[[nm]] <- pars[[nm]]
+    }
+    if ("y" %in% which && fig$x$spec$yaxes != FALSE) {
+      if (is.null(fig$x$spec$model[["y_grid"]]))
+        fig <- fig %>% y_axis()
+      for (nm in parnames)
+        fig$x$spec$model[["y_grid"]]$attributes[[nm]] <- pars[[nm]]
+    }
   }
 
   fig

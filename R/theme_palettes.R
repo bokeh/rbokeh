@@ -88,7 +88,12 @@ set_palette <- function(fig,
     res <- NULL
   }
 
-  fig$x$spec$theme_update <- res
+  if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
+    for (ii in seq_along(fig$x$spec$figs))
+      fig$x$spec$figs[[ii]]$x$spec$theme_update <- res
+  } else {
+    fig$x$spec$theme_update <- res
+  }
 
   fig
 }
