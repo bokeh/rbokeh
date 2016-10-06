@@ -12,13 +12,6 @@
 #' @param outline_line_dash_offset (integer) The line dash offset for the plot border outline.
 #' @param outline_line_join ('miter', 'round', 'bevel') The line join for the plot border outline.
 #' @param outline_line_width (integer) The line width for the plot border outline.
-#' @param title_text_align ('left', 'right', 'center') The text align for the plot title.
-#' @param title_text_alpha The text alpha for the plot title.
-#' @param title_text_baseline ('top', 'middle', 'bottom', 'alphabetic', 'hanging') The text baseline for the plot title.
-#' @param title_text_color (color) The text color for the plot title.
-#' @param title_text_font (string) The text font for the plot title.
-#' @param title_text_font_size (string - e.g. '12pt') The text font size for the plot title.
-#' @param title_text_font_style ('normal', 'italic', 'bold') The text font style for the plot title.
 #' @param min_border (integer) A convenience property to set all all the min_X_border properties to the same value. If an individual border property is explicitly set, it will override min_border.
 #' @param min_border_bottom (integer) Minimum size in pixels of the padding region below the bottom of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.
 #' @param min_border_left (integer) Minimum size in pixels of the padding region to the left of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.
@@ -40,13 +33,6 @@ theme_plot <- function(fig,
   outline_line_dash_offset = 0,
   outline_line_join = "miter",
   outline_line_width = 1,
-  title_text_align = "left",
-  title_text_alpha = 1,
-  title_text_baseline = "bottom",
-  title_text_color = "#444444",
-  title_text_font = "Helvetica",
-  title_text_font_size = "12pt",
-  title_text_font_style = "normal",
   min_border = 50,
   min_border_bottom = 50,
   min_border_left = 50,

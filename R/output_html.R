@@ -24,7 +24,10 @@ rbokeh2html <- function(fig, file = tempfile(fileext = ".html"), pretty = FALSE,
   docid <- fig$x$docid
 
   fig <- jsonlite::toJSON(fig$x$docs_json, pretty = pretty,
-    auto_unbox = TRUE, null = "null", na = "null")
+    dataframe = "columns", null = "null", na = "null", auto_unbox = TRUE,
+    digits = getOption("shiny.json.digits", 16), use_signif = TRUE,
+    force = TRUE, POSIXt = "ISO8601", UTC = TRUE, rownames = FALSE,
+    keep_vec_names = TRUE)
 
   ver <- get_bokeh_version()
 

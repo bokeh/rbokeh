@@ -9,11 +9,7 @@ theme_plot(fig, pars = NULL, background_fill_color = "white",
   border_fill_alpha = 1, outline_line_alpha = 1,
   outline_line_cap = "butt", outline_line_color = "black",
   outline_line_dash = NULL, outline_line_dash_offset = 0,
-  outline_line_join = "miter", outline_line_width = 1,
-  title_text_align = "left", title_text_alpha = 1,
-  title_text_baseline = "bottom", title_text_color = "#444444",
-  title_text_font = "Helvetica", title_text_font_size = "12pt",
-  title_text_font_style = "normal", min_border = 50,
+  outline_line_join = "miter", outline_line_width = 1, min_border = 50,
   min_border_bottom = 50, min_border_left = 50, min_border_right = 50,
   min_border_top = 50)
 }
@@ -43,20 +39,6 @@ theme_plot(fig, pars = NULL, background_fill_color = "white",
 \item{outline_line_join}{('miter', 'round', 'bevel') The line join for the plot border outline.}
 
 \item{outline_line_width}{(integer) The line width for the plot border outline.}
-
-\item{title_text_align}{('left', 'right', 'center') The text align for the plot title.}
-
-\item{title_text_alpha}{The text alpha for the plot title.}
-
-\item{title_text_baseline}{('top', 'middle', 'bottom', 'alphabetic', 'hanging') The text baseline for the plot title.}
-
-\item{title_text_color}{(color) The text color for the plot title.}
-
-\item{title_text_font}{(string) The text font for the plot title.}
-
-\item{title_text_font_size}{(string - e.g. '12pt') The text font size for the plot title.}
-
-\item{title_text_font_style}{('normal', 'italic', 'bold') The text font style for the plot title.}
 
 \item{min_border}{(integer) A convenience property to set all all the min_X_border properties to the same value. If an individual border property is explicitly set, it will override min_border.}
 
