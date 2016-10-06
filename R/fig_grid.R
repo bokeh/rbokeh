@@ -7,6 +7,7 @@
 #' @param byrow populate the grid by row according to the order of figure elements supplied in \code{params}
 #' @param xlim the extent of the plotting area in the x-dimension to be applied to every panel (original individual panel limits will be honored if not specified).
 #' @param ylim the extent of the plotting area in the y-dimension to be applied to every panel (original individual panel limits will be honored if not specified).
+#' @param logo ('normal', 'grey') What version of the Bokeh logo to display on the toolbar. If set to NULL, no logo will be displayed.
 #' @param same_axes logical or vector of two logicals specifying whether the x and/or y axis limits should be the same for each plot in the grid
 #' @param simplify_axes logical or vector of logicals specifying whether to simply the x and/or y axes (only show the axes along the bottom and left sides of the grid) - only valid if \code{same_axes} is \code{TRUE} for the axis
 #' @param x_margin,y_margin specify the margin space in pixels to be left for axes when using \code{simplify_axes=TRUE}
@@ -19,8 +20,12 @@
 grid_plot <- function(figs, width = NULL, height = NULL,
   nrow = 1, ncol = 1, byrow = TRUE,
   xlim = NULL, ylim = NULL,
+  toolbar_location = "above", logo = NULL,
   same_axes = FALSE, simplify_axes = TRUE,
   y_margin = NULL, x_margin = NULL, link_data = FALSE) {
+
+  tb_pars <- list(logo = logo)
+  tb_pars <- handle_extra_pars(tb_pars, grid_plot_par_validator_map)
 
   if (length(same_axes) == 1) {
     same_x <- same_y <- same_axes
@@ -249,6 +254,10 @@ grid_plot <- function(figs, width = NULL, height = NULL,
   tbbmod <- base_model_object("ToolbarBox", tbbid)
   tbbmod$model$attributes$sizing_mode <- "scale_width"
   tbbmod$model$attributes$toolbar_location <- "above"
+  # tbbmod$model$attributes$toolbar_location <- tb_pars$toolbar_location
+  if ("logo" %in% names(tb_pars))
+    tbbmod$model$attributes["logo"] <- list(tb_pars$logo)
+
   # gather all tools from all figures
   alltools <- unname(unlist(lapply(figs,
     function(a) {
@@ -549,3 +558,8 @@ update_grid_sizes <- function(obj) {
   }
   obj
 }
+
+grid_plot_par_validator_map <- list(
+  "toolbar_location" = "toolbar_location",
+  "logo" =  "logo"
+)
