@@ -1,3 +1,117 @@
+#' Set palettes for various plot attributes
+#'
+#' @param fig figure to update theme palettes for
+#' @param discrete_color a discrete color palette to override the theme (see details)
+#' @param discrete_alpha a discrete alpha palette to override the theme (see details)
+#' @param continuous_color a continuous color palette to override the theme (see details)
+#' @param continuous_alpha a continuous alpha palette to override the theme (see details)
+#' @param discrete_glyph a discrete glyph palette to override the theme
+#' @param discrete_fill_color a discrete fill_color palette to override the theme
+#' @param discrete_line_color a discrete line_color palette to override the theme
+#' @param discrete_text_color a discrete text_color palette to override the theme
+#' @param discrete_fill_alpha a discrete fill_alpha palette to override the theme
+#' @param discrete_line_alpha a discrete line_alpha palette to override the theme
+#' @param discrete_text_alpha a discrete text_alpha palette to override the theme
+#' @param discrete_line_dash a discrete line_dash palette to override the theme
+#' @param discrete_line_width a discrete line_width palette to override the theme
+#' @param discrete_size a discrete size palette to override the theme
+#' @param continuous_glyph a continuous glyph palette to override the theme
+#' @param continuous_fill_color a continuous fill_color palette to override the theme
+#' @param continuous_line_color a continuous line_color palette to override the theme
+#' @param continuous_text_color a continuous text_color palette to override the theme
+#' @param continuous_fill_alpha a continuous fill_alpha palette to override the theme
+#' @param continuous_line_alpha a continuous line_alpha palette to override the theme
+#' @param continuous_text_alpha a continuous text_alpha palette to override the theme
+#' @param continuous_line_dash a continuous line_dash palette to override the theme
+#' @param continuous_line_width a continuous line_width palette to override the theme
+#' @param continuous_size a continuous size palette to override the theme
+#' @details
+#' Palettes specified in this function will override the existing theme and apply the specified attributes when they are not otherwise explicitly specified in a layer function.  See the contents of \code{bk_default_theme} for an example of the theme elements this will update.  As a convenience, if you use \code{discrete_color}, the palette will apply to all the \code{discrete_***_color} attributes unless those are explicitly specified also.  The same pattern is true for \code{discrete_alpha}, \code{continuous_color}, and \code{continuous_alpha}.  For specifying discrete color palettes, the easiest thing to do is use \code{\link{pal_color}} with a vector of colors you want to use in the palette.
+#' @examples
+#' figure() %>%
+#'   ly_points(Sepal.Length, Sepal.Width, data = iris,
+#'     color = Species, glyph = Species) %>%
+#'   set_palette(discrete_color = pal_color(c("red", "blue", "green")))
+#'
+#' @export
+set_palette <- function(fig,
+  discrete_color = NULL, discrete_alpha = NULL,
+  continuous_color = NULL, continuous_alpha = NULL,
+  discrete_glyph = NULL, discrete_fill_color = NULL,
+  discrete_line_color = NULL, discrete_text_color = NULL,
+  discrete_fill_alpha = NULL, discrete_line_alpha = NULL,
+  discrete_text_alpha = NULL, discrete_line_dash = NULL,
+  discrete_line_width = NULL, discrete_size = NULL,
+  continuous_glyph = NULL, continuous_fill_color = NULL,
+  continuous_line_color = NULL, continuous_text_color = NULL,
+  continuous_fill_alpha = NULL, continuous_line_alpha = NULL,
+  continuous_text_alpha = NULL, continuous_line_dash = NULL,
+  continuous_line_width = NULL, continuous_size = NULL) {
+
+  specified <- setdiff(names(as.list(match.call())[-1]), "fig")
+  if (length(specified) > 0) {
+    pars <- as.list(environment())[specified]
+    # need to do some validation here...
+    build_object <- function(type, pars) {
+      res <- NULL
+      pnames <- names(pars)
+      nms <- pnames[grepl(paste0("^", type, "_"), pnames)]
+      if (length(nms) > 0) {
+        res <- pars[nms]
+        names(res) <- gsub(paste0("^", type, "_"), "", nms)
+        if (paste0(type, "_color") %in% nms) {
+          if (is.null(res$fill_color))
+            res$fill_color <- res$color
+          if (is.null(res$line_color))
+            res$line_color <- res$color
+          if (is.null(res$text_color))
+            res$text_color <- res$color
+          res$color <- NULL
+        }
+        if (paste0(type, "_alpha") %in% nms) {
+          if (is.null(res$fill_alpha))
+            res$fill_alpha <- res$alpha
+          if (is.null(res$line_alpha))
+            res$line_alpha <- res$alpha
+          if (is.null(res$text_alpha))
+            res$text_alpha <- res$alpha
+          res$alpha <- NULL
+        }
+      }
+      res
+    }
+
+    res <- list()
+    res$discrete <- build_object("discrete", pars)
+    res$continuous <- build_object("continuous", pars)
+  } else {
+    res <- NULL
+  }
+
+  if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
+    for (ii in seq_along(fig$x$spec$figs))
+      fig$x$spec$figs[[ii]]$x$spec$theme_update <- res
+  } else {
+    fig$x$spec$theme_update <- res
+  }
+
+  fig
+}
+
+
+#' Palettes for themes
+#' @rdname palettes
+#' @param colors a vector of colors to be used in the color palette
+#' @export
+pal_color <- function(colors) {
+  function(n) {
+    # if (n > length(colors))
+    #   message("There are more levels to color than there are available colors ",
+    #     "in this palette... repeating colors")
+    colors[(seq_len(n) - 1) %% length(colors) + 1]
+  }
+}
+
 #' Palettes for themes
 #' @rdname palettes
 #' @param pal palette name
@@ -5,12 +119,8 @@
 #' @param max maximum value
 #' @export
 pal_tableau <- function(pal = "Tableau10") {
-  pal <- tableau_colors[[pal]]
-  function(n) {
-    # if(n > length(pal))
-    #   message("There are more levels to color than there are available colors in this palette... repeating colors")
-    pal[(seq_len(n) - 1) %% length(pal) + 1]
-  }
+  colors <- tableau_colors[[pal]]
+  pal_color(colors)
 }
 # show_col(pal_tableau("Tableau20")(20))
 
@@ -18,18 +128,25 @@ pal_tableau <- function(pal = "Tableau10") {
 #' @export
 pal_bk_glyph <- function() {
   function(n) {
-    pal <- c("circle", "square", "triangle", "diamond", "circle_cross", "circle_x", "cross", "diamond_cross", "inverted_triangle","square_cross", "square_x", "x", "asterisk")
-    # if(n > length(pal))
-    #   message("There are more levels to color than there are available colors in this palette... repeating colors")
+    pal <- c("circle", "square", "triangle", "diamond", "circle_cross", "circle_x",
+      "cross", "diamond_cross", "inverted_triangle", "square_cross", "square_x", "x",
+      "asterisk")
+    # if (n > length(pal))
+    #   message(
+    #     "There are more levels to color than there are available colors ",
+    #     "in this palette... repeating colors")
     pal[(seq_len(n) - 1) %% length(pal) + 1]
   }
 }
 
 #' @rdname palettes
 #' @export
+#' @param cols a vector of colors to ramp across for a continuous palette
+#' @param space passed on to \code{\link{colorRampPalette}[grDevices]}
 #' @importFrom grDevices colorRampPalette
-pal_gradient <- function() {
-  grDevices::colorRampPalette(c("#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B"))
+pal_gradient <- function(
+  cols = c("#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B"), space = "rgb") {
+  grDevices::colorRampPalette(cols, space = space)
 }
 
 #' @rdname palettes
@@ -45,8 +162,9 @@ pal_size <- function(min = 2, max = 20) {
 pal_bk_line_dash <- function() {
   function(n) {
     dashes <- as.character(1:6)
-    # if(n > 6)
-    #   message("There are more levels for line dash than there are available line dash styles in this theme... repeating line dash")
+    # if (n > 6)
+    #   message("There are more levels for line dash than there are available ",
+    #     "line dash styles in this theme... repeating line dash")
     lty_dict[dashes[(seq_len(n) - 1) %% length(dashes) + 1]]
   }
 }
@@ -56,13 +174,15 @@ pal_bk_line_dash <- function() {
 pal_bk_line_width <- function() {
   function(n) {
     dashes <- as.character(1:6)
-    # if(n > 6)
-    #   message("There are more levels for line dash than there are available line dash styles in this theme... repeating line dash")
+    # if (n > 6)
+    #   message("There are more levels for line dash than there are available ",
+    #     "line dash styles in this theme... repeating line dash")
     dashes[(seq_len(n) - 1) %% length(dashes) + 1]
   }
 }
 
 # http://bokeh.pydata.org/en/latest/docs/reference/palettes.html
+# nolint start
 bk_gradient_palettes <- list(
   Spectral3 = c("#99d594", "#ffffbf", "#fc8d59"),
   Spectral4 = c("#2b83ba", "#abdda4", "#fdae61", "#d7191c"),
@@ -272,6 +392,6 @@ bk_gradient_palettes <- list(
   PuBuGn8 = c("#016450", "#02818a", "#3690c0", "#67a9cf", "#a6bddb", "#d0d1e6", "#ece2f0", "#fff7fb"),
   PuBuGn9 = c("#014636", "#016c59", "#02818a", "#3690c0", "#67a9cf", "#a6bddb", "#d0d1e6", "#ece2f0", "#fff7fb")
 )
+# nolint end
 
 bk_gradient_palette_names <- names(bk_gradient_palettes)
-

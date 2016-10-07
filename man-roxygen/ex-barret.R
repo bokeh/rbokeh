@@ -123,7 +123,7 @@ load_all(); b_fig %>% ly_bar(variety, yield, data = lattice::barley) %>% theme_a
 # the top half of the R is being cut off. :-(
 a <- function() {
   load_all()
-  url <- c("http://bokeh.pydata.org/en/latest/_static/bokeh-transparent.png",
+  url <- c("  http://bokeh.pydata.org/en/latest/_static/images/logo.png",
     "http://developer.r-project.org/Logo/Rlogo-4.png")
 
   ss <- seq(0, 2*pi, length = 13)[-1]

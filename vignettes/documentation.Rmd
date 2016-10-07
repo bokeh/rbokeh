@@ -1,0 +1,13 @@
+---
+title: "rbokeh Package Tutorial"
+output: rmarkdown::html_vignette
+vignette: >
+ %\VignetteEngine{knitr::rmarkdown}
+ %\VignetteIndexEntry{rbokeh Package Tutorial}
+ %\VignetteEncoding{UTF-8}
+---
+
+<meta http-equiv="refresh" content="0; URL='http://hafen.github.io/rbokeh'" />
+
+<p>If not automatically redirected, please visit (<a href="http://hafen.github.io/rbokeh">http://hafen.github.io/rbokeh</a>) for the latest vignette.</p>
+

@@ -39,7 +39,7 @@ ly_points <- function(
   validate_fig(fig, "ly_points")
 
   mc <- attr(fig, "ly_call")
-  if(is.null(mc))
+  if (is.null(mc))
     mc <- lapply(match.call(), deparse)
 
   args <- sub_names(fig, data,
@@ -59,36 +59,41 @@ ly_points <- function(
       dots = lazy_dots(...)
     )
   )
-  if(is.null(args$params$glyph)) {
+  if (is.null(args$params$glyph)) {
     args$params$glyph <- "circle"
   }
 
   # #TODO
   # # if color wasn't specified, it should be the same for all glyphs
-  # if(length(unique(args$glyph)) != 1) {
+  # if (length(unique(args$glyph)) != 1) {
   #   # if color wasn't specified, it should be the same for all glyphs
-  #   if(is.null(args$color))
+  #   if (is.null(args$color))
   #     args$color <- fig$x$spec$theme[["discrete"]][["fill_color"]](1)
   # }
 
-  if(length(args$params$glyph) == 1) {
+  if (length(args$params$glyph) == 1) {
     args$params$glyph <- rep(args$params$glyph, length(args$data$x))
   }
-  if(is.character(args$params$glyph)) {
+  if (is.character(args$params$glyph)) {
     args$params$glyph <- factor(args$params$glyph)
   }
 
   # split data up for each glyph
-  split_list <- split(seq_along(args$params$glyph), args$params$glyph)
-  for (ii in seq_along(split_list)) {
+  split_list <- split(seq_along(args$params$glyph), args$params$glyph, drop = TRUE)
+  sln <- length(split_list)
+  for (ii in seq_len(sln)) {
     arg_obj <- subset_arg_obj(args, split_list[[ii]])
 
     arg_obj$params$glyph <- arg_obj$params$glyph[1]
 
+    ly <- fig$x$spec$layers[[arg_obj$info$lgroup]]
+    if (is.null(args$params$color) && sln > 1)
+      ly <- NULL
+
     arg_obj$params <- resolve_color_alpha(
       arg_obj$params,
       has_line = TRUE, has_fill = TRUE,
-      ly    = fig$x$spec$layers[[arg_obj$info$lgroup]],
+      ly    = ly,
       solid = arg_obj$params$glyph %in% as.character(15:20),
       theme = fig$x$spec$theme
     )
@@ -96,7 +101,7 @@ ly_points <- function(
     arg_obj$params <- resolve_glyph_props(arg_obj$params$glyph, arg_obj$params, arg_obj$info$lgroup)
 
     ## see if any options won't be used and give a message
-    if(valid_glyph(arg_obj$params$glyph)) {
+    if (valid_glyph(arg_obj$params$glyph)) {
       check_opts(arg_obj$params, arg_obj$params$glyph, formals = names(formals(ly_points)))
     }
 

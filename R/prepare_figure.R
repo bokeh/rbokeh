@@ -7,18 +7,28 @@
 prepare_figure <- function(fig) {
   legend <- list()
 
-  if(is.null(fig$x$spec$theme))
+  if (is.null(fig$x$spec$theme))
     fig$x$spec$theme <- bk_default_theme()
+
+  if (!is.null(fig$x$spec$theme_update)) {
+    for (type in c("discrete", "continuous")) {
+      if (!is.null(fig$x$spec$theme_update[[type]])) {
+        for (nm in names(fig$x$spec$theme_update[[type]])) {
+          fig$x$spec$theme[[type]][[nm]] <- fig$x$spec$theme_update[[type]][[nm]]
+        }
+      }
+    }
+  }
 
   ## resolve attribute mappings
   ## step through each layer
-  for(ly in fig$x$spec$layers) {
-    if(!is.null(ly$maps)) {
+  for (ly in fig$x$spec$layers) {
+    if (!is.null(ly$maps)) {
       ## step through each mapped attribute
       mapnames <- names(ly$maps)
-      for(nm in mapnames) {
+      for (nm in mapnames) {
         map_item <- ly$maps[[nm]]
-        if(is.numeric(map_item$domain)) {
+        if (is.numeric(map_item$domain)) {
           # the continuous domain cuts should be specifiable
           # and the default number of cuts should be a theme thing
           intervals <- pretty(map_item$domain, 6)
@@ -32,48 +42,49 @@ prepare_figure <- function(fig) {
           map_item$values <- map_item$domain
         }
         ## map the glyphs attributes
-        for(entry in map_item$map_entries) {
+        for (entry in map_item$map_entries) {
           did <- fig$x$spec$model[[entry$id]]$attributes$data_source$id
           gl <- fig$x$spec$model[[entry$id]]$attributes$glyph
           nsglid <- fig$x$spec$model[[entry$id]]$attributes$nonselection_glyph$id
           hovglid <- fig$x$spec$model[[entry$id]]$attributes$hover_glyph$id
           data_attr_names <- names(fig$x$spec$model[[did]]$attributes$data)
           glyph_attr_names <- names(fig$x$spec$model[[gl$id]]$attributes)
-          for(attr in entry$map_args) {
+          for (attr in entry$map_args) {
             ## handle glyph type
-            if(attr == "glyph") {
-              new_type <- underscore2camel(get_theme_value(underscore2camel(map_item$domain), gl$type, attr,
-                fig$x$spec$theme))
+            if (attr == "glyph") {
+              new_type <- underscore2camel(
+                get_theme_value(underscore2camel(map_item$domain),
+                  gl$type, attr, fig$x$spec$theme))
               ## should check things in resolve_glyph_props() with new glyph
               fig$x$spec$model[[entry$id]]$attributes$glyph$type <- new_type
               fig$x$spec$model[[gl$id]]$type <- new_type
               ## fix it in the non-selection glyph too
-              if(!is.null(nsglid)) {
+              if (!is.null(nsglid)) {
                 fig$x$spec$model[[entry$id]]$attributes$nonselection_glyph$type <- new_type
                 fig$x$spec$model[[nsglid]]$type <- new_type
               }
-              if(!is.null(hovglid)) {
+              if (!is.null(hovglid)) {
                 fig$x$spec$model[[entry$id]]$attributes$hover_glyph$type <- new_type
                 fig$x$spec$model[[hovglid]]$type <- new_type
               }
             } else {
-              if(attr %in% data_attr_names) {
+              if (attr %in% data_attr_names) {
                 cur_dat <- fig$x$spec$model[[did]]$attributes$data[[attr]]
-                fig$x$spec$model[[did]]$attributes$data[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr,
-                  fig$x$spec$theme)
-              } else if(attr %in% glyph_attr_names) {
-                if(attr == "line_dash") {
+                fig$x$spec$model[[did]]$attributes$data[[attr]] <- get_theme_value(
+                  map_item$domain, cur_dat, attr, fig$x$spec$theme)
+              } else if (attr %in% glyph_attr_names) {
+                if (attr == "line_dash") {
                   cur_dat <- fig$x$spec$model[[gl$id]]$attributes[[attr]]
-                  fig$x$spec$model[[gl$id]]$attributes[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr,
-                    fig$x$spec$theme)
-                  fig$x$spec$model[[hovglid]]$attributes[[attr]] <- get_theme_value(map_item$domain, cur_dat, attr,
-                    fig$x$spec$theme)
+                  fig$x$spec$model[[gl$id]]$attributes[[attr]] <- get_theme_value(
+                    map_item$domain, cur_dat, attr, fig$x$spec$theme)
+                  fig$x$spec$model[[hovglid]]$attributes[[attr]] <- get_theme_value(
+                    map_item$domain, cur_dat, attr, fig$x$spec$theme)
                 } else {
                   cur_dat <- fig$x$spec$model[[gl$id]]$attributes[[attr]]$value
-                  fig$x$spec$model[[gl$id]]$attributes[[attr]]$value <- get_theme_value(map_item$domain, cur_dat, attr,
-                    fig$x$spec$theme)
-                  fig$x$spec$model[[hovglid]]$attributes[[attr]]$value <- get_theme_value(map_item$domain, cur_dat, attr,
-                    fig$x$spec$theme)
+                  fig$x$spec$model[[gl$id]]$attributes[[attr]]$value <- get_theme_value(
+                    map_item$domain, cur_dat, attr, fig$x$spec$theme)
+                  fig$x$spec$model[[hovglid]]$attributes[[attr]]$value <- get_theme_value(
+                    map_item$domain, cur_dat, attr, fig$x$spec$theme)
                 }
               }
             }
@@ -81,38 +92,103 @@ prepare_figure <- function(fig) {
         }
 
         ## add legend glyphs and build legend element
-        if(is.null(ly$do_legend)) {
+        if (is.null(ly$do_legend)) {
           ## add a header to this entry of the legend
           # ## spacer if it's not the first legend group
-          # if(nm != mapnames[1])
+          # if (nm != mapnames[1])
           #   legend[[paste0("lgnd_spacer_", nm)]] <- list(list("", list()))
           nm <- gsub("^\"|\"$", "", nm)
+          # sometimes the name can be quote("name") so remove it in this case
+          if (grepl("^quote\\(", nm)) {
+            nm <- gsub("^quote\\(\\\"", "", nm)
+            nm <- gsub("\\\"\\)$", "", nm)
+          }
           legend[[paste0("lgnd_header_", nm)]] <- list(list(nm, list()))
-          for(ii in seq_along(map_item$labels)) {
+          for (ii in seq_along(map_item$labels)) {
             cur_val <- map_item$values[[ii]]
             cur_lab <- map_item$labels[[ii]]
             lgnd_id <- paste(nm, cur_lab, sep = "_")
             legend[[lgnd_id]] <- list(list(paste0(" ", cur_lab), list()))
 
-            for(glph in map_item$legend_glyphs) {
-              for(mrg in glph$map_args)
-                glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg, fig$x$spec$theme)
+            for (glph in map_item$legend_glyphs) {
+              for (mrg in glph$map_args)
+                glph$args[[mrg]] <- get_theme_value(map_item$domain, cur_val, mrg,
+                  fig$x$spec$theme)
               # render legend glyph
-              spec <- c(glph$args, list(x = "x", y = "y"))
+              spec <- glph$args
               lgroup <- paste("__legend_", nm, "_", cur_lab, sep = "")
               lname <- glph$args$glyph
               glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
               # make it so legend glyph doesn't show up on page
               oox <- ifelse(fig$x$spec$x_axis_type == "categorical", "", NA)
               ooy <- ifelse(fig$x$spec$y_axis_type == "categorical", "", NA)
-              if(!is.null(spec$size))
+              if (!is.null(spec$size))
                 spec$size <- 0
-              if(!is.null(spec$radius))
+              if (!is.null(spec$radius))
                 spec$radius <- 0
-              if(is.null(spec$glyph))
-                spec$glyph <- "Circle"
-              fig <- fig %>% add_layer(spec = spec,
-                dat = data.frame(x = c(oox, oox), y = c(ooy, ooy)),
+              if (is.null(spec$glyph)) {
+                # if a glyph is being used for both glyph and other attributes
+                # the color attribute will be denoted with a filled large sqaure
+                # so we'll use a patch glyph
+                spec$glyph <- "patch"
+                dat <- data.frame(
+                  x = c(oox, oox),
+                  y = c(ooy, ooy)
+                )
+                spec$size <- NULL
+                spec <- c(spec, list(x = "x", y = "y"))
+              } else if (spec$glyph %in% c("patches", "multi_line")) {
+                dat <- data.frame(
+                  xs = c(oox, oox),
+                  ys = c(ooy, ooy)
+                )
+                spec <- c(spec, list(xs = "xs", ys = "ys"))
+              } else if (spec$glyph == "segment") {
+                dat <- data.frame(
+                  x0 = c(oox, oox),
+                  y0 = c(ooy, ooy),
+                  x1 = c(oox, oox),
+                  y1 = c(ooy, ooy)
+                )
+                spec <- c(spec, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1"))
+              } else if (spec$glyph == "quadratic") {
+                dat <- data.frame(
+                  x0 = c(oox, oox),
+                  y0 = c(ooy, ooy),
+                  x1 = c(oox, oox),
+                  y1 = c(ooy, ooy),
+                  cx = c(oox, oox),
+                  cy = c(ooy, ooy)
+                )
+                spec <- c(spec, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1",
+                  cx = "cx", cy = "cy"))
+              } else if (spec$glyph == "quad") {
+                dat <- data.frame(
+                  left = c(oox, oox),
+                  bottom = c(ooy, ooy),
+                  right = c(oox, oox),
+                  top = c(ooy, ooy)
+                )
+                spec <- c(spec, list(left = "left", bottom = "bottom",
+                  right = "right", top = "top"))
+              } else if (spec$glyph == "bezier") {
+                dat <- data.frame(
+                  x0 = c(oox, oox),
+                  y0 = c(ooy, ooy),
+                  x1 = c(oox, oox),
+                  y1 = c(ooy, ooy),
+                  cx0 = c(oox, oox),
+                  cy0 = c(ooy, ooy),
+                  cx1 = c(oox, oox),
+                  cy1 = c(ooy, ooy)
+                )
+                spec <- c(spec, list(x0 = "x0", y0 = "y0", x1 = "x1", y1 = "y1",
+                  cx0 = "cx0", cy0 = "cy0", cx1 = "cx1", cy1 = "cy1"))
+              } else {
+                dat <- data.frame(x = c(oox, oox), y = c(ooy, ooy))
+                spec <- c(spec, list(x = "x", y = "y"))
+              }
+              fig <- fig %>% add_layer(spec = spec, dat = dat,
                 lname = lname, lgroup = lgroup)
 
               # add reference to glyph to legend object
@@ -126,20 +202,20 @@ prepare_figure <- function(fig) {
   }
 
   ## deal with common legend, if any
-  if(length(fig$x$spec$common_legend) > 0) {
-    for(lg in fig$x$spec$common_legend) {
+  if (length(fig$x$spec$common_legend) > 0) {
+    for (lg in fig$x$spec$common_legend) {
       lgroup <- paste("common_legend", lg$name, sep = "_")
       legend[[lgroup]] <- list(list(lg$name, list()))
-      for(lg_args in lg$args) {
-        spec <- c(lg_args, list(x = "x", y = "y"))
+      for (lg_args in lg$args) {
+        spec <- c(lg_args)
         lname <- lg_args$glyph
         glr_id <- gen_id(fig, c("glyph_renderer", lgroup, lname))
         # make it so legend glyph doesn't show up on page
         oox <- ifelse(fig$x$spec$x_axis_type == "categorical", "", NA)
         ooy <- ifelse(fig$x$spec$y_axis_type == "categorical", "", NA)
-        if(!is.null(spec$size))
+        if (!is.null(spec$size))
           spec$size <- 0
-        if(!is.null(spec$radius))
+        if (!is.null(spec$radius))
           spec$radius <- 0
 
         fig <- fig %>% add_layer(spec = spec,
@@ -153,7 +229,7 @@ prepare_figure <- function(fig) {
     }
   }
 
-  if(length(legend) > 0 && !is.null(fig$x$spec$legend_attrs))
+  if (length(legend) > 0 && !is.null(fig$x$spec$legend_attrs))
     fig <- fig %>%
       add_legend(unname(unlist(legend, recursive = FALSE)),
         fig$x$spec$legend_attrs)
@@ -162,56 +238,58 @@ prepare_figure <- function(fig) {
   ## log axis is only available if explicitly specified through x_axis()
   ## or y_axis(), so at this point, *_mapper_type should be defined
   x_log <- y_log <- FALSE
-  if(!is.null(fig$x$spec$model$plot$attributes$x_mapper_type))
+  if (!is.null(fig$x$spec$model$plot$attributes$x_mapper_type))
     x_log <- TRUE
-  if(!is.null(fig$x$spec$model$plot$attributes$y_mapper_type))
+  if (!is.null(fig$x$spec$model$plot$attributes$y_mapper_type))
     y_log <- TRUE
 
   ## set xlim and ylim if not set
-  if(length(fig$x$spec$xlim) == 0) {
+  if (length(fig$x$spec$xlim) == 0) {
     # message("xlim not specified explicitly... calculating...")
-    xrange <- get_all_glyph_range(fig$x$spec$glyph_x_ranges, fig$x$spec$padding_factor, fig$x$spec$x_axis_type, x_log)
+    xrange <- get_all_glyph_range(fig$x$spec$glyph_x_ranges, fig$x$spec$padding_factor,
+      fig$x$spec$x_axis_type, x_log)
   } else {
     xrange <- fig$x$spec$xlim
-    if(inherits(xrange, c("Date", "POSIXt")))
+    if (inherits(xrange, c("Date", "POSIXt")))
       xrange <- to_epoch(xrange)
   }
 
-  if(length(fig$x$spec$ylim) == 0) {
+  if (length(fig$x$spec$ylim) == 0) {
     # message("ylim not specified explicitly... calculating...")
-    yrange <- get_all_glyph_range(fig$x$spec$glyph_y_ranges, fig$x$spec$padding_factor, fig$x$spec$y_axis_type, y_log)
+    yrange <- get_all_glyph_range(fig$x$spec$glyph_y_ranges, fig$x$spec$padding_factor,
+      fig$x$spec$y_axis_type, y_log)
   } else {
     yrange <- fig$x$spec$ylim
-    if(inherits(yrange, c("Date", "POSIXt")))
+    if (inherits(yrange, c("Date", "POSIXt")))
       yrange <- to_epoch(yrange)
   }
 
-  if(!fig$x$spec$has_x_range)
+  if (!fig$x$spec$has_x_range)
     fig <- fig %>% x_range(xrange)
 
-  if(!fig$x$spec$has_y_range)
+  if (!fig$x$spec$has_y_range)
     fig <- fig %>% y_range(yrange)
 
-  if(!fig$x$spec$has_x_axis) {
-    if(is.null(fig$x$spec$xlab)) {
+  if (!fig$x$spec$has_x_axis) {
+    if (is.null(fig$x$spec$xlab)) {
       this_xlab <- "x"
     } else {
       this_xlab <- fig$x$spec$xlab
     }
-    if(fig$x$spec$xaxes == FALSE) {
+    if (fig$x$spec$xaxes == FALSE) {
       fig <- fig %>% x_axis(this_xlab, grid = fig$x$spec$xgrid, visible = FALSE)
     } else {
       fig <- fig %>% x_axis(this_xlab, grid = fig$x$spec$xgrid, position = fig$x$spec$xaxes)
     }
   }
 
-  if(!fig$x$spec$has_y_axis) {
-    if(is.null(fig$x$spec$ylab)) {
+  if (!fig$x$spec$has_y_axis) {
+    if (is.null(fig$x$spec$ylab)) {
       this_ylab <- "y"
     } else {
       this_ylab <- fig$x$spec$ylab
     }
-    if(fig$x$spec$yaxes == FALSE) {
+    if (fig$x$spec$yaxes == FALSE) {
       fig <- fig %>% y_axis(this_ylab, grid = fig$x$spec$ygrid, visible = FALSE)
     } else {
       fig <- fig %>% y_axis(this_ylab, grid = fig$x$spec$ygrid, position = fig$x$spec$yaxes)
@@ -219,8 +297,8 @@ prepare_figure <- function(fig) {
   }
 
   ## see if we need to execute any deferred functions
-  if(length(fig$x$spec$glyph_defer) > 0) {
-    for(dfr in fig$x$spec$glyph_defer) {
+  if (length(fig$x$spec$glyph_defer) > 0) {
+    for (dfr in fig$x$spec$glyph_defer) {
       tmp_spec <- dfr$fn(dfr$spec, xrange, yrange)
       tmp_data <- dfr$fn(dfr$data, xrange, yrange)
       fig <- fig %>% add_layer(tmp_spec, tmp_data, dfr$lname, dfr$lgroup)
@@ -231,35 +309,25 @@ prepare_figure <- function(fig) {
   fig$x$spec$height <- fig$x$spec$model$plot$attributes$plot_height
   fig$x$spec$id <- fig$x$spec$model$plot$id
 
-  # handle toolbar padding
-  if(!is.null(fig$x$parenttype)) {
-    # parenttype is set when plot is part of GridPlot, which has different padding
-    x_pad <- y_pad <- 4
+  if (is.null(fig$width)) {
+    fig$x$spec$model$plot$attributes$plot_width <- NULL
   } else {
-    x_pad <- y_pad <- 10
+    fig$x$spec$model$plot$attributes$plot_width <- fig$width
   }
-  tb <- fig$x$spec$model$plot$attributes$toolbar_location
-  if(is.null(tb)) {
-    if(!"toolbar_location" %in% names(fig$x$spec$model$plot$attributes))
-      x_pad <- 46
-  } else if(tb %in% c("above", "below")) {
-    y_pad <- 46
-  } else if(tb %in% c("left", "right")) {
-    x_pad <- 46
+  if (is.null(fig$height)) {
+    fig$x$spec$model$plot$attributes$plot_height <- NULL
+  } else {
+    fig$x$spec$model$plot$attributes$plot_height <- fig$height
   }
-
-  fig$x$padding <- list(type = "figure", y_pad = y_pad, x_pad = x_pad)
-  fig$x$spec$model$plot$attributes$plot_width <- fig$width - y_pad
-  fig$x$spec$model$plot$attributes$plot_height <- fig$height - x_pad
 
   # handle plot/axis/grid/legend themes
-  if(!is.null(fig$x$spec$theme$plot))
+  if (!is.null(fig$x$spec$theme$plot))
     fig <- fig %>% theme_plot(pars = fig$x$spec$theme$plot)
-  if(!is.null(fig$x$spec$theme$axis))
+  if (!is.null(fig$x$spec$theme$axis))
     fig <- fig %>% theme_axis(c("x", "y"), pars = fig$x$spec$theme$axis)
-  if(!is.null(fig$x$spec$theme$grid))
+  if (!is.null(fig$x$spec$theme$grid))
     fig <- fig %>% theme_grid(c("x", "y"), pars = fig$x$spec$theme$grid)
-  if(!is.null(fig$x$spec$theme$legend))
+  if (!is.null(fig$x$spec$theme$legend))
     fig <- fig %>% theme_legend(pars = fig$x$spec$theme$legend)
 
   fig

@@ -22,11 +22,13 @@
 #' @export
 widget2gist <- function(widget_string, name,
   created = NULL, description = "",
-  license = c("none", "apache-2.0", "bsd-2-clause", "bsd-3-clause", "cc-by-4.0", "cc-by-nc-4.0", "cc-by-nc-nd-4.0", "cc-by-nc-sa-4.0", "cc-by-nd-4.0", "cc-by-sa-4.0", "cddl-1.0", "epl-1.0", "gpl-2.0", "gpl-3.0", "lgpl-2.1", "lgpl-3.0", "mit", "mpl-2.0"),
+  license = c("none", "apache-2.0", "bsd-2-clause", "bsd-3-clause", "cc-by-4.0",
+    "cc-by-nc-4.0", "cc-by-nc-nd-4.0", "cc-by-nc-sa-4.0", "cc-by-nd-4.0", "cc-by-sa-4.0",
+    "cddl-1.0", "epl-1.0", "gpl-2.0", "gpl-3.0", "lgpl-2.1", "lgpl-3.0", "mit", "mpl-2.0"),
   border = TRUE, scrolling = FALSE,
   secure = TRUE, view = TRUE) {
 
-  if(!is.character(widget_string))
+  if (!is.character(widget_string))
     stop("Argument 'widget_string' must be a string specifying an htmlwidget")
 
   license <- match.arg(license)
@@ -40,20 +42,20 @@ widget2gist <- function(widget_string, name,
   dir <- tempfile(pattern = "widget_gist_", fileext = "")
   dir.create(dir)
 
-  if(inherits(p, "rbokeh")) {
+  if (inherits(p, "rbokeh")) {
     rbokeh2html(p, file = file.path(dir, "index.html"), secure = secure)
     # widget2png(p, file = file.path(dir, "thumbnail.png"))
-  } else if(inherits(p, "htmlwidget")) {
+  } else if (inherits(p, "htmlwidget")) {
     try_res <- try(htmlwidgets::saveWidget(p,
       file = file.path(dir, "index.html"),
       selfcontained = TRUE))
-    if(inherits(try_res, "error"))
+    if (inherits(try_res, "error"))
       stop("Widget could not be saved as a self contained file.")
     unlink(file.path(dir, "index_files"), recursive = TRUE)
   }
 
   readme <- NULL
-  if(!is.null(created))
+  if (!is.null(created))
     readme <- c(readme, paste0("Created by ", created), "")
   readme <- c(readme, description, "", "```r", widget_string, "```")
   writeLines(paste(readme, collapse = "\n"), file.path(dir, "README.md"))
@@ -78,9 +80,12 @@ widget2gist <- function(widget_string, name,
   # emb <- paste0("http://bl.ocks.org/", gst$owner$login, "/raw/", gst$id)
   index_raw <- gst$files[["index.html"]]$raw_url
   index_cdn <- gsub("gist\\.githubusercontent\\.com", "cdn.rawgit.com", index_raw)
-  message(paste0('   <iframe width="', p$width + 20, '" height="', p$height + 20, '" frameBorder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" sandbox="allow-forms allow-scripts allow-popups allow-same-origin allow-pointer-lock" src="', index_cdn,'"></iframe>'))
+  message(paste0("   <iframe width='", p$width + 20, "' height='", p$height + 20,
+    "' frameBorder='0' webkitallowfullscreen='' mozallowfullscreen='' ",
+    "allowfullscreen='' sandbox='allow-forms allow-scripts allow-popups ",
+    "allow-same-origin allow-pointer-lock' src='", index_cdn, "'></iframe>"))
 
-  if(view) {
+  if (view) {
     Sys.sleep(0.5) # wait so it has time to populate
     utils::browseURL(bl_ocks)
   }

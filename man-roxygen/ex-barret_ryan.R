@@ -62,7 +62,7 @@ p
 
 
 load_all()
-url <- c("http://bokeh.pydata.org/en/latest/_static/bokeh-transparent.png",
+url <- c("  http://bokeh.pydata.org/en/latest/_static/images/logo.png",
   "http://developer.r-project.org/Logo/Rlogo-4.png")
 ss <- seq(0, 2*pi, length = 13)[-1]
 ws <- runif(12, 2.5, 5) * rep(c(1, 0.8), 6)

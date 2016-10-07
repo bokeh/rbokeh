@@ -47,8 +47,9 @@ ly_hexbin <- function(
 
   minarea <- 0.04; maxarea <- 0.8; mincnt <- 1; maxcnt <- NULL
 
-  if(!inherits(args$data$x, "hexbin")) {
-    xy_names <- get_xy_names(args$data$x, args$data$y, deparse(substitute(x)), deparse(substitute(y)), NULL)
+  if (!inherits(args$data$x, "hexbin")) {
+    xy_names <- get_xy_names(args$data$x, args$data$y,
+      deparse(substitute(x)), deparse(substitute(y)), NULL)
     xy <- get_xy_data(args$data$x, args$data$y)
     args$data$x <- xy$x
     args$data$y <- xy$y
@@ -65,34 +66,37 @@ ly_hexbin <- function(
   }
 
   hbd <- get_from_hexbin(hbd, maxcnt = maxcnt,
-    mincnt =mincnt, trans = trans, inv = inv, style = style,
+    mincnt = mincnt, trans = trans, inv = inv, style = style,
     minarea = minarea, maxarea = maxarea)
 
-  if(is.character(palette)) {
-    if(valid_color(palette)) {
+  if (is.character(palette)) {
+    if (valid_color(palette)) {
       col <- palette
     } else {
-      if(!palette %in% bk_gradient_palette_names)
-        stop("'palette' specified in ly_hexbin is not a valid color name or palette - see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html", call. = FALSE)
+      if (!palette %in% bk_gradient_palette_names)
+        stop(
+          "'palette' specified in ly_hexbin is not a valid color name or palette ",
+          "- see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+          call. = FALSE)
       palette <- colorRampPalette(bk_gradient_palettes[[palette]])
     }
   }
 
-  if(is.function(palette)) {
+  if (is.function(palette)) {
     colorcut <- seq(0, 1, length = 100)
-    nc <- length(colorcut)
+    # nc <- length(colorcut)
     colgrp <- cut(hbd$rcnt, colorcut, labels = FALSE, include.lowest = TRUE)
     clrs <- palette(length(colorcut) - 1)
     col <- clrs[colgrp]
   }
 
-  if(args$info$x_name == args$info$y_name) {
+  if (args$info$x_name == args$info$y_name) {
     args$info$x_name <- paste(args$info$x_name, "(x)")
     args$info$y_name <- paste(args$info$y_name, "(y)")
   }
   names(hbd$data)[1:2] <- c(args$info$x_name, args$info$y_name)
 
-  if(!line) {
+  if (!line) {
     line_color <- NA
   } else {
     # TODO
@@ -100,7 +104,7 @@ ly_hexbin <- function(
     line_color <- col
   }
 
-  if(is.logical(hover) && !hover)
+  if (is.logical(hover) && !hover)
     hbd$data <- NULL
 
   fig %>% ly_polygons(
@@ -120,10 +124,10 @@ get_hexbin_data <- function(x, y, xbins = 30, shape = 1,
   xbnds = range(x, na.rm = TRUE),
   ybnds = range(y, na.rm = TRUE)) {
 
-  if(is.null(xbnds))
+  if (is.null(xbnds))
     xbnds <- range(x, na.rm = TRUE)
 
-  if(is.null(ybnds))
+  if (is.null(ybnds))
     ybnds <- range(y, na.rm = TRUE)
 
   ind <- stats::complete.cases(x, y)
@@ -131,13 +135,14 @@ get_hexbin_data <- function(x, y, xbins = 30, shape = 1,
 }
 
 
-get_from_hexbin <- function(dat, maxcnt = NULL, mincnt = 1, trans = identity, inv = identity, maxarea = 0.8, minarea = 0.04, style = style) {
+get_from_hexbin <- function(dat, maxcnt = NULL, mincnt = 1, trans = identity,
+  inv = identity, maxarea = 0.8, minarea = 0.04, style = style) {
 
   cnt <- dat@count
   xbins <- dat@xbins
   shape <- dat@shape
   tmp <- hcell2xy(dat)
-  if(is.null(maxcnt))
+  if (is.null(maxcnt))
     maxcnt <- max(dat@count)
 
   ok <- cnt >= mincnt & cnt <= maxcnt
@@ -163,7 +168,7 @@ get_from_hexbin <- function(dat, maxcnt = NULL, mincnt = 1, trans = identity, in
      if (any(is.na(rcnt))) stop("bad count transformation")
   }
 
-  if(style == "lattice") {
+  if (style == "lattice") {
     area <- minarea + rcnt * (maxarea - minarea)
     area <- pmin(area, maxarea)
     radius <- sqrt(area)

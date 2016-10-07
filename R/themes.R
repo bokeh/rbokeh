@@ -2,11 +2,19 @@
 #'
 #' @param fig a figure to set the theme for
 #' @param theme theme
+#' @example man-roxygen/ex-theme.R
 #' @export
 set_theme <- function(fig, theme) {
-  if(is.function(theme))
+  if (is.function(theme))
     theme <- theme()
-  fig$x$spec$theme <- theme
+
+  if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
+    for (ii in seq_along(fig$x$spec$figs))
+      fig$x$spec$figs[[ii]]$x$spec$theme <- theme
+  } else {
+    fig$x$spec$theme <- theme
+  }
+
   fig
 }
 
@@ -52,12 +60,12 @@ bk_default_theme <- function() {
 #' Themes
 #' @rdname themes
 #' @export
-#' @importFrom scales shape_pal hue_pal seq_gradient_pal
-#' @importFrom ggplot2 scale_size_discrete scale_size_continuous
+#' @importFrom scales shape_pal hue_pal
 bk_ggplot_theme <- function() {
   gg_shape_pal <- function() {
     function(n) {
-      unname(unlist(lapply(marker_dict[as.character(scales::shape_pal()(n))], function(x) x$glyph)))
+      unname(unlist(lapply(marker_dict[as.character(scales::shape_pal()(n))],
+        function(x) x$glyph)))
     }
   }
 
@@ -72,24 +80,24 @@ bk_ggplot_theme <- function() {
       text_alpha = 1,
       # line_dash = ,
       # line_width = ,
-      size = ggplot2::scale_size_discrete()$palette
+      size = pal_size() # ggplot2::scale_size_discrete()$palette
     ),
     continuous = list(
-      fill_color = scales::seq_gradient_pal(low = "#132B43", high = "#56B1F7", space = "Lab"),
-      line_color = scales::seq_gradient_pal(low = "#132B43", high = "#56B1F7", space = "Lab"),
-      text_color = scales::seq_gradient_pal(low = "#132B43", high = "#56B1F7", space = "Lab"),
+      fill_color = pal_gradient(c("#132B43", "#56B1F7"), space = "Lab"),
+      line_color = pal_gradient(c("#132B43", "#56B1F7"), space = "Lab"),
+      text_color = pal_gradient(c("#132B43", "#56B1F7"), space = "Lab"),
       fill_alpha = 1,
       line_alpha = 1,
       text_alpha = 1,
       # line_dash = ,
       # line_width = ,
-      size = ggplot2::scale_size_continuous()$palette
+      size = pal_size() # ggplot2::scale_size_continuous()$palette
     ),
-    gradient = scales::seq_gradient_pal(low = "#132B43", high = "#56B1F7", space = "Lab"),
+    gradient = pal_gradient(c("#132B43", "#56B1F7"), space = "Lab"),
     ungrouped = list(fill_color = "black", line_color = "black",
       text_color = "black", fill_alpha = 1, line_alpha = 1,
       size = 10, glyph = 16, line_dash = NULL, line_width = 1),
-    plot = list(background_fill = "#E6E6E6",
+    plot = list(background_fill_color = "#E6E6E6",
       outline_line_color = "white"),
     grid = list(grid_line_color = "white",
       minor_grid_line_color = "white",
@@ -97,6 +105,8 @@ bk_ggplot_theme <- function() {
     axis = list(axis_line_color = "white",
       major_label_text_color = "#7F7F7F",
       major_tick_line_color = "#7F7F7F",
-      minor_tick_line_alpha = 0, num_minor_ticks = 2)
+      minor_tick_line_alpha = 0,
+      axis_label_text_font_style = "normal",
+      num_minor_ticks = 2)
   )
 }

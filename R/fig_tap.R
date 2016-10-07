@@ -4,19 +4,39 @@ add_url <- function(fig, url, renderer_ref) {
   tap_id <- gen_id(fig, c(renderer_ref$id, "TapTool"))
   tap_model <- tap_model(tap_id, fig$x$spec$ref, renderer_ref)
 
+  if (is.null(fig$x$spec$model$toolbar)) {
+    tbid <- gen_id(fig, "Toolbar")
+    tbmodel <- toolbar_model(tbid)
+    tbmodel$model$attributes["logo"] <- list(fig$x$spec$logo)
+    fig$x$spec$model$plot$attributes$toolbar <- tbmodel$ref
+    fig$x$spec$model$toolbar <- tbmodel$model
+    fig$x$spec$model$plot$attributes$tool_events <- list()
+    fig <- update_tool_events(fig)
+  }
+
   url_id <- gen_id(fig, c(renderer_ref$id, "url"))
   url_model <- open_url_model(url_id, url)
 
   tap_model$model$attributes$callback <- url_model$ref
 
   fig$x$spec$model[[url_id]] <- url_model$model
-  fig$x$spec$model$plot$attributes$tools[[tap_id]] <- tap_model$ref
+  fig$x$spec$model$toolbar$attributes$tools[[tap_id]] <- tap_model$ref
   fig$x$spec$model[[tap_id]] <- tap_model$model
 
   fig
 }
 
 add_tap_callback <- function(fig, callback, ref_layer) {
+
+  if (is.null(fig$x$spec$model$toolbar)) {
+    tbid <- gen_id(fig, "Toolbar")
+    tbmodel <- toolbar_model(tbid)
+    tbmodel$model$attributes["logo"] <- list(fig$x$spec$logo)
+    fig$x$spec$model$plot$attributes$toolbar <- tbmodel$ref
+    fig$x$spec$model$toolbar <- tbmodel$model
+    fig$x$spec$model$plot$attributes$tool_events <- list()
+    fig <- update_tool_events(fig)
+  }
 
   tap_id <- gen_id(fig, c(callback, ref_layer, "tap_callback"))
 
@@ -33,7 +53,7 @@ add_tap_callback <- function(fig, callback, ref_layer) {
     code = callback$code, args = callback$args)
   tap_model$model$attributes$callback <- cb_model$ref
   fig$x$spec$model[[cb_id]] <- cb_model$model
-  fig$x$spec$model$plot$attributes$tools[[tap_id]] <- tap_model$ref
+  fig$x$spec$model$toolbar$attributes$tools[[tap_id]] <- tap_model$ref
   fig$x$spec$model[[tap_id]] <- tap_model$model
 
   fig

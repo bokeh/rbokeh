@@ -10,6 +10,11 @@
 #' @template par-lnamegroup
 #' @template dots-fillline
 #' @family layer functions
+#' @examples
+#' h <- figure(width = 600, height = 400) %>%
+#'   ly_hist(eruptions, data = faithful, breaks = 40, freq = FALSE) %>%
+#'   ly_density(eruptions, data = faithful)
+#' h
 #' @export
 ly_hist <- function(
   fig, x, data = figure_data(fig),
@@ -35,7 +40,7 @@ ly_hist <- function(
 
   tryres <- try(identity(x), silent = TRUE)
 
-  if(inherits(tryres, "histogram")) {
+  if (inherits(tryres, "histogram")) {
     hh <- x
     args$info$x_name <- x$xname
   } else {
@@ -47,9 +52,10 @@ ly_hist <- function(
   }
   args$info$y_name <- ifelse(freq, "Frequency", "Density")
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
+    fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
-  y <- if(freq) {
+  y <- if (freq) {
     hh$counts
   } else {
     hh$density
@@ -78,6 +84,11 @@ ly_hist <- function(
 #' @template par-lnamegroup
 #' @template dots-line
 #' @family layer functions
+#' @examples
+#' h <- figure(width = 600, height = 400) %>%
+#'   ly_hist(eruptions, data = faithful, breaks = 40, freq = FALSE) %>%
+#'   ly_density(eruptions, data = faithful)
+#' h
 #' @export
 ly_density <- function(
   fig, x, data = figure_data(fig),
@@ -114,16 +125,17 @@ ly_density <- function(
 
 
   ## b_eval will repeat these, but the line glyph doesn't like this
-  if(length(unique(args$params$color)) == 1)
+  if (length(unique(args$params$color)) == 1)
     args$params$color <- subset_with_attributes(args$params$color, 1)
-  if(length(unique(args$params$type)) == 1)
+  if (length(unique(args$params$type)) == 1)
     args$params$type <- subset_with_attributes(args$params$type, 1)
-  if(length(unique(args$params$width)) == 1)
+  if (length(unique(args$params$width)) == 1)
     args$params$width <- subset_with_attributes(args$params$width, 1)
 
   args$params <- resolve_line_args(fig, args$params)
 
-  dd <- stats::density.default(x = args$data$x, bw = bw, adjust = adjust, kernel = kernel, n = n, cut = 3, na.rm = na.rm)
+  dd <- stats::density.default(x = args$data$x, bw = bw, adjust = adjust,
+    kernel = kernel, n = n, cut = 3, na.rm = na.rm)
 
   do.call(ly_lines, c(
     list(
@@ -152,6 +164,9 @@ ly_density <- function(
 #' @template par-lnamegroup
 #' @template dots-fillline
 #' @family layer functions
+#' @examples
+#' figure(legend_location = "top_left") %>%
+#'   ly_quantile(Sepal.Length, group = Species, data = iris)
 #' @export
 ly_quantile <- function(
   fig, x, group = NULL, data = figure_data(fig),
@@ -181,7 +196,7 @@ ly_quantile <- function(
   args$info$x_name <- "f-value"
   # args$info$y_name <- deparse(substitute(x)) # already done!
 
-  if(is.null(args$info$group)) {
+  if (is.null(args$info$group)) {
     args$info$group <- rep(1, length(args$data$x))
   }
 
@@ -194,17 +209,17 @@ ly_quantile <- function(
   ## quantile plot with no groups needs explicit legend
   ## but with groups, legend can simply be "TRUE" in which case
   ## an entry is automatically added for each group
-  if(length(idx) == 1) {
-    if(is.logical(args$info$legend))
+  if (length(idx) == 1) {
+    if (is.logical(args$info$legend))
       args$info$legend <- NULL
   }
 
-  for(ii in idx) {
-    if(length(ii) > 0) {
-      if(is.null(probs)) {
+  for (ii in idx) {
+    if (length(ii) > 0) {
+      if (is.null(probs)) {
         ## if the vector is too long, perhaps should default
         ## to some length, like 1000
-        if(length(ii) > ncutoff) {
+        if (length(ii) > ncutoff) {
           cur_probs <- stats::ppoints(ncutoff)
           qq <- stats::quantile(args$data$x[ii], cur_probs, names = FALSE, na.rm = TRUE)
         } else {
@@ -218,8 +233,8 @@ ly_quantile <- function(
       ff <- distn(cur_probs)
 
       cur_legend <- NULL
-      if(is.logical(args$info$legend)) {
-        if(args$info$legend) {
+      if (is.logical(args$info$legend)) {
+        if (args$info$legend) {
           cur_legend <- args$info$group[[ii[1]]]
         }
       } else {
@@ -246,18 +261,24 @@ ly_quantile <- function(
 #' @param data an optional data frame, providing the source for x and y
 #' @param width with of each box, a value between 0 (no width) and 1 (full width)
 #' @param coef see \code{\link[grDevices]{boxplot.stats}}
-#' @param with_outliers \code{logical} indicating whether or not the outlier
-#'   points should be drawn outside of the whiskers of the boxplot.
+#' @param outlier_glyph the glyph used to plot the outliers. If set to
+#'   \code{NA}, no outlier points are plotted. Run \code{point_types()} for
+#'   possible values.
+#' @param outlier_size the size of the glyph used to plot outliers. If set to
+#'   \code{NA}, no outlier points are plotted.
 #' @template par-coloralpha
 #' @template par-lnamegroup
 #' @template dots-fillline
 #' @family layer functions
+#' @examples
+#' figure(ylab = "Height (inches)", width = 600) %>%
+#'   ly_boxplot(voice.part, height, data = lattice::singer)
 #' @export
 ly_boxplot <- function(
   fig, x, y = NULL, data = figure_data(fig),
   width = 0.9, coef = 1.5,
-  with_outliers = TRUE,
   color = "blue", alpha = 1,
+  outlier_glyph = 1, outlier_size = 10,
   lname = NULL, lgroup = NULL, visible = TRUE,
   ...
 ) {
@@ -294,35 +315,40 @@ ly_boxplot <- function(
   args$params <- resolve_color_alpha(args$params, has_line = TRUE,
     has_fill = TRUE, theme = fig$x$spec$theme)
 
-  fill_ind <- grepl("^fill_", names(args$params))
+  # fill_ind <- grepl("^fill_", names(args$params))
 
   # pull out x and y as they are used a lot
   x <- args$data$x
   y <- args$data$y
 
-  if(is.null(y)) {
+  group_is_numeric <- FALSE
+
+  if (is.null(y)) {
     x_name <- " "
     y_name <- args$info$x_name
     group <- rep(x_name, length(x))
   } else {
     num_ind <- c(is.numeric(x), is.numeric(y))
-    if(all(num_ind)) {
-      message("both x and y are numeric -- choosing numeric variable based on which has the most unique values")
-      if(length(unique(x)) > length(unique(y))) {
+    if (all(num_ind)) {
+      group_is_numeric <- TRUE
+      message(
+        "both x and y are numeric -- choosing numeric variable based on ",
+        "which has the most unique values")
+      if (length(unique(x)) > length(unique(y))) {
         x_name <- args$info$y_name
         y_name <- args$info$x_name
-        group <- y
+        group <- as.character(y)
       } else {
         x_name <- args$info$x_name
         y_name <- args$info$y_name
-        group <- x
+        group <- as.character(x)
         x <- y
       }
-    } else if(num_ind[1]) {
+    } else if (num_ind[1]) {
       x_name <- args$info$y_name
       y_name <- args$info$x_name
       group <- y
-    } else if(num_ind[2]) {
+    } else if (num_ind[2]) {
       x_name <- args$info$x_name
       y_name <- args$info$y_name
       group <- x
@@ -333,7 +359,7 @@ ly_boxplot <- function(
   }
 
   idx <- split(seq_along(x), group)
-  for(ii in seq_along(idx)) {
+  for (ii in seq_along(idx)) {
     bp <- grDevices::boxplot.stats(x = x[idx[[ii]]], coef = coef)
 
     gp <- group[idx[[ii]][1]] ## doesn't work right now
@@ -345,47 +371,49 @@ ly_boxplot <- function(
     hgt2 <- bp$stats[4] - bp$stats[3]
     md2 <- hgt2 / 2 + bp$stats[3]
 
-    fig <- do.call(ly_crect, c(
-      list(
-        fig = fig, x = rep(gp, 2), y = c(md1, md2),
-        width = width, height = c(hgt1, hgt2),
-        xlab = x_name, ylab = y_name
-      ),
-      args$params
-    ))
-    fig <- do.call(ly_segments, c(
-      list(
-        fig = fig,
-        x0 = c(gp, gp, gpr, gpr),
-        y0 = c(bp$stats[1], bp$stats[4], bp$stats[1], bp$stats[5]),
-        x1 = c(gp, gp, gpl, gpl),
-        y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5]),
-        xlab = x_name, ylab = y_name
-      ),
-      args$params[!fill_ind])
-    )
+    fig <- ly_crect(
+      fig = fig, x = rep(gp, 2), y = c(md1, md2),
+      width = width, height = c(hgt1, hgt2),
+      xlab = x_name, ylab = y_name,
+      visible = args$params$visible,
+      line_color = args$params$line_color,
+      fill_color = args$params$fill_color,
+      line_alpha = args$params$line_alpha,
+      fill_alpha = args$params$fill_alpha)
 
-    if (with_outliers) {
-      if(length(bp$out) > 0) {
-        fig <- do.call(ly_points, c(
-          list(
-            fig = fig,
-            x = rep(gp, length(bp$out)), y = bp$out,
-            glyph = 1,
-            xlab = x_name, ylab = y_name
-          ),
-          args$params
-        ))
-      }
+    fig <- ly_segments(
+      fig = fig,
+      x0 = c(gp, gp, gpr, gpr),
+      y0 = c(bp$stats[1], bp$stats[4], bp$stats[1], bp$stats[5]),
+      x1 = c(gp, gp, gpl, gpl),
+      y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5]),
+      xlab = x_name, ylab = y_name,
+      visible = args$params$visible,
+      line_color = args$params$line_color,
+      line_alpha = args$params$line_alpha)
+
+    if (length(bp$out) > 0 && !(is.na(outlier_size) || is.na(outlier_glyph))) {
+      fig <- ly_points(
+        fig = fig,
+        x = rep(gp, length(bp$out)), y = bp$out,
+        glyph = rep(outlier_glyph, length(bp$out)),
+        size = outlier_size,
+        xlab = x_name, ylab = y_name,
+        visible = args$params$visible,
+        line_color = args$params$line_color,
+        fill_color = args$params$fill_color,
+        line_alpha = args$params$line_alpha,
+        fill_alpha = args$params$fill_alpha)
     }
   }
+
+  if (group_is_numeric && !fig$x$spec$has_x_axis)
+    fig <- fig %>% x_range(as.character(sort(unique(as.numeric(group)))))
 
   fig
 }
 
 # ly_violin
-
-# ly_bar
 
 # ly_dotplot
 

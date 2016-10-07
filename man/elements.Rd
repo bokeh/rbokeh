@@ -32,7 +32,7 @@ elements$massy <- paste(elements$period, ":0.15", sep = "")
 elements$namey <- paste(elements$period, ":0.3", sep = "")
 
 # create figure
-p <- figure(title = "Periodic Table", tools = c("resize", "hover"),
+p <- figure(title = "Periodic Table", tools = "",
   ylim = as.character(c(7:1)), xlim = as.character(1:18),
   xgrid = FALSE, ygrid = FALSE, xlab = "", ylab = "",
   height = 600, width = 1200) \%>\%

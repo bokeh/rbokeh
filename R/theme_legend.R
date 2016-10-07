@@ -1,6 +1,8 @@
 #' Override theme parameters for legend attributes
 #'
 #' @param fig figure to modify
+#' @param background_fill_color (color) background color of plot
+#' @param background_fill_alpha (numeric) background color alpha of plot
 #' @param border_line_alpha The line alpha for the legend border outline.
 #' @param border_line_cap ('butt', 'round', 'square') The line cap for the legend border outline.
 #' @param border_line_color The line color for the legend border outline.
@@ -29,7 +31,9 @@
 #'   theme_legend(border_line_width = 2)
 #' @export
 theme_legend <- function(fig,
-  border_line_alpha = 1,
+  background_fill_alpha = 0.95,
+  background_fill_color = "#fff",
+  border_line_alpha = 0.5,
   border_line_cap = "butt",
   border_line_color = "black",
   border_line_dash = NULL,
@@ -55,7 +59,7 @@ theme_legend <- function(fig,
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  if(is.null(pars)) {
+  if (is.null(pars)) {
     specified <- names(as.list(match.call())[-1])
     pars <- as.list(environment())[specified]
   }
@@ -64,10 +68,15 @@ theme_legend <- function(fig,
   pars <- handle_extra_pars(pars, legend_par_validator_map)
   parnames <- names(pars)
 
-  for(nm in parnames)
-    fig$x$spec$legend_attrs[[nm]] <- pars[[nm]]
+  if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
+    for (ii in seq_along(fig$x$spec$figs)) {
+      for (nm in parnames)
+        fig$x$spec$figs[[ii]]$x$spec$legend_attrs[[nm]] <- pars[[nm]]
+    }
+  } else {
+    for (nm in parnames)
+      fig$x$spec$legend_attrs[[nm]] <- pars[[nm]]
+  }
 
   fig
 }
-
-

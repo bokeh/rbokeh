@@ -4,15 +4,16 @@
 \alias{ly_bar}
 \title{Add a "barchart" layer to a Bokeh figure}
 \usage{
-ly_bar(fig, x, y = NULL, data = figure_data(fig), color = NULL,
+ly_bar(fig, x = NULL, y = NULL, data = figure_data(fig), color = NULL,
   alpha = 1, position = c("stack", "fill", "dodge"), width = 0.9,
-  origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
-  lname = NULL, lgroup = NULL, legend = NULL, visible = TRUE, ...)
+  hover = FALSE, origin = NULL, breaks = NULL, right = FALSE,
+  binwidth = NULL, lname = NULL, lgroup = NULL, legend = NULL,
+  visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
 
-\item{x}{values or field name for x variable}
+\item{x}{values or field name for x variable, or if NULL, x-axis will be counts of y}
 
 \item{y}{values or field name for y variable, or if NULL, y-axis will be counts of x}
 
@@ -25,6 +26,8 @@ ly_bar(fig, x, y = NULL, data = figure_data(fig), color = NULL,
 \item{position}{either "stack", "fill", or "dodge" (see details)}
 
 \item{width}{with of each bar, a value between 0 (no width) and 1 (full width)}
+
+\item{hover}{logical - should a hover tool be added to show the value of each bar?}
 
 \item{origin, breaks, right, binwidth}{parameters to be used for binning x when it is continuous (not yet implemented)}
 
@@ -42,9 +45,7 @@ ly_bar(fig, x, y = NULL, data = figure_data(fig), color = NULL,
 Draws a bar chart
 }
 \details{
-The y variable is summed for each x variable and bars are plotted.  If no y variable is supplied, the unique values of x will be tabulated.  Within each x variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each x, stacking the bars.  The "dodge" choice will plot the bars for each x side by side.
-
-Note that currently x cannot be numeric but support will soon be added for numeric x by first binning the x values.
+This function expects one of either x or y to be categorical and the other to be numeric or NULL.  The numeric variable is summed for each categorical variable and bars are plotted.  If no numeric variable is supplied, the unique values of the categorical variable will be tabulated.  Within each categorical variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each categorical variable level, stacking the bars.  The "dodge" choice will plot the bars for each level of the categorical variable side by side.
 }
 \section{Handling color}{
  The \code{color} parameter is a high-level plot attribute that provides default behavior for coloring glyphs.
@@ -92,18 +93,38 @@ figure() \%>\%
 
 # total yield per variety
 figure() \%>\%
-  ly_bar(variety, yield, data = lattice::barley) \%>\%
+  ly_bar(variety, yield, data = lattice::barley, hover = TRUE) \%>\%
   theme_axis("x", major_label_orientation = 90)
 
+# swap axes and add hover
 figure() \%>\%
-  ly_bar(variety, yield, color = year, data = lattice::barley) \%>\%
+  ly_bar(yield, variety, data = lattice::barley, hover = TRUE)
+
+# stack by year
+figure() \%>\%
+  ly_bar(variety, yield, color = year, data = lattice::barley, hover = TRUE) \%>\%
   theme_axis("x", major_label_orientation = 90)
 
+# proportional bars
 figure() \%>\%
   ly_bar(variety, yield, color = year,
     data = lattice::barley, position = "fill", width = 1) \%>\%
+  theme_axis("x", major_label_orientation = 90) \%>\%
+  set_palette(discrete_color = pal_color(c("red", "blue")))
+
+# swap axes and use different palette
+figure() \%>\%
+  ly_bar(yield, variety, color = year,
+    data = lattice::barley, position = "fill") \%>\%
+  set_palette(discrete_color = pal_color(c("red", "blue")))
+
+# side by side bars
+figure() \%>\%
+  ly_bar(variety, yield, color = year,
+    data = lattice::barley, position = "dodge") \%>\%
   theme_axis("x", major_label_orientation = 90)
 
+# use a different theme
 figure() \%>\%
   ly_bar(variety, yield, color = year,
     data = lattice::barley, position = "dodge") \%>\%

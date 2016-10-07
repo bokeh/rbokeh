@@ -5,8 +5,8 @@
 \title{Add a "boxplot" layer to a Bokeh figure}
 \usage{
 ly_boxplot(fig, x, y = NULL, data = figure_data(fig), width = 0.9,
-  coef = 1.5, with_outliers = TRUE, color = "blue", alpha = 1,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  coef = 1.5, color = "blue", alpha = 1, outlier_glyph = 1,
+  outlier_size = 10, lname = NULL, lgroup = NULL, visible = TRUE, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -21,12 +21,16 @@ ly_boxplot(fig, x, y = NULL, data = figure_data(fig), width = 0.9,
 
 \item{coef}{see \code{\link[grDevices]{boxplot.stats}}}
 
-\item{with_outliers}{\code{logical} indicating whether or not the outlier
-points should be drawn outside of the whiskers of the boxplot.}
-
 \item{color}{color for the glyph - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' - for glyphs with both fill and line properties, see "Handling color" below}
 
 \item{alpha}{the alpha transparency of the glyph between 0 (transparent) and 1 (opaque) - if glyph has both fill and color properties, see "Handling alpha" below}
+
+\item{outlier_glyph}{the glyph used to plot the outliers. If set to
+\code{NA}, no outlier points are plotted. Run \code{point_types()} for
+possible values.}
+
+\item{outlier_size}{the size of the glyph used to plot outliers. If set to
+\code{NA}, no outlier points are plotted.}
 
 \item{lname}{layer name}
 
@@ -71,6 +75,10 @@ When color is \code{NULL} and \code{fill_color} or \code{line_color} are not spe
   \code{line_dash} \tab array of integer pixel distances that describe the on-off pattern of dashing to use \cr
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
+}
+\examples{
+figure(ylab = "Height (inches)", width = 600) \%>\%
+  ly_boxplot(voice.part, height, data = lattice::singer)
 }
 \seealso{
 Other layer functions: \code{\link{ly_abline}},

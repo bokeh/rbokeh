@@ -39,17 +39,12 @@ ly_text <- function(
       color,
       alpha,
       angle,
-      align,
-      baseline,
-      font,
       font_size,
-      font_style,
       x_offset,
       y_offset,
       legend,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots()
     )
   )
@@ -59,16 +54,18 @@ ly_text <- function(
   arg_params$glyph <- "text"
   arg_params$text_color <- args$params$color
   arg_params$angle <- args$params$angle
-  arg_params$text_align <- args$params$align
   arg_params$text_alpha <- args$params$alpha
-  arg_params$text_baseline <- args$params$baseline
-  arg_params$text_font <- args$params$font
   arg_params$text_font_size <- args$params$font_size
-  arg_params$text_font_style <- args$params$font_style
   arg_params$x_offset <- args$params$x_offset
   arg_params$y_offset <- args$params$y_offset
 
-  if(is.null(args$params$text)) {
+  arg_params$text_font <- font
+  arg_params$text_font_style <- font_style
+  arg_params$text_align <- align
+  arg_params$text_baseline <- baseline
+  arg_params$visible <- visible
+
+  if (is.null(args$params$text)) {
     args$params$text <- seq_along(args$data$x)
   }
 

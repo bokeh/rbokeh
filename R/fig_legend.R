@@ -34,6 +34,8 @@ legend_model <- function(id, plot_ref, legends, extra_pars) {
 
 legend_par_validator_map <- list(
   "location" = "legend_orientation",
+  "background_fill_alpha" = "num_data_spec",
+  "background_fill_color" = "color",
   "border_line_alpha" = "num_data_spec",
   "border_line_cap" = "line_cap",
   "border_line_color" = "color",

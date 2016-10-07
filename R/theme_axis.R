@@ -98,10 +98,11 @@ theme_axis <- function(fig,
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  if(is.null(pars)) {
+  if (is.null(pars)) {
     specified <- names(as.list(match.call())[-1])
     pars <- as.list(environment())[specified]
   }
+  num_minor_ticks <- pars$num_minor_ticks
   pars <- pars[names(pars) %in% names(axis_par_validator_map)]
 
   pars <- handle_extra_pars(pars, axis_par_validator_map)
@@ -110,24 +111,44 @@ theme_axis <- function(fig,
   ## if an axis hasn't been created yet (usually done in prepare_figure)
   ## then create it here and apply attributes
   ## could alternatively save attributes and apply in prepare_figure
-  if("x" %in% which && fig$x$spec$xaxes != FALSE) {
-    if(is.null(fig$x$spec$model[["x_axis"]]))
-      fig <- fig %>% x_axis()
-    for(nm in parnames)
-      fig$x$spec$model[["x_axis"]]$attributes[[nm]] <- pars[[nm]]
-    if(!is.null(pars$num_minor_ticks))
-      fig$x$spec$model$x_tickformatter$attributes$num_minor_ticks <- pars$num_minor_ticks
-  }
-  if("y" %in% which && fig$x$spec$yaxes != FALSE) {
-    if(is.null(fig$x$spec$model[["y_axis"]]))
-      fig <- fig %>% y_axis()
-    for(nm in parnames)
-      fig$x$spec$model[["y_axis"]]$attributes[[nm]] <- pars[[nm]]
-    if(!is.null(pars$num_minor_ticks))
-      fig$x$spec$model$y_tickformatter$attributes$num_minor_ticks <- pars$num_minor_ticks
+
+  if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
+    for (ii in seq_along(fig$x$spec$figs)) {
+      if ("x" %in% which && fig$x$spec$figs[[ii]]$x$spec$xaxes != FALSE) {
+        if (is.null(fig$x$spec$figs[[ii]]$x$spec$model[["x_axis"]]))
+          fig$x$spec$figs[[ii]] <- fig$x$spec$figs[[ii]] %>% x_axis()
+        for (nm in parnames)
+          fig$x$spec$figs[[ii]]$x$spec$model[["x_axis"]]$attributes[[nm]] <- pars[[nm]]
+        if (!is.null(num_minor_ticks))
+          fig$x$spec$figs[[ii]]$x$spec$model$x_tickformatter$attributes$num_minor_ticks <- num_minor_ticks
+      }
+      if ("y" %in% which && fig$x$spec$figs[[ii]]$x$spec$yaxes != FALSE) {
+        if (is.null(fig$x$spec$figs[[ii]]$x$spec$model[["y_axis"]]))
+          fig$x$spec$figs[[ii]] <- fig$x$spec$figs[[ii]] %>% y_axis()
+        for (nm in parnames)
+          fig$x$spec$figs[[ii]]$x$spec$model[["y_axis"]]$attributes[[nm]] <- pars[[nm]]
+        if (!is.null(num_minor_ticks))
+          fig$x$spec$figs[[ii]]$x$spec$model$y_tickformatter$attributes$num_minor_ticks <- num_minor_ticks
+      }
+    }
+  } else {
+    if ("x" %in% which && fig$x$spec$xaxes != FALSE) {
+      if (is.null(fig$x$spec$model[["x_axis"]]))
+        fig <- fig %>% x_axis()
+      for (nm in parnames)
+        fig$x$spec$model[["x_axis"]]$attributes[[nm]] <- pars[[nm]]
+      if (!is.null(num_minor_ticks))
+        fig$x$spec$model$x_tickformatter$attributes$num_minor_ticks <- num_minor_ticks
+    }
+    if ("y" %in% which && fig$x$spec$yaxes != FALSE) {
+      if (is.null(fig$x$spec$model[["y_axis"]]))
+        fig <- fig %>% y_axis()
+      for (nm in parnames)
+        fig$x$spec$model[["y_axis"]]$attributes[[nm]] <- pars[[nm]]
+      if (!is.null(num_minor_ticks))
+        fig$x$spec$model$y_tickformatter$attributes$num_minor_ticks <- num_minor_ticks
+    }
   }
 
   fig
 }
-
-

@@ -1,13 +1,14 @@
+# nolint start
 #' Widget output function for use in Shiny
 #' @param outputId output variable to read from
 #' @param width a valid CSS unit for the width or a number, which will be coerced to a string and have "px" appended.
 #' @param height a valid CSS unit for the height or a number, which will be coerced to a string and have "px" appended.
-#' 
+#'
 #' @example man-roxygen/ex-shiny.R
 #'
 #' @export
-rbokehOutput <- function(outputId, width = '100%', height = '400px'){
-  shinyWidgetOutput(outputId, 'rbokeh', width, height, package = 'rbokeh')
+rbokehOutput <- function(outputId, width = "100%", height = "400px") {
+  htmlwidgets::shinyWidgetOutput(outputId, "rbokeh", width, height, package = "rbokeh")
 }
 
 #' Widget render function for use in Shiny
@@ -20,5 +21,6 @@ rbokehOutput <- function(outputId, width = '100%', height = '400px'){
 #' @export
 renderRbokeh <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) expr <- substitute(expr)
-  shinyRenderWidget(expr, rbokehOutput, env, quoted = TRUE)
+  htmlwidgets::shinyRenderWidget(expr, rbokehOutput, env, quoted = TRUE)
 }
+# nolint end

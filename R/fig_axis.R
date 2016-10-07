@@ -30,15 +30,15 @@ x_axis <- function(fig, label, position = "below", log = FALSE,
   power_limit_high = 5, power_limit_low = -3, precision = NULL,
   use_scientific = TRUE, format = NULL) {
 
-  if(is.null(position))
+  if (is.null(position))
     position <- "below"
-  if(!position %in% c("below", "above")) {
+  if (!position %in% c("below", "above")) {
     message("x axis position must be either below or above - setting to 'below'")
     position <- "below"
   }
 
-  if(is.logical(log)) {
-    if(log) {
+  if (is.logical(log)) {
+    if (log) {
       log <- 10.0
     } else {
       log <- NULL
@@ -47,7 +47,7 @@ x_axis <- function(fig, label, position = "below", log = FALSE,
     log <- as.numeric(log)
   }
 
-  if(missing(label))
+  if (missing(label))
     label <- fig$x$spec$xlab
   fig$x$spec$xlab <- label
 
@@ -77,15 +77,15 @@ y_axis <- function(fig, label, position = "left", log = FALSE,
   power_limit_high = 5, power_limit_low = -3, precision = NULL,
   use_scientific = TRUE, format = NULL) {
 
-  if(is.null(position))
+  if (is.null(position))
     position <- "left"
-  if(!position %in% c("left", "right")) {
+  if (!position %in% c("left", "right")) {
     message("y axis position must be either left or right - setting to 'left'")
     position <- "left"
   }
 
-  if(is.logical(log)) {
-    if(log) {
+  if (is.logical(log)) {
+    if (log) {
       log <- 10.0
     } else {
       log <- NULL
@@ -94,7 +94,7 @@ y_axis <- function(fig, label, position = "left", log = FALSE,
     log <- as.numeric(log)
   }
 
-  if(missing(label))
+  if (missing(label))
     label <- fig$x$spec$ylab
   fig$x$spec$ylab <- label
 
@@ -142,10 +142,10 @@ update_axis <- function(fig, position, label, grid = TRUE,
   axis_type <- ifelse(is_y,
     fig$x$spec$y_axis_type, fig$x$spec$x_axis_type)
 
-  if(axis_type == "numeric") {
-    if(!is.null(log)) {
+  if (axis_type == "numeric") {
+    if (!is.null(log)) {
       type_list <- list(format = "LogTickFormatter", tick = "LogTicker", axis = "LogAxis")
-      if(is_y) {
+      if (is_y) {
         fig$x$spec$model$plot$attributes$y_mapper_type <- "log"
       } else {
         fig$x$spec$model$plot$attributes$x_mapper_type <- "log"
@@ -159,7 +159,7 @@ update_axis <- function(fig, position, label, grid = TRUE,
       format_pars <- handle_extra_pars(format_pars,
         get(paste0(number_formatter, "_tick_formatter_map")))
     }
-  } else if(axis_type == "datetime") {
+  } else if (axis_type == "datetime") {
     type_list <- list(format = "DatetimeTickFormatter",
       tick = "DatetimeTicker", axis = "DatetimeAxis")
     format_pars$formats <- format_pars$format
@@ -186,7 +186,7 @@ update_axis <- function(fig, position, label, grid = TRUE,
   fig$x$spec$model[[f_name]] <- formatter$model
   fig$x$spec$model[[t_name]] <- ticker$model
 
-  if(grid) {
+  if (grid) {
     g_id <- gen_id(fig, c(position, "grid"))
     g_name <- ifelse(is_y, "y_grid", "x_grid")
 
@@ -198,7 +198,7 @@ update_axis <- function(fig, position, label, grid = TRUE,
     fig$x$spec$model[[g_name]] <- grid$model
   }
 
-  if(is_y) {
+  if (is_y) {
     fig$x$spec$has_y_axis <- TRUE
   } else {
     fig$x$spec$has_x_axis <- TRUE
@@ -232,9 +232,11 @@ ticker_model <- function(type = "BasicTicker", id,
   desired_num_ticks = NULL, num_minor_ticks = 5, log = NULL) {
 
   res <- base_model_object(type, id)
-  res$model$attributes$num_minor_ticks <- num_minor_ticks
-  res$model$attributes$desired_num_ticks <- desired_num_ticks
-  if(!is.null(log))
+  if (type != "CategoricalTicker") {
+    res$model$attributes$num_minor_ticks <- num_minor_ticks
+    res$model$attributes$desired_num_ticks <- desired_num_ticks
+  }
+  if (!is.null(log))
     res$model$attributes$base <- log
 
   res
@@ -292,8 +294,7 @@ axis_par_validator_map <- list(
   "axis_line_join" = "line_join",
   "major_tick_line_join" = "line_join",
   "minor_tick_line_join" = "line_join",
-  "major_label_orientation" = "label_orientation",
-  "num_minor_ticks" = "int" # this is in ticker
+  "major_label_orientation" = "label_orientation"
 )
 
 grid_par_validator_map <- list(

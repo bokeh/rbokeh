@@ -4,7 +4,7 @@
 \alias{catjitter}
 \title{Add a small amount of (rbokeh-compatible) noise to a character vector}
 \usage{
-catjitter(x, factor = 0.8)
+catjitter(x, factor = 0.5)
 }
 \arguments{
 \item{x}{numeric vector to which jitter should be added}
@@ -13,5 +13,10 @@ catjitter(x, factor = 0.8)
 }
 \description{
 Add a small amount of (rbokeh-compatible) noise to a character vector
+}
+\examples{
+figure(data = lattice::singer) \%>\%
+  ly_points(catjitter(voice.part), jitter(height), color = "black") \%>\%
+  ly_boxplot(voice.part, height, with_outliers = FALSE)
 }
 

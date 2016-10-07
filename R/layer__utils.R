@@ -7,7 +7,7 @@ b_eval_get_symbol <- function(x) {
 
 lazy_eval_unname <- function(x, data = NULL) {
   x <- lazy_eval(x = x, data = data)
-  if(is.vector(x))
+  if (is.vector(x))
     x <- unname(x)
   x
 }
@@ -20,14 +20,14 @@ lazy_eval_unname <- function(x, data = NULL) {
 b_eval <- function(data) {
 
   deparse_or_string <- function(val) {
-    if(is.character(val)) {
+    if (is.character(val)) {
       val
     } else {
       deparse(val)
     }
   }
 
-  if(is.null(data)) {
+  if (is.null(data)) {
     fn <- function(x, key = stop("didn't supply key in b_eval fn")) {
       ans <- lazy_eval_unname(x)
 
@@ -45,7 +45,7 @@ b_eval <- function(data) {
 
   } else {
 
-    if(! is.data.frame(data)) {
+    if (! is.data.frame(data)) {
       data <- tryCatch(as.data.frame(data),
         error = function(e) {
           stop("data must be NULL or be able to pass as.data.frame")
@@ -55,20 +55,20 @@ b_eval <- function(data) {
 
     fn <- function(x, key = stop("didn't supply key in b_eval fn")) {
       # internal helper
-      if(! inherits(x, "lazy")) {
+      if (! inherits(x, "lazy")) {
         # print(x)
         # browser()
         stop("argument is not of class 'lazy'")
       }
 
-      if(is.null(x$expr)) {
+      if (is.null(x$expr)) {
         return(NULL)
       }
 
       return_ans <- function(ans, x_name = stop("x_name not supplied")) {
         # attach the variable name from where it came
-        if(!is.null(ans)) {
-          if(! is.null(x_name)) {
+        if (!is.null(ans)) {
+          if (! is.null(x_name)) {
             # if a name can be supplied, add it
             attr(ans, "stringName") <- x_name
           }
@@ -87,14 +87,14 @@ b_eval <- function(data) {
       }
 
       res_class <- class(res)
-      if(identical(res_class, "AsIs")) {
+      if (identical(res_class, "AsIs")) {
         # this means it evaluated properly and is suppose to be "as is"
         return(return_ans(res, x_name))
       }
 
       ## variable name could have been supplied in quotes
-      if(length(res) == 1 && is.character(res) && (nrow(data) > 1 || inherits(data, "quoted"))) {
-        if(res %in% names(data)) {
+      if (length(res) == 1 && is.character(res) && (nrow(data) > 1 || inherits(data, "quoted"))) {
+        if (res %in% names(data)) {
           nm <- res
           res <- data[[res]]
           return(return_ans(res, nm))
@@ -118,9 +118,9 @@ b_eval <- function(data) {
 
 get_legend <- function(val) {
   val_type <- typeof(val)
-  if(!is.null(val)) {
-    if(val_type != "logical") {
-      if(!(val_type == "character" || is.factor(val))) {
+  if (!is.null(val)) {
+    if (val_type != "logical") {
+      if (!(val_type == "character" || is.factor(val))) {
         stop("'legend' must be a logical value or a character string")
       }
     }
@@ -143,15 +143,15 @@ subset_arg_obj <- function(arg_obj, idxs) {
     ret <- lapply(arg_names, function(key) {
       val <- x[[key]]
 
-      if(key %in% non_subsetable_names) {
+      if (key %in% non_subsetable_names) {
         return(val)
       }
 
-      if(is.null(val)) {
+      if (is.null(val)) {
         return(val)
       }
 
-      if(key %in% c("hover", "url")) {
+      if (key %in% c("hover", "url")) {
         if (is.null(nrow(val$data))) {
           return(val)
         }
@@ -159,16 +159,16 @@ subset_arg_obj <- function(arg_obj, idxs) {
         return(val)
       }
 
-      if(length(val) == 1) {
+      if (length(val) == 1) {
         return(val)
       }
 
-      if(length(val) < max(idxs)) {
+      if (length(val) < max(idxs)) {
         print(list(val = val, key = key, idxs = idxs))
         stop("bad key val for subset")
       }
 
-      if(length(attributes(val)) > 1) {
+      if (length(attributes(val)) > 1) {
         return(subset_with_attributes(val, idxs))
       } else {
         return(val[idxs])
@@ -185,9 +185,6 @@ subset_arg_obj <- function(arg_obj, idxs) {
 
   ret
 }
-
-
-
 
 
 #' List of all types of data name structures that could appear
@@ -211,20 +208,23 @@ data_name_list_c <- function() {
 # helper function to get all 'data' positions from the given names
 grab_data_index <- function(name_vals) {
   data_name_list <- data_name_list()
-  data_name_idx <- lapply(data_name_list, function(data_names) {
-    all(data_names %in% name_vals)
-  }) %>% unlist() %>% which()
+  data_name_idx <- lapply(data_name_list,
+    function(data_names) {
+      all(data_names %in% name_vals)
+    }
+  ) %>% unlist() %>% which()
 
-  if(length(data_name_idx) == 0) {
+  if (length(data_name_idx) == 0) {
     stop("invalid data names supplied to 'grab'")
   }
-  if(length(data_name_idx) > 1) {
+  if (length(data_name_idx) > 1) {
     data_name_idx <- min(data_name_idx)
     # stop("too many data names were supplied to 'grab'")
   }
 
   data_idx <- name_vals %in% data_name_list[[data_name_idx]]
 
+  data_idx
 }
 
 # helper function to get all 'info' positions from the given names
@@ -246,7 +246,7 @@ grab_param_index <- function(data_idx, regular_idx) {
 # @return list of three groups: data, info, and params
 grab <- function(..., dots, null_data = FALSE) {
 
-  if(missing(dots)) {
+  if (missing(dots)) {
     stop("'dots' must be supplied")
   }
 
@@ -266,7 +266,7 @@ grab <- function(..., dots, null_data = FALSE) {
 
   name_vals <- names(arg_vals)
 
-  if(null_data) {
+  if (null_data) {
     data_idx <- rep(FALSE, length(name_vals))
     dt <- list()
 
@@ -303,20 +303,20 @@ sub_names <- function(
   process_data_and_names = TRUE
 ) {
   # , matchCall = match.call(parent.frame(2L))
-  if(missing(fig)) {
+  if (missing(fig)) {
     stop(paste0("'fig' was not supplied to ", match.call()[1]))
   }
-  if(missing(data)) {
+  if (missing(data)) {
     stop(paste0("'data' was not supplied to ", match.call()[1]))
   }
-  if(missing(arg_obj)) {
+  if (missing(arg_obj)) {
     stop(paste0("'data' was not supplied to ", match.call()[1]))
   }
 
   sub_fn <- b_eval(data)
 
   # retrieve the data with best guess
-  data_names <- names(data)
+  # data_names <- names(data)
 
   # get the unevaled values
   parse_values <- function(x) {
@@ -330,7 +330,7 @@ sub_names <- function(
         params    = parse_values(arg_val),
 
         # send symbol to hover; also sending "data finding" function
-        hover     = get_hover2(arg_val, data, sub_fn),
+        hover     = get_hover(arg_val, data, sub_fn),
         lgroup    = get_lgroup(lazy_eval_unname(arg_val), fig),
         url       = get_url(arg_val, data, sub_fn),
         legend    = get_legend(lazy_eval_unname(arg_val)),
@@ -352,14 +352,14 @@ sub_names <- function(
   # parse all values for
   ret <- lapply(arg_obj, parse_values)
 
-  if(!is.null(ret$params$direction)) {
+  if (!is.null(ret$params$direction)) {
     check_arc_direction(ret$params$direction)
   }
 
   # TODO: handle histogram and hexbin here...
 
   # get the x and y names and data
-  if(process_data_and_names) {
+  if (process_data_and_names) {
     d2_and_names <- b_xy_data_and_names2(
       ret$data[1:2],
       ret$info$xlab, ret$info$ylab
@@ -386,20 +386,20 @@ b_xy_data_and_names2 <- function(d2, xlab, ylab) {
   y_name <- "y"
 
 
-  if(!is.null(attr(x, "stringName")))
+  if (!is.null(attr(x, "stringName")))
     x_name <- attr(x, "stringName")
-  if(!is.null(attr(y, "stringName")))
+  if (!is.null(attr(y, "stringName")))
     y_name <- attr(y, "stringName")
 
 
 
-  if(is.null(y)) {
-    if(stats::is.ts(x)) {
+  if (is.null(y)) {
+    if (stats::is.ts(x)) {
       y <- as.vector(x)
       x <- as.vector(time(x))
       y_name <- x_name
       x_name <- "time"
-    } else if(is.list(x)) {
+    } else if (is.list(x)) {
       nms <- names(x)
       y <- x[[2]]
       x <- x[[1]]
@@ -415,17 +415,17 @@ b_xy_data_and_names2 <- function(d2, xlab, ylab) {
 
   # manual specification trumps
 
-  if(!is.null(xlab)) {
+  if (!is.null(xlab)) {
     x_name <- xlab
   }
-  if(!is.null(ylab)) {
+  if (!is.null(ylab)) {
     y_name <- ylab
   }
 
   ## deal with singleton x or y
-  if(length(x) == 1)
+  if (length(x) == 1)
     x <- rep(x, length(y))
-  if(length(y) == 1) {
+  if (length(y) == 1) {
     y <- rep(y, length(x))
   }
 

@@ -87,7 +87,7 @@ handle_range_callback.consoleCallback <- function(x, fig_refs) {
     code = "
 if(range.get('factors')) {
   console.log(range.get('factors'))
-} else if(range.get('start')) {
+} else if (range.get('start')) {
   console.log('[' + range.get('start').toFixed(2) + ',' + range.get('end').toFixed(2) + ']')
 }",
     args = c(x$args, callback_lname2args(x$lnames, fig_refs))
@@ -228,9 +228,9 @@ if (HTMLWidgets.shinyMode) {
   // var cols = cb_obj.attributes.column_names;
   // var idx = cb_obj.attributes.selected['1d'].indices;
   // var res = null;
-  // if(idx.length > 0) {
+  // if (idx.length > 0) {
   //   res = {}
-  //   for(var i = 0; i < cols.length; i++) {
+  //   for (var i = 0; i < cols.length; i++) {
   //     res[cols[i]] = [];
   //     for (var j = 0; j < idx.length; j++) {
   //       res[cols[i]].push(cb_obj.attributes.data[cols[i]][idx[j]]);
@@ -294,7 +294,7 @@ handle_selection_callback.default <- function(x, fig_refs) {
 # var cols = cb_obj.attributes.column_names;
 # var idx = cb_obj.attributes.selected['1d'].indices;
 # var res = {}
-# for(var i = 0; i < cols.length; i++) {
+# for (var i = 0; i < cols.length; i++) {
 #   res[cols[i]] = [];
 #   for (var j = 0; j < idx.length; j++) {
 #     res[cols[i]].push(cb_obj.attributes.data[cols[i]][idx[j]]);

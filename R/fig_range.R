@@ -29,20 +29,20 @@ update_range <- function(fig, axis = "x", dat = NULL, callback = NULL) {
   model <- base_model_object(type, id)
 
   # first get the model if it exists
-  if(!is.null(fig$x$spec$model[[id]]))
+  if (!is.null(fig$x$spec$model[[id]]))
     model$model <- fig$x$spec$model[[id]]
 
-  if(!is.null(dat)) {
-    if(inherits(dat, c("Date", "POSIXt")))
+  if (!is.null(dat)) {
+    if (inherits(dat, c("Date", "POSIXt")))
       dat <- to_epoch(dat)
 
-    if(type == "Range1d") {
+    if (type == "Range1d") {
       # preserve backward xlim/ylim specification
-      if(!(length(dat) == 2 && dat[1] > dat[2]))
+      if (!(length(dat) == 2 && dat[1] > dat[2]))
         dat <- range(dat, na.rm = TRUE)
       model$model$attributes$start <- dat[1]
       model$model$attributes$end <- dat[2]
-    } else if(type == "FactorRange") {
+    } else if (type == "FactorRange") {
       model$model$attributes$factors <- I(dat)
     }
 
@@ -51,13 +51,13 @@ update_range <- function(fig, axis = "x", dat = NULL, callback = NULL) {
     fig$x$spec[[paste0("has_", axis, "_range")]] <- TRUE
   }
 
-  if(!is.null(callback)) {
-    if(is.character(callback))
+  if (!is.null(callback)) {
+    if (is.character(callback))
       callback <- structure(list(code = callback, args = NULL, lnames = NULL),
         class = "customCallback")
     callback$args <- c(callback$args, list(range = model$ref))
     callback <- handle_range_callback(callback, fig$x$spec$callback$layers)
-    if(!is.null(callback)) {
+    if (!is.null(callback)) {
       cb_id <- gen_id(fig, c(paste0(range_name, "_callback"),
         callback$args, callback$lname))
       cb_model <- customjs_model(id = cb_id,
@@ -76,10 +76,10 @@ update_range <- function(fig, axis = "x", dat = NULL, callback = NULL) {
 range_model <- function(type = "Range1d", id, dat) {
   res <- base_model_object(type, id)
 
-  if(type == "Range1d") {
+  if (type == "Range1d") {
     res$model$attributes$start <- dat[1]
     res$model$attributes$end <- dat[2]
-  } else if(type == "FactorRange") {
+  } else if (type == "FactorRange") {
     res$model$attributes$factors <- I(dat)
   }
 

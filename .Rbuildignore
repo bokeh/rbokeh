@@ -9,3 +9,6 @@ CONTRIBUTING\.md
 .Rproj
 ^\.httr-oauth$
 cran-comments.md
+.lintr.*
+_gh-pages
+.codecov.yml

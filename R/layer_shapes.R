@@ -42,12 +42,16 @@ ly_polygons <- function(
   ys <- args$data$ys
   group <- args$info$group
 
-  if(missing(alpha)) {
+  if (missing(alpha)) {
     args$params$alpha <- NULL
   }
 
-  if(!is.null(group)) {
-    if(is.factor(group)) {
+  # if color is not a valid color then we want to group on it too
+  if (needs_map_fns[["color"]](args$params$color))
+    group <- args$params$color
+
+  if (!is.null(group)) {
+    if (is.factor(group)) {
       group <- as.character(group)
     }
     idx <- unname(split(seq_along(group), group))
@@ -55,40 +59,46 @@ ly_polygons <- function(
     ys <- lapply(idx, function(x) ys[x])
 
     # data for hover and url will only be one row for each group
-    data <- data[sapply(idx, "[", 1),]
+    data <- data[sapply(idx, "[", 1), ]
 
     ns <- lapply(args$params, length)
     bad_ind <- which(!ns %in% c(0, 1, length(idx), length(group)))
-    if(length(bad_ind) > 0) {
-      message("The following arguments do not have length the same as the number of groups or the total number of observations for ly_polygons() and will be ignored: ", paste(names(args$params[bad_ind]), collapse = ", "))
+    if (length(bad_ind) > 0) {
+      message(
+        "The following arguments do not have length the same as the number of groups ",
+        "or the total number of observations for ly_polygons() and will be ignored: ",
+        paste(names(args$params[bad_ind]), collapse = ", "))
       args$params[bad_ind] <- NULL
     }
 
     full_length <- which(ns == length(group))
-    for(ii in full_length) {
+    for (ii in full_length) {
       args$params[[ii]] <- sapply(idx, function(x) args$params[[ii]][x[1]])
     }
   }
 
   ## translate different x, y types to vectors
-  if(is.atomic(xs) && !is.list(xs)) {
+  if (is.atomic(xs) && !is.list(xs)) {
     xs <- list(xs)
   }
 
-  if(is.atomic(ys) && !is.list(ys)) {
+  if (is.atomic(ys) && !is.list(ys)) {
     ys <- list(ys)
   }
 
-  if(!(is.list(xs) && is.list(ys))) {
-    stop("For ly_polygons, xs and ys must be lists or specified through a data frame through 'data' argument.")
+  if (!(is.list(xs) && is.list(ys))) {
+    stop(
+      "For ly_polygons, xs and ys must be lists or specified through a data frame ",
+      "through 'data' argument.")
   }
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
+    fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args$params, "patches", formals = names(formals(ly_polygons)))
 
-  if(is.null(args$params$fill_alpha)) {
+  if (is.null(args$params$fill_alpha)) {
     args$params$fill_alpha <- 0.5
   }
 
@@ -100,7 +110,8 @@ ly_polygons <- function(
     fig, type = "patches", data = list(xs = unname(xs), ys = unname(ys)),
     args = args$params, axis_type_range = axis_type_range,
     xname = args$info$x_name, yname = args$info$y_name,
-    lname = args$info$lname, lgroup = args$info$lgroup, hover = args$info$hover, url = args$info$url,
+    lname = args$info$lname, lgroup = args$info$lgroup, hover = args$info$hover,
+    url = args$info$url,
     ly_call = mc
   )
 }
@@ -153,12 +164,13 @@ ly_rect <- function(
     args$params$alpha <- NULL
   }
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
+    fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args$params, "quad", formals = names(formals(ly_rect)))
 
-  if(is.null(args$params$fill_alpha)) {
+  if (is.null(args$params$fill_alpha)) {
     args$params$fill_alpha <- 0.5
   }
 
@@ -232,25 +244,26 @@ ly_crect <- function(
   )
   args$info$glyph <- "rect"
 
-  if(missing(alpha)) {
+  if (missing(alpha)) {
     args$info$alpha <- NULL
   }
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
+    fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args$params, "rect", formals = names(formals(ly_crect)))
 
-  if(is.null(args$params$fill_alpha)) {
+  if (is.null(args$params$fill_alpha)) {
     args$params$fill_alpha <- 0.5
   }
 
   xr <- args$data$x
-  if(is.numeric(xr)) {
+  if (is.numeric(xr)) {
     xr <- c(xr - width / 2, xr + width / 2)
   }
   yr <- args$data$y
-  if(is.numeric(yr)) {
+  if (is.numeric(yr)) {
     yr <- c(yr - height / 2, yr + height / 2)
   }
 
@@ -312,11 +325,12 @@ ly_oval <- function(
   )
   args$info$glyph <- "oval"
 
-  if(missing(alpha)) {
+  if (missing(alpha)) {
     args$params$alpha <- NULL
   }
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
+    fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args$params, "oval", formals = names(formals(ly_oval)))
@@ -375,11 +389,12 @@ ly_patch <- function(
   )
   args$info$glyph <- "patch"
 
-  if(missing(alpha)) {
+  if (missing(alpha)) {
     args$params$alpha <- NULL
   }
 
-  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE, fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
+  args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
+    fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
 
   ## see if any options won't be used and give a message
   check_opts(args, "patch", formals = names(formals(ly_patch)))
@@ -387,7 +402,7 @@ ly_patch <- function(
   axis_type_range <- get_glyph_axis_type_range(args$data$x, args$data$y)
 
   mc <- lapply(match.call(), deparse)
-
+browser()
   make_glyph(
     fig, type = "patch", data = args$data, args = args$params,
     legend = args$info$legend, hover = args$info$hover, url = args$info$url,

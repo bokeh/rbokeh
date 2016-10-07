@@ -1,5 +1,5 @@
 #' @export
-.datatable.aware <- TRUE
+.datatable.aware <- TRUE # nolint
 
 ## internal helper methods
 
@@ -12,7 +12,7 @@ get_bokeh_version <- function() {
 }
 
 validate_fig <- function(fig, fct) {
-  if(!inherits(fig$x$spec, "BokehFigure"))
+  if (!inherits(fig$x$spec, "BokehFigure"))
     stop("Error in ", fct, ": first argument must be of type 'BokehFigure'", call. = FALSE)
 }
 
@@ -21,12 +21,14 @@ validate_fig <- function(fig, fct) {
 validate_colors <- function(opts) {
   col_fields <- c("line_color", "fill_color", "text_color")
 
-  for(fld in col_fields) {
-    if(!is.null(opts[[fld]])) {
+  for (fld in col_fields) {
+    if (!is.null(opts[[fld]])) {
       ind <- which(grepl("^#", opts[[fld]]) & nchar(opts[[fld]]) == 9)
-      if(length(ind) > 0) {
-        message("note - ", fld, " has hex colors with with alpha information - removing alpha - please specify that through fill_alpha or line_alpha")
-        opts[[fld]][ind] <- substr(opts[[fld]][ind], 1 , 7)
+      if (length(ind) > 0) {
+        message(
+          "note - ", fld, " has hex colors with with alpha information - ",
+          "removing alpha - please specify that through fill_alpha or line_alpha")
+        opts[[fld]][ind] <- substr(opts[[fld]][ind], 1, 7)
       }
     }
   }
@@ -42,7 +44,7 @@ get_next_color <- function(lgroupobj, which = "fill_color", type = "discrete", t
 }
 
 check_arc_direction <- function(direction) {
-  if(! all(direction %in% c("clock", "anticlock")))
+  if (! all(direction %in% c("clock", "anticlock")))
     stop("'direction' must be 'clock' or 'anticlock'", call. = FALSE)
 }
 
@@ -50,11 +52,11 @@ check_arc_direction <- function(direction) {
 ## and come up with the next increment of 'layer[int]'
 gen_layer_name <- function(cur_names, prefix = "group") {
   # cur_names <- c("asdf", "layer1", "layer23", "qwert", "alayer7", "layer12b")
-  if(length(cur_names) == 0) {
+  if (length(cur_names) == 0) {
     name <- paste0(prefix, "1")
   } else {
     names_with_prefix <- cur_names[grepl(paste0("^", prefix, "([0-9]+)$"), cur_names)]
-    if(length(names_with_prefix) == 0) {
+    if (length(names_with_prefix) == 0) {
       name <- paste0(prefix, "1")
     } else {
       nn <- as.integer(gsub(prefix, "", names_with_prefix))
@@ -69,15 +71,15 @@ get_glyph_axis_type_range <- function(x, y, assert_x = NULL, assert_y = NULL, gl
   x_axis_type <- get_glyph_axis_type(x)
   y_axis_type <- get_glyph_axis_type(y)
 
-  if(glyph != "")
+  if (glyph != "")
     glyph_text <- paste("'", glyph, "' ")
 
-  if(!is.null(assert_x)) {
-    if(x_axis_type != assert_x)
+  if (!is.null(assert_x)) {
+    if (x_axis_type != assert_x)
       stop("Glyph ", glyph, " expects a ", assert_x, " x axis", call. = FALSE)
   }
-  if(!is.null(assert_y)) {
-    if(y_axis_type != assert_y)
+  if (!is.null(assert_y)) {
+    if (y_axis_type != assert_y)
       stop("Glyph ", glyph, "expects a ", assert_y, " y axis", call. = FALSE)
   }
 
@@ -93,9 +95,9 @@ get_glyph_axis_type_range <- function(x, y, assert_x = NULL, assert_y = NULL, gl
 ## determine whether axis is "numeric" or "categorical"
 get_glyph_axis_type <- function(a) {
   # this will surely get more complex...
-  if(is.character(a) || is.factor(a)) {
+  if (is.character(a) || is.factor(a)) {
     return("categorical")
-  } else if(inherits(a, c("Date", "POSIXct"))) {
+  } else if (inherits(a, c("Date", "POSIXct"))) {
     return("datetime")
   } else {
     return("numeric")
@@ -104,47 +106,48 @@ get_glyph_axis_type <- function(a) {
 
 ## determine the range of an axis for a glyph
 get_glyph_range <- function(a, axis_type = NULL, ...) {
-  if(is.null(axis_type))
+  if (is.null(axis_type))
     axis_type <- get_glyph_axis_type(a)
   ## ... can be size, etc. attributes
-  if(axis_type %in% c("numeric", "datetime")) {
+  if (axis_type %in% c("numeric", "datetime")) {
     range(a, na.rm = TRUE)
   } else {
     # gsub removes suffixes like ":0.6"
-    if(is.factor(a))
+    if (is.factor(a))
       a <- levels(a)
     unique(gsub("(.*):(-*[0-9]*\\.*)*([0-9]+)*$", "\\1", a))
   }
 }
 
 validate_axis_type <- function(fig_type, cur_type, which) {
-  if(length(fig_type) > 0 && length(cur_type) > 0) {
+  if (length(fig_type) > 0 && length(cur_type) > 0) {
     # make this more informative...
-    if(fig_type != cur_type)
-      stop(which, " axis type (numerical / categorical) does not match that of other elements in this figure", call. = FALSE)
+    if (fig_type != cur_type)
+      stop(which, " axis type (numerical / categorical) does not match that of ",
+        "other elements in this figure", call. = FALSE)
   }
 }
 
 ## take a collection of glyph ranges (x or y axis)
 ## and find the global range across all glyphs
 get_all_glyph_range <- function(ranges, padding_factor, axis_type = "numeric", log = FALSE) {
-  if(axis_type == "numeric") {
+  if (axis_type == "numeric") {
     range_mat <- do.call(rbind, ranges)
-    hard_range <- c(min(range_mat[,1], na.rm = TRUE),
-      max(range_mat[,2], na.rm = TRUE))
+    hard_range <- c(min(range_mat[, 1], na.rm = TRUE),
+      max(range_mat[, 2], na.rm = TRUE))
     ## if log, we need to make padding multiplicative
-    if(log) {
+    if (log) {
       hard_range <- hard_range * c(padding_factor * 10, 2 - (padding_factor * 10))
     } else {
       hard_range <- hard_range + c(-1, 1) * padding_factor * diff(hard_range)
     }
-    if(hard_range[1] == hard_range[2])
+    if (hard_range[1] == hard_range[2])
       hard_range <- hard_range + c(-0.5, 0.5)
     hard_range
-  } else if(axis_type == "datetime") {
+  } else if (axis_type == "datetime") {
     range_mat <- do.call(rbind, ranges)
-    hard_range <- c(min(range_mat[,1], na.rm = TRUE),
-      max(range_mat[,2], na.rm = TRUE))
+    hard_range <- c(min(range_mat[, 1], na.rm = TRUE),
+      max(range_mat[, 2], na.rm = TRUE))
     hard_range <- hard_range + c(-1, 1) * padding_factor / 2 * diff(hard_range)
   } else {
     sort(unique(do.call(c, ranges)))
@@ -158,20 +161,21 @@ check_opts <- function(opts, type, formals = NULL) {
   cur_glyph_props <- glyph_props[[type]]
 
   valid_opts <- c("glyph", "visible", "xlab", "ylab", formals)
-  if(cur_glyph_props$lp)
+  if (cur_glyph_props$lp)
     valid_opts <- c(valid_opts, line_prop_names)
-  if(cur_glyph_props$fp)
+  if (cur_glyph_props$fp)
     valid_opts <- c(valid_opts, fill_prop_names)
-  if(cur_glyph_props$tp)
+  if (cur_glyph_props$tp)
     valid_opts <- c(valid_opts, text_prop_names)
 
-  if(length(opts) > 0) {
+  if (length(opts) > 0) {
     # only get names of opts that are not NULL
     idx <- which(sapply(opts, function(x) !is.null(x)))
-    if(length(idx) > 0) {
+    if (length(idx) > 0) {
       not_used <- setdiff(names(opts)[idx], valid_opts)
-      if(length(not_used) > 0)
-        message("note - arguments not used when adding glyph '", type, "': ", paste(not_used, collapse = ", "))
+      if (length(not_used) > 0)
+        message("note - arguments not used when adding glyph '",
+          type, "': ", paste(not_used, collapse = ", "))
     }
   }
 }
@@ -180,20 +184,20 @@ check_opts <- function(opts, type, formals = NULL) {
 ## (used to get fill for pch=21:25)
 reduce_saturation <- function(col, factor = 0.5) {
   col2 <- do.call(grDevices::rgb2hsv,
-    structure(as.list(grDevices::col2rgb(col)[,1]),
+    structure(as.list(grDevices::col2rgb(col)[, 1]),
     names = c("r", "g", "b")))
-  col2['s', ] <- col2['s', ] * factor
-  do.call(grDevices::hsv, as.list(col2[,1]))
+  col2["s", ] <- col2["s", ] * factor
+  do.call(grDevices::hsv, as.list(col2[, 1]))
 }
 
 ## handle different x, y input types
 ## this should be more "class"-y
 ## but this will suffice
 get_xy_data <- function(x, y) {
-  if(is.null(y)) {
-    if(stats::is.ts(x)) {
+  if (is.null(y)) {
+    if (stats::is.ts(x)) {
       res <- list(x = as.vector(stats::time(x)), y = as.vector(x))
-    } else if(is.list(x)) {
+    } else if (is.list(x)) {
       res <- list(x = x[[1]], y = x[[2]])
     } else {
       res <- list(x = seq_along(x), y = x)
@@ -202,29 +206,29 @@ get_xy_data <- function(x, y) {
     res <- list(x = x, y = y)
   }
   ## deal with singleton x or y
-  if(length(res$x) == 1)
+  if (length(res$x) == 1)
     res$x <- rep(res$x, length(res$y))
-  if(length(res$y) == 1)
+  if (length(res$y) == 1)
     res$y <- rep(res$y, length(res$x))
   res
 }
 
 get_xy_names <- function(x, y, xname, yname, dots) {
 
-  if(length(xname) > 1)
+  if (length(xname) > 1)
     xname <- NULL
-  if(length(yname) > 1)
+  if (length(yname) > 1)
     yname <- NULL
 
-  if(!is.null(attr(x, "stringName")))
+  if (!is.null(attr(x, "stringName")))
     xname <- attr(x, "stringName")
-  if(!is.null(attr(y, "stringName")))
+  if (!is.null(attr(y, "stringName")))
     yname <- attr(y, "stringName")
 
-  if(is.null(y)) {
-    if(stats::is.ts(x)) {
+  if (is.null(y)) {
+    if (stats::is.ts(x)) {
       res <- list(x = "time", y = xname)
-    } else if(is.list(x)) {
+    } else if (is.list(x)) {
       nms <- names(x)
       res <- list(x = nms[1], y = nms[2])
     } else {
@@ -235,9 +239,9 @@ get_xy_names <- function(x, y, xname, yname, dots) {
   }
 
   # manual specification trumps
-  if("xlab" %in% names(dots))
+  if ("xlab" %in% names(dots))
     res$x <- dots$xlab
-  if("ylab" %in% names(dots))
+  if ("ylab" %in% names(dots))
     res$y <- dots$ylab
 
   res
@@ -246,18 +250,18 @@ get_xy_names <- function(x, y, xname, yname, dots) {
 
 resolve_line_args <- function(fig, args) {
 
-  if(!is.null(args$color)) {
-    if(!is.null(args$line_color)) {
-      # if(any(args$color != args$line_color))
+  if (!is.null(args$color)) {
+    if (!is.null(args$line_color)) {
+      # if (any(args$color != args$line_color))
       #   message("both color and line_color specified - honoring line_color")
     } else {
       args$line_color <- args$color
     }
   }
 
-  if(!is.null(args$alpha)) {
-    if(!is.null(args$line_alpha)) {
-      # if(any(args$alpha != args$line_alpha))
+  if (!is.null(args$alpha)) {
+    if (!is.null(args$line_alpha)) {
+      # if (any(args$alpha != args$line_alpha))
       #   message("both alpha and line_alpha specified - honoring line_alpha")
     } else {
       args$line_alpha <- args$alpha
@@ -265,29 +269,29 @@ resolve_line_args <- function(fig, args) {
   }
 
   ## map to what bokeh expects
-  if(is.null(args$line_dash) && !is.null(args$type))
+  if (is.null(args$line_dash) && !is.null(args$type))
     args$line_dash <- args$type
   args$type <- NULL
 
-  if(is.null(args$line_width) && !is.null(args$width))
+  if (is.null(args$line_width) && !is.null(args$width))
     args$line_width <- args$width
   args$width <- NULL
 
-  if(is.numeric(args$line_dash)) {
-    if(length(args$line_dash) == 1) {
+  if (is.numeric(args$line_dash)) {
+    if (length(args$line_dash) == 1) {
       args$line_dash <- as.character(args$line_dash)
     }
   }
-  if(is.character(args$line_dash)) {
-    if(!args$line_dash %in% names(lty_dict))
+  if (is.character(args$line_dash)) {
+    if (!args$line_dash %in% names(lty_dict))
       stop("'line_dash' should be one of: ", paste(names(lty_dict), collapse = ", "), call. = FALSE)
     args$line_dash <- lty_dict[[args$line_dash]]
   }
 
-  if(is.numeric(args$line_cap))
+  if (is.numeric(args$line_cap))
     args$line_cap <- ljoin_dict[[as.character(args$line_cap)]]
 
-  if(is.null(args$line_color))
+  if (is.null(args$line_color))
     args$line_color <- get_next_color(fig, theme = fig$x$spec$theme)
 
   args$color <- NULL
@@ -297,46 +301,47 @@ resolve_line_args <- function(fig, args) {
 }
 
 ## take args color and alpha and translate them to f
-resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly = NULL, solid = FALSE, theme = NULL) {
+resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE,
+  ly = NULL, solid = FALSE, theme = NULL) {
 
   ## if no color at all is specified, choose from the theme
-  if(is.null(args$color) && is.null(args$fill_color) && is.null(args$line_color))
+  if (is.null(args$color) && is.null(args$fill_color) && is.null(args$line_color))
     args$color <- get_next_color(ly, theme = theme)
 
-  if(!is.null(args$color)) {
-    if(!is.null(args$line_color)) {
-      # if(any(args$color != args$line_color))
+  if (!is.null(args$color)) {
+    if (!is.null(args$line_color)) {
+      # if (any(args$color != args$line_color))
       #   message("both color and line_color specified - honoring line_color")
     } else {
       args$line_color <- args$color
     }
-    if(!is.null(args$fill_color)) {
-      # if(any(args$color != args$fill_color))
+    if (!is.null(args$fill_color)) {
+      # if (any(args$color != args$fill_color))
       #   message("both color and fill_color specified - honoring fill_color")
     } else {
       args$fill_color <- args$color
     }
   } else {
-    if(is.null(args$line_color))
+    if (is.null(args$line_color))
       args$line_color <- NA
   }
 
-  if(!is.null(args$alpha)) {
-    if(!is.null(args$line_alpha)) {
-      # if(any(args$alpha != args$line_alpha))
+  if (!is.null(args$alpha)) {
+    if (!is.null(args$line_alpha)) {
+      # if (any(args$alpha != args$line_alpha))
       #   message("both alpha and line_alpha specified - honoring line_alpha")
     } else {
       args$line_alpha <- args$alpha
     }
-    if(!is.null(args$fill_alpha)) {
-      # if(any(args$alpha != args$fill_alpha))
+    if (!is.null(args$fill_alpha)) {
+      # if (any(args$alpha != args$fill_alpha))
       #   message("both alpha and fill_alpha specified - honoring fill_alpha")
     } else {
       args$fill_alpha <- args$alpha * 0.5
     }
   }
 
-  if(solid)
+  if (solid)
     args$fill_alpha <- args$line_alpha
 
   args$color <- NULL
@@ -349,12 +354,12 @@ resolve_color_alpha <- function(args, has_line = TRUE, has_fill = TRUE, ly = NUL
 ## make sure marker fill and line properties are correct for marker glyphs
 ## (for example, some, such as glyph = 1, must not have fill)
 resolve_glyph_props <- function(glyph, args, lgroup) {
-  if(valid_glyph(glyph)) {
+  if (valid_glyph(glyph)) {
     cur_glyph_props <- marker_dict[[as.character(glyph)]]
     args$glyph <- cur_glyph_props$glyph
-    if(cur_glyph_props$fill) {
-      if(is.null(args$fill_color)) {
-        if(!is.null(args$line_color)) {
+    if (cur_glyph_props$fill) {
+      if (is.null(args$fill_color)) {
+        if (!is.null(args$line_color)) {
           args$fill_color <- args$line_color
         } else {
           args$fill_color <- lgroup
@@ -362,7 +367,7 @@ resolve_glyph_props <- function(glyph, args, lgroup) {
       }
     } else {
       # if set to NULL, it will use bokeh default as the fill
-      if(glyph_props[[args$glyph]]$fp) {
+      if (glyph_props[[args$glyph]]$fp) {
         args$fill_color <- NA
         args$fill_alpha <- NA
       } else {
@@ -371,9 +376,9 @@ resolve_glyph_props <- function(glyph, args, lgroup) {
       }
     }
 
-    if(cur_glyph_props$line) {
-      if(is.null(args$line_color))
-        if(!is.null(args$fill_color)) {
+    if (cur_glyph_props$line) {
+      if (is.null(args$line_color))
+        if (!is.null(args$fill_color)) {
           args$line_color <- args$fill_color
         } else {
           args$line_color <- lgroup
@@ -389,12 +394,12 @@ resolve_glyph_props <- function(glyph, args, lgroup) {
 # attr(resolve_glyph_props, "keys") <- c("glyph", "line_color", "fill_color", "line_width", "line_alpha")
 
 get_lgroup <- function(lgroup, fig) {
-  if(is.null(lgroup))
+  if (is.null(lgroup))
     lgroup <- gen_layer_name(names(fig$x$spec$layers))
   lgroup <- as.character(lgroup)
 }
 
-get_hover2 <- function(lazy_hover_val, data, sub_fn) {
+get_hover <- function(lazy_hover_val, data, sub_fn) {
 
   # three cases
   # 1. evaluates right away
@@ -426,7 +431,7 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
     # if it evals, check to see if it's full of
     maybe_var <- try(lazy_eval(lazy_hover_val), silent = TRUE)
     if (!inherits(maybe_var, "try-error")) {
-      if(is.null(maybe_var)) {
+      if (is.null(maybe_var)) {
         return(NULL)
       } else if (is.data.frame(maybe_var)) {
         hover_symbol_list <- as.list(maybe_var)
@@ -458,7 +463,7 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
     }
 
     # correct missing name issues
-    if (any((missing_names <- hover_list_names == ""))) {
+    if (any((missing_names <- hover_list_names == ""))) { # nolint
       hover_list_names[missing_names] <- as.character(hover_symbol_list[missing_names])
     }
 
@@ -497,7 +502,7 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
   # make the hover list into a dataframe
   hover_val_dt <- as.data.frame(hover_val_list, stringsAsFactors = FALSE)
 
-  # if(nrow(hover_val_dt) == 1) {
+  # if (nrow(hover_val_dt) == 1) {
   #   hover_val_dt <- lapply(hover_val_dt, I)
   # }
 
@@ -507,7 +512,7 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
   # list of list(pretty name, key name)
   if (is_at_string) {
     tmp <- hover_symbol
-    for(ii in seq_along(hover_dt_key)) {
+    for (ii in seq_along(hover_dt_key)) {
       tmp <- gsub(
         paste0("@", hover_dt_names[ii]),
         paste0("@", hover_dt_key[ii]),
@@ -528,119 +533,34 @@ get_hover2 <- function(lazy_hover_val, data, sub_fn) {
   ), class = "hoverSpec"))
 }
 
-# get the "hover" argument and turn it into data and dict
-# if a string was provided, parse the @var values
-# if a data frame was provided, the arg sould be a
-# list of column names
-# otherwise it should be a named list or data frame
-get_hover <- function(hn, data, sub_fn) {
-
-  # try to get the raw data
-  tmp <- try(lazy_eval(hn), silent = TRUE)
-
-  if (is.null(tmp)) {
-    return(NULL)
-  }
-
-  # if failed, it's a "fancy symbol", so retrieve and eval that
-  if (inherits(tmp, "try-error")) {
-    tmp <- sub_fn(hn)
-    # to work with code below
-    hn <- b_eval_get_symbol(hn)
-
-    # there is also a sub_fn to retrieve data, but didn't want to mess with code
-  }
-
-  # is.character is bad because it's true for try-error
-  if(inherits(tmp, "character")) {
-    # extract variable names
-    tmp_split <- strsplit(tmp, "@")[[1]][-1]
-    hn <- NULL
-    if(length(tmp_split) > 0) {
-      hn <- gsub("^([a-zA-Z0-9_]+).*", "\\1", tmp_split)
-      hn_miss <- setdiff(hn, names(data))
-      if(length(hn_miss) > 0) {
-        message("hover tool couldn't find following variables in the data: ", paste(hn_miss, collapse = ", "), " - ignoring them...")
-        hn <- setdiff(hn, hn_miss)
-      }
-      data <- subset(data, select = hn)
-    }
-  } else if(is.data.frame(tmp)) {
-    data <- tmp
-    hn <- names(data)
-  } else if(inherits(tmp, "hoverSpec")) {
-    return(tmp)
-  } else {
-    if(deparse(hn)[1] == "NULL")
-      return(NULL)
-    if(is.null(data)) {
-      if(!is.data.frame(hn)) {
-        message("hover tool not added - 'hover' must be a data frame or list of variables present in the data frame supplied as the 'data' argument")
-        return(NULL)
-      } else {
-        data <- hn
-        hn <- names(data)
-      }
-    } else {
-      hn <- deparse(hn)[1]
-      hn <- gsub("c\\(|list\\(|\\)| +", "", hn)
-      hn <- strsplit(hn, ",")[[1]]
-      if(all(! hn %in% names(data))) {
-        message("There were no columns: ", paste(hn, collapse = ", "), " in the data for the hover tool - hover not added")
-        return(NULL)
-      }
-      data <- subset(data, select = hn)
-    }
-  }
-  ## to be safe, give hover columns their own name and format them as strings
-  hn2 <- paste("hover_", gsub("\\.|\\(|\\)| ", "_", hn), sep = "")
-  names(data) <- hn2
-
-  for(ii in seq_len(ncol(data)))
-    data[[ii]] <- format(data[[ii]])
-
-  if(inherits(tmp, "character")) {
-    for(ii in seq_along(hn))
-      tmp <- gsub(paste0("@", hn[ii]), paste0("@hover_", hn[ii]), tmp)
-    hdict <- tmp
-  } else {
-    hdict <- lapply(seq_along(hn), function(ii) list(hn[ii], paste("@", hn2[ii], sep = "")))
-  }
-
-  if(nrow(data) == 1)
-    data <- lapply(data, I)
-
-  return(structure(list(
-    data = data,
-    dict = hdict
-  ), class = "hoverSpec"))
-}
-
-
 # get the "url" argument and turn it into data and "dict"
 # must be a vector or a string referencing variables in data
 get_url <- function(url, data, sub_fn) {
   url <- lazy_eval(url)
 
-  if(is.null(url))
+  if (is.null(url))
     return(NULL)
   url <- as.character(url)
-  if(length(url) == 1) {
-    if(!grepl("@", url)) {
-      message("url tap tool not added - 'url' must be a vector of URLs or a string referencing names of 'data' with e.g. @varname")
+  if (length(url) == 1) {
+    if (!grepl("@", url)) {
+      message("url tap tool not added - 'url' must be a vector of URLs ",
+        "or a string referencing names of 'data' with e.g. @varname")
       return(NULL)
     }
-    if(!is.null(data)) {
+    if (!is.null(data)) {
       tmp <- strsplit(url, "@")[[1]][-1]
       vars <- gsub("(^[A-Za-z]+).*", "\\1", tmp)
-      if(!all(vars %in% names(data))) {
-        message("url tap tool not added - one or more of the following detected variables are not in the 'data' argument: ", paste(vars, collapse = ", "))
+      if (!all(vars %in% names(data))) {
+        message("url tap tool not added - one or more of the following detected ",
+          "variables are not in the 'data' argument: ",
+          paste(vars, collapse = ", "))
         return(NULL)
       } else {
         data <- subset(data, select = vars)
       }
     } else {
-      message("url tap tool not added - 'url' must be a vector of URLs or a string referencing names of 'data' with e.g. @varname")
+      message("url tap tool not added - 'url' must be a vector of URLs ",
+        "or a string referencing names of 'data' with e.g. @varname")
       return(NULL)
     }
   } else {
@@ -654,54 +574,11 @@ get_url <- function(url, data, sub_fn) {
   ), class = "urlSpec"))
 }
 
-v_eval <- function(x, data) {
-  res <- try(eval(x, data), silent = TRUE)
-
-  if(inherits(res, "try-error")) {
-    res <- try(eval(x), silent = TRUE)
-    if(inherits(res, "try-error")) {
-      stop("argument '", deparse(x), "' cannot be found")
-    }
-    ## In this case, the user has specified a 'data' argument
-    ## but has also specified an "additional parameter" argument
-    ## such as fill_alpha, etc. which has been set to a variable
-    ## in the calling frame
-    ## for example:
-    ##  col <- "blue"
-    ##  figure() %>% ly_polygon(..., data = d, fill_color = col)
-    ## it is looking for "col" in 'data' but instead should get it from the calling frame
-    ## but right now, we throw an error
-    ## and the way around it is to not use the 'data' argument
-    ## and specify everything explicitly
-  }
-
-  ## variable name could have been supplied in quotes
-  if(length(res) == 1 && is.character(res) && nrow(data) > 0) {
-    if(res %in% names(data)) {
-      nm <- res
-      res <- data[[res]]
-      attr(res, "stringName") <- nm
-    } else {
-      res <- rep(res, nrow(data))
-    }
-  }
-
-  if (is.null(res))
-    return(res)
-
-  # # if the variable came from the data, give it a name
-  # dp <- deparse(x)
-  # if(dp[1] %in% names(data))
-  #   attr(res, "nseName") <- dp
-
-  res
-}
-
 fix_args <- function(args, n) {
   # print(args); cat("\n\n\n\n\n\n\n\n\n\n\n")
 
   lns <- sapply(names(args), function(item_name) {
-    item_val = args[[item_name]]
+    item_val <- args[[item_name]]
 
     if (is.null(item_val)) {
       return(0)
@@ -721,16 +598,17 @@ fix_args <- function(args, n) {
   })
   idx <- which(!lns %in% c(0, 1, n))
 
-  if(length(idx) > 0) {
+  if (length(idx) > 0) {
     nms <- names(args)
     print(args[idx])
-    stop("Arguments do not have correct length of ", n, ": ", paste(nms[idx], " (", lns[idx],")", sep = "", collapse = ", "))
+    stop("Arguments do not have correct length of ", n, ": ",
+      paste(nms[idx], " (", lns[idx], ")", sep = "", collapse = ", "))
   }
 
   # scl_idx <- which(lns == 1)
   # split_idx <- which(lns == n)
   null_idx <- which(lns == 0)
-  if(length(null_idx) > 0)
+  if (length(null_idx) > 0)
     args[null_idx] <- NULL
 
   # print(args); cat("\n\n\n\n")
@@ -748,14 +626,14 @@ map2df <- function(a) {
 # # importFrom bitops bitShiftL bitOr
 # # export
 # to_uint32 <- function(x) {
-#   if(is.vector(x))
+#   if (is.vector(x))
 #     x <- matrix(x, nrow = 1)
 #   bitOr(bitOr(bitOr(bitShiftL(x[,4], 24), bitShiftL(x[,3], 16)),
 #     bitShiftL(x[,2], 8)), bitShiftL(x[,1], 0))
 # }
 
 handle_singleton <- function(x, fn) {
-  if(is.list(x) && length(x) == 1) {
+  if (is.list(x) && length(x) == 1) {
     list(fn(x[[1]]))
   } else {
     fn(x)
@@ -763,9 +641,9 @@ handle_singleton <- function(x, fn) {
 }
 
 to_epoch <- function(x) {
-  if(inherits(x, "Date")) {
+  if (inherits(x, "Date")) {
     return(as.numeric(x) * 86400000)
-  } else if(inherits(x, "POSIXt")) {
+  } else if (inherits(x, "POSIXt")) {
     return(as.numeric(x) * 1000)
   }
   x
@@ -779,7 +657,8 @@ subset_with_attributes <- function(x, ...) {
 
   ans <- try({
     attributes(res)[attr_names] <- attributes(x)[attr_names]
-  }, silent = TRUE)
+  },
+  silent = TRUE)
 
   # if there's trouble setting the attributes,
   # (like in Time-Series data, 'tsp' attr)
@@ -788,16 +667,16 @@ subset_with_attributes <- function(x, ...) {
     for (attr_name in attr_names) {
       try({
         attributes(res)[attr_name] <- attributes(x)[attr_name]
-      }, silent = TRUE)
+      },
+      silent = TRUE)
     }
   }
 
   res
 }
 
-# http://stackoverflow.com/questions/6364783/capitalize-the-first-letter-of-both-words-in-a-two-word-string
 simple_cap <- function(x) {
   s <- strsplit(x, " ")[[1]]
-  paste(toupper(substring(s, 1,1)), substring(s, 2),
-        sep="", collapse=" ")
+  paste(toupper(substring(s, 1, 1)), substring(s, 2),
+    sep = "", collapse = " ")
 }
