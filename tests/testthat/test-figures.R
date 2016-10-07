@@ -672,9 +672,11 @@ test_that("examples", {
   pp <- figure() %>% ly_points(1:10)
   rbokeh2html(pp)
 
-  figure(tools = NULL) %>%
-    ly_points(1:10) %>%
-    widget2png(tempfile(fileext = ".png"))
+  # tf <- tempfile(fileext = ".png")
+  # figure(tools = NULL) %>%
+  #   ly_points(1:10) %>%
+  #   widget2png(tf)
+  # system2("open", tf)
 })
 
 # # sapply(p, length)
