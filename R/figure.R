@@ -107,6 +107,11 @@ figure <- function(
   tt <- Sys.time()
   id <- gen_id(list(x = list(spec = list(time = tt))), type)
 
+  if (is.null(width) && !is.null(height))
+    width <- 500
+  if (is.null(height) && !is.null(width))
+    height <- 500
+
   model <- fig_model_skeleton(id, title, width, height, type)
   ref <- list(
     type = type,
