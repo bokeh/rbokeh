@@ -1,6 +1,8 @@
 Version 0.5
 ----------------------------------------------------------------------
 
+- Add spinner for long-loading figures
+- Set default height/width if one or the other is specified
 - Remove resize tool as default
 - Make theme_ functions propagate across grid plot figures
 - Add theme_title to address issue with title props being moved to new element
