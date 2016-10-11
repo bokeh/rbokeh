@@ -7,4 +7,5 @@ dependencies:
     # - bokeh-widgets.min.js
   stylesheet:
     - bokeh.min.css
+    - loader.css
     # - bokeh-widgets.min.css

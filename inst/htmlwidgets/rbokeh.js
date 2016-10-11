@@ -1,5 +1,4 @@
 HTMLWidgets.widget({
-
   name: 'rbokeh',
 
   type: 'output',
@@ -53,11 +52,21 @@ HTMLWidgets.widget({
 
     var dv1 = document.createElement('div');
     dv1.setAttribute('class', 'bk-root');
+    var spinner = document.createElement('div');
+    spinner.setAttribute('class', 'bk-loader');
+    spinner.style.opacity = 0;
+    spinner.style.left = (instance.width / 2 - 35) + 'px';
+    spinner.style.top = (instance.height / 2 - 35) + 'px';
+
     var dv = document.createElement('div');
     dv.id = x.elementid;
     dv.setAttribute('class', 'plotdiv');
     dv1.appendChild(dv);
+    dv1.appendChild(spinner);
     el.appendChild(dv1);
+
+    window.getComputedStyle(spinner).opacity;
+    spinner.style.opacity = 1;
 
     var render_items = [{
       'docid': x.docid,
@@ -70,6 +79,16 @@ HTMLWidgets.widget({
     }
 
     Bokeh.embed.embed_items(x.docs_json, render_items);
+
+    var timer = function() {
+      if (dv1.childNodes[0].childNodes.length > 0) {
+        dv1.removeChild(spinner);
+      } else {
+        window.setTimeout(timer, 200);
+      }
+    };
+    timer();
+
   },
 
   resize: function(el, width, height, instance) {
