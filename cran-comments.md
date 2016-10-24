@@ -1,6 +1,6 @@
 ## Submission comments
 
-This submission contains numerous improvements and fixes.
+**Resubmission**: Added link to bokeh.pydata.org to DESCRIPTION as requested.
 
 ## Test environments
 
