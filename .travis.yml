@@ -1,14 +1,15 @@
 language: r
 cache: packages
-
 r_binary_packages:
-  - covr # code coverage check
-  - lintr # code lint
-
+- covr
+- lintr
 after_success:
-  - Rscript -e 'covr::codecov()'
-
+- Rscript -e 'covr::codecov()'
+- Rscript -e "packagedocs::deploy_travis()"
 branches:
   only:
-    - master
-    - dev
+  - master
+  - dev
+env:
+  global:
+    secure: b86iRZi+98f5o2+SkCOc7AUGpJetF0iOnYOugY93qQjv5cRv9895GjuVSzZTIBpLMfVm6b3XkJOhs3lJOUfcjUXQF+wE+bUoZdA7Z5SANNpf/RopN9LfAzhwzNsVk8pUYwxSiTCqnz3ubQbcqIJMnQjopgzgLl1c0r3ubWm+KwU=

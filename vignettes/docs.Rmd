@@ -1,13 +1,649 @@
 ---
-title: "rbokeh Function Reference"
-output: rmarkdown::html_vignette
+title: "rbokeh"
+subtitle: "R Interface for Bokeh"
+author: Ryan Hafen
+copyright: Ryan Hafen
+output:
+  packagedocs::package_docs:
+    toc: true
+redirect: http://hafen.github.io/rbokeh
 vignette: >
- %\VignetteEngine{knitr::rmarkdown}
- %\VignetteIndexEntry{rbokeh Function Reference}
- %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{rbokeh documentation}
+  %\VignetteEngine{packagedocs::redirect}
+navpills: |
+  <li class="active"><a href='index.html'>Docs</a></li>
+  <li><a href='rd.html'>Package Ref</a></li>
+  <li><a href='https://github.com/bokeh/rbokeh'>Github <i class='fa fa-github'></i></a></li>
 ---
 
-<meta http-equiv="refresh" content="0; URL='http://hafen.github.io/rbokeh/rd.html'" />
+```{r global_options, include=FALSE}
+# R output pre blocks are styled by default to indicate output
+knitr::opts_chunk$set(comment = NA)
 
-<p>If not automatically redirected, please visit (<a href="http://hafen.github.io/rbokeh/rd.html">http://hafen.github.io/rbokeh/rd.html</a>) for the latest vignette.</p>
+# shorthand for rd_link() - see ?packagedocs::rd_link for more information
+rdl <- function(x) packagedocs::rd_link(deparse(substitute(x)))
+```
 
+# Background #
+
+[Bokeh](http://bokeh.pydata.org) is a visualization library that provides a flexible and powerful declarative framework for creating web-based plots.  Bokeh renders plots using HTML canvas and provides many mechanisms for interactivity.  Bokeh has interfaces in Python, Scala, Julia, and now R.
+
+The Bokeh library is written and maintained by the [Bokeh Core Team](http://bokeh.pydata.org/en/latest/docs/contributing.html) consisting of several members of [Continuum Analytics](http://continuum.io) and other members of the open source community.  The rbokeh package is written and maintained by Ryan Hafen ([\@hafenstats](https://twitter.com/hafenstats)) with several [contributions from others](https://github.com/bokeh/rbokeh/graphs/contributors).  [Contributions are welcome](https://github.com/bokeh/rbokeh/blob/master/CONTRIBUTING.md).
+
+If you find bugs or have issues, please file them on the [github issue tracker](https://github.com/bokeh/rbokeh/issues) or hop on the [Bokeh mailing list](https://groups.google.com/a/continuum.io/forum/#!forum/bokeh) and be sure tag your subject with [R].
+
+# Installation #
+
+The rbokeh package can be installed from CRAN:
+
+```r
+install.packages("rbokeh")
+```
+
+```{r}
+library(rbokeh)
+```
+
+Plots are constructed by initializing a `figure()` and then adding layers on top through various glyphs available in Bokeh, or abstractions of those glyphs that we have created for common use cases.  The data input is typically `x` and `y`, and how they are specified is quite flexible (see examples below).
+
+# Preview #
+
+Before providing a tutorial, we first show several examples of plots created with rbokeh.  This will both give a feel for what the syntax looks like and provide some motivation to go through the more procedural tutorial.  We thought this would be a more enjoyable way to begin than looking at 50 different versions of a plot of the iris data with different parameter settings.
+
+Speaking of the iris data, our first plot:
+
+```{r iris1, lazy=TRUE, message=FALSE}
+p <- figure() %>%
+  ly_points(Sepal.Length, Sepal.Width, data = iris,
+    color = Species, glyph = Species,
+    hover = list(Sepal.Length, Sepal.Width))
+p
+```
+
+Here since we are specifying color and glyph by `Species`, a legend is automatically created and the points are colored according to the default color scheme.  You can hover over points to see the tooltips we added with the `hover` argument.  You can also play around with the other interactive components such as panning and zooming.
+
+We can also specify legend entries manually:
+
+```{r cars1, lazy=TRUE, message=FALSE}
+z <- lm(dist ~ speed, data = cars)
+p <- figure(width = 600, height = 600) %>%
+  ly_points(cars, hover = cars) %>%
+  ly_lines(lowess(cars), legend = "lowess") %>%
+  ly_abline(z, type = 2, legend = "lm")
+p
+```
+
+Histogram of old faithful geyser data with density overplotted:
+
+```{r eruptions1, lazy=TRUE, message=FALSE}
+h <- figure(width = 600, height = 400) %>%
+  ly_hist(eruptions, data = faithful, breaks = 40, freq = FALSE) %>%
+  ly_density(eruptions, data = faithful)
+h
+```
+
+Periodic table of the elements with additional info on hover:
+
+```{r elements, lazy=TRUE, message=FALSE}
+# prepare data
+elements <- subset(elements, !is.na(group))
+elements$group <- as.character(elements$group)
+elements$period <- as.character(elements$period)
+
+# add colors for groups
+metals <- c("alkali metal", "alkaline earth metal", "halogen",
+  "metal", "metalloid", "noble gas", "nonmetal", "transition metal")
+colors <- c("#a6cee3", "#1f78b4", "#fdbf6f", "#b2df8a", "#33a02c",
+  "#bbbb88", "#baa2a6", "#e08e79")
+elements$color <- colors[match(elements$metal, metals)]
+elements$type <- elements$metal
+
+# make coordinates for labels
+elements$symx <- paste(elements$group, ":0.1", sep = "")
+elements$numbery <- paste(elements$period, ":0.8", sep = "")
+elements$massy <- paste(elements$period, ":0.15", sep = "")
+elements$namey <- paste(elements$period, ":0.3", sep = "")
+
+# create figure
+p <- figure(title = "Periodic Table", tools = c("resize", "hover"),
+  ylim = as.character(c(7:1)), xlim = as.character(1:18),
+  xgrid = FALSE, ygrid = FALSE, xlab = "", ylab = "",
+  height = 445, width = 800) %>%
+
+# plot rectangles
+ly_crect(group, period, data = elements, 0.9, 0.9,
+  fill_color = color, line_color = color, fill_alpha = 0.6,
+  hover = list(name, atomic.number, type, atomic.mass,
+    electronic.configuration)) %>%
+
+# add symbol text
+ly_text(symx, period, text = symbol, data = elements,
+  font_style = "bold", font_size = "10pt",
+  align = "left", baseline = "middle") %>%
+
+# add atomic number text
+ly_text(symx, numbery, text = atomic.number, data = elements,
+  font_size = "6pt", align = "left", baseline = "middle") %>%
+
+# add name text
+ly_text(symx, namey, text = name, data = elements,
+  font_size = "4pt", align = "left", baseline = "middle") %>%
+
+# add atomic mass text
+ly_text(symx, massy, text = atomic.mass, data = elements,
+  font_size = "4pt", align = "left", baseline = "middle")
+
+p
+```
+
+
+Crude map of the world with capital cities:
+
+```{r worldmap, lazy=TRUE, message=FALSE}
+library(maps)
+data(world.cities)
+caps <- subset(world.cities, capital == 1)
+caps$population <- prettyNum(caps$pop, big.mark = ",")
+figure(width = 800, height = 450, padding_factor = 0) %>%
+  ly_map("world", col = "gray") %>%
+  ly_points(long, lat, data = caps, size = 5,
+    hover = c(name, country.etc, population))
+```
+
+Hover for population info, etc.
+
+Google map plot:
+
+```{r gmap1, lazy=TRUE, message=FALSE}
+orstationc <- read.csv("http://geog.uoregon.edu/bartlein/old_courses/geog414s05/data/orstationc.csv")
+
+gmap(lat = 44.1, lng = -120.767, zoom = 6, width = 700, height = 600) %>%
+  ly_points(lon, lat, data = orstationc, alpha = 0.8, col = "red",
+    hover = c(station, Name, elev, tann))
+```
+
+Note: for this to work you need to get a Google Maps API key and either provide it as an argument to `gmap()` or set it as an option in your R session `options(GMAP_API_KEY=xxx)` or set it as a system environment variable, `GMAP_API_KEY`.
+
+Time series plot of daily airline flights with hover and vertical line:
+
+```{r flights1, lazy=TRUE, message=FALSE}
+p <- figure(width = 800, height = 400) %>%
+  ly_lines(date, Freq, data = flightfreq, alpha = 0.3) %>%
+  ly_points(date, Freq, data = flightfreq,
+    hover = list(date, Freq, dow), size = 5) %>%
+  ly_abline(v = as.Date("2001-09-11"))
+p
+```
+
+Note that using your scroll wheel over the x or y axis activates a zoom in the dimension of the axis you are hovered over.
+
+Scatterplot matrix of iris data with linked panning, zooming, and brushing (try the pan, zoom, and box_select tools in the figure below):
+
+```{r splom, lazy=TRUE, message=FALSE}
+tools <- c("pan", "wheel_zoom", "box_zoom", "box_select", "reset")
+nms <- expand.grid(names(iris)[1:4], rev(names(iris)[1:4]), stringsAsFactors = FALSE)
+splom_list <- vector("list", 16)
+for(ii in seq_len(nrow(nms))) {
+  splom_list[[ii]] <- figure(width = 200, height = 200, tools = tools,
+    xlab = nms$Var1[ii], ylab = nms$Var2[ii]) %>%
+    ly_points(nms$Var1[ii], nms$Var2[ii], data = iris,
+      color = Species, size = 5, legend = FALSE)
+}
+grid_plot(splom_list, ncol = 4, same_axes = TRUE, link_data = TRUE)
+```
+
+A hexbin plot:
+
+```{r hexbin1, lazy=TRUE, message=FALSE}
+figure() %>% ly_hexbin(rnorm(10000), rnorm(10000))
+```
+
+Hovering will show the counts in the hexagon bin.
+
+Here's a combination of many layers using hexbins to show the density of the fielding location of all doubles in the 2014 MLB season, inspired by [this](https://baseballwithr.wordpress.com/2014/06/06/creating-hexbin-plots/):
+
+```{r baseball, lazy=TRUE, message=FALSE}
+doubles <- read.csv("https://gist.githubusercontent.com/hafen/77f25b556725b3d0066b/raw/10f0e811f09f2b9f0f9ccfb542e296dfac2761d4/doubles.csv")
+
+ly_baseball <- function(x) {
+  base_x <- c(90 * cos(pi/4), 0, 90 * cos(3 * pi/4), 0)
+  base_y <- c(90 * cos(pi/4), sqrt(90^2 + 90^2), 90 * sin(pi/4), 0)
+  distarc_x <- lapply(c(2:4) * 100, function(a)
+    seq(a * cos(3 * pi/4), a * cos(pi/4), length = 200))
+  distarc_y <- lapply(distarc_x, function(x)
+    sqrt((x[1]/cos(3 * pi/4))^2 - x^2))
+
+  x %>%
+    ## boundary
+    ly_segments(c(0, 0), c(0, 0), c(-300, 300), c(300, 300), alpha = 0.4) %>%
+    ## bases
+    ly_crect(base_x, base_y, width = 10, height = 10,
+      angle = 45*pi/180, color = "black", alpha = 0.4) %>%
+    ## infield/outfield boundary
+    ly_curve(60.5 + sqrt(95^2 - x^2),
+      from = base_x[3] - 26, to = base_x[1] + 26, alpha = 0.4) %>%
+    ## distance arcs (ly_arc should work here and would be much simpler but doesn't)
+    ly_multi_line(distarc_x, distarc_y, alpha = 0.4)
+}
+
+figure(xgrid = FALSE, ygrid = FALSE, width = 630, height = 540,
+  xlab = "Horizontal distance from home plate (ft.)",
+  ylab = "Vertical distance from home plate (ft.)") %>%
+  ly_baseball() %>%
+  ly_hexbin(doubles, xbins = 50, shape = 0.77, alpha = 0.75, palette = "Spectral10")
+```
+
+Image plot of Maunga Whau volcano topography with contour line:
+
+```{r volcano, lazy=TRUE, message=FALSE, warning=FALSE}
+p <- figure(title = "Volcano", padding_factor = 0) %>%
+  ly_image(volcano) %>%
+  ly_contour(volcano)
+p
+```
+
+Log axes:
+
+```{r cranpkgs, lazy=TRUE, message=FALSE}
+# get data on number of CRAN packages over time (from Ecdat)
+packages <- read.csv("https://gist.githubusercontent.com/hafen/117d731ad93c03bd5ec0079cbb38ab94/raw/04e7dc3aed1c6f5d82b1bb21460c0b589ef09d96/rpackages.csv",
+  colClasses = c("numeric", "Date", "integer", "character"))
+
+figure(data = packages) %>%
+  ly_points(Date, Packages, hover = c(Version, Date, Packages)) %>%
+  y_axis(log = TRUE)
+```
+
+Embedding images in a figure:
+
+```{r images, lazy=TRUE, message=FALSE}
+url <- c("http://bokeh.pydata.org/en/latest/_static/images/logo.png",
+  "http://developer.r-project.org/Logo/Rlogo-4.png")
+
+ss <- seq(0, 2*pi, length = 13)[-1]
+ws <- runif(12, 2.5, 5) * rep(c(1, 0.8), 6)
+
+imgdat <- data.frame(
+  x = sin(ss) * 10, y = cos(ss) * 10,
+  w = ws, h = ws * rep(c(1, 0.76), 6),
+  url = rep(url, 6)
+)
+
+p <- figure(xlab = "x", ylab = "y", height = 450) %>%
+  ly_image_url(x, y, w = w, h = h, image_url = url, data = imgdat,
+    anchor = "center") %>%
+  ly_lines(sin(c(ss, ss[1])) * 10, cos(c(ss, ss[1])) * 10,
+    width = 15, alpha = 0.1)
+p
+```
+
+Boxplot of voice data:
+
+```{r singer, lazy=TRUE, message=FALSE}
+figure(ylab = "Height (inches)", width = 600) %>%
+  ly_boxplot(voice.part, height, data = lattice::singer)
+```
+
+Quantile plot with iris data:
+
+```{r iris2, lazy=TRUE, message=FALSE}
+figure(legend_location = "top_left") %>%
+  ly_quantile(Sepal.Length, group = Species, data = iris)
+```
+
+```{r singer2, lazy=TRUE, eval=FALSE, echo=FALSE}
+# make this work with tableau20 theme (same shades for each part group)
+figure(xlim = c(-0.1, 1.35), width = 550, legend_location = "bottom_right") %>%
+  ly_quantile(height, group = voice.part, data = lattice::singer)
+```
+
+Washington cancer rates:
+
+```{r cancer, lazy=TRUE, message=FALSE}
+wa_cancer <- droplevels(subset(latticeExtra::USCancerRates, state == "Washington"))
+## y axis sorted by male rate
+ylim <- levels(with(wa_cancer, reorder(county, rate.male)))
+
+figure(ylim = ylim, width = 700, height = 600, tools = "") %>%
+  ly_segments(LCL95.male, county, UCL95.male,
+    county, data = wa_cancer, color = NULL, width = 2) %>%
+  ly_points(rate.male, county, glyph = 16, data = wa_cancer)
+```
+
+# Tutorial #
+
+## Building with layers ##
+
+Plots in rbokeh are build by layering plot elements, called glyphs, to create the desired visualization.  This is a familiar notion to those who have experience with ggplot2 geoms, ggvis layers, or even base R graphics functions `points()`, `lines()`, etc.
+
+To initialize a Bokeh figure, we call
+
+```{r, echo=FALSE}
+p <- figure()
+```
+
+There are several arguments to `figure()` which control things like the width, height, and axes of the figure.  We now have a figure object, `p`, which we are ready to add layers to.
+
+We can add a layer to the figure by calling a number of layer functions.  All layer functions conveniently start with the `ly_` prefix, and a full list can be found in the [function reference](rd.html).  The first argument of a layer function is always the figure to be modified.  Following this, most layer functions take as next arguments `x` and `y` to specify the x and y location of the placement of the glyphs, followed by several arguments for specifying attributes of the glyphs.  All layer functions return a figure object, which can be passed to further layer functions.
+
+For example, suppose we would like to plot the distance to stop vs. speed from the `cars` data.  We can build on the object `p` that we initialized above:
+
+```{r}
+p <- ly_points(p, cars$speed, cars$dist)
+```
+
+We can now view the figure by simply typing `p`:
+
+```{r, lazy=TRUE, message=FALSE}
+p
+```
+
+Note that since we didn't specify x and y axis labels (which can be done with `xlab` and `ylab` in `figure()`), they were chosen for us based on the inputs.
+
+Also note that when we print the figure it tells us that we did not specify the `xlim` and `ylim` arguments and that it is computing limits for us.  By default, the limits are chosen so that all glyphs can be seen in the plot.
+
+Since layer functions return figure objects, we can make use of pipes from the `magrittr` package to string function calls together:
+
+```{r, message=FALSE}
+p <- figure() %>%
+  ly_points(cars$speed, cars$dist)
+```
+
+To illustrate adding another layer to the figure, suppose we would like to add a line to the figure with an intercept of -17.6 and slope of 3.9.  We can do this with the `ly_abline()` layer function.  We can modify the existing figure with the following:
+
+```{r, message=FALSE}
+p <- p %>% ly_abline(-17.6, 3.9)
+```
+
+Or if we were to have built it up in one step, it would look like this:
+
+```{r, lazy=TRUE, message=FALSE}
+p <- figure() %>%
+  ly_points(cars$speed, cars$dist) %>%
+  ly_abline(-17.6, 3.9)
+p
+```
+
+We can continue to add layers as we wish.
+
+## Specifying data ##
+
+In the previous examples, we passed vectors of data to `x` and `y`.  As an alternative, we can pass a data frame to layer functions through the `data` argument and then reference names of the data frame to pass to `x`, `y`, and other plot attributes, using [non-standard evaluation](http://adv-r.had.co.nz/Computing-on-the-language.html).
+
+For example
+
+```{r, message=FALSE}
+p <- figure() %>%
+  ly_points(speed, dist, data = cars)
+```
+
+Or
+
+```{r, message=FALSE}
+p <- figure() %>%
+  ly_points(speed, dist^2, data = cars)
+```
+
+For those familiar with ggplot2, unlike ggplot2, we do not attach a default data set when we call `figure()`, but data is explicitly specified for each layer.
+
+We will see in the following sections how we can also reference variables in the `data` argument for other attributes as well.
+
+There are a few other conveniences for specifying data with plots that are similar to other R plotting systems.  For example, if we only pass one vector of data, the x-axis will become an index and the y-axis will be vector.
+
+```{r, message=FALSE}
+p <- figure() %>%
+  ly_points(speed, data = cars)
+```
+
+Or if we only pass one vector and it is a list or data frame, the second element will be plotted against the first element.
+
+```{r, message=FALSE}
+p <- figure() %>%
+  ly_points(cars)
+```
+
+## Hover ##
+
+Now is a good time to introduce hover capabilities in rbokeh.  Most layer functions (those that render shapes and not lines), have a `hover` argument.  This argument can be a data frame with the same number of rows as the length of `x` and `y`, or a vector of names in the `data` argument.  When specified, the hover tool will be activated and when a point is hovered over in the plot, a list of the specified variable values for that point will be shown.  For example, with the cars data, suppose we would like to see the actual data point values:
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_points(speed, dist, data = cars, hover = c(speed, dist))
+```
+
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_points(speed, dist, data = cars, hover = "This car was going @speed mph!")
+```
+
+
+## Plot attributes ##
+
+Now that we can get data in and add layers, we want to control the aesthetic attributes of the glyphs being plotted.  By default, attributes are chosen based on the currently selected theme.  We will cover more on themes later, and for now use the default color theme.
+
+We can also explicitly specify attributes such as size, color, etc. for each layer.  For example, suppose we want to color the glyphs in our `cars` plot red and have them 20 pixels in size:
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_points(cars, color = "red", size = 20)
+```
+
+We can pass vectors of attributes as well:
+
+```{r, lazy=TRUE, message=FALSE}
+n <- nrow(cars)
+ramp <- colorRampPalette(c("red", "blue"))(n)
+figure() %>%
+  ly_points(cars, color = ramp, size = seq_len(n))
+```
+
+In the following section, "Mapped attributes", we will see how we can specify attributes to be applied automatically based on different variables in our data.
+
+### Line and fill attributes ###
+
+Every layer function has either line attributes or line and fill attributes (except for `ly_text()`, which has text attributes).  Which of these categories a glyph falls into is usually evident from the name of the layer function and is spelled out in the function reference.
+
+In the example above, the points in our plot have both line attributes (the outline of the circles) and fill attributes (the area inside the circles).  But we specified color with a single argument `color`.  `color` convenience argument, which we will provide more detail about below, but we can have finer control over line and fill attributes.  The following are the available line and fill attributes we can specify:
+
+| attribute    | description |
+|--------------|-------------|
+| `fill_color` | color to use to fill the glyph with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' |
+| `fill_alpha` | transparency value between 0 (transparent) and 1 (opaque) |
+| `line_color` | color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' |
+| `line_width` | stroke width in units of pixels |
+| `line_alpha` | transparency value between 0 (transparent) and 1 (opaque) |
+| `line_join`  | how path segments should be joined together 'miter' 'round' 'bevel' |
+| `line_cap`   | how path segments should be terminated 'butt' 'round' 'square' |
+| `line_dash`  | array of integer pixel distances that describe the on-off pattern of dashing to use |
+
+For example, suppose we want the fill to be blue and the line to be black:
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_points(cars, fill_color = "blue", line_color = "black")
+```
+
+### Convenience line and fill attributes ###
+
+We provide convenience arguments `color` and `alpha` to deal with both line and/or fill attributes.  How they behave differs depending on what attributes the glyph has.
+
+#### Glyphs with line and fill attributes ####
+
+When dealing with glyphs that have both line and color attributes (like the plots we have created so far), when `color` is specified, this will be the color of both the line and the fill, with the alpha level of the fill reduced by 50\%.  When `alpha` is specified, this will be the alpha of the line, with the alpha of the fill being set to 50\% of this value.
+
+#### Glyphs with only line attributes ####
+
+When using a glyph that only has line properties, `color` maps directly to `line_color` and is simply a convenience as the `line_` prefix is redundant, and similarly `alpha` maps directly to `line_alpha`Any attribute that starts with `line_` or `fill_` always overrides `color` and `alpha`.
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_points(cars) %>%
+  ly_lines(lowess(cars), color = "red", width = 2)
+```
+
+### The `glyph` attribute in `ly_points()`
+
+Most of the attributes for different layer functions are self-explanatory from looking at the function reference, but there are a few that are worth spending some more time on.  One is the `glyph` attribute in `ly_points()`.  This is similar to the `pch` argument to base R's `points()`.
+
+To see the avaialable possible values for `glyph`:
+
+```{r, lazy=TRUE, message=FALSE}
+point_types()
+```
+
+The named glyphs on rows 4 and 5 are called "markers" in Bokeh and are shown with their default rendering when `color` is "blue".  The numbered glyphs map closely to the possible values for `pch` in R's `points()` function.  When a numbered glyph is specified, fill and line attributes will be handled accordingly to get the desired effect.
+
+For example, let's plot the cars data with `glyph = 12`:
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_points(cars, glyph = 12)
+```
+
+### The `type` attribute in `ly_lines()` and friends
+
+Similar to the `glyph` argument in `ly_points()`, there is a `type` argument in `ly_lines()` that maps to the `lty` argument in base R's `lines()` function.
+
+For example:
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_lines(lowess(cars), type = 2)
+```
+
+We encourage you to explore all the different layer functions and the available attributes.  They are well-documented in the function reference and most have examples.
+
+## Mapped attributes ##
+
+Often we want to control the behavior of glyph attributes based on other properties of the data.  The rbokeh package borrows from the ideas of  ggplot2's `qplot()` to allow easy specification of variables to map to different attributes.
+
+For example, turning to the famous `iris` data set, suppose we want to plot sepal width vs. sepal length and color the points by species:
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_points(Sepal.Length, Sepal.Width, data = iris, color = Species)
+```
+
+We see that points get colored according to species (based on the current theme, which is Tableau10) and a legend is added.
+
+We can map other attributes, and more than one attribute at once.  For example, to vary both color and glyph type by species:
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_points(Sepal.Length, Sepal.Width, data = iris,
+    color = Species, glyph = Species)
+```
+
+rbokeh knows to map a variable when the variable it is given does not conform to what is expected for that attribute.  For example, the species values of "setosa", etc., are not hex codes or color names.  In the future we could allow this specification to be more explicit through using `I()`.
+
+We can also map continuous variables, and in this case it it sliced up and values are mapped across a scale for the attribute.  For example, coloring by petal width:
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_points(Sepal.Length, Sepal.Width, data = iris,
+    color = Petal.Width)
+```
+
+We can do this with other glyphs as well.  Some glyphs have a `group` parameter where we would like to split the data up by a grouping variable but not vary an aesthetic attribute.  For example, with `ly_lines()`, we may want to break the data up by a variable and get a different line for each, all of the same color:
+
+```{r, lazy=TRUE, message=FALSE}
+co2dat <- data.frame(
+  y = co2,
+  x = floor(time(co2)),
+  m = rep(month.abb, 39))
+
+figure() %>%
+  ly_lines(x, y, group = m, data = co2dat)
+```
+
+We can of course vary the color as well:
+
+```{r, lazy=TRUE, message=FALSE}
+figure(xlim = c(1958, 2010)) %>%
+  ly_lines(x, y, color = m, data = co2dat)
+```
+
+## Legends ##
+
+We saw that when mapping attributes to variables in our data, we get legends for free.  But we may want to have more control over legends.  Each layer we add to a plot can have a legend entry.  Most layer functions have a `legend` argument that allows you to specify the legend entry for that layer.  This only works if you are not mapping attributes or grouping.  The value for the `legend` argument is simply the text you would like to have displayed next to the glyph in the legend.  The glyph that appears in the legend is automatically created based on the attributes specified for the layer.
+
+An example we saw before made use of explicit specification of legend entries:
+
+```{r, lazy=TRUE, message=FALSE}
+z <- lm(dist ~ speed, data = cars)
+figure(width = 600, height = 600) %>%
+  ly_points(cars, hover = cars, legend = "data") %>%
+  ly_lines(lowess(cars), legend = "lowess") %>%
+  ly_abline(z, type = 2, legend = "lm")
+```
+
+Bokeh provides finer control of parameters for legend appearance (such as where to put it) and we will expose these soon in rbokeh.
+
+## Axes ##
+
+Bokeh allows you to specify numeric, categorical, and date/time axes.  In the case of numeric axes, you can also specify a log scale.  Examples for this are in the function reference under [`x_axis`](rd.html#x_axis) and [`y_axis`](rd.html#y_axis).
+
+Axis labels formats can be controlled by specifying various tick format parameters in the axis layers.
+
+For example, the default Date axis monthly format of '%b%y' can instead be specified as '%b' using
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_lines(seq(as.Date("2012-01-01"),
+    as.Date("2012-12-31"), by="days"), rnorm(366)) %>%
+  x_axis(label = "Date", format = list(months = "%b"))
+```
+
+or commas could be added to long numeric labels using
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_points(rnorm(10), rnorm(10) * 10000) %>%
+  y_axis(number_formatter = "numeral", format = "0,000")
+```
+
+A complete list of supported axis tick parameters can be found in the function reference under [`x_axis`](rd.html#x_axis) and [`y_axis`](rd.html#y_axis).
+
+## Tools ##
+
+Bokeh has many tools available for different types of interaction.  Tools can be easily added to a plot either through the `tools` argument to `figure()`, in which case a vector of tool names is provided, or through any of the various `tool_` functions.  In the latter case, some tools have additional parameters that give us finer control over the behavior of the tool.
+
+For example, suppose I want to add the `box_select` and `lasso_select` tools to my figure:
+
+```{r, lazy=TRUE, message=FALSE}
+figure() %>%
+  ly_points(Sepal.Length, Sepal.Width, data = iris, color = Species) %>%
+  tool_box_select() %>%
+  tool_lasso_select()
+```
+
+Now in the plot in the toolbar at the top I can choose the one of these tools and select points in the figure.  This is particularly useful for linked brushing described in the next section.
+
+For more examples, see the examples in the [`tool_`](rd.html#tool_box_select) functions in the function reference.
+
+## Grids ##
+
+Bokeh allows us to construct grids of plots that can interact with each other through linked pan/zoom and brushing.  There are several examples in the function reference for [`grid_plot`](rd.html#grid_plot)
+
+## Themes ##
+
+Theme support in rbokeh is pretty minimal right now but the groundwork is there.  More to come on this.
+
+## Statistical layers ##
+
+There are several layer functions that add statistically-derived glyphs to a plot, such as `ly_boxplot`, `ly_hist`, `ly_density`, etc.  A major focus in the near future of this package will be the ability to add as many of these as we can and make them robust to different use cases.
+
+# Design / Dev #
+
+Notes on the design of rbokeh, roadmap, etc. to come.
+
+<!-- The Bokeh model JSON is built as an R list incrementally as layers are added.  Each layer typically adds a ColumnDataSource, GlyphRenderer, and Glyph to the model list.  The model list, however, is not complete until the plot is printed, at which point `prepare_figure()` is called.
+
+`prepare_figure()` does the following:
+
+- takes care of any deferred rendering - for example, some functions such as `ly_abline()` wait until the plot is called to get the range of values over which it needs to be rendered
+- resolve attributes that need to be mapped
+- add legend entries for mapped attributes
+- clean up the model list to be ready to send to Bokeh (remove names, etc.)
+ -->

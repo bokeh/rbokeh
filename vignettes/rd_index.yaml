@@ -1,0 +1,138 @@
+## layout the order in which topics are presented in the rd docs
+# 1. get a list of topics with the following:
+#    db <- tools::Rd_db("rbokeh")
+#    topics <- gsub("\\.Rd", "", names(db))
+#    cat(paste(topics, collapse = "\n"))
+# 2. arrange the topic names into sections as desired in the format below:
+## If you need to see which topics are missing, do the following in addition:
+# cur <- yaml::yaml.load_file("rd_index.yaml")
+# cur <- unlist(lapply(cur, function(x) x$topics))
+# cat(paste(setdiff(topics, cur), collapse = "\n"))
+knitr:
+  eval: true
+
+sections:
+-
+  section_name: rbokeh
+  topics:
+    -
+      file: rbokeh-package.Rd
+      title: "rbokeh-package: rbokeh, rbokeh-package"
+-
+  section_name: Plots
+  description:
+  topics:
+    - figure
+    - gmap
+    - grid_plot
+-
+  section_name: Layer Functions
+  description:
+  topics:
+    - ly_annular_wedge
+    - ly_annulus
+    - ly_arc
+    - ly_bezier
+    - ly_crect
+    - ly_image
+    - ly_image_url
+    - ly_lines
+    - ly_multi_line
+    - ly_oval
+    - ly_patch
+    - ly_points
+    - ly_polygons
+    - ly_quadratic
+    - ly_ray
+    - ly_rect
+    - ly_segments
+    - ly_text
+    - ly_wedge
+-
+  section_name: Higher-Level Layer Functions
+  description:
+  topics:
+    - ly_quantile
+    - ly_density
+    - ly_hist
+    - ly_hexbin
+    - ly_boxplot
+    - ly_abline
+    - ly_contour
+    - ly_curve
+    - ly_map
+    - ly_bar
+-
+  section_name: Finer Control
+  description:
+  topics:
+    - x_axis
+    - x_range
+    - y_axis
+    - y_range
+-
+  section_name: Themes
+  description:
+  topics:
+    - set_theme
+    - theme_axis
+    - theme_grid
+    - theme_legend
+    - theme_plot
+    - theme_title
+    - set_palette
+    -
+      file: themes.Rd
+      title: "themes"
+    -
+      file: palettes.Rd
+      title: "palettes"
+-
+  section_name: Interaction Tools
+  description:
+  topics:
+    - tool_hover
+    - tool_selection
+    - tool_tap
+    - tool_box_select
+    - tool_box_zoom
+    - tool_crosshair
+    - tool_lasso_select
+    - tool_pan
+    - tool_reset
+    - tool_resize
+    - tool_save
+    - tool_wheel_zoom
+-
+  section_name: Callback Interactivity
+  description:
+  topics:
+    - console_callback
+    - custom_callback
+    - debug_callback
+    - shiny_callback
+-
+  section_name: Output
+  description:
+  topics:
+    - print_model_json
+    - bokeh_render_json
+    - rbokehOutput
+    - renderRbokeh
+    - widget2gist
+    - widget2html
+    - widget2png
+    - rbokeh2html
+-
+  section_name: Misc
+  description:
+  topics:
+    - flightfreq
+    - elements
+    - nyctaxihex
+    - catjitter
+    - get_object_refs
+    - phantom_install
+    - pipe
+    - point_types
+    - gmap_style
