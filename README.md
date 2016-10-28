@@ -24,3 +24,4 @@ devtools::install_github("bokeh/rbokeh")
 ### Use
 
 Please see [here](http://hafen.github.io/rbokeh).
+
