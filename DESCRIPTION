@@ -35,7 +35,8 @@ Suggests:
     lattice,
     lintr,
     roxygen2 (>= 5.0.0),
-    packagedocs
+    packagedocs,
+    latticeExtra
 Enhances: shiny (>= 0.12)
 RoxygenNote: 5.0.1
 VignetteBuilder: packagedocs
