@@ -5,7 +5,8 @@ r_binary_packages:
 - lintr
 after_success:
 - Rscript -e 'covr::codecov()'
-- Rscript -e "packagedocs::deploy_travis()"
+- Rscript -e 'devtools::install_github("hafen/lazyrmd@jsonp")'
+- Rscript -e 'packagedocs::deploy_travis()'
 branches:
   only:
   - master
