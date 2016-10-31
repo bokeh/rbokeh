@@ -10,6 +10,7 @@
 # cat(paste(setdiff(topics, cur), collapse = "\n"))
 knitr:
   eval: true
+  lazy: true
 
 sections:
 -

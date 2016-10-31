@@ -7,7 +7,6 @@ output:
   packagedocs::package_docs_rd:
     toc: true
     toc_collapse: true
-    lazy: true
 redirect: http://hafen.github.io/rbokeh/rd.html
 vignette: |
   %\VignetteIndexEntry{rbokeh Package Reference}
