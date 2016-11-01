@@ -13,4 +13,4 @@ branches:
   - dev
 env:
   global:
-    secure: b86iRZi+98f5o2+SkCOc7AUGpJetF0iOnYOugY93qQjv5cRv9895GjuVSzZTIBpLMfVm6b3XkJOhs3lJOUfcjUXQF+wE+bUoZdA7Z5SANNpf/RopN9LfAzhwzNsVk8pUYwxSiTCqnz3ubQbcqIJMnQjopgzgLl1c0r3ubWm+KwU=
+    secure: WrQmEDKUpIj93iX7G8SYH5BN0nIBKU095UuGrw7443xTji5aO/fVoEbA4ciG6oxF2VuR5DEuEJte5K1e1GHF0cutgl2XGBucCgidDl9U0hy3DykF0hXw1Vr2IwmWZF36zDEVaEmczRkKkSBe8sfo1q5kzWL4QmenRJqZhizg3fw=
