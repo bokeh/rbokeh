@@ -9,7 +9,7 @@ output:
 redirect: http://hafen.github.io/rbokeh
 vignette: >
   %\VignetteIndexEntry{rbokeh documentation}
-  %\VignetteEngine{packagedocs::redirect_index}
+  %\VignetteEngine{packagedocs::redirect}
 navpills: |
   <li class="active"><a href='index.html'>Docs</a></li>
   <li><a href='rd.html'>Package Ref</a></li>
