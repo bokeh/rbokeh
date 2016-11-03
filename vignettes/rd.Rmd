@@ -19,7 +19,3 @@ navpills: |
 
 ```{r auto-gen-child, child="auto-generated-rd.Rmd"}
 ```
-
-```{r}
-sessionInfo()
-```
