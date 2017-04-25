@@ -181,6 +181,8 @@ grid_plot <- function(figs, width = NULL, height = NULL,
 
   if (!is.null(xlim)) {
     id <- gen_id(figs[[1]], c("x", "GridRange"))
+    if(inherits(xlim, c("Date", "POSIXct")))
+      xlim <- to_epoch(xlim)
     x_range <- list(range = xlim,
       mod = range_model(ifelse(is.numeric(xlim), "Range1d", "FactorRange"), id, xlim))
     for (ii in seq_along(figs)) {
@@ -192,6 +194,8 @@ grid_plot <- function(figs, width = NULL, height = NULL,
 
   if (!is.null(ylim)) {
     id <- gen_id(figs[[1]], c("y", "GridRange"))
+    if(inherits(ylim, c("Date", "POSIXct")))
+      ylim <- to_epoch(ylim)
     y_range <- list(range = ylim,
       mod = range_model(ifelse(is.numeric(ylim), "Range1d", "FactorRange"), id, ylim))
     for (ii in seq_along(figs)) {
