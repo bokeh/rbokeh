@@ -679,6 +679,7 @@ test_that("examples", {
   # system2("open", tf)
 })
 
+
 # # sapply(p, length)
 # for (i in seq_along(p)) {
 #   if (!is.null(p[[i]])) {

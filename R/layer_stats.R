@@ -20,7 +20,7 @@ ly_hist <- function(
   fig, x, data = figure_data(fig),
   breaks = "Sturges", freq = TRUE, include.lowest = TRUE, right = TRUE,
   color = NULL, alpha = 1,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...
+  lname = NULL, lgroup = NULL, ...
 ) {
 
   validate_fig(fig, "ly_hist")
@@ -33,7 +33,6 @@ ly_hist <- function(
       # no legend?
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...)
     )
   )
@@ -97,7 +96,7 @@ ly_density <- function(
     "biweight", "cosine", "optcosine"),
   weights = NULL, window = kernel, n = 512, cut = 3, na.rm = FALSE,
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  legend = NULL, lname = NULL, lgroup = NULL,
   ...
 ) {
 
@@ -113,7 +112,6 @@ ly_density <- function(
       legend,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...)
     )
   )
@@ -172,7 +170,7 @@ ly_quantile <- function(
   fig, x, group = NULL, data = figure_data(fig),
   probs = NULL, distn = stats::qunif, ncutoff = 200,
   color = NULL, alpha = 1,
-  legend = TRUE, lname = NULL, lgroup = NULL, visible = TRUE,
+  legend = TRUE, lname = NULL, lgroup = NULL,
   ...
 ) {
 
@@ -187,7 +185,6 @@ ly_quantile <- function(
       legend,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...)
     )
   )
@@ -279,7 +276,7 @@ ly_boxplot <- function(
   width = 0.9, coef = 1.5,
   color = "blue", alpha = 1,
   outlier_glyph = 1, outlier_size = 10,
-  lname = NULL, lgroup = NULL, visible = TRUE,
+  lname = NULL, lgroup = NULL,
   ...
 ) {
 
@@ -293,7 +290,6 @@ ly_boxplot <- function(
       # legend, # no legend?
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...)
     )
   )
@@ -375,7 +371,6 @@ ly_boxplot <- function(
       fig = fig, x = rep(gp, 2), y = c(md1, md2),
       width = width, height = c(hgt1, hgt2),
       xlab = x_name, ylab = y_name,
-      visible = args$params$visible,
       line_color = args$params$line_color,
       fill_color = args$params$fill_color,
       line_alpha = args$params$line_alpha,
@@ -388,7 +383,6 @@ ly_boxplot <- function(
       x1 = c(gp, gp, gpl, gpl),
       y1 = c(bp$stats[2], bp$stats[5], bp$stats[1], bp$stats[5]),
       xlab = x_name, ylab = y_name,
-      visible = args$params$visible,
       line_color = args$params$line_color,
       line_alpha = args$params$line_alpha)
 
@@ -399,7 +393,6 @@ ly_boxplot <- function(
         glyph = rep(outlier_glyph, length(bp$out)),
         size = outlier_size,
         xlab = x_name, ylab = y_name,
-        visible = args$params$visible,
         line_color = args$params$line_color,
         fill_color = args$params$fill_color,
         line_alpha = args$params$line_alpha,

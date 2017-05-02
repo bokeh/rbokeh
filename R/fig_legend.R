@@ -25,7 +25,7 @@ add_legend <- function(fig, legends, extra_pars) {
 legend_model <- function(id, plot_ref, legends, extra_pars) {
   res <- base_model_object("Legend", id)
   res$model$attributes$plot <- plot_ref
-  res$model$attributes$legends <- legends
+  res$model$attributes$items <- legends
 
   res$model$attributes <- c(res$model$attributes, extra_pars)
 
