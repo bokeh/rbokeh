@@ -1,6 +1,7 @@
 cache_directory: ".lintr_cache"
 linters: with_defaults(
     commented_code_linter = NULL,
+    absolute_paths_linter = NULL,
     line_length_linter(100),
     NULL
   )
