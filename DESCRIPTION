@@ -1,6 +1,6 @@
 Package: rbokeh
 Title: R Interface for Bokeh
-Version: 0.5.0
+Version: 0.5.1
 Authors@R: c(
     person("Ryan", "Hafen", email = "rhafen@gmail.com", role = c("aut", "cre")),
     person("Kenton", "Russell", email = "kent.russell@timelyportfolio.com", role = "ctb"),
@@ -38,7 +38,7 @@ Suggests:
     packagedocs,
     latticeExtra
 Enhances: shiny (>= 0.12)
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 VignetteBuilder: packagedocs
 Remotes:
     hafen/packagedocs,

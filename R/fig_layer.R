@@ -149,7 +149,7 @@ data_model <- function(dd, id = NULL) {
   res <- base_model_object("ColumnDataSource", id)
 
   res$model$attributes$column_names <- I(names(dd))
-  res$model$attributes$selected <- I(NULL)
+  res$model$attributes$selected <- list()
   res$model$attributes$data <- as.list(dd)
 
   res
