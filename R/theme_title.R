@@ -5,7 +5,7 @@
 #' @param background_fill_alpha (numeric) background color alpha of plot
 #' @param border_fill_color (color) fill color of border area of plot
 #' @param border_fill_alpha (numeric) fill color alpha of border area of plot
-#' @param text_align ('left', 'right', 'center') The text align for the plot title.
+#' @param align ('left', 'right', 'center') The text align for the plot title.
 #' @param text_alpha The text alpha for the plot title.
 #' @param text_baseline ('top', 'middle', 'bottom', 'alphabetic', 'hanging') The text baseline for the plot title.
 #' @param text_color (color) The text color for the plot title.
@@ -24,7 +24,7 @@ theme_title <- function(fig,
   background_fill_alpha = 1,
   border_fill_color = "white",
   border_fill_alpha = 1,
-  text_align = "left",
+  align = "left",
   text_alpha = 1,
   text_baseline = "bottom",
   text_color = "#444444",
@@ -70,7 +70,7 @@ title_par_validator_map <- list(
   "border_fill_alpha" = "alpha",
   "text_color" = "color",
   "text_alpha" = "num_data_spec",
-  "text_align" = "text_align",
+  "align" = "align",
   "text_baseline" = "text_baseline",
   "text_font_style" = "font_style",
   "text_font" = "string",
