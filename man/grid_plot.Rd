@@ -102,4 +102,3 @@ p2 <- figure(tools = tools, width = 500, height = 500) \%>\%
 grid_plot(list(p1, p2), same_axes = TRUE, link_data = TRUE)
 }
 }
-

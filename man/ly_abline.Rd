@@ -53,6 +53,7 @@ Draws one or more straight lines.
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 # abline with mixed axes for h and v
 figure() \%>\%
@@ -95,4 +96,3 @@ Other layer functions: \code{\link{ly_annular_wedge}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

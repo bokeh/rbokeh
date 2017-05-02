@@ -23,4 +23,3 @@ Get the HTML content required to embed a Bokeh figure
 p <- figure() \%>\% ly_points(1:10)
 rbokeh2html(p)
 }
-

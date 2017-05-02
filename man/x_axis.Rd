@@ -92,4 +92,3 @@ figure() \%>\%
 \seealso{
 Other axes: \code{\link{y_axis}}
 }
-

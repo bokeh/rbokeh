@@ -31,4 +31,3 @@ figure(title = "hover a blue point") \%>\%
     orange_data.trigger('change')", "orange"), "blue")
 }
 }
-

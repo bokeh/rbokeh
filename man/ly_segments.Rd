@@ -55,6 +55,7 @@ Draws line segments with the given starting and ending coordinates.
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \seealso{
 Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_annular_wedge}}, \code{\link{ly_annulus}},
@@ -71,4 +72,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_ray}}, \code{\link{ly_rect}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

@@ -15,4 +15,3 @@ a function that takes in one lazy argument to be evaluated
 \description{
 Evaluate the argument from the env it came from, or from within the data.  The arg supplied to the returned function must be lazy.
 }
-

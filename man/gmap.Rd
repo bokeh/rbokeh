@@ -78,4 +78,3 @@ gmap(title = "NYC taxi pickups January 2013",
 \seealso{
 \code{\link{gmap_style}}
 }
-

@@ -32,4 +32,3 @@ Other tools: \code{\link{tool_box_select}},
   \code{\link{tool_reset}}, \code{\link{tool_resize}},
   \code{\link{tool_save}}, \code{\link{tool_tap}}
 }
-

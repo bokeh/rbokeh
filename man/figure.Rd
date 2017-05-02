@@ -76,6 +76,7 @@ Although the HTML canvas can comfortably display tens or even hundreds of thousa
 
 The basic idea is that during interactive operations (e.g., panning or zooming), the plot only draws some small fraction data points. This hopefully allows the general sense of the interaction to be preserved mid-flight, while maintaining interactive performance. See the \code{lod_} parameters for information on how to control this.
 }
+
 \examples{
 figure() \%>\% ly_points(1:10)
 }
@@ -102,4 +103,3 @@ Tools to add to a figure: \code{\link{tool_box_select}};
   \code{\link{tool_save}}; \code{\link{tool_wheel_zoom}}
 Other figure types: \code{\link{grid_plot}}; \code{\link{gmap}}
 }
-

@@ -43,4 +43,3 @@ Also note that this currently can't handle thumbnails but we are looking into wa
 widget2gist("figure() \%>\% ly_points(1:10)", name = "test")
 }
 }
-

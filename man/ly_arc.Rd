@@ -60,6 +60,7 @@ Add an "arc" layer to a Bokeh figure
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 rescale <- function(x)
   (x - min(x)) / diff(range(x))
@@ -84,4 +85,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

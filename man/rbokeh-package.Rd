@@ -2,8 +2,8 @@
 % Please edit documentation in R/rbokeh-package.R
 \docType{package}
 \name{rbokeh-package}
-\alias{rbokeh}
 \alias{rbokeh-package}
+\alias{rbokeh}
 \title{rbokeh: R interface for Bokeh}
 \description{
 R interface for creating plots in Bokeh.  Bokeh by Continuum Analytics, \url{http://bokeh.pydata.org/en/latest/}
@@ -11,4 +11,3 @@ R interface for creating plots in Bokeh.  Bokeh by Continuum Analytics, \url{htt
 \details{
 For full documentation on the package, visit \url{http://hafen.github.io/rbokeh}
 }
-

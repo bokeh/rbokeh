@@ -55,6 +55,7 @@ Draws lines with the given coordinates.
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 \donttest{
 z <- lm(dist ~ speed, data = cars)
@@ -81,4 +82,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

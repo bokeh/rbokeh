@@ -46,6 +46,7 @@ Computes and draws contour lines.
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 \donttest{
 p <- figure(xlim = c(0, 1), ylim = c(0, 1), title = "Volcano") \%>\%
@@ -70,4 +71,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

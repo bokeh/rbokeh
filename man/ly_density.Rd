@@ -48,6 +48,7 @@ Draws a kernel density estimate
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 h <- figure(width = 600, height = 400) \%>\%
   ly_hist(eruptions, data = faithful, breaks = 40, freq = FALSE) \%>\%
@@ -70,4 +71,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

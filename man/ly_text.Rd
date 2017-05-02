@@ -55,6 +55,7 @@ Add a "text" layer to a Bokeh figure
 \section{Mapped plot attributes and legends}{
  When specifying an input data frame for a layer through the \code{data} argument, columns of \code{data} can be used to specify various plot attributes such as \code{color}, etc. For example, with \code{ly_points(..., data = iris, color = Species)}, the \code{Species} variable is used to determine how to color the points.  Here, \code{Species} is "mapped" to the \code{color} attribute.  Both continuous and categorical variables can be mapped.  In the case of continuous variables, the range is cut into slices and attributes are applied to each interval.  The mapping from the values of the variable to the actual plot attributes is determined based on the theme.
 }
+
 \examples{
 \donttest{
 # prepare data
@@ -124,4 +125,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_ray}}, \code{\link{ly_rect}},
   \code{\link{ly_segments}}, \code{\link{ly_wedge}}
 }
-

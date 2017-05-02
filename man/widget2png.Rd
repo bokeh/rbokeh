@@ -26,4 +26,3 @@ figure(tools = NULL) \%>\%
   widget2png("/tmp/test.png")
 }
 }
-

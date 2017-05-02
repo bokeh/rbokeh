@@ -44,4 +44,3 @@ Add a "hexbin" layer to a Bokeh figure
 figure() \%>\% ly_hexbin(rnorm(10000), rnorm(10000))
 }
 }
-

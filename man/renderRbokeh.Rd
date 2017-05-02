@@ -19,4 +19,3 @@ Widget render function for use in Shiny
 \seealso{
 \code{\link{rbokehOutput}} for an example in Shiny
 }
-
