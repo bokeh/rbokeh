@@ -12,4 +12,4 @@ cran-comments.md
 .lintr.*
 _gh-pages
 .codecov.yml
-vignettes2/
+code-gen

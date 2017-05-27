@@ -1,6 +1,6 @@
 Package: rbokeh
 Title: R Interface for Bokeh
-Version: 0.5.1
+Version: 0.6.0
 Authors@R: c(
     person("Ryan", "Hafen", email = "rhafen@gmail.com", role = c("aut", "cre")),
     person("Kenton", "Russell", email = "kent.russell@timelyportfolio.com", role = "ctb"),
@@ -17,29 +17,12 @@ License: MIT + file LICENSE
 LazyData: true
 NeedsCompilation: no
 Imports:
-    htmlwidgets (>= 0.5),
-    maps,
-    methods,
+    R6,
     jsonlite,
     digest,
-    hexbin,
-    lazyeval,
-    pryr,
-    magrittr,
-    ggplot2,
-    scales,
-    gistr
+    methods
 Suggests:
     testthat,
-    data.table,
-    lattice,
     lintr,
-    roxygen2 (>= 5.0.0),
-    packagedocs,
-    latticeExtra
-Enhances: shiny (>= 0.12)
+    roxygen2 (>= 5.0.0)
 RoxygenNote: 6.0.1
-VignetteBuilder: packagedocs
-Remotes:
-    hafen/packagedocs,
-    hafen/lazyrmd@jsonp
