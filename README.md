@@ -8,12 +8,14 @@ This branch contains code for an ongoing refactoring effort to bring rbokeh mode
 
 ```r
 install.packages("devtools")
-devtools::install_github("bokeh/rbokeh@refactor")
+devtools::install_github("hafen/rbokeh@refactor")
 ```
 
 ### Use
 
 ```r
+library(rbokeh)
+
 # minimal plot example
 p <- figure() %>%
   ly_line(1:100, rnorm(100))
@@ -21,4 +23,9 @@ p
 
 # print json of model
 print_model_json(p)
+
+# example of internal stuff
+p <- rbokeh:::BoxAnnotation$new()
+p$to_json()
+p$get_instance()
 ```
