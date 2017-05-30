@@ -2,7 +2,7 @@ source("code-gen/fns.R")
 
 mods <- get_mod_json()
 
-.bk_prop_types <- lapply(mods, function(x) {
+bk_prop_types <- lapply(mods, function(x) {
   if (x$name == "Base")
     return(NULL)
   attrs <- x$props
@@ -11,10 +11,10 @@ mods <- get_mod_json()
   names(base_attrs) <- unlist(lapply(base_attrs, function(x) x$name))
   attrs <- attrs[setdiff(names(attrs), names(base_attrs))]
 
-  lapply(attrs, function(x) x$type)
+  # lapply(attrs, function(x) x$type)
+  lapply(attrs, function(x) list(type = x$type, default = x$default))
 })
-use_data(.bk_prop_types, overwrite = TRUE)
-
+use_data(bk_prop_types, overwrite = TRUE)
 
 cat(get_class_string("Model", mods), file = "R/model_autogen.R")
 for (nm in setdiff(names(mods), "Model")) {
@@ -22,6 +22,7 @@ for (nm in setdiff(names(mods), "Model")) {
   cat(get_class_string(nm, mods), file = "R/model_autogen.R", append = TRUE)
 }
 
+load_all()
 
 # written <- 1
 # bases <- unlist(lapply(mods, function(x) get_inherit(x$base)))

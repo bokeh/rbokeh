@@ -20,7 +20,9 @@ Imports:
     R6,
     jsonlite,
     digest,
-    methods
+    methods,
+    htmlwidgets,
+    magrittr
 Suggests:
     testthat,
     lintr,

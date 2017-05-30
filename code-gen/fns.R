@@ -37,13 +37,14 @@ get_class_string <- function(class_name, obj) {
   res <- paste0(desc, "\n", cls, ' <- R6::R6Class("', cls, '",',
   ifelse(is.null(base), "", paste0("\n  inherit = ", base, ",")), '
   public = list(
+    specified_args = NULL,
     initialize = function(\n',
       paste_nice(get_default_string(attrs), indent = 6), '
     ) {\n',
       paste_nice(get_super_string(base_attrs), indent = 6, exdent = 8),
       '\n',
       get_initialize_string(cls),
-      '
+      '\nself$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(\n', get_private_string(attrs[this_nms]), '
@@ -55,27 +56,27 @@ get_class_string <- function(class_name, obj) {
   res
 }
 
-get_test_string <- function(a, obj) {
-  # if there are any instance types, we need to specify them...
-  all_attrs <- get_attrs(obj, a$name, dflt = a$dflt, recurse = TRUE)
-  types <- unlist(lapply(all_attrs, function(x) x$type))
-  idx <- which(grepl("^Instance", types))
-  extra_args <- ""
-  if (length(idx) > 0) {
-    extra_args <- paste0(", ", paste(unlist(lapply(all_attrs[idx], function(x) {
-      paste0(x$name, " = ", init_default_check(a$dflt[[x$name]], x$type))
-    })), collapse = ", "))
-  }
+# get_test_string <- function(a, obj) {
+#   # if there are any instance types, we need to specify them...
+#   all_attrs <- get_attrs(obj, a$name, dflt = a$dflt, recurse = TRUE)
+#   types <- unlist(lapply(all_attrs, function(x) x$type))
+#   idx <- which(grepl("^Instance", types))
+#   extra_args <- ""
+#   if (length(idx) > 0) {
+#     extra_args <- paste0(", ", paste(unlist(lapply(all_attrs[idx], function(x) {
+#       paste0(x$name, " = ", init_default_check(a$dflt[[x$name]], x$type))
+#     })), collapse = ", "))
+#   }
 
-  paste0(
-'test_that("\'', a$name, '\' model matches prototype", {
-  obj <- ', a$name, '$new(id = "', a$dflt$id, '"', extra_args, ')
-  jsn <- as.character(obj$to_json(include_defaults = TRUE, pretty = TRUE))
-  expect_identical(jsn,\n\'', fixup(strip_white(a$json)), '\')
-})
+#   paste0(
+# 'test_that("\'', a$name, '\' model matches prototype", {
+#   obj <- ', a$name, '$new(id = "', a$dflt$id, '"', extra_args, ')
+#   jsn <- as.character(obj$to_json(include_defaults = TRUE, pretty = TRUE))
+#   expect_identical(jsn,\n\'', fixup(strip_white(a$json)), '\')
+# })
 
-')
-}
+# ')
+# }
 
 ##
 ##---------------------------------------------------------
@@ -124,50 +125,18 @@ init_default <- function(val, type) {
   return (clean_dput(val))
 }
 
-init_validator <- function(type, name) {
-  ttrns <- list(String = "character", Bool = "logical", Int = "numeric", Float = "Numeric")
-
-  # if scalar
-  if (type %in% c("String", "Bool", "Int", "Float")) {
-    return (paste0("validate_scalar(", name, ", \"", ttrns[[type]], "\")"))
-  }
-
-  if (grepl("^Seq ", type)) {
-    type <- gsub("^Seq \\( ([A-Za-z]*)  \\)$", "\\1", type)
-    if (type %in% c("String", "Bool", "Int", "Float")) {
-      return (paste0("validate_vector(", name, ", \"", ttrns[[type]], "\")"))
-    }
-    # also deal with color here...
-  }
-
-  if (grepl("^Enum", type)) {
-    type <- get_enum_type(type)
-    return (paste0("validate_enum(", name, ", \"", type, "\")"))
-  }
-
-  if (type == "List ( Any )")
-    return (paste0("validate_list(", name, ", named = FALSE)"))
-}
-
 get_super_string <- function(attrs) {
   if (is.null(attrs))
     return("\nsuper$initialize()")
   paste0("\nsuper$initialize(", paste0(names(attrs), "=", names(attrs), collapse = ", "), ")")
 }
 
-get_initialize_string2 <- function(attrs) {
-  paste0(unlist(
-    lapply(attrs, function(atr) {
-      res <- paste0("      private$", atr$name, " <- ", init_validator(atr$type, atr$name))
-    }
-  )), collapse = "\n")
-}
-
 get_initialize_string <- function(cls) {
   paste(
-  paste0("      types <- .bk_prop_types[[\"", cls, "\"]]"),
+  paste0(
+  "      types <- bk_prop_types[[\"", cls, "\"]]"),
   "      for (nm in names(types)) {",
-  "        private[[nm]] <- validate(get(nm), types[[nm]], nm)",
+  "        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)",
   "      }"
   , sep = "\n")
 }

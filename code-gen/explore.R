@@ -1,4 +1,6 @@
-mods <- jsonlite::fromJSON("https://gist.githubusercontent.com/bryevdv/de62a68029661a6e44169c17a34966f5/raw/997a5f1e7f92fea86b273a5c7c8bfaf246760d1e/gistfile1.txt", simplifyVector = FALSE)
+source("code-gen/fns.R")
+
+mods <- get_mod_json()
 
 names(mods)
 names(mods[[1]])
@@ -18,6 +20,30 @@ glphmk <- which(unlist(lapply(mods, function(x) any(x$bases2 %in% c("Glyph", "Ma
 sort(unlist(lapply(mods, function(a)
   length(which(!unlist(lapply(a$props, function(x) length(x$type))) > 0)))))
 # yes
+
+## does each unique variable name have the same type?
+##---------------------------------------------------------
+
+type_res <- list()
+for (aa in mods) {
+  for (atr in aa$props) {
+    nm <- atr$name
+    if (is.null(type_res[[atr$name]])) {
+      type_res[[atr$name]] <- list(atr$type)
+    } else {
+      type_res[[atr$name]] <- c(type_res[[atr$name]], list(atr$type))
+    }
+  }
+}
+
+sort(sapply(type_res, length))
+sort(sapply(type_res, function(x) length(which(!duplicated(x)))))
+
+type_res$bounds
+type_res$xs
+type_res$ys
+
+
 
 ##
 ##---------------------------------------------------------
