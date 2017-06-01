@@ -44,7 +44,8 @@ get_class_string <- function(class_name, obj) {
       paste_nice(get_super_string(base_attrs), indent = 6, exdent = 8),
       '\n',
       get_initialize_string(cls),
-      '\nself$specified_args <- get_specified_args(match.call())
+      '
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(\n', get_private_string(attrs[this_nms]), '

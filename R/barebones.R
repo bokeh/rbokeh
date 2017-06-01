@@ -3,8 +3,10 @@
 #' @param obj an rbokeh object
 #' @param x x values
 #' @param y y values
+#' @param legend optional string to specify the legend entry for this glyph
+#' @param lname optional layer name
 #' @export
-ly_line <- function(obj, x, y = x) {
+ly_line <- function(obj, x, y = x, legend = NULL, lname = NULL) {
   cds <- ColumnDataSource$new(
     column_names = c("x", "y"),
     data = list(x = x, y = y)
@@ -13,16 +15,16 @@ ly_line <- function(obj, x, y = x) {
   glph <- Line$new(
     line_color = "#1f77b4",
     line_width = 2,
-    x = list(field = "x"),
-    y = list(field = "y")
+    x = "x",
+    y = "y"
   )
 
   nsglph <- Line$new(
     line_alpha = 0.1,
     line_color = "#1f77b4",
     line_width = 2,
-    x = list(field = "x"),
-    y = list(field = "y")
+    x = "x",
+    y = "y"
   )
 
   glr <- GlyphRenderer$new(
@@ -31,25 +33,51 @@ ly_line <- function(obj, x, y = x) {
     nonselection_glyph = nsglph$get_instance()
   )
 
-  lngi <- LegendItem$new(label = "Temp.",
-    renderers = list(glr$get_instance())
-  )
+  lngi <- NULL
+  if (!is.null(legend)) {
+    if (is.character(legend) && is.atomic(legend)) {
+      lngi <- LegendItem$new(label = legend,
+        renderers = list(glr$get_instance())
+      )
+    } else {
+      message("'legend' misspecified...")
+    }
+  }
 
-  obj$x$mods$layers <- list(
-    l1 = list(
-      group = "gp1",
-      data_source = cds,
-      glyph = glph,
-      ns_glyph = nsglph,
-      hov_glyph = NULL,
-      sel_glyph = NULL,
-      mut_glyph = NULL,
-      glyph_renderer = glr,
-      legend_item = lngi
-    )
+  if (is.null(obj$x$mods$layers))
+    obj$x$mods$layers <- list()
+
+  if (is.null(lname))
+    lname <- get_next_layer_name(obj)
+
+  if (! (is.character(lname) && is.atomic(lname))) {
+    message("'lname' misspecified...")
+    lname <- get_next_layer_name(obj)
+  }
+
+  obj$x$mods$layers[[lname]] <- list(
+    group = "gp1",
+    legend = legend,
+    data_source = cds,
+    glyph = glph,
+    ns_glyph = nsglph,
+    hov_glyph = NULL,
+    sel_glyph = NULL,
+    mut_glyph = NULL,
+    glyph_renderer = glr,
+    legend_item = lngi
   )
 
   obj
+}
+
+get_next_layer_name <- function(obj) {
+  nms <- names(obj$x$mods$layers)
+  nms <- nms[grepl("^l[0-9]+", nms)]
+  if (length(nms) == 0)
+    return ("l1")
+  val <- as.integer(gsub("l(.*)", "\\1", nms))
+  paste0("l", max(val) + 1)
 }
 
 add_axes <- function(mods) {
@@ -196,15 +224,15 @@ add_legend <- function(mods) {
       return(NULL)
     x$legend_item$get_instance()
   }))
-  lgnd_items[is.null(lgnd_items)] <- NULL
+  lgnd_items[sapply(lgnd_items, is.null)] <- NULL
 
-  # da74c8b7-2cfc-4d3b-9527-7d0e2120e3f6
-  lgnd <- Legend$new(
-    items = lgnd_items,
-    plot = mods$plot$get_instance()
-  )
-
-  mods$legend <- lgnd
+  if (length(lgnd_items) > 0) {
+    lgnd <- Legend$new(
+      items = lgnd_items,
+      plot = mods$plot$get_instance()
+    )
+    mods$legend <- lgnd
+  }
 
   mods
 }

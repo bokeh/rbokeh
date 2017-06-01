@@ -14,7 +14,7 @@ Model <- R6::R6Class("Model",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -111,7 +111,7 @@ AbstractButton <- R6::R6Class("AbstractButton",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -156,7 +156,7 @@ AbstractGroup <- R6::R6Class("AbstractGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -195,7 +195,7 @@ AbstractIcon <- R6::R6Class("AbstractIcon",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -226,7 +226,7 @@ Action <- R6::R6Class("Action",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -262,7 +262,7 @@ AdaptiveTicker <- R6::R6Class("AdaptiveTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -316,7 +316,7 @@ AjaxDataSource <- R6::R6Class("AjaxDataSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -368,7 +368,7 @@ Annotation <- R6::R6Class("Annotation",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -405,7 +405,7 @@ AnnularWedge <- R6::R6Class("AnnularWedge",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -499,7 +499,7 @@ Annulus <- R6::R6Class("Annulus",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -577,7 +577,7 @@ Arc <- R6::R6Class("Arc",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -658,7 +658,7 @@ Arrow <- R6::R6Class("Arrow",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -747,7 +747,7 @@ ArrowHead <- R6::R6Class("ArrowHead",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -786,7 +786,7 @@ Asterisk <- R6::R6Class("Asterisk",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -819,7 +819,7 @@ AutocompleteInput <- R6::R6Class("AutocompleteInput",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -879,7 +879,7 @@ Axis <- R6::R6Class("Axis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1075,7 +1075,7 @@ BBoxTileSource <- R6::R6Class("BBoxTileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1106,7 +1106,7 @@ BasicTickFormatter <- R6::R6Class("BasicTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1156,7 +1156,7 @@ BasicTicker <- R6::R6Class("BasicTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1194,7 +1194,7 @@ Bezier <- R6::R6Class("Bezier",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1264,7 +1264,7 @@ BooleanFormatter <- R6::R6Class("BooleanFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1299,7 +1299,7 @@ Box <- R6::R6Class("Box",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1337,7 +1337,7 @@ BoxAnnotation <- R6::R6Class("BoxAnnotation",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1446,7 +1446,7 @@ BoxSelectTool <- R6::R6Class("BoxSelectTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1509,7 +1509,7 @@ BoxZoomTool <- R6::R6Class("BoxZoomTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1559,7 +1559,7 @@ Button <- R6::R6Class("Button",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1596,7 +1596,7 @@ ButtonGroup <- R6::R6Class("ButtonGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1628,7 +1628,7 @@ Callback <- R6::R6Class("Callback",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1724,7 +1724,7 @@ CategoricalAxis <- R6::R6Class("CategoricalAxis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1752,7 +1752,7 @@ CategoricalColorMapper <- R6::R6Class("CategoricalColorMapper",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1780,7 +1780,7 @@ CategoricalTickFormatter <- R6::R6Class("CategoricalTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1806,7 +1806,7 @@ CategoricalTicker <- R6::R6Class("CategoricalTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1836,7 +1836,7 @@ CellEditor <- R6::R6Class("CellEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1866,7 +1866,7 @@ CellFormatter <- R6::R6Class("CellFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1897,7 +1897,7 @@ CheckboxButtonGroup <- R6::R6Class("CheckboxButtonGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1925,7 +1925,7 @@ CheckboxEditor <- R6::R6Class("CheckboxEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1957,7 +1957,7 @@ CheckboxGroup <- R6::R6Class("CheckboxGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -1998,7 +1998,7 @@ Circle <- R6::R6Class("Circle",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2062,7 +2062,7 @@ CircleCross <- R6::R6Class("CircleCross",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2101,7 +2101,7 @@ CircleX <- R6::R6Class("CircleX",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2158,7 +2158,7 @@ ColorBar <- R6::R6Class("ColorBar",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2385,7 +2385,7 @@ ColorMapper <- R6::R6Class("ColorMapper",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2426,7 +2426,7 @@ Column <- R6::R6Class("Column",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2470,7 +2470,7 @@ ColumnDataSource <- R6::R6Class("ColumnDataSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2510,7 +2510,7 @@ ColumnarDataSource <- R6::R6Class("ColumnarDataSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2543,7 +2543,7 @@ CompositeTicker <- R6::R6Class("CompositeTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2648,7 +2648,7 @@ ContinuousAxis <- R6::R6Class("ContinuousAxis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2681,7 +2681,7 @@ ContinuousColorMapper <- R6::R6Class("ContinuousColorMapper",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2726,7 +2726,7 @@ ContinuousTicker <- R6::R6Class("ContinuousTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2776,7 +2776,7 @@ Cross <- R6::R6Class("Cross",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2816,7 +2816,7 @@ CrosshairTool <- R6::R6Class("CrosshairTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2869,7 +2869,7 @@ CustomJS <- R6::R6Class("CustomJS",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2912,7 +2912,7 @@ CustomJSTransform <- R6::R6Class("CustomJSTransform",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -2976,7 +2976,7 @@ DataRange <- R6::R6Class("DataRange",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3016,7 +3016,7 @@ DataRange1d <- R6::R6Class("DataRange1d",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3119,7 +3119,7 @@ DataRenderer <- R6::R6Class("DataRenderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3154,7 +3154,7 @@ DataSource <- R6::R6Class("DataSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3209,7 +3209,7 @@ DataTable <- R6::R6Class("DataTable",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3268,7 +3268,7 @@ DateEditor <- R6::R6Class("DateEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3294,7 +3294,7 @@ DateFormatter <- R6::R6Class("DateFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3360,7 +3360,7 @@ DatePicker <- R6::R6Class("DatePicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3405,7 +3405,7 @@ DateRangeSlider <- R6::R6Class("DateRangeSlider",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3529,7 +3529,7 @@ DatetimeAxis <- R6::R6Class("DatetimeAxis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3726,7 +3726,7 @@ DatetimeTickFormatter <- R6::R6Class("DatetimeTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3828,7 +3828,7 @@ DatetimeTicker <- R6::R6Class("DatetimeTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3858,7 +3858,7 @@ DaysTicker <- R6::R6Class("DaysTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3899,7 +3899,7 @@ Diamond <- R6::R6Class("Diamond",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3938,7 +3938,7 @@ DiamondCross <- R6::R6Class("DiamondCross",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -3976,7 +3976,7 @@ Div <- R6::R6Class("Div",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4011,7 +4011,7 @@ Drag <- R6::R6Class("Drag",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4044,7 +4044,7 @@ Dropdown <- R6::R6Class("Dropdown",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4081,7 +4081,7 @@ DynamicImageRenderer <- R6::R6Class("DynamicImageRenderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4124,7 +4124,7 @@ Ellipse <- R6::R6Class("Ellipse",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4212,7 +4212,7 @@ FactorRange <- R6::R6Class("FactorRange",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4299,7 +4299,7 @@ FixedTicker <- R6::R6Class("FixedTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4328,7 +4328,7 @@ FuncTickFormatter <- R6::R6Class("FuncTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4373,7 +4373,7 @@ GMapOptions <- R6::R6Class("GMapOptions",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4472,7 +4472,7 @@ GMapPlot <- R6::R6Class("GMapPlot",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4512,7 +4512,7 @@ GeoJSONDataSource <- R6::R6Class("GeoJSONDataSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4546,7 +4546,7 @@ Glyph <- R6::R6Class("Glyph",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4576,7 +4576,7 @@ GlyphRenderer <- R6::R6Class("GlyphRenderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4652,7 +4652,7 @@ Grid <- R6::R6Class("Grid",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4755,7 +4755,7 @@ Group <- R6::R6Class("Group",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4790,7 +4790,7 @@ GuideRenderer <- R6::R6Class("GuideRenderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4826,7 +4826,7 @@ HBar <- R6::R6Class("HBar",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4912,7 +4912,7 @@ HTMLTemplateFormatter <- R6::R6Class("HTMLTemplateFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -4946,7 +4946,7 @@ HelpTool <- R6::R6Class("HelpTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5016,7 +5016,7 @@ HoverTool <- R6::R6Class("HoverTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5134,7 +5134,7 @@ Image <- R6::R6Class("Image",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5200,7 +5200,7 @@ ImageRGBA <- R6::R6Class("ImageRGBA",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5266,7 +5266,7 @@ ImageSource <- R6::R6Class("ImageSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5307,7 +5307,7 @@ ImageURL <- R6::R6Class("ImageURL",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5403,7 +5403,7 @@ InputWidget <- R6::R6Class("InputWidget",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5436,7 +5436,7 @@ Inspection <- R6::R6Class("Inspection",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5462,7 +5462,7 @@ IntEditor <- R6::R6Class("IntEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5520,7 +5520,7 @@ Interpolator <- R6::R6Class("Interpolator",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5574,7 +5574,7 @@ InvertedTriangle <- R6::R6Class("InvertedTriangle",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5600,7 +5600,7 @@ Jitter <- R6::R6Class("Jitter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5661,7 +5661,7 @@ Label <- R6::R6Class("Label",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5830,7 +5830,7 @@ LabelSet <- R6::R6Class("LabelSet",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -5986,7 +5986,7 @@ LassoSelectTool <- R6::R6Class("LassoSelectTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6038,7 +6038,7 @@ LayoutDOM <- R6::R6Class("LayoutDOM",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6121,7 +6121,7 @@ Legend <- R6::R6Class("Legend",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6262,7 +6262,7 @@ LegendItem <- R6::R6Class("LegendItem",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6305,7 +6305,7 @@ Line <- R6::R6Class("Line",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6427,7 +6427,7 @@ LinearAxis <- R6::R6Class("LinearAxis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6466,7 +6466,7 @@ LinearColorMapper <- R6::R6Class("LinearColorMapper",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6495,7 +6495,7 @@ LinearInterpolator <- R6::R6Class("LinearInterpolator",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6591,7 +6591,7 @@ LogAxis <- R6::R6Class("LogAxis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6633,7 +6633,7 @@ LogColorMapper <- R6::R6Class("LogColorMapper",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6661,7 +6661,7 @@ LogTickFormatter <- R6::R6Class("LogTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6695,7 +6695,7 @@ LogTicker <- R6::R6Class("LogTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6725,7 +6725,7 @@ MapOptions <- R6::R6Class("MapOptions",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6813,7 +6813,7 @@ MapPlot <- R6::R6Class("MapPlot",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6852,7 +6852,7 @@ Marker <- R6::R6Class("Marker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6928,7 +6928,7 @@ Markup <- R6::R6Class("Markup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -6965,7 +6965,7 @@ MercatorTickFormatter <- R6::R6Class("MercatorTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7011,7 +7011,7 @@ MercatorTicker <- R6::R6Class("MercatorTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7062,7 +7062,7 @@ MercatorTileSource <- R6::R6Class("MercatorTileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7098,7 +7098,7 @@ MonthsTicker <- R6::R6Class("MonthsTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7135,7 +7135,7 @@ MultiLine <- R6::R6Class("MultiLine",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7193,7 +7193,7 @@ MultiSelect <- R6::R6Class("MultiSelect",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7241,7 +7241,7 @@ NormalHead <- R6::R6Class("NormalHead",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7296,7 +7296,7 @@ NumberEditor <- R6::R6Class("NumberEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7327,7 +7327,7 @@ NumberFormatter <- R6::R6Class("NumberFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7405,7 +7405,7 @@ NumeralTickFormatter <- R6::R6Class("NumeralTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7488,7 +7488,7 @@ OpenHead <- R6::R6Class("OpenHead",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7537,7 +7537,7 @@ OpenURL <- R6::R6Class("OpenURL",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7578,7 +7578,7 @@ Oval <- R6::R6Class("Oval",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7666,7 +7666,7 @@ PanTool <- R6::R6Class("PanTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7701,7 +7701,7 @@ Panel <- R6::R6Class("Panel",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7748,7 +7748,7 @@ Paragraph <- R6::R6Class("Paragraph",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7783,7 +7783,7 @@ Patch <- R6::R6Class("Patch",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7859,7 +7859,7 @@ Patches <- R6::R6Class("Patches",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7925,7 +7925,7 @@ PercentEditor <- R6::R6Class("PercentEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -7973,7 +7973,7 @@ Plot <- R6::R6Class("Plot",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8228,7 +8228,7 @@ PolyAnnotation <- R6::R6Class("PolyAnnotation",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8321,7 +8321,7 @@ PolySelectTool <- R6::R6Class("PolySelectTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8368,7 +8368,7 @@ PreText <- R6::R6Class("PreText",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8394,7 +8394,7 @@ PrintfTickFormatter <- R6::R6Class("PrintfTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8468,7 +8468,7 @@ QUADKEYTileSource <- R6::R6Class("QUADKEYTileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8501,7 +8501,7 @@ Quad <- R6::R6Class("Quad",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8572,7 +8572,7 @@ Quadratic <- R6::R6Class("Quadratic",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8641,7 +8641,7 @@ RadioButtonGroup <- R6::R6Class("RadioButtonGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8676,7 +8676,7 @@ RadioGroup <- R6::R6Class("RadioGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8709,7 +8709,7 @@ Range <- R6::R6Class("Range",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8745,7 +8745,7 @@ Range1d <- R6::R6Class("Range1d",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8815,7 +8815,7 @@ RangeSlider <- R6::R6Class("RangeSlider",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8883,7 +8883,7 @@ Ray <- R6::R6Class("Ray",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -8957,7 +8957,7 @@ Rect <- R6::R6Class("Rect",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9045,7 +9045,7 @@ RedoTool <- R6::R6Class("RedoTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9082,7 +9082,7 @@ RemoteSource <- R6::R6Class("RemoteSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9117,7 +9117,7 @@ Renderer <- R6::R6Class("Renderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9158,7 +9158,7 @@ ResetTool <- R6::R6Class("ResetTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9193,7 +9193,7 @@ ResizeTool <- R6::R6Class("ResizeTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9226,7 +9226,7 @@ Row <- R6::R6Class("Row",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9262,7 +9262,7 @@ SaveTool <- R6::R6Class("SaveTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9293,7 +9293,7 @@ Scroll <- R6::R6Class("Scroll",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9326,7 +9326,7 @@ Segment <- R6::R6Class("Segment",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9389,7 +9389,7 @@ Select <- R6::R6Class("Select",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9427,7 +9427,7 @@ SelectEditor <- R6::R6Class("SelectEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9457,7 +9457,7 @@ SingleIntervalTicker <- R6::R6Class("SingleIntervalTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9492,7 +9492,7 @@ Slider <- R6::R6Class("Slider",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9555,7 +9555,7 @@ Spacer <- R6::R6Class("Spacer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9588,7 +9588,7 @@ Span <- R6::R6Class("Span",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9672,7 +9672,7 @@ Square <- R6::R6Class("Square",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9711,7 +9711,7 @@ SquareCross <- R6::R6Class("SquareCross",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9750,7 +9750,7 @@ SquareX <- R6::R6Class("SquareX",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9780,7 +9780,7 @@ StepInterpolator <- R6::R6Class("StepInterpolator",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9815,7 +9815,7 @@ StringEditor <- R6::R6Class("StringEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9844,7 +9844,7 @@ StringFormatter <- R6::R6Class("StringFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9895,7 +9895,7 @@ TMSTileSource <- R6::R6Class("TMSTileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9923,7 +9923,7 @@ TableColumn <- R6::R6Class("TableColumn",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -9982,7 +9982,7 @@ TableWidget <- R6::R6Class("TableWidget",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10020,7 +10020,7 @@ Tabs <- R6::R6Class("Tabs",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10059,7 +10059,7 @@ Tap <- R6::R6Class("Tap",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10100,7 +10100,7 @@ TapTool <- R6::R6Class("TapTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10152,7 +10152,7 @@ Text <- R6::R6Class("Text",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10231,7 +10231,7 @@ TextAnnotation <- R6::R6Class("TextAnnotation",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10257,7 +10257,7 @@ TextEditor <- R6::R6Class("TextEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10288,7 +10288,7 @@ TextInput <- R6::R6Class("TextInput",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10328,7 +10328,7 @@ TickFormatter <- R6::R6Class("TickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10358,7 +10358,7 @@ Ticker <- R6::R6Class("Ticker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10387,7 +10387,7 @@ TileRenderer <- R6::R6Class("TileRenderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10436,7 +10436,7 @@ TileSource <- R6::R6Class("TileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10494,7 +10494,7 @@ TimeEditor <- R6::R6Class("TimeEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10530,7 +10530,7 @@ Title <- R6::R6Class("Title",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10649,7 +10649,7 @@ Toggle <- R6::R6Class("Toggle",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10682,7 +10682,7 @@ Tool <- R6::R6Class("Tool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10713,7 +10713,7 @@ ToolEvents <- R6::R6Class("ToolEvents",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10746,7 +10746,7 @@ Toolbar <- R6::R6Class("Toolbar",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10788,7 +10788,7 @@ ToolbarBase <- R6::R6Class("ToolbarBase",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10827,7 +10827,7 @@ ToolbarBox <- R6::R6Class("ToolbarBox",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10874,7 +10874,7 @@ Tooltip <- R6::R6Class("Tooltip",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10923,7 +10923,7 @@ Transform <- R6::R6Class("Transform",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10962,7 +10962,7 @@ Triangle <- R6::R6Class("Triangle",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -10993,7 +10993,7 @@ UndoTool <- R6::R6Class("UndoTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11027,7 +11027,7 @@ VBar <- R6::R6Class("VBar",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11096,7 +11096,7 @@ VeeHead <- R6::R6Class("VeeHead",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11167,7 +11167,7 @@ WMTSTileSource <- R6::R6Class("WMTSTileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11202,7 +11202,7 @@ Wedge <- R6::R6Class("Wedge",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11287,7 +11287,7 @@ WheelPanTool <- R6::R6Class("WheelPanTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11327,7 +11327,7 @@ WheelZoomTool <- R6::R6Class("WheelZoomTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11365,7 +11365,7 @@ Widget <- R6::R6Class("Widget",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11394,7 +11394,7 @@ WidgetBox <- R6::R6Class("WidgetBox",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11435,7 +11435,7 @@ X <- R6::R6Class("X",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11464,7 +11464,7 @@ YearsTicker <- R6::R6Class("YearsTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11496,7 +11496,7 @@ ZoomInTool <- R6::R6Class("ZoomInTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11536,7 +11536,7 @@ ZoomOutTool <- R6::R6Class("ZoomOutTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(
@@ -11564,7 +11564,7 @@ Base <- R6::R6Class("Base",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_args(match.call())
     }
   ),
   private = list(

@@ -4,7 +4,7 @@
 \alias{ly_line}
 \title{Bare-bones line layer function}
 \usage{
-ly_line(obj, x, y = x)
+ly_line(obj, x, y = x, legend = NULL, lname = NULL)
 }
 \arguments{
 \item{obj}{an rbokeh object}
@@ -12,6 +12,10 @@ ly_line(obj, x, y = x)
 \item{x}{x values}
 
 \item{y}{y values}
+
+\item{legend}{optional string to specify the legend entry for this glyph}
+
+\item{lname}{optional layer name}
 }
 \description{
 Bare-bones line layer function

@@ -20,10 +20,10 @@ Base <- R6::R6Class("Base",
     to_json = function(include_defaults = TRUE, pretty = TRUE) {
       els <- as.list(private)
       if (!include_defaults) {
-        types <- unlist(unname(bk_prop_types[setdiff(class(self), c("R6", "Base"))]),
-          recursive = FALSE)
-        ind <- sapply(names(els), function (nm) !identical(els[[nm]], types[[nm]]$default))
-        els <- els[ind]
+        # types <- unlist(unname(bk_prop_types[setdiff(class(self), c("R6", "Base"))]),
+        #   recursive = FALSE)
+        # ind <- sapply(names(els), function (nm) !identical(els[[nm]], types[[nm]]$default))
+        els <- els[self$specified_args]
       }
       jsonlite::toJSON(els[order(names(els))], auto_unbox = TRUE, null = "null", pretty = pretty)
     },

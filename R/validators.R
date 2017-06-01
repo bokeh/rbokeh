@@ -104,17 +104,9 @@ validate <- function(x, type, name) {
   if (grepl("^Instance", type) || type == "TitleProp") {
     if (is.null(x) || is.na(x))
       return(NULL)
-    nms <- names(x)
-    if (is.list(x) && "id" %in% nms && "type" %in% nms &&
-      length(x$id) == 1 && length(x$type == 1)) {
 
-      return (list(
-        id = as.character(x$id),
-        type = as.character(x$type)
-      ))
-    } else {
-      stop("Attribute '", name, "' must be NULL or a list with 'id' and 'type'", call. = FALSE)
-    }
+    x <- validate_instance(x)
+    return (x)
   }
 
   if (grepl("^Dict\\(String, ", type)) {
@@ -124,16 +116,76 @@ validate <- function(x, type, name) {
     return (lapply(x, function(a) validate(a, subtype)))
   }
 
+  if (grepl("^NumberSpec", type)) {
+    if (is.null(x) || is.na(x))
+      return(NULL)
+
+    if (is.atomic(x)) {
+      if (is.numeric(x)) {
+        x <- list(value = x)
+        return(x)
+      } else if (is.character(x)) {
+        x <- list(field = x)
+        return(x)
+      }
+    }
+
+    x <- validate_list(x, named = TRUE, name)
+    if (length(x) == 2 && is.list(x[[2]])) {
+      x[[2]] <- validate_instance(x[[2]])
+      return(x)
+    }
+    stop("Attribute '", name, "' does not seem to be a valid NumberSpec", call. = FALSE)
+  }
+
+  if (grepl("^ColorSpec", type)) {
+    if (is.null(x) || is.na(x))
+      return(NULL)
+
+    if (is.atomic(x) && is.character(x)) {
+      x <- list(value = x)
+      return(x)
+    }
+
+    x <- validate_list(x, named = TRUE, name)
+
+    if (length(x) == 1 && names(x) == "field" && length(x[[1]]) == 1)
+      return(x)
+
+    if (length(x) == 2 && is.list(x[[2]])) {
+      x[[2]] <- validate_instance(x[[2]])
+      return(x)
+    }
+    stop("Attribute '", name, "' does not seem to be a valid NumberSpec", call. = FALSE)
+  }
+
+  if (grepl("^ColumnData\\(", type)) {
+    x <- validate_list(x, named = TRUE, name)
+    return(x)
+  }
+
+  if (grepl("^MinMaxBounds\\(", type)) {
+    if (is.null(x) || is.na(x))
+      return(NULL)
+
+    if (grepl("Datetime", type)) {
+      x <- to_epoch(x)
+    }
+
+    if (length(x) != 2 || !is.numeric(x))
+      stop("Attribute '", name, "' does not seem to be a valid MinMaxBounds", call. = FALSE)
+
+    return (x)
+  }
+
   # Specs are lists of scalars
   if (grepl("Spec\\(", type)) {
     # At some point, we can check specific attributes of each of these
     #   StringSpec
     #   ScreenDistanceSpec
-    #   NumberSpec
     #   FontSizeSpec
     #   DistanceSpec
     #   AngleSpec
-    #   ColorSpec
     if (is.null(x) || is.na(x))
       return(NULL)
 
@@ -245,6 +297,20 @@ validate_list <- function(x, named = FALSE, name) {
   if (!named && !is.null(names(x)))
     names(x) <- NULL
   x
+}
+
+validate_instance <- function(x, name) {
+  nms <- names(x)
+  if (is.list(x) && "id" %in% nms && "type" %in% nms &&
+    length(x$id) == 1 && length(x$type == 1)) {
+
+    return (list(
+      id = as.character(x$id),
+      type = as.character(x$type)
+    ))
+  } else {
+    stop("Attribute '", name, "' must be NULL or a list with 'id' and 'type'", call. = FALSE)
+  }
 }
 
 validate_list_class <- function(x, class, named = FALSE, name) {
