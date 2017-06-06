@@ -105,12 +105,12 @@ validate <- function(x, type, name) {
     if (is.null(x) || is.na(x))
       return(NULL)
 
-    x <- validate_instance(x)
+    x <- validate_instance(x, name)
     return (x)
   }
 
   if (grepl("^Dict\\(String, ", type)) {
-    subtype <- strip_white(gsub("^Dict\\(String, (.*) \\)", "\\1", type))
+    subtype <- strip_white(gsub("^Dict\\(String, (.*)\\)$", "\\1", type))
     x <- validate_list(x, named = TRUE, name)
     # validate subtypes
     return (lapply(x, function(a) validate(a, subtype)))
@@ -132,7 +132,7 @@ validate <- function(x, type, name) {
 
     x <- validate_list(x, named = TRUE, name)
     if (length(x) == 2 && is.list(x[[2]])) {
-      x[[2]] <- validate_instance(x[[2]])
+      x[[2]] <- validate_instance(x[[2]], name)
       return(x)
     }
     stop("Attribute '", name, "' does not seem to be a valid NumberSpec", call. = FALSE)
@@ -153,10 +153,32 @@ validate <- function(x, type, name) {
       return(x)
 
     if (length(x) == 2 && is.list(x[[2]])) {
-      x[[2]] <- validate_instance(x[[2]])
+      x[[2]] <- validate_instance(x[[2]], name)
       return(x)
     }
     stop("Attribute '", name, "' does not seem to be a valid NumberSpec", call. = FALSE)
+  }
+
+  if (grepl("^ScreenDistanceSpec", type)) {
+    if (is.null(x) || is.na(x))
+      return(NULL)
+
+    if (is.atomic(x)) {
+      if (is.numeric(x)) {
+        x <- list(units = "screen", value = x)
+        return(x)
+      } else if (is.character(x)) {
+        x <- list(units = "screen", field = x)
+        return(x)
+      }
+    }
+
+    x <- validate_list(x, named = TRUE, name)
+    if (length(x) == 3 && is.list(x[[3]])) {
+      x[[3]] <- validate_instance(x[[3]], name)
+      return(x)
+    }
+    stop("Attribute '", name, "' does not seem to be a valid ScreenDistanceSpec", call. = FALSE)
   }
 
   if (grepl("^ColumnData\\(", type)) {
