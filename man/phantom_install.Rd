@@ -9,4 +9,3 @@ phantom_install()
 \description{
 Instructions for installing phantomjs
 }
-

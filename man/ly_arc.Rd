@@ -7,7 +7,7 @@
 ly_arc(fig, x, y = NULL, data = figure_data(fig), color = NULL,
   alpha = 1, width = 2, type = 1, radius = 0.2, start_angle = 0,
   end_angle = 2 * pi, direction = "anticlock", legend = NULL,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -40,8 +40,6 @@ ly_arc(fig, x, y = NULL, data = figure_data(fig), color = NULL,
 
 \item{lgroup}{layer group}
 
-\item{visible}{should the layer be visible?}
-
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
@@ -60,6 +58,7 @@ Add an "arc" layer to a Bokeh figure
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 rescale <- function(x)
   (x - min(x)) / diff(range(x))
@@ -84,4 +83,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

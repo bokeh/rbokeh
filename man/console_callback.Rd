@@ -17,4 +17,3 @@ figure() \%>\%
   y_range(callback = console_callback())
 }
 }
-

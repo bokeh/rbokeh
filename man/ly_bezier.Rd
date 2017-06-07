@@ -6,7 +6,7 @@
 \usage{
 ly_bezier(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -43,8 +43,6 @@ ly_bezier(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = figure_data(fig),
 
 \item{lgroup}{layer group}
 
-\item{visible}{should the layer be visible?}
-
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
@@ -63,6 +61,7 @@ Draws Bezier curves with the given starting, ending, and control points.
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \seealso{
 Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_annular_wedge}}, \code{\link{ly_annulus}},
@@ -79,4 +78,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

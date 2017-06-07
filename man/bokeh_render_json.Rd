@@ -18,4 +18,3 @@ This is mainly useful for development / debugging purposes for reading in json c
 \seealso{
 \code{\link{print_model_json}}
 }
-

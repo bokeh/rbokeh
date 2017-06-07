@@ -16,4 +16,3 @@ tool_selection(fig, callback, ref_layer)
 \description{
 This adds a selection callback to be used with the box select or lasso select tools.
 }
-

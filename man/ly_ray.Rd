@@ -6,7 +6,7 @@
 \usage{
 ly_ray(fig, x, y = NULL, data = figure_data(fig), length = NULL,
   angle = 0, color = "black", type = 1, width = 1, alpha = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  legend = NULL, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -35,8 +35,6 @@ ly_ray(fig, x, y = NULL, data = figure_data(fig), length = NULL,
 
 \item{lgroup}{layer group}
 
-\item{visible}{should the layer be visible?}
-
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
@@ -55,6 +53,7 @@ Draws line segments starting at the given coordinate and extending the given len
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \seealso{
 Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_annular_wedge}}, \code{\link{ly_annulus}},
@@ -71,4 +70,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

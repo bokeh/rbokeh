@@ -6,7 +6,7 @@
 \usage{
 ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   color = "black", alpha = NULL, width = 1, type = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -33,8 +33,6 @@ ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
 
 \item{lgroup}{layer group}
 
-\item{visible}{should the layer be visible?}
-
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
@@ -53,6 +51,7 @@ Draws one or more straight lines.
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 # abline with mixed axes for h and v
 figure() \%>\%
@@ -95,4 +94,3 @@ Other layer functions: \code{\link{ly_annular_wedge}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

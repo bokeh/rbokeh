@@ -81,4 +81,3 @@ figure() \%>\%
   set_palette(discrete_color = pal_color(c("red", "blue", "green")))
 
 }
-

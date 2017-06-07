@@ -8,6 +8,7 @@ test_that("svgs in css are base64 encoded", {
 
 # to fix svg problem: find something like this in bokeh.min.css:
 # .bk-logo.grey{filter:url("data:image/svg+xml;utf8,<svgxmlns=\'http://www.w3.org/2000/svg\'><filterid=\'grayscale\'><feColorMatrixtype=\'matrix\'values=\'0.33330.33330.3333000.33330.33330.3333000.33330.33330.33330000010\'/></filter></svg>#grayscale");filter:gray;-webkit-filter:grayscale(100%)}
+
 # .bk-logo.grey{filter:url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");filter:gray;-webkit-filter:grayscale(100%)}
 
 # then

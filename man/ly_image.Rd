@@ -5,8 +5,7 @@
 \title{Add an "image" layer to a Bokeh figure}
 \usage{
 ly_image(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
-  palette = "Spectral10", dilate = FALSE, lname = NULL, lgroup = NULL,
-  visible = TRUE)
+  palette = "Spectral10", dilate = FALSE, lname = NULL, lgroup = NULL)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -32,8 +31,6 @@ ly_image(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 }
 \description{
 Draws a grid of rectangles with colors corresponding to the values in \code{z}
@@ -62,4 +59,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

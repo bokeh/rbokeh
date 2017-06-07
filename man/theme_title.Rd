@@ -46,4 +46,3 @@ figure(title = "asdf") \%>\%
   ly_points(1:10) \%>\%
   theme_title(text_color = "red")
 }
-

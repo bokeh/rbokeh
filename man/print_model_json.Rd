@@ -28,4 +28,3 @@ p <- figure() \%>\% ly_points(1:10) \%>\%
 print_model_json(p)
 }
 }
-

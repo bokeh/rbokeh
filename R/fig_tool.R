@@ -283,7 +283,7 @@ tool_model <- function(id, tool_name, plot_ref, ...) {
 
 tool_events <- function(id) {
   res <- base_model_object("ToolEvents", id)
-  res$model$geometries <- I(NULL)
+  res$model$geometries <- I(list())
   res
 }
 

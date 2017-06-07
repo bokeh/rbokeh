@@ -6,7 +6,7 @@
 \usage{
 ly_curve(fig, expr, from = NULL, to = NULL, n = 101, color = "black",
   alpha = 1, width = 1, type = 1, legend = NULL, lname = NULL,
-  lgroup = NULL, visible = TRUE, ...)
+  lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -27,8 +27,6 @@ ly_curve(fig, expr, from = NULL, to = NULL, n = 101, color = "black",
 
 \item{lgroup}{layer group}
 
-\item{visible}{should the layer be visible?}
-
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
@@ -47,6 +45,7 @@ Draws a curve corresponding to a function over the interval \code{[from, to]}.
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 \donttest{
 chippy <- function(x) sin(cos(x)*exp(-x/2))
@@ -70,4 +69,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

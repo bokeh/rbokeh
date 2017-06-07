@@ -7,7 +7,7 @@ Draws lines with the given coordinates.}
 \usage{
 ly_lines(fig, x, y = NULL, data = figure_data(fig), group = NULL,
   color = "black", type = 1, width = 1, alpha = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -34,8 +34,6 @@ ly_lines(fig, x, y = NULL, data = figure_data(fig), group = NULL,
 
 \item{lgroup}{layer group}
 
-\item{visible}{should the layer be visible?}
-
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
@@ -55,6 +53,7 @@ Draws lines with the given coordinates.
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 \donttest{
 z <- lm(dist ~ speed, data = cars)
@@ -81,4 +80,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

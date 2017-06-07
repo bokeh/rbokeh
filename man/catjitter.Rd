@@ -19,4 +19,3 @@ figure(data = lattice::singer) \%>\%
   ly_points(catjitter(voice.part), jitter(height), color = "black") \%>\%
   ly_boxplot(voice.part, height, with_outliers = FALSE)
 }
-

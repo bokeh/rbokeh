@@ -12,4 +12,3 @@ get_object_refs(fig)
 \description{
 Get object ids and types from a figure
 }
-

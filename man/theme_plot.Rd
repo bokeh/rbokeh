@@ -84,4 +84,3 @@ figure() \%>\%
   ly_boxplot(1:10)
 }
 }
-

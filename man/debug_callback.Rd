@@ -21,4 +21,3 @@ figure() \%>\%
   tool_tap(debug_callback("points"), "points")
 }
 }
-

@@ -6,7 +6,7 @@
 \usage{
 ly_points(fig, x, y = NULL, data = figure_data(fig), glyph = 21,
   color = NULL, alpha = 1, size = 10, hover = NULL, url = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  legend = NULL, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -34,8 +34,6 @@ ly_points(fig, x, y = NULL, data = figure_data(fig), glyph = 21,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
@@ -79,6 +77,7 @@ When color is \code{NULL} and \code{fill_color} or \code{line_color} are not spe
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 \donttest{
 figure() \%>\%
@@ -117,4 +116,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

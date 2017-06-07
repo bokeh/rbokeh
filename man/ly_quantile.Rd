@@ -6,7 +6,7 @@
 \usage{
 ly_quantile(fig, x, group = NULL, data = figure_data(fig), probs = NULL,
   distn = stats::qunif, ncutoff = 200, color = NULL, alpha = 1,
-  legend = TRUE, lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  legend = TRUE, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -32,8 +32,6 @@ ly_quantile(fig, x, group = NULL, data = figure_data(fig), probs = NULL,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
@@ -77,6 +75,7 @@ When color is \code{NULL} and \code{fill_color} or \code{line_color} are not spe
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 figure(legend_location = "top_left") \%>\%
   ly_quantile(Sepal.Length, group = Species, data = iris)
@@ -97,4 +96,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

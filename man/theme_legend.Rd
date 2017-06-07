@@ -75,4 +75,3 @@ figure(legend_location = "top_left") \%>\%
   ly_points(1:10, legend = "a") \%>\%
   theme_legend(border_line_width = 2)
 }
-

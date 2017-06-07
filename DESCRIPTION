@@ -38,7 +38,7 @@ Suggests:
     packagedocs,
     latticeExtra
 Enhances: shiny (>= 0.12)
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 VignetteBuilder: packagedocs
 Remotes:
     hafen/packagedocs,

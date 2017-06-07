@@ -20,4 +20,3 @@ gmap(title = "NYC taxi pickups January 2013",
 }
 }
 \keyword{data}
-

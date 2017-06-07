@@ -21,4 +21,3 @@ list of three groups: data, info, and params
 \description{
 Retrieve and properly parse all data
 }
-

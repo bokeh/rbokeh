@@ -7,7 +7,7 @@
 ly_contour(fig, z, x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1,
   length.out = ncol(z)), nlevels = 10, levels = pretty(range(z, na.rm =
   TRUE), nlevels), color = "black", alpha = 1, width = 1, type = 1,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -30,8 +30,6 @@ ly_contour(fig, z, x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1,
 
 \item{lgroup}{layer group}
 
-\item{visible}{should the layer be visible?}
-
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
@@ -46,6 +44,7 @@ Computes and draws contour lines.
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 \donttest{
 p <- figure(xlim = c(0, 1), ylim = c(0, 1), title = "Volcano") \%>\%
@@ -70,4 +69,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
-

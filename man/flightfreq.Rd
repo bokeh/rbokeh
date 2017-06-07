@@ -20,4 +20,3 @@ p
 }
 }
 \keyword{data}
-

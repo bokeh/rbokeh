@@ -7,7 +7,7 @@
 ly_wedge(fig, x, y = NULL, data = figure_data(fig), radius = 0.3,
   start_angle = 0, end_angle = 2 * pi, direction = "anticlock",
   color = NULL, alpha = 1, hover = NULL, url = NULL, legend = NULL,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -39,8 +39,6 @@ ly_wedge(fig, x, y = NULL, data = figure_data(fig), radius = 0.3,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
@@ -84,6 +82,7 @@ When color is \code{NULL} and \code{fill_color} or \code{line_color} are not spe
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 rescale <- function(x)
   (x - min(x)) / diff(range(x))
@@ -109,4 +108,3 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_ray}}, \code{\link{ly_rect}},
   \code{\link{ly_segments}}, \code{\link{ly_text}}
 }
-
