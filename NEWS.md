@@ -1,6 +1,7 @@
 Version 0.5
 ----------------------------------------------------------------------
 
+- Update to BokehJS 0.12.5 (0.5.1)
 - Add spinner for long-loading figures
 - Set default height/width if one or the other is specified
 - Remove resize tool as default
