@@ -6,7 +6,7 @@
 \usage{
 ly_quadratic(fig, x0, y0, x1, y1, cx, cy, data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -38,8 +38,6 @@ ly_quadratic(fig, x0, y0, x1, y1, cx, cy, data = figure_data(fig),
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

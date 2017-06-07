@@ -6,7 +6,7 @@
 \usage{
 ly_boxplot(fig, x, y = NULL, data = figure_data(fig), width = 0.9,
   coef = 1.5, color = "blue", alpha = 1, outlier_glyph = 1,
-  outlier_size = 10, lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  outlier_size = 10, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -35,8 +35,6 @@ possible values.}
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

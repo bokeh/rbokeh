@@ -32,7 +32,7 @@ ly_points <- function(
   fig, x, y = NULL, data = figure_data(fig),
   glyph = 21, color = NULL, alpha = 1, size = 10,
   hover = NULL, url = NULL, legend = NULL,
-  lname = NULL, lgroup = NULL, visible = TRUE,
+  lname = NULL, lgroup = NULL,
   ...
 ) {
 
@@ -55,7 +55,6 @@ ly_points <- function(
       legend,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...)
     )
   )

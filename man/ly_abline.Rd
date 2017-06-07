@@ -6,7 +6,7 @@
 \usage{
 ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   color = "black", alpha = NULL, width = 1, type = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -32,8 +32,6 @@ ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }

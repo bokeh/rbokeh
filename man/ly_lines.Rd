@@ -7,7 +7,7 @@ Draws lines with the given coordinates.}
 \usage{
 ly_lines(fig, x, y = NULL, data = figure_data(fig), group = NULL,
   color = "black", type = 1, width = 1, alpha = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -33,8 +33,6 @@ ly_lines(fig, x, y = NULL, data = figure_data(fig), group = NULL,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }

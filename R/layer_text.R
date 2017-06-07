@@ -28,7 +28,7 @@ ly_text <- function(
   angle = 0, align = NULL, baseline = NULL,
   font = NULL, font_size = NULL, font_style = NULL,
   x_offset = NULL, y_offset = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE
+  legend = NULL, lname = NULL, lgroup = NULL
 ) {
 
   validate_fig(fig, "ly_text")
@@ -63,7 +63,6 @@ ly_text <- function(
   arg_params$text_font_style <- font_style
   arg_params$text_align <- align
   arg_params$text_baseline <- baseline
-  arg_params$visible <- visible
 
   if (is.null(args$params$text)) {
     args$params$text <- seq_along(args$data$x)

@@ -162,7 +162,7 @@ update_axis <- function(fig, position, label, grid = TRUE,
   } else if (axis_type == "datetime") {
     type_list <- list(format = "DatetimeTickFormatter",
       tick = "DatetimeTicker", axis = "DatetimeAxis")
-    format_pars$formats <- format_pars$format
+    format_pars <- format_pars$format
     format_pars$format <- NULL
     format_pars <- handle_extra_pars(format_pars,
       datetime_tick_formatter_map)

@@ -6,7 +6,7 @@
 \usage{
 ly_polygons(fig, xs, ys, group = NULL, data = figure_data(fig),
   color = NULL, alpha = 1, hover = NULL, url = NULL, lname = NULL,
-  lgroup = NULL, visible = TRUE, ...)
+  lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -30,8 +30,6 @@ ly_polygons(fig, xs, ys, group = NULL, data = figure_data(fig),
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

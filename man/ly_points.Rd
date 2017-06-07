@@ -6,7 +6,7 @@
 \usage{
 ly_points(fig, x, y = NULL, data = figure_data(fig), glyph = 21,
   color = NULL, alpha = 1, size = 10, hover = NULL, url = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  legend = NULL, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -34,8 +34,6 @@ ly_points(fig, x, y = NULL, data = figure_data(fig), glyph = 21,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

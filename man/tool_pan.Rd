@@ -4,12 +4,12 @@
 \alias{tool_pan}
 \title{Add "pan" tool to a Bokeh figure}
 \usage{
-tool_pan(fig, dimensions = c("width", "height"))
+tool_pan(fig, dimensions = "both")
 }
 \arguments{
 \item{fig}{figure to modify}
 
-\item{dimensions}{a vector specifying whether the pan tool should pan with respect to the x axis ("width") and the y axis ("height") or both (c("width", "height"))}
+\item{dimensions}{a vector specifying whether the pan tool should pan with respect to the x axis ("width") and the y axis ("height") or "both"}
 }
 \description{
 Add "pan" tool to a Bokeh figure

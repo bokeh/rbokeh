@@ -6,7 +6,7 @@
 \usage{
 ly_hist(fig, x, data = figure_data(fig), breaks = "Sturges", freq = TRUE,
   include.lowest = TRUE, right = TRUE, color = NULL, alpha = 1,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -24,8 +24,6 @@ ly_hist(fig, x, data = figure_data(fig), breaks = "Sturges", freq = TRUE,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }

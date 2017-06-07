@@ -18,7 +18,7 @@
 #' @export
 ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
   palette = "Spectral10", dilate = FALSE,
-  lname = NULL, lgroup = NULL, visible = TRUE) {
+  lname = NULL, lgroup = NULL) {
 
   validate_fig(fig, "ly_image")
   ## see if any options won't be used and give a message
@@ -30,7 +30,6 @@ ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
       y,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots()
     )
   )
@@ -108,7 +107,7 @@ ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
 ly_image_url <- function(
   fig, x = 0, y = 0, data = figure_data(fig), w = 10, h = 10,
   image_url, dilate = TRUE, anchor = "top_left", angle = 0,
-  lname = NULL, lgroup = NULL, visible = TRUE
+  lname = NULL, lgroup = NULL
 ) {
 
   validate_fig(fig, "ly_image_url")
@@ -131,7 +130,6 @@ ly_image_url <- function(
       angle,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots()
     )
   )

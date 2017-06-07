@@ -9,7 +9,7 @@ ly_density(fig, x, data = figure_data(fig), bw = "nrd0", adjust = 1,
   "biweight", "cosine", "optcosine"), weights = NULL, window = kernel,
   n = 512, cut = 3, na.rm = FALSE, color = "black", alpha = 1,
   width = 1, type = 1, legend = NULL, lname = NULL, lgroup = NULL,
-  visible = TRUE, ...)
+  ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -31,8 +31,6 @@ ly_density(fig, x, data = figure_data(fig), bw = "nrd0", adjust = 1,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }

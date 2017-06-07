@@ -7,7 +7,7 @@
 ly_crect(fig, x, y = NULL, data = figure_data(fig), width = 1,
   height = 1, angle = 0, dilate = FALSE, color = NULL, alpha = 1,
   hover = NULL, url = NULL, legend = NULL, lname = NULL,
-  lgroup = NULL, visible = TRUE, ...)
+  lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -39,8 +39,6 @@ ly_crect(fig, x, y = NULL, data = figure_data(fig), width = 1,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
