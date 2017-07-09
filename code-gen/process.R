@@ -1,6 +1,9 @@
+# run
+# python ~/Documents/Code/_cloned/bokeh/scripts/spec.py > code-gen/spec_0.12.6.json
+
 source("code-gen/fns.R")
 
-mods <- get_mod_json()
+mods <- get_mod_json("code-gen/spec_0.12.6.json")
 
 ## write out R6 class code for all models
 ##---------------------------------------------------------

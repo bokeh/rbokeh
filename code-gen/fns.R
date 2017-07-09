@@ -1,8 +1,8 @@
 ##
 ##---------------------------------------------------------
 
-get_mod_json <- function() {
-  mods <- jsonlite::fromJSON("https://gist.githubusercontent.com/bryevdv/de62a68029661a6e44169c17a34966f5/raw/997a5f1e7f92fea86b273a5c7c8bfaf246760d1e/gistfile1.txt", simplifyVector = FALSE)
+get_mod_json <- function(json_path) {
+  mods <- jsonlite::fromJSON(json_path, simplifyVector = FALSE)
 
   mods$Model$base <- list("Base")
   mods$Model$props

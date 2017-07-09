@@ -1,36 +1,21 @@
+is_color <- function(x) {
+  x %in% css_colors | (nchar(as.character(x)) == 7 && grepl("^#", x))
+}
+
+## some things like rainbow(), etc., give hex with alpha
+## Bokeh doesn't like hex alpha, so get rid of it
+# ind <- which(grepl("^#", x) & nchar(x) == 9)
+# if (length(ind) > 0) {
+#   message(
+#     "note - ", fld, " has hex colors with with alpha information - ",
+#     "removing alpha - please specify that through fill_alpha or line_alpha")
+#   x[ind] <- substr(x[ind], 1, 7)
+# }
+
 validate <- function(x, type, name) {
 
-  # Completed:
-  # "Bool"
-  # "Float"
-  # "Int"
-  # "String"
-  # "Seq ("
-  # "Enum ("
-  # "List ("
-  # "Tuple ("
-  # "Any"
-  # "Instance ("
-  # "Dict ( String"
-  # "Color"
-  # "Percent"
-  # "Angle"
-  # "JSON"
-  # "StringSpec"
-  # "ScreenDistanceSpec"
-  # "NumberSpec"
-  # "FontSizeSpec"
-  # "DistanceSpec"
-  # "AngleSpec"
-  # "ColorSpec"
-  # "TitleProp"
-
   # Need to do:
-  # "RelativeDelta ( "
-  # "MinMaxBounds"
-  # "Either (" # ignore "Auto"
-  # "DashPattern"
-  # "ColumnData ( String , Seq ( Any  ) )"
+  # "RelativeDelta("
 
   if (type == "Auto")
     type <- "String"
@@ -60,6 +45,10 @@ validate <- function(x, type, name) {
       if (!is.numeric(x))
         stop("Attribute '", name, "' must be a numeric vector of length 2", call. = FALSE)
       return (validate_vector(x, ttrns$Float, "Float", name))
+    } else if (subtype == "String, String") {
+      if (is.list(x) && all(sapply(x, length) == 1))
+        x <- as.character(unlist(x))
+      return (validate_vector(x, ttrns$String, "String", name))
     }
   }
 
@@ -116,6 +105,14 @@ validate <- function(x, type, name) {
     return (lapply(x, function(a) validate(a, subtype)))
   }
 
+  if (grepl("\\Dict\\(Either\\(Float, String\\), String\\)", type)) {
+    # only support (String, String) case
+    subtype <- "String"
+    x <- validate_list(x, named = TRUE, name)
+    # validate subtypes
+    return (lapply(x, function(a) validate(a, subtype)))
+  }
+
   if (grepl("^NumberSpec", type)) {
     if (is.null(x) || is.na(x))
       return(NULL)
@@ -131,7 +128,9 @@ validate <- function(x, type, name) {
     }
 
     x <- validate_list(x, named = TRUE, name)
-    if (length(x) == 2 && is.list(x[[2]])) {
+    if (length(x) == 1 && names(x) %in% c("field", "value")) {
+      return(x)
+    } else if (length(x) == 2 && is.list(x[[2]])) {
       x[[2]] <- validate_instance(x[[2]], name)
       return(x)
     }
@@ -274,7 +273,7 @@ strip_white <- function(x) {
 
 #' @importFrom methods as
 validate_scalar <- function(x, type = "character", otype = "", name) {
-  if (length(x) > 1)
+  if (!is.atomic(x))
     stop("Attribute '", name, "' must be a scalar.", call. = FALSE)
   # ensure NA gets populated as null (unbox wants a "character" NA for this)
   if (length(x) == 1 && is.na(x))

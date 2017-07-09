@@ -17,9 +17,11 @@ devtools::install_github("hafen/rbokeh@refactor")
 library(rbokeh)
 
 # minimal plot example
-p <- figure() %>%
-  ly_line(1:100, rnorm(100), legend = "series 1") %>%
-  ly_line(1:100, rnorm(100), legend = "series 1")
+p <- figure(iris) %>%
+  ly_points(x = Sepal.Width, y = Sepal.Length,
+    color = Species, size = Species)
+
+# view the plot
 p
 
 # print json of model

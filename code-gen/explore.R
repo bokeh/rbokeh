@@ -1,6 +1,6 @@
 source("code-gen/fns.R")
 
-mods <- get_mod_json()
+mods <- get_mod_json("code-gen/spec_0.12.6.json")
 
 names(mods)
 names(mods[[1]])
@@ -214,11 +214,43 @@ names(sort(table(names(ags)), decreasing = TRUE))
 # [1] "angle"       "end_angle"   "start_angle"
 # ...
 
+allvals[grepl("Dict\\(Either\\(Float, String\\), String\\)", allvals)]
 
-# ColumnData(String, Seq(Any))
+#                 major_label_overrides
+# "Dict(Either(Float, String), String)"
 
 
-# RelativeDelta???
+## completed:
+##---------------------------------------------------------
+
+# "Bool"
+# "Float"
+# "Int"
+# "String"
+# "Seq("
+# "Enum("
+# "List("
+# "Tuple("
+# "Any"
+# "Instance("
+# "Dict(String"
+# "Color"
+# "Percent"
+# "Angle"
+# "JSON"
+# "StringSpec"
+# "ScreenDistanceSpec"
+# "NumberSpec"
+# "FontSizeSpec"
+# "DistanceSpec"
+# "AngleSpec"
+# "ColorSpec"
+# "TitleProp"
+# "MinMaxBounds"
+# "ColumnData(String, Seq(Any))"
+# "DashPattern"
+# "Either(" # ignore "Auto"
+
 
 
 valtbl <- sort(table(unname(allvals)))
