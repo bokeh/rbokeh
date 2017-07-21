@@ -152,7 +152,7 @@ figure_data <- function(fig) {
   return(NULL)
 }
 
-rbokeh_prerender <- function(obj) {
+rbokeh_prerender <- function(obj, keep_aux = FALSE) {
 
   mods <- prepare_figure(obj$x)
 
@@ -176,7 +176,14 @@ rbokeh_prerender <- function(obj) {
   obj$x$modelid <- mods$plot$get_prop("id")
   obj$x$docid <- docid
 
-  obj$x$mods <- NULL
+  if (!keep_aux) {
+    obj$x$mods <- NULL
+    obj$x$layers <- NULL
+    obj$x$theme <- NULL
+    obj$x$pars <- NULL
+    obj$x$data <- NULL
+  }
+
   obj$preRenderHook <- NULL # nolint
 
   attr(obj$x, "TOJSON_ARGS") <- list(auto_unbox = TRUE, null = "null", na = "null")
