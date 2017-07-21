@@ -22,7 +22,8 @@ Imports:
     digest,
     methods,
     htmlwidgets,
-    magrittr
+    magrittr,
+    curl
 Suggests:
     testthat,
     lintr,

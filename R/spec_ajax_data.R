@@ -20,6 +20,9 @@ ajax_data <- function(data_url, polling_interval = 100, method = "GET",
   mode = "replace", max_size = NULL, content_type = NULL, if_modified = NULL,
   http_headers = NULL) {
 
+  # TODO: add col_types argument so users can specify if it should be treated as a date/time
+  # then honor this in get_ajax_sample so we can get correct axis types, etc.
+
   args <- list()
 
   args$data_url <- data_url
@@ -44,6 +47,7 @@ ajax_data <- function(data_url, polling_interval = 100, method = "GET",
 #' get_ajax_sample(d)
 #' }
 #' @export
+#' @importFrom curl new_handle handle_setheaders curl_fetch_memory
 get_ajax_sample <- function(x) {
   hdr <- x$http_headers
   if (is.null(hdr))
@@ -51,9 +55,9 @@ get_ajax_sample <- function(x) {
   if (!is.null(x$content_type))
     hdr[["Content-Type"]] <- x$content_type
 
-  h <- new_handle()
+  h <- curl::new_handle()
   if (length(hdr) > 0)
-    do.call(handle_setheaders, c(list(h = h), hdr))
+    do.call(curl::handle_setheaders, c(list(h = h), hdr))
   # handle_data(h)
 
   req <- try(curl::curl_fetch_memory(x$data_url, handle = h), silent = TRUE)
