@@ -4,13 +4,25 @@ prepare_figure <- function(x) {
   if (is.null(x$theme))
     x$theme <- bk_default_theme()
 
-  # TODO: turn this into a for loop to apply to each layer
+  # keep a list of data sources so we don't duplicate data
+  data_sources <- list()
+
   for (lnm in names(x$layers)) {
     # lnm <- names(x$layers)[1]
-    cur_ly <- list(transforms = list()) # this will hold all the model instances for the layer
 
+    # this will hold all the model instances for the layer
+    cur_ly <- list(transforms = list())
+
+    # this holds the arguments and data that were specified for this layer
     ly <- x$layers[[lnm]]
-    ly_nms <- names(ly)
+
+    # handle ajax data input
+    if (inherits(ly$data, "ajax_data")) {
+      ly$ajax_data <- ly$data
+      ly$data <- get_ajax_sample(ly$data)
+      # need to set the "column_names" attribute
+      ly$ajax_data$column_names <- names(ly$data)
+    }
 
     # get fingerprint of every column of supplied data
     # and use this to build up the dataset for the ColumnDataSource
@@ -63,6 +75,16 @@ prepare_figure <- function(x) {
         dval <- digest::digest(val)
         if (dval %in% col_dig) {
           nm <- col_nm[col_dig == dval]
+          # deal with multiple column matches
+          if (length(nm) > 1) {
+            qnm <- quo_name(ly[[attr_nm]])
+            # if the expression supplied directly maps to a variable name, use it
+            if (qnm %in% col_nm) {
+              nm <- qnm
+            } else {
+              nm <- nm[1]
+            }
+          }
         } else {
           nm <- paste0("col", length(ly$data) + 1, "___")
           ly$data[[nm]] <- val
@@ -310,11 +332,35 @@ return new_xs;
     dat <- as.list(ly$data)[cols_to_use]
     names(dat) <- sanitize(names(dat))
 
-    cur_ly$data_source <- ColumnDataSource$new(
-      column_names = sanitize(cols_to_use),
-      data = dat,
-      name = paste(lnm, "data", sep = "_")
-    )
+    if (!is.null(ly$ajax_data)) {
+      # we can't use an Ajax data source if R has modified the columns
+      if (!all(cols_to_use %in% ly$ajax_data$column_names)) {
+        stop("Cannot use an Ajax data source with variables updated by R.", call. = FALSE)
+      }
+      # need to set an empty "data" attribute
+      dat <- lapply(ly$ajax_data$column_names, function(a) list())
+      names(dat) <- ly$ajax_data$column_names
+      ly$ajax_data$data <- dat
+      cur_ly$data_source <- do.call(AjaxDataSource$new, ly$ajax_data)
+    } else {
+      cur_ly$data_source <- ColumnDataSource$new(
+        column_names = sanitize(cols_to_use),
+        data = dat,
+        name = paste(lnm, "data", sep = "_")
+      )
+    }
+
+    # we don't want to duplicate data sources
+    # compare props supplied to data source (except ID)
+    # if there's already a match, use that data source and remove current one
+    ds_dgst <- digest::digest(cur_ly$data_source$get_all_props(id = FALSE))
+    if (ds_dgst %in% names(data_sources)) {
+      cur_data_source_instance <- data_sources[[ds_dgst]]
+      cur_ly$data_source <- NULL
+    } else {
+      cur_data_source_instance <- cur_ly$data_source$get_instance()
+      data_sources[[ds_dgst]] <- cur_data_source_instance
+    }
 
     ## get set up for glyphs
     ##---------------------------------------------------------
@@ -443,7 +489,7 @@ return new_xs;
     ##---------------------------------------------------------
 
     cur_ly$glyph_renderer <- GlyphRenderer$new(
-      data_source = cur_ly$data_source$get_instance(),
+      data_source = cur_data_source_instance,
       glyph = cur_ly$glyph$get_instance(),
       nonselection_glyph = cur_ly$ns_glyph$get_instance(),
       selection_glyph = cur_ly$sel_glyph$get_instance(),
@@ -616,7 +662,8 @@ add_axis <- function(x, whch) {
       args$range$start <- drng[1]
     if (is.null(args$range$end))
       args$range$end <- drng[2]
-    rng <- do.call(DataRange1d$new, args$range)
+    # rng <- do.call(DataRange1d$new, args$range)
+    rng <- DataRange1d$new()
   } else if (type == "numeric_log") {
     # LogTickFormatter
     # LogTicker
