@@ -13,3 +13,4 @@ cran-comments.md
 _gh-pages
 .codecov.yml
 code-gen
+\.docs-dev
