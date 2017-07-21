@@ -47,13 +47,15 @@ Base <- R6::R6Class("Base",
         res$subtype <- "Figure"
       res
     },
-    get_all_props = function() {
+    get_all_props = function(id = TRUE) {
       res <- c(
         self$get_instance(),
         # list(attributes = as.list(private))
         list(attributes = as.list(private)[self$specified_args])
       )
       res$attributes$id <- NULL
+      if (!id)
+        res$id <- NULL
       res
     }
   ),
