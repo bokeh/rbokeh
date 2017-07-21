@@ -25,3 +25,6 @@ ly_lines(fig, x = NULL, y = NULL, data = figure_data(fig), type = 1,
 Add a "lines" layer to a Bokeh figure
 Draws lines with the given coordinates.
 }
+\seealso{
+Other layer functions: \code{\link{ly_points}}
+}

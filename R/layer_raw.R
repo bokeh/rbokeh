@@ -1,5 +1,17 @@
 
-
+#' Add a "points" layer to a Bokeh figure
+#' Draws points with the given coordinates.
+#' @param fig figure to modify
+#' @param x values or field name of line x coordinates
+#' @param y values or field name of line y coordinates
+#' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
+# @template par-lineprops
+# @template par-legend
+# @template par-lnamegroup
+# @template dots-line
+# @example man-roxygen/ex-lines.R
+#' @family layer functions
+#' @export
 ly_points <- function(fig, x = NULL, y = NULL, data = figure_data(fig),
   glyph = 21, color = NULL, alpha = NULL, size = NULL,
   hover = NULL, legend = TRUE,
