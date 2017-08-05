@@ -151,14 +151,6 @@ pal_gradient <- function(
 
 #' @rdname palettes
 #' @export
-pal_size <- function(min = 2, max = 20) {
-  function(n) {
-    seq(min, max, length = n)
-  }
-}
-
-#' @rdname palettes
-#' @export
 pal_bk_line_dash <- function() {
   function(n) {
     dashes <- as.character(1:6)
@@ -166,18 +158,6 @@ pal_bk_line_dash <- function() {
     #   message("There are more levels for line dash than there are available ",
     #     "line dash styles in this theme... repeating line dash")
     lty_dict[dashes[(seq_len(n) - 1) %% length(dashes) + 1]]
-  }
-}
-
-#' @rdname palettes
-#' @export
-pal_bk_line_width <- function() {
-  function(n) {
-    dashes <- as.character(1:6)
-    # if (n > 6)
-    #   message("There are more levels for line dash than there are available ",
-    #     "line dash styles in this theme... repeating line dash")
-    dashes[(seq_len(n) - 1) %% length(dashes) + 1]
   }
 }
 

@@ -8,12 +8,7 @@ set_theme <- function(fig, theme) {
   if (is.function(theme))
     theme <- theme()
 
-  if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
-    for (ii in seq_along(fig$x$spec$figs))
-      fig$x$spec$figs[[ii]]$x$spec$theme <- theme
-  } else {
-    fig$x$spec$theme <- theme
-  }
+  fig$x$theme <- theme
 
   fig
 }
@@ -25,27 +20,26 @@ bk_default_theme <- function() {
   list(
     discrete = list(
       glyph = pal_bk_glyph(),
-      fill_color = pal_tableau("Tableau10"),
-      line_color = pal_tableau("Tableau10"),
+      color = pal_tableau("Tableau10"),
+      color_unknown = "lightgray",
       text_color = pal_tableau("Tableau10"),
-      fill_alpha = 1,
-      line_alpha = 1,
+      alpha = 1,
       text_alpha = 1,
       line_dash = pal_bk_line_dash(),
-      line_width = pal_bk_line_width(),
-      size = pal_size()
+      line_width = list(exponent = 1, log = FALSE, min = 5, max = 8),
+      size = list(exponent = 0.5, log = FALSE, min = 5, max = 30)
     ),
     continuous = list(
       glyph = pal_bk_glyph(),
-      fill_color = pal_gradient(),
-      line_color = pal_gradient(),
+      color = pal_gradient(),
+      color_unknown = "lightgray",
+      color_n_intervals = 4,
       text_color = pal_gradient(),
-      fill_alpha = 1,
-      line_alpha = 1,
+      alpha = 1,
       text_alpha = 1,
       line_dash = pal_bk_line_dash(),
-      line_width = pal_bk_line_width(),
-      size = pal_size()
+      line_width = list(exponent = 1, log = FALSE, min = 5, max = 8),
+      size = list(exponent = 0.5, log = FALSE, min = 5, max = 30)
     ),
     ungrouped = list(fill_color = "black", line_color = "black",
       text_color = "black", fill_alpha = 0.5, line_alpha = 1,
@@ -73,26 +67,24 @@ bk_ggplot_theme <- function() {
   list(
     discrete = list(
       glyph = gg_shape_pal(),
-      fill_color = scales::hue_pal(),
-      line_color = scales::hue_pal(),
+      color = scales::hue_pal(),
+      color_unknown = "lightgray",
       text_color = scales::hue_pal(),
-      fill_alpha = 1,
-      line_alpha = 1,
+      alpha = 1,
       text_alpha = 1,
       # line_dash = ,
-      # line_width = ,
-      size = pal_size() # ggplot2::scale_size_discrete()$palette
+      line_width = list(exponent = 1, log = FALSE, min = 5, max = 8),
+      size = list(exponent = 0.5, log = FALSE, min = 5, max = 30)
     ),
     continuous = list(
-      fill_color = pal_gradient(c("#132B43", "#56B1F7"), space = "Lab"),
-      line_color = pal_gradient(c("#132B43", "#56B1F7"), space = "Lab"),
+      color = pal_gradient(c("#132B43", "#56B1F7"), space = "Lab"),
+      color_unknown = "lightgray",
       text_color = pal_gradient(c("#132B43", "#56B1F7"), space = "Lab"),
-      fill_alpha = 1,
-      line_alpha = 1,
+      alpha = 1,
       text_alpha = 1,
       # line_dash = ,
-      # line_width = ,
-      size = pal_size() # ggplot2::scale_size_continuous()$palette
+      line_width = list(exponent = 1, log = FALSE, min = 5, max = 8),
+      size = list(exponent = 0.5, log = FALSE, min = 5, max = 30)
     ),
     gradient = pal_gradient(c("#132B43", "#56B1F7"), space = "Lab"),
     ungrouped = list(fill_color = "black", line_color = "black",

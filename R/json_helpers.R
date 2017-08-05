@@ -8,7 +8,6 @@
 #' @param is_file is \code{json} a json string (FALSE) or a path to a json file (TRUE)?
 #'
 #' @seealso \code{\link{print_model_json}}
-#' @import htmlwidgets
 #' @importFrom jsonlite fromJSON
 #'
 #' @export
@@ -67,3 +66,5 @@ print_model_json <- function(fig, prepare = TRUE, pretty = TRUE, file = "", pbco
   cat(jsonlite::toJSON(fig$x$docs_json, pretty = pretty,
     auto_unbox = TRUE, null = "null", na = "null"), "\n", file = file)
 }
+
+pmj <- function(x) print_model_json(x, pbcopy = TRUE)

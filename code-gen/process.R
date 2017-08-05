@@ -1,4 +1,6 @@
 # run
+# git fetch --all --tags --prune
+# git checkout tags/0.12.6 -b 0.12.6
 # python ~/Documents/Code/_cloned/bokeh/scripts/spec.py > code-gen/spec_0.12.6.json
 
 source("code-gen/fns.R")
@@ -32,4 +34,10 @@ bk_prop_types <- lapply(mods, function(x) {
   # lapply(attrs, function(x) x$type)
   lapply(attrs, function(x) list(type = x$type, default = x$default))
 })
+
+bk_prop_types$BoxAnnotation$top$type <- "Float"
+bk_prop_types$BoxAnnotation$bottom$type <- "Float"
+bk_prop_types$BoxAnnotation$left$type <- "Float"
+bk_prop_types$BoxAnnotation$right$type <- "Float"
+
 save(bk_prop_types, file = "inst/bk_prop_types.rda", compress = "bzip2")

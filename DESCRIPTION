@@ -23,7 +23,8 @@ Imports:
     methods,
     htmlwidgets,
     magrittr,
-    curl
+    curl,
+    glue
 Suggests:
     testthat,
     lintr,

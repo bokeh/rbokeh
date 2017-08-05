@@ -42,11 +42,12 @@ figure <- function(
       layers = list(),
       pars = list(
         gen = list(
-          title = title, logo = logo, tools = tools,
+          logo = logo, tools = tools,
           xgrid = xgrid, ygrid = ygrid,
           xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
           padding_factor = padding_factor
         ),
+        title = list(text = title),
         legend = list(legend_location = legend_location),
         axes = list(
           type = list(x = NULL, y = NULL),
@@ -160,7 +161,7 @@ rbokeh_prerender <- function(obj, keep_aux = FALSE) {
   mod_list <- mod_list[sapply(mod_list, function(a) inherits(a, "Model"))]
 
   fig <- list(list(
-    version = "0.12.5",
+    version = "0.12.6",
     title = "Bokeh Figure",
     roots = list(
       root_ids = list(mods$plot$get_prop("id")),

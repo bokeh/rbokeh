@@ -17,19 +17,19 @@ hov <- function(
   attachment = NULL,
   point_policy = NULL) {
 
-  pars <- list()
-  pars$data <- enquo(data)
-  pars$line_policy <- line_policy
-  pars$callback <- callback
-  pars$anchor <- anchor
-  pars$show_arrow <- show_arrow
-  pars$mode <- mode
-  pars$attachment <- attachment
-  pars$point_policy <- point_policy
+  spec <- list()
+  spec$data <- enquo(data)
+  spec$line_policy <- line_policy
+  spec$callback <- callback
+  spec$anchor <- anchor
+  spec$show_arrow <- show_arrow
+  spec$mode <- mode
+  spec$attachment <- attachment
+  spec$point_policy <- point_policy
 
-  class(pars) <- c("list", "hover_spec")
+  class(spec) <- c("list", "hover_spec")
 
-  pars
+  spec
 }
 
 

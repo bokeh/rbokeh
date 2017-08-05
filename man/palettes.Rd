@@ -5,9 +5,7 @@
 \alias{pal_tableau}
 \alias{pal_bk_glyph}
 \alias{pal_gradient}
-\alias{pal_size}
 \alias{pal_bk_line_dash}
-\alias{pal_bk_line_width}
 \title{Palettes for themes}
 \usage{
 pal_color(colors)
@@ -19,11 +17,7 @@ pal_bk_glyph()
 pal_gradient(cols = c("#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B"),
   space = "rgb")
 
-pal_size(min = 2, max = 20)
-
 pal_bk_line_dash()
-
-pal_bk_line_width()
 }
 \arguments{
 \item{colors}{a vector of colors to be used in the color palette}

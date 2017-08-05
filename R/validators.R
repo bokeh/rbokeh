@@ -173,10 +173,16 @@ validate <- function(x, type, name) {
     }
 
     x <- validate_list(x, named = TRUE, name)
-    if (length(x) == 3 && is.list(x[[3]])) {
-      x[[3]] <- validate_instance(x[[3]], name)
+    if (is.null(x$units))
+      x$units <- "screen"
+    if (length(x) == 2) {
       return(x)
     }
+    if (length(x) == 3 && is.list(x$transform)) {
+      x$transform <- validate_instance(x$transform, name)
+      return(x)
+    }
+
     stop("Attribute '", name, "' does not seem to be a valid ScreenDistanceSpec", call. = FALSE)
   }
 
@@ -210,8 +216,14 @@ validate <- function(x, type, name) {
     if (is.null(x) || is.na(x))
       return(NULL)
 
-    if (is.atomic(x))
+    if (is.atomic(x)) {
+      if (grepl("FontSizeSpec", type)) {
+        if (is.numeric(x))
+          x <- paste0(x, "pt")
+        # TODO: validate that it ends with "pt" or other valid suffix
+      }
       x <- list(value = x)
+    }
 
     x <- validate_list(x, named = TRUE, name)
     if (any(unlist(lapply(x, length)) > 1))

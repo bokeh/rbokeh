@@ -19,6 +19,77 @@ sanitize <- function(x) {
   gsub("\\.", "_", x)
 }
 
+
+#' Add a small amount of (rbokeh-compatible) noise to a character vector
+#'
+#' @param x numeric vector to which jitter should be added
+#' @param factor a factor between 0 and 1 that
+#' @export
+#' @importFrom stats runif
+#' @examples
+#' figure(data = lattice::singer) %>%
+#'   ly_points(catjitter(voice.part), jitter(height), color = "black") %>%
+#'   ly_boxplot(voice.part, height, with_outliers = FALSE)
+jitter_cat <- function(x, factor = 0.5) {
+  # TODO: validate factor and x
+  # TODO: make sure this preserves factor ordering
+  paste0(x, ":", stats::runif(min = 0.5 * (1 - factor),
+    max = 0.5 + 0.5 * factor, length(x)))
+}
+
+
+get_init_formals <- function(cls) {
+  names(formals(cls$public_methods$initialize))
+}
+
+get_bk_props_recurse <- function(mod) {
+  res <- list()
+  ii <- 1
+  while (mod != "Base") {
+    res[[ii]] <- bk_prop_types[[mod]]
+    mod <- as.character(utils::getFromNamespace(mod, "rbokeh")$inherit)
+    ii <- ii + 1
+  }
+  unlist(res, recursive = FALSE)
+}
+
+get_can_be_vector <- function(mod) {
+  types <- get_bk_props_recurse(mod)
+  can_be_vector <- sapply(types, function(x) grepl("'field'|DistanceSpec", x$type))
+  can_be_vector <- names(can_be_vector[can_be_vector])
+  if (any(grepl("fill_color|line_color", can_be_vector)))
+    can_be_vector <- c(can_be_vector, "color")
+  if (any(grepl("fill_alpha|line_alpha", can_be_vector)))
+    can_be_vector <- c(can_be_vector, "alpha")
+  if (any(grepl("line_width", can_be_vector)))
+    can_be_vector <- c(can_be_vector, "width")
+
+  can_be_vector <- c(
+    can_be_vector,
+    paste0("hov_", can_be_vector)
+  )
+
+  if (mod == "Line")
+    can_be_vector <- setdiff(can_be_vector, c("color", "line_color",
+      "alpha", "line_alpha", "line_width"))
+
+  can_be_vector
+}
+
+# a <- unlist(bk_prop_types, recursive = FALSE)
+# a <- lapply(a, function(x) x$type)
+# a[grepl("fill_color", names(a))]
+# # all fill colors can be field
+# a[grepl("fill_alpha", names(a))]
+# # all fill alphas can be fields
+# a[grepl("line_color", names(a))]
+# # all line colors can be fields
+# a[grepl("line_alpha", names(a))]
+# # all line alphas can be fields
+# a[grepl("line_width", names(a))]
+# # all line widths except for CrosshairTool can be fields
+
+
 add_layer <- function(fig, spec, lgroup, lname) {
   if (is.null(lname))
     lname <- get_next_layer_name(fig)
