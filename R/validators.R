@@ -134,6 +134,7 @@ validate <- function(x, type, name) {
       x[[2]] <- validate_instance(x[[2]], name)
       return(x)
     }
+
     stop("Attribute '", name, "' does not seem to be a valid NumberSpec", call. = FALSE)
   }
 
@@ -148,14 +149,15 @@ validate <- function(x, type, name) {
 
     x <- validate_list(x, named = TRUE, name)
 
-    if (length(x) == 1 && names(x) == "field" && length(x[[1]]) == 1)
+    if (length(x) == 1 && names(x) %in% c("field", "value") && length(x[[1]]) == 1)
       return(x)
 
     if (length(x) == 2 && is.list(x[[2]])) {
       x[[2]] <- validate_instance(x[[2]], name)
       return(x)
     }
-    stop("Attribute '", name, "' does not seem to be a valid NumberSpec", call. = FALSE)
+
+    stop("Attribute '", name, "' does not seem to be a valid ColorSpec", call. = FALSE)
   }
 
   if (grepl("^ScreenDistanceSpec", type)) {
