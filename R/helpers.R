@@ -26,10 +26,10 @@ sanitize <- function(x) {
 #' @param factor a factor between 0 and 1 that
 #' @export
 #' @importFrom stats runif
-#' @examples
-#' figure(data = lattice::singer) %>%
-#'   ly_points(catjitter(voice.part), jitter(height), color = "black") %>%
-#'   ly_boxplot(voice.part, height, with_outliers = FALSE)
+# @examples
+# figure(data = lattice::singer) %>%
+#   ly_points(catjitter(voice.part), jitter(height), color = "black") %>%
+#   ly_boxplot(voice.part, height, with_outliers = FALSE)
 jitter_cat <- function(x, factor = 0.5) {
   # TODO: validate factor and x
   # TODO: make sure this preserves factor ordering

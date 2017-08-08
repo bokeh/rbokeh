@@ -70,8 +70,3 @@ theme_legend(fig, background_fill_alpha = 0.95,
 \description{
 Override theme parameters for legend attributes
 }
-\examples{
-figure(legend_location = "top_left") \%>\%
-  ly_points(1:10, legend = "a") \%>\%
-  theme_legend(border_line_width = 2)
-}

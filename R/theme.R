@@ -119,10 +119,10 @@ bk_ggplot_theme <- function() {
 #' @param text_font_size (string - e.g. '12pt') The text font size for the plot title.
 #' @param text_font_style ('normal', 'italic', 'bold') The text font style for the plot title.
 #' @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
-#' @examples
-#' figure(title = "asdf") %>%
-#'   ly_points(1:10) %>%
-#'   theme_title(text_color = "red")
+# @examples
+# figure(title = "asdf") %>%
+#   ly_points(1:10) %>%
+#   theme_title(text_color = "red")
 #' @export
 theme_title <- function(fig,
   pars = NULL,
@@ -314,7 +314,7 @@ theme_grid <- function(fig,
     specified <- names(as.list(match.call())[-1])
     pars <- as.list(environment())[specified]
   }
-  pars <- pars[names(pars) %in% names(grid_par_validator_map)]
+  # pars <- pars[names(pars) %in% names(grid_par_validator_map)]
 
   fig$x$theme$grid <- pars
 
@@ -348,10 +348,10 @@ theme_grid <- function(fig,
 #' @param legend_padding Amount of padding around the legend.
 #' @param legend_spacing Amount of spacing between legend entries.
 #' @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
-#' @examples
-#' figure(legend_location = "top_left") %>%
-#'   ly_points(1:10, legend = "a") %>%
-#'   theme_legend(border_line_width = 2)
+# @examples
+# figure(legend_location = "top_left") %>%
+#   ly_points(1:10, legend = "a") %>%
+#   theme_legend(border_line_width = 2)
 #' @export
 theme_legend <- function(fig,
   background_fill_alpha = 0.95,

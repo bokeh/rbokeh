@@ -13,7 +13,7 @@ cran-comments.md
 _gh-pages
 .codecov.yml
 code-gen
-\.docs-dev
-\.js-scales
+^docs-dev$
+^js-scales$
 inst/htmlwidgets/lib/bokehjs/v*
 inst/htmlwidgets/lib/bokehjs/cdn.txt

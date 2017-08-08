@@ -41,8 +41,3 @@ theme_title(fig, pars = NULL, background_fill_color = "white",
 \description{
 Override theme parameters for general plot attributes
 }
-\examples{
-figure(title = "asdf") \%>\%
-  ly_points(1:10) \%>\%
-  theme_title(text_color = "red")
-}

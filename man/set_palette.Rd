@@ -74,10 +74,3 @@ Set palettes for various plot attributes
 \details{
 Palettes specified in this function will override the existing theme and apply the specified attributes when they are not otherwise explicitly specified in a layer function.  See the contents of \code{bk_default_theme} for an example of the theme elements this will update.  As a convenience, if you use \code{discrete_color}, the palette will apply to all the \code{discrete_***_color} attributes unless those are explicitly specified also.  The same pattern is true for \code{discrete_alpha}, \code{continuous_color}, and \code{continuous_alpha}.  For specifying discrete color palettes, the easiest thing to do is use \code{\link{pal_color}} with a vector of colors you want to use in the palette.
 }
-\examples{
-figure() \%>\%
-  ly_points(Sepal.Length, Sepal.Width, data = iris,
-    color = Species, glyph = Species) \%>\%
-  set_palette(discrete_color = pal_color(c("red", "blue", "green")))
-
-}

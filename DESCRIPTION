@@ -24,7 +24,9 @@ Imports:
     htmlwidgets,
     magrittr,
     curl,
-    glue
+    glue,
+    rlang,
+    scales
 Suggests:
     testthat,
     lintr,
