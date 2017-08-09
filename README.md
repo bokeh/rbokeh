@@ -19,7 +19,7 @@ library(rbokeh)
 # minimal plot example
 p <- figure(iris) %>%
   ly_points(x = Sepal.Width, y = Sepal.Length,
-    color = Species, size = Species)
+    color = Species, size = Petal.Length)
 
 # view the plot
 p
