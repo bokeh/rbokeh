@@ -15,5 +15,3 @@ _gh-pages
 code-gen
 ^docs-dev$
 ^js-scales$
-inst/htmlwidgets/lib/bokehjs/v*
-inst/htmlwidgets/lib/bokehjs/cdn.txt
