@@ -37,6 +37,17 @@ jitter_cat <- function(x, factor = 0.5) {
     max = 0.5 + 0.5 * factor, length(x)))
 }
 
+# nms is an optional vector of names to subset results to
+get_specified_args <- function(nms = NULL) {
+  res <- as.list(match.call(
+    def = sys.function(-1),
+    call = sys.call(-1)
+  ))[-1]
+  if (!is.null(nms) && is.character(nms))
+    res <- res[intersect(names(res), nms)]
+
+  res
+}
 
 get_init_formals <- function(cls) {
   names(formals(cls$public_methods$initialize))
@@ -55,7 +66,7 @@ get_bk_props_recurse <- function(mod) {
 
 get_can_be_vector <- function(mod) {
   types <- get_bk_props_recurse(mod)
-  can_be_vector <- sapply(types, function(x) grepl("'field'|DistanceSpec", x$type))
+  can_be_vector <- sapply(types, function(x) grepl("'field'|DistanceSpec|AngleSpec", x$type))
   can_be_vector <- names(can_be_vector[can_be_vector])
   if (any(grepl("fill_color|line_color", can_be_vector)))
     can_be_vector <- c(can_be_vector, "color")

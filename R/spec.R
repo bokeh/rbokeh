@@ -1,4 +1,4 @@
-
+#' @export
 spec <- function(x, domain = NULL, range = NULL, transform = NULL, units = "screen", name = NULL,
   exponent = 0.5, log = FALSE, unknown = "lightgray") {
 
@@ -21,6 +21,7 @@ spec <- function(x, domain = NULL, range = NULL, transform = NULL, units = "scre
   x
 }
 
+#' @export
 custom_js_transform <- function(func, v_func = NULL, global = NULL) {
   if (!is.character(func))
     stop("Argument 'func' to custom_js_transform must be a string.", call. = FALSE)

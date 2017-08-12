@@ -89,27 +89,27 @@ prepare_figure <- function(x) {
         attr(val, "spec") <- NULL
 
         # keep track of axis ranges and types
-        if (attr_nm %in% c("x", "xs")) {
-          x$pars$axes$type$x <- get_glyph_axis_type(val, x$pars$axes$type$x)
-          x$pars$axes$range$x <- get_glyph_range(val,
-            prev_range = x$pars$axes$range$x, axis_type = x$pars$axes$type$x)
-          if (is.null(x$pars$axes$lab$x)) {
-            lab_nm <- try(quo_name(ly[[attr_nm]]), silent = TRUE)
-            if (inherits(lab_nm, "try-error"))
-              lab_nm <- "x"
-            x$pars$axes$lab$x <- lab_nm
-          }
-        }
-        if (attr_nm %in% c("y", "ys")) {
-          x$pars$axes$type$y <- get_glyph_axis_type(val, x$pars$axes$type$y)
-          x$pars$axes$range$y <- get_glyph_range(val,
-            prev_range = x$pars$axes$range$y, axis_type = x$pars$axes$type$y)
-          if (is.null(x$pars$axes$lab$y)) {
-            # if it's null quo_name() will error out
-            lab_nm <- try(quo_name(ly[[attr_nm]]), silent = TRUE)
-            if (inherits(lab_nm, "try-error"))
-              lab_nm <- "y"
-            x$pars$axes$lab$y <- lab_nm
+        for (xy in c("x", "y")) {
+          nms_chk <- c("x", "xs", "left", "right")
+          if (xy == "y")
+            nms_chk <- c("y", "ys", "bottom", "top")
+          if (attr_nm %in% nms_chk) {
+            type <- get_glyph_axis_type(val, x$pars$axes$type[[xy]])
+            if (is.null(x$pars$axes$type[[xy]])) {
+              x$pars$axes$type[[xy]] <- type
+            } else {
+              if (x$pars$axes$type[[xy]] != type)
+                stop("Layer has incompatible x-axis type from previous layer.", call. = FALSE)
+            }
+            if (is.null(x$pars$axes$range[[xy]]))
+              x$pars$axes$range[[xy]] <- get_glyph_range(val,
+                prev_range = x$pars$axes$range[[xy]], axis_type = x$pars$axes$type[[xy]])
+            if (is.null(x$pars$axes$lab[[xy]])) {
+              lab_nm <- try(quo_name(ly[[attr_nm]]), silent = TRUE)
+              if (inherits(lab_nm, "try-error"))
+                lab_nm <- xy
+              x$pars$axes$lab[[xy]] <- lab_nm
+            }
           }
         }
 
@@ -291,6 +291,7 @@ prepare_figure <- function(x) {
       ## process hover
       ##---------------------------------------------------------
 
+      cur_hov_str <- as.character(cur_hov)
       cur_hov <- rlang::eval_tidy(cur_hov, ly$data)
       if (!is.null(cur_hov)) {
         pars <- list()
@@ -314,7 +315,18 @@ prepare_figure <- function(x) {
           for (ii in seq_along(pars$data)) {
             dval <- digest::digest(pars$data[[ii]])
             if (dval %in% col_dig) {
-              dnm[ii] <- col_nm[col_dig == dval]
+              nm <- col_nm[col_dig == dval]
+              # deal with multiple column matches
+              if (length(nm) > 1) {
+                # see if we can find these names in the string expression
+                nm_match <- which(sapply(nm, function(x) any(grepl(x, cur_hov_str))))
+                if (length(nm_match) == 0) {
+                  nm <- nm[1]
+                } else {
+                  nm <- nm[nm_match[1]]
+                }
+              }
+              dnm[ii] <- nm
             } else {
               dnm[ii] <- paste0("col", length(ly$data) + 1, "___")
               ly$data[[dnm[ii]]] <- pars$data[[ii]]
@@ -843,6 +855,9 @@ add_axis <- function(x, whch) {
   xy <- ifelse(whch %in% c("below", "above"), "x", "y")
   args <- x$pars$axes$args[[whch]]
 
+  if (!is.list(args$grid))
+    args$grid <- list(visible = FALSE)
+
   # grid and axis need plot instances
   args$grid$plot <- x$mods$plot$get_instance()
   args$axis$plot <- x$mods$plot$get_instance()
@@ -851,19 +866,6 @@ add_axis <- function(x, whch) {
     args$axis$axis_label <- x$pars$axes$lab[[xy]]
 
   if (type == "numeric") {
-    # TODO: allow for PrintfNumberFormatter, etc.
-
-    tck <- do.call(BasicTicker$new, args$ticker)
-
-    args$grid$ticker <- tck$get_instance()
-    grd <- do.call(Grid$new, args$grid)
-
-    tf <- do.call(BasicTickFormatter$new, args$tickformatter)
-
-    args$axis$formatter <- tf$get_instance()
-    args$axis$ticker <- tck$get_instance()
-    axs <- do.call(LinearAxis$new, args$axis)
-
     drng <- x$pars$axes$range[[xy]]
     drng <- drng + c(-1, 1) * 0.07 * diff(drng) #TODO: make 0.07 padding factor part of theme
     if (is.null(args$range$start))
@@ -871,40 +873,44 @@ add_axis <- function(x, whch) {
     if (is.null(args$range$end))
       args$range$end <- drng[2]
     # rng <- do.call(DataRange1d$new, args$range)
-    rng <- DataRange1d$new()
-    scl <- LinearScale$new()
-  } else if (type == "numeric_log") {
-    # LogTickFormatter
-    # LogTicker
-    # LogAxis
-    # LogScale
+      rng <- DataRange1d$new()
+
+    if (x$pars$axes$log[[xy]]) {
+      if (is.null(args$ticker$model))
+        args$ticker$model <- "LogTicker"
+      if (is.null(args$tickformatter$model))
+        args$tickformatter$model <- "LogTickFormatter"
+      if (is.null(args$axis$model))
+        args$axis$model <- "LogAxis"
+      scl <- LogScale$new()
+    } else {
+      if (is.null(args$ticker$model))
+        args$ticker$model <- "BasicTicker"
+      if (is.null(args$tickformatter$model))
+        args$tickformatter$model <- "BasicTickFormatter"
+      if (is.null(args$axis$model))
+        args$axis$model <- "LinearAxis"
+      scl <- LinearScale$new()
+    }
   } else if (type == "categorical") {
-    tck <- do.call(CategoricalTicker$new, args$ticker)
-
-    args$grid$ticker <- tck$get_instance()
-    grd <- do.call(Grid$new, args$grid)
-
-    tf <- do.call(CategoricalTickFormatter$new, args$tickformatter)
-
-    args$axis$formatter <- tf$get_instance()
-    args$axis$ticker <- tck$get_instance()
-    axs <- do.call(CategoricalAxis$new, args$axis)
+    if (is.null(args$ticker$model))
+      args$ticker$model <- "CategoricalTicker"
+    if (is.null(args$tickformatter$model))
+      args$tickformatter$model <- "CategoricalTickFormatter"
+    if (is.null(args$axis$model))
+      args$axis$model <- "CategoricalAxis"
 
     if (is.null(args$range$factors))
       args$range$factors <- x$pars$axes$range[[xy]]
     rng <- do.call(FactorRange$new, args$range)
     scl <- CategoricalScale$new()
   } else if (type == "datetime") {
-    tck <- do.call(DatetimeTicker$new, args$ticker)
-
-    args$grid$ticker <- tck$get_instance()
-    grd <- do.call(Grid$new, args$grid)
-
-    tf <- do.call(DatetimeTickFormatter$new, args$tickformatter)
-
-    args$axis$formatter <- tf$get_instance()
-    args$axis$ticker <- tck$get_instance()
-    axs <- do.call(DatetimeAxis$new, args$axis)
+    if (is.null(args$ticker$model))
+      args$ticker$model <- "DatetimeTicker"
+    if (is.null(args$tickformatter$model))
+      args$tickformatter$model <- "DatetimeTickFormatter"
+    if (is.null(args$axis$model))
+      args$axis$model <- "DatetimeAxis"
 
     drng <- x$pars$axes$range[[xy]]
     drng <- drng + c(-1, 1) * 0.07 * diff(drng) #TODO: make 0.07 padding factor part of theme
@@ -914,10 +920,26 @@ add_axis <- function(x, whch) {
       args$range$end <- drng[2]
     rng <- do.call(DataRange1d$new, args$range)
 
-    rng <- do.call(DataRange1d$new, args$range)
     # what about MonthsTicker, DaysTicker, etc.?
     scl <- LinearScale$new()
   }
+
+  tck_mod <- getFromNamespace(args$ticker$model, "rbokeh")
+  args$ticker$model <- NULL
+  tck <- do.call(tck_mod$new, args$ticker)
+
+  args$grid$ticker <- tck$get_instance()
+  grd <- do.call(Grid$new, args$grid)
+
+  tf_mod <- getFromNamespace(args$tickformatter$model, "rbokeh")
+  args$tickformatter$model <- NULL
+  tf <- do.call(tf_mod$new, args$tickformatter)
+
+  args$axis$formatter <- tf$get_instance()
+  args$axis$ticker <- tck$get_instance()
+  ax_mod <- getFromNamespace(args$axis$model, "rbokeh")
+  args$axis$model <- NULL
+  axs <- do.call(ax_mod$new, args$axis)
 
   if (is.null(x$mods$axes))
     x$mods$axes <- list()
@@ -1042,9 +1064,12 @@ get_renderers <- function(mods) {
 
   res <- c(glrs,
     unlist(unname(
-      lapply(mods$axes, function(a)
-        list(a$axis$get_instance(), a$grid$get_instance())
-      )
+      lapply(mods$axes, function(a) {
+        res <- list(a$axis$get_instance())
+        if (!is.null(a$grid))
+          res <- c(res, list(a$grid$get_instance()))
+        res
+      })
     ), recursive = FALSE))
 
   if (!is.null(mods$legend))

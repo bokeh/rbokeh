@@ -45,7 +45,7 @@ get_class_string <- function(class_name, obj) {
       '\n',
       get_initialize_string(cls),
       '
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(\n', get_private_string(attrs[this_nms]), '

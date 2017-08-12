@@ -1,114 +1,393 @@
-# #' Customize x axis of a Bokeh figure
-# #' @param fig figure to modify
-# #' @param label axis label
-# #' @param position where to place the axis (either "above" or "below")
-# #' @param log logical or integer - if TRUE, a log axis with base 10 is used - if an integer, a log axis with base of that integer will be used
-# #' @param grid logical - should a reference grid be shown for this axis?
-# #' @param desired_num_ticks desired target number of major tick positions to generate across the plot range
-# #' @param num_minor_ticks number of minor ticks
-# #' @param visible should axis be shown?
-# #' @param number_formatter Bokeh numeric tick label formatter
-# #'  (\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.BasicTickFormatter}{"basic"},
-# #'  \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
-# #'  or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
-# #'  ignored if \code{log} is TRUE
-# #' @param power_limit_high (int) Limit the use of scientific notation to when log(x) >= value. Only applicable when \code{number_formatter} is "basic".
-# #' @param power_limit_low (int) Limit the use of scientific notation to when log(x) <= value. Only applicable when \code{number_formatter} is "basic".
-# #' @param precision (int) How many digits of precision to display in tick labels. Automatically determined if not specified. Only applicable when \code{number_formatter} is "basic".
-# #' @param use_scientific (logical) Whether to ever display scientific notation. If True, then when to use scientific notation is controlled by \code{power_limit_low} and \code{power_limit_high}. Only applicable when \code{number_formatter} is "basic".
-# #' @param format Specification of format options.  Specification depends on the value of \code{number_formatter} - see "details" below.
-# #' @details \code{format} parameter:
-# #' When \code{number_formatter} is "basic" and the axis type is datetime, \code{format} specifies how to display tick values from a continuous range as formatted datetimes. See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.DatetimeTickFormatter}{DatetimeTickFormatter}
-# #' When \code{number_formatter} is "numeral", \code{format} specifies a human-readable format string. See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{NumeralTickFormatter}.
-# #' When \code{number_formatter} is "printf", \code{format} is a printf-style format string. See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{PrintfTickFormatter}.
-# #' @family axes
-# #' @example man-roxygen/ex-axis.R
-# #' @export
-# x_axis <- function(fig, label, position = "below", log = FALSE,
-#   grid = TRUE, desired_num_ticks = NULL, num_minor_ticks = 5,
-#   visible = TRUE, number_formatter = c("basic", "numeral", "printf"),
-#   power_limit_high = 5, power_limit_low = -3, precision = NULL,
-#   use_scientific = TRUE, format = NULL) {
+#' Customize x axis of a Bokeh figure
+#' @export
+x_axis <- function(fig, label = NULL, position = "below", log = FALSE, draw = TRUE,
+  ticker = NULL, tickformatter = NULL, axis = NULL, grid = NULL) {
 
-#   if (is.null(position))
-#     position <- "below"
-#   if (!position %in% c("below", "above")) {
-#     message("x axis position must be either below or above - setting to 'below'")
-#     position <- "below"
-#   }
+  get_nms <- c("label", "ticker", "tickformatter", "axis", "grid", "log")
+  args <- get_specified_args(get_nms)
 
-#   if (is.logical(log)) {
-#     if (log) {
-#       log <- 10.0
-#     } else {
-#       log <- NULL
-#     }
-#   } else {
-#     log <- as.numeric(log)
-#   }
+  if (is.null(position))
+    position <- "below"
+  if (!position %in% c("below", "above")) {
+    message("x-axis position must be either below or above - setting to 'below'")
+    position <- "below"
+  }
 
-#   if (missing(label))
-#     label <- fig$x$spec$xlab
-#   fig$x$spec$xlab <- label
+  update_axis(fig, position, draw, args, which = "x")
+}
 
-#   format_pars <- list(power_limit_high = power_limit_high,
-#     power_limit_low = power_limit_low,
-#     precision = precision, use_scientific = use_scientific,
-#     format = format)
-#   specified <- names(as.list(match.call())[-1])
-#   format_pars <- format_pars[names(format_pars) %in% specified]
+#' @export
+y_axis <- function(fig, label = NULL, position = "left", log = FALSE, draw = TRUE,
+  ticker = NULL, tickformatter = NULL, axis = NULL, grid = NULL) {
 
-#   update_axis(fig, position = position, label = label, grid = grid,
-#     desired_num_ticks = desired_num_ticks,
-#     num_minor_ticks = num_minor_ticks, visible = visible,
-#     log = log, number_formatter = match.arg(number_formatter),
-#     format_pars = format_pars)
-# }
+  get_nms <- c("label", "ticker", "tickformatter", "axis", "grid", "log")
+  args <- get_specified_args(get_nms)
 
-# #' Customize x axis of a Bokeh figure
-# #' @inheritParams x_axis
-# #' @param position where to place the axis (either "left" or "right")
-# #' @family axes
-# #' @example man-roxygen/ex-axis.R
-# #' @export
-# y_axis <- function(fig, label, position = "left", log = FALSE,
-#   grid = TRUE, desired_num_ticks = NULL, num_minor_ticks = 5,
-#   visible = TRUE, number_formatter = c("basic", "numeral", "printf"),
-#   power_limit_high = 5, power_limit_low = -3, precision = NULL,
-#   use_scientific = TRUE, format = NULL) {
+  if (is.null(position))
+    position <- "left"
+  if (!position %in% c("left", "right")) {
+    message("y-axis position must be either 'left' or 'right' - setting to 'left'")
+    position <- "left"
+  }
 
-#   if (is.null(position))
-#     position <- "left"
-#   if (!position %in% c("left", "right")) {
-#     message("y axis position must be either left or right - setting to 'left'")
-#     position <- "left"
-#   }
+  update_axis(fig, position, draw, args, which = "y")
+}
 
-#   if (is.logical(log)) {
-#     if (log) {
-#       log <- 10.0
-#     } else {
-#       log <- NULL
-#     }
-#   } else {
-#     log <- as.numeric(log)
-#   }
+update_axis <- function(fig, position, draw, args, which) {
+  if ("log" %in% names(args) && args$log == TRUE)
+    fig$x$pars$axes$log[[which]] <- TRUE
 
-#   if (missing(label))
-#     label <- fig$x$spec$ylab
-#   fig$x$spec$ylab <- label
+  if ("label" %in% names(args))
+    fig$x$pars$axes$lab[[which]] <- args$label
 
-#   format_pars <- list(power_limit_high = power_limit_high,
-#     power_limit_low = power_limit_low,
-#     precision = precision, use_scientific = use_scientific,
-#     format = format)
-#   specified <- names(as.list(match.call())[-1])
-#   format_pars <- format_pars[names(format_pars) %in% specified]
+  axis_type <- fig$x$pars$axes$type[[which]]
 
-#   update_axis(fig, position = position, label = label, grid = grid,
-#     desired_num_ticks = desired_num_ticks,
-#     num_minor_ticks = num_minor_ticks, visible = visible,
-#     log = log, number_formatter = match.arg(number_formatter),
-#     format_pars = format_pars)
-# }
-NULL
+  # TODO: move this validation to when axes are built in prepare_figure
+  # valid_mods <- list(
+  #   numeric = c("BasicTicker", "FixedTicker", "SingleIntervalTicker",
+  #     "BasicTickFormatter", "NumeralTickFormatter", "PrintfTickFormatter",
+  #     "LinearAxis", "FuncTickFormatter", "LogTicker", "LogTickFormatter",
+  #     "LogAxis", "FuncTickFormatter"),
+  #   categorical = c("DatetimeTicker", "DatetimeTickFormatter", "DatetimeAxis",
+  #     "FuncTickFormatter"),
+  #   datetime = c("CategoricalTicker", "CategoricalTickFormatter", "CategoricalAxis",
+  #     "FuncTickFormatter")
+  # )
+  # if (is.null(axis_type)) {
+  #   message("Cannot customize axes without data.")
+  #   return(fig)
+  # }
+  # if (!cur_obj$model %in% valid_mods[[axis_type]]) {
+  #   message("The model '", cur_obj$model,"' is not compatible with the ", which,
+  #     " axis which is of type '", axis_type, "... Ignoring this specification.")
+
+  if (draw) {
+    mod_nms <- c("ticker", "tickformatter", "axis", "grid")
+    for (nm in intersect(mod_nms, names(args))) {
+      cur_obj <- eval(args[[nm]])
+      if (cur_obj$clear) {
+        fig$x$pars$axes$args[[position]][[nm]] <- cur_obj
+      } else {
+        fig$x$pars$axes$args[[position]][[nm]] <-
+          modifyList(fig$x$pars$axes$args[[position]][[nm]], cur_obj)
+      }
+      fig$x$pars$axes$args[[position]][[nm]]$clear <- NULL
+    }
+  } else {
+    fig$x$pars$axes$args[[position]] <- NULL
+  }
+
+  fig
+}
+
+
+## tickers
+##---------------------------------------------------------
+
+#' @export
+ticker_num <- function(
+  min_interval = 0,
+  max_interval = NULL,
+  desired_num_ticks = 6,
+  num_minor_ticks = 5,
+  mantissas = c(1, 2, 5),
+  base = 10,
+  clear = FALSE
+) {
+  structure(list(
+    desired_num_ticks = desired_num_ticks,
+    num_minor_ticks = num_minor_ticks,
+    min_interval = min_interval,
+    max_interval = max_interval,
+    mantissas = mantissas,
+    base = base,
+    model = "BasicTicker",
+    clear = clear
+  ),
+  class = c("list", "ticker"))
+}
+
+ticker_fixed <- function(
+  ticks = NULL,
+  desired_num_ticks = 6,
+  num_minor_ticks = 5,
+  clear = FALSE
+) {
+  structure(list(
+    ticks = ticks,
+    num_minor_ticks = num_minor_ticks,
+    desired_num_ticks = desired_num_ticks,
+    model = "FixedTicker",
+    clear = clear
+  ),
+  class = c("list", "ticker"))
+}
+
+#' @export
+ticker_interval <- function(
+  interval = NULL,
+  desired_num_ticks = 6,
+  num_minor_ticks = 5,
+  clear = FALSE
+) {
+  structure(list(
+    interval = interval,
+    num_minor_ticks = num_minor_ticks,
+    desired_num_ticks = desired_num_ticks,
+    model = "SingleIntervalTicker",
+    clear = clear
+  ),
+  class = c("list", "ticker"))
+}
+
+#' @export
+ticker_log <- function(
+  base = 10,
+  min_interval = 0,
+  max_interval = NULL,
+  mantissas = list(1, 5),
+  desired_num_ticks = 6,
+  num_minor_ticks = 5,
+  clear = FALSE
+) {
+  structure(list(
+    base = base,
+    min_interval = min_interval,
+    max_interval = max_interval,
+    mantissas = mantissas,
+    desired_num_ticks = desired_num_ticks,
+    num_minor_ticks = num_minor_ticks,
+    model = "LogTicker",
+    clear = clear
+  ),
+  class = c("list", "ticker"))
+}
+
+#' @export
+ticker_date <- function(
+  desired_num_ticks = 6L,
+  num_minor_ticks = 0L,
+  clear = FALSE
+) {
+  structure(list(
+    desired_num_ticks = desired_num_ticks,
+    num_minor_ticks = num_minor_ticks,
+    model = "DatetimeTicker",
+    clear = clear
+  ),
+  class = c("list", "ticker"))
+}
+
+#' @export
+ticker_cat <- function(clear = FALSE) {
+  structure(list(
+    model = "CategoricalTicker",
+    clear = clear
+  ),
+  class = c("list", "ticker"))
+}
+
+# MercatorTicker
+
+## tickformatters
+##---------------------------------------------------------
+
+#' @export
+tickformatter_num <- function(
+  use_scientific = TRUE,
+  power_limit_low = -3,
+  power_limit_high = 5,
+  precision = "auto",
+  clear = FALSE
+) {
+  structure(list(
+    use_scientific = use_scientific,
+    power_limit_low = power_limit_low,
+    power_limit_high = power_limit_high,
+    precision = precision,
+    model = "BasicTickFormatter",
+    clear = clear
+  ),
+  class = c("list", "tickformatter"))
+}
+
+#' @export
+tickformatter_func <- function(
+  code = "",
+  args = NULL,
+  clear = FALSE
+) {
+  structure(list(
+    code = code,
+    args = args,
+    model = "FuncTickFormatter",
+    clear = clear
+  ),
+  class = c("list", "tickformatter"))
+}
+
+#' @export
+tickformatter_numeral <- function(
+  format = "0,0",
+  rounding = "round",
+  language = "en",
+  clear = FALSE
+) {
+  structure(list(
+    format = format,
+    rounding = rounding,
+    language = language,
+    model = "NumeralTickFormatter",
+    clear = clear
+  ),
+  class = c("list", "tickformatter"))
+}
+
+#' @export
+tickformatter_printf <- function(format = "%s", clear = FALSE) {
+  structure(list(
+    format = format,
+    model = "PrintfTickFormatter",
+    clear = clear
+  ),
+  class = c("list", "tickformatter"))
+}
+
+#' @export
+tickformatter_log <- function(clear = FALSE) {
+  structure(list(
+    model = "LogTickFormatter",
+    clear = clear
+  ),
+  class = c("list", "tickformatter"))
+}
+
+#' @export
+tickformatter_date <- function(
+  years = c("%Y"),
+  months = c("%m/%Y", "%b%y"),
+  days = c("%m/%d", "%a%d"),
+  hours = c("%Hh", "%H:%M"),
+  hourmin = c("%H:%M"),
+  minutes = c(":%M", "%Mm"),
+  minsec = c(":%M:%S"),
+  seconds = c("%Ss"),
+  milliseconds = c("%3Nms", "%S.%3Ns"),
+  microseconds = c("%fus"),
+  clear = FALSE
+) {
+  structure(list(
+    years = years,
+    months = months,
+    days = days,
+    hours = hours,
+    hourmin = hourmin,
+    minutes = minutes,
+    minsec = minsec,
+    seconds = seconds,
+    milliseconds = milliseconds,
+    microseconds = microseconds,
+    model = "DatetimeTickFormatter",
+    clear = clear
+  ),
+  class = c("list", "tickformatter"))
+}
+
+#' @export
+tickformatter_cat <- function(clear = FALSE) {
+  structure(list(
+    model = "CategoricalTickFormatter",
+    clear = clear
+  ),
+  class = c("list", "tickformatter"))
+}
+
+## axis and grid spec
+##---------------------------------------------------------
+
+#' @export
+axis_spec <- function(
+  visible = TRUE,
+  major_label_overrides = NULL,
+  bounds = "auto",
+  level = "overlay",
+  # the rest of this is theme stuff...
+  axis_label_standoff = NULL,
+  axis_label_text_align = NULL,
+  axis_label_text_alpha = NULL,
+  axis_label_text_baseline = NULL,
+  axis_label_text_color = NULL,
+  axis_label_text_font = NULL,
+  axis_label_text_font_size = NULL,
+  axis_label_text_font_style = NULL,
+  major_label_orientation = NULL,
+  major_label_standoff = NULL,
+  major_label_text_align = NULL,
+  major_label_text_alpha = NULL,
+  major_label_text_baseline = NULL,
+  major_label_text_color = NULL,
+  major_label_text_font = NULL,
+  major_label_text_font_size = NULL,
+  major_label_text_font_style = NULL,
+  axis_line_alpha = NULL,
+  axis_line_cap = NULL,
+  axis_line_color = NULL,
+  axis_line_dash = NULL,
+  axis_line_dash_offset = NULL,
+  axis_line_join = NULL,
+  axis_line_width = NULL,
+  major_tick_in = NULL,
+  major_tick_line_alpha = NULL,
+  major_tick_line_cap = NULL,
+  major_tick_line_color = NULL,
+  major_tick_line_dash = NULL,
+  major_tick_line_dash_offset = NULL,
+  major_tick_line_join = NULL,
+  major_tick_line_width = NULL,
+  major_tick_out = NULL,
+  minor_tick_in = NULL,
+  minor_tick_line_alpha = NULL,
+  minor_tick_line_cap = NULL,
+  minor_tick_line_color = NULL,
+  minor_tick_line_dash = NULL,
+  minor_tick_line_dash_offset = NULL,
+  minor_tick_line_join = NULL,
+  minor_tick_line_width = NULL,
+  minor_tick_out = NULL,
+  clear = FALSE
+) {
+  res <- get_specified_args()
+  res$clear <- clear
+  class(res) <- c("list", "axis")
+  res
+}
+
+#' @export
+grid_spec <- function(
+  visible = TRUE,
+  level = "underlay",
+  bounds = "auto",
+  # the rest of this is theme stuff...
+  band_fill_alpha = NULL,
+  band_fill_color = NULL,
+  grid_line_alpha = NULL,
+  grid_line_cap = NULL,
+  grid_line_color = NULL,
+  grid_line_dash = NULL,
+  grid_line_dash_offset = NULL,
+  grid_line_join = NULL,
+  grid_line_width = NULL,
+  minor_grid_line_alpha = NULL,
+  minor_grid_line_cap = NULL,
+  minor_grid_line_color = NULL,
+  minor_grid_line_dash = NULL,
+  minor_grid_line_dash_offset = NULL,
+  minor_grid_line_join = NULL,
+  minor_grid_line_width = NULL,
+  clear = FALSE
+) {
+  res <- get_specified_args()
+  res$clear <- clear
+  class(res) <- c("list", "axis_grid")
+  res
+}

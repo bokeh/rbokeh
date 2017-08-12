@@ -7,6 +7,7 @@
 #' @param mode Whether to consider hover pointer as a point (x/y values), or a span on h or v directions. Must be one of 'mouse', 'hline', 'vline'.
 #' @param attachment Whether tooltip's arrow should appear in the horizontal or vertical dimension. Must be one of 'horizontal', 'vertical'.
 #' @param callback A callback to run in the browser whenever the input's value changes. The cb_data parameter that is available to the Callback code will contain two HoverTool specific fields: :index: object containing the indices of the hovered points in the data, and source :geometry: object containing the coordinates of the hover cursor.
+#' @export
 hov <- function(
   data = NULL,
   line_policy = NULL,

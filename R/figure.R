@@ -51,19 +51,20 @@ figure <- function(
         legend = list(legend_location = legend_location),
         axes = list(
           type = list(x = NULL, y = NULL),
-          range = list(x = NULL, y = NULL),
-          lab = list(x = NULL, y = NULL),
+          log = list(x = FALSE, y = FALSE),
+          range = list(x = xlim, y = ylim),
+          lab = list(x = xlab, y = ylab),
           args = list(
             below = list(
               ticker = list(),
-              grid = list(),
+              grid = if (xgrid) list() else NA,
               tickformatter = list(),
               axis = list(),
               range = list()
             ),
             left = list(
               ticker = list(),
-              grid = list(),
+              grid = if (ygrid) list() else NA,
               tickformatter = list(),
               axis = list(),
               range = list()

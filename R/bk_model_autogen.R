@@ -13,17 +13,17 @@ Model <- R6::R6Class("Model",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # A mapping of event names to lists of CustomJS callbacks.
-    # 
+    #
     # Typically, rather then modifying this property directly, callbacks
     # should be added using the ``Model.js_on_event`` method:
-    # 
+    #
     # .. code:: python
-    # 
+    #
     # callback = CustomJS(code="console.log('tap event occured')")
     # plot.js_on_event('tap', callback)
     # > Dict(String, List(Instance(CustomJS)))
@@ -35,27 +35,27 @@ Model <- R6::R6Class("Model",
     subscribed_events = NULL,
     # A mapping of attribute names to lists of CustomJS callbacks, to be set
     # up on BokehJS side when the document is created.
-    # 
+    #
     # Typically, rather then modifying this property directly, callbacks
     # should be added using the ``Model.js_on_change`` method:
-    # 
+    #
     # .. code:: python
-    # 
+    #
     # callback = CustomJS(code="console.log('stuff')")
     # plot.x_range.js_on_change('start', callback)
     # > Dict(String, List(Instance(CustomJS)))
     js_property_callbacks = NULL,
     # An arbitrary, user-supplied name for this model.
-    # 
+    #
     # This name can be useful when querying the document to retrieve specific
     # Bokeh models.
-    # 
+    #
     # .. code:: python
-    # 
+    #
     # >>> plot.circle([1,2,3], [4,5,6], name="temp") >>>
     # plot.select(name="temp")
     # [GlyphRenderer(id='399d53f5-73e9-44d9-9527-544b761c7705', ...)]
-    # 
+    #
     # .. note:: No uniqueness guarantees or other conditions are enforced on
     # any names that are provided, nor is the name used directly by Bokeh for
     # any reason.
@@ -63,19 +63,19 @@ Model <- R6::R6Class("Model",
     name = NULL,
     # An optional list of arbitrary, user-supplied values to attach to this
     # model.
-    # 
+    #
     # This data can be useful when querying the document to retrieve specific
     # Bokeh models:
-    # 
+    #
     # .. code:: python
-    # 
+    #
     # >>> r = plot.circle([1,2,3], [4,5,6]) >>> r.tags = ["foo", 10] >>>
     # plot.select(tags=['foo', 10])
     # [GlyphRenderer(id='1de4c3df-a83d-480a-899b-fb263d3d5dd9', ...)]
-    # 
+    #
     # Or simply a convenient way to attach any necessary metadata to a model
     # that can be accessed by CustomJS callbacks, etc.
-    # 
+    #
     # .. note:: No uniqueness guarantees or other conditions are enforced on
     # any tags that are provided, nor are the tags used directly by Bokeh for
     # any reason.
@@ -85,7 +85,7 @@ Model <- R6::R6Class("Model",
 )
 
 # A base class for all range types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -107,7 +107,7 @@ Range <- R6::R6Class("Range",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -118,14 +118,14 @@ Range <- R6::R6Class("Range",
 )
 
 # Render Bézier curves.
-# 
+#
 # For more information consult the `Wikipedia article for Bézier curve`_.
-# 
+#
 # .. _Wikipedia article for Bézier curve:
 # http://en.wikipedia.org/wiki/Bézier_curve
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Bezier.py :source-position: below
 Bezier <- R6::R6Class("Bezier",
   inherit = Glyph,
@@ -148,7 +148,7 @@ Bezier <- R6::R6Class("Bezier",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -226,12 +226,12 @@ BoxAnnotation <- R6::R6Class("BoxAnnotation",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # The x-coordinates of the left edge of the box annotation.
-    # 
+    #
     # Datetime values are also accepted, but note that they are immediately
     # converted to milliseconds-since-epoch.
     # > Either(Auto, NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float))
@@ -258,13 +258,13 @@ BoxAnnotation <- R6::R6Class("BoxAnnotation",
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     line_alpha = NULL,
     # The x-coordinates of the right edge of the box annotation.
-    # 
+    #
     # Datetime values are also accepted, but note that they are immediately
     # converted to milliseconds-since-epoch.
     # > Either(Auto, NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float))
     right = NULL,
     # The y-coordinates of the bottom edge of the box annotation.
-    # 
+    #
     # Datetime values are also accepted, but note that they are immediately
     # converted to milliseconds-since-epoch.
     # > Either(Auto, NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float))
@@ -274,7 +274,7 @@ BoxAnnotation <- R6::R6Class("BoxAnnotation",
     # > Enum('screen', 'data')
     left_units = NULL,
     # The y-coordinates of the top edge of the box annotation.
-    # 
+    #
     # Datetime values are also accepted, but note that they are immediately
     # converted to milliseconds-since-epoch.
     # > Either(Auto, NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float))
@@ -288,7 +288,7 @@ BoxAnnotation <- R6::R6Class("BoxAnnotation",
     bottom_units = NULL,
     # Specifies whether the box is rendered as a canvas element or as an css
     # element overlaid on the canvas. The default mode is "canvas".
-    # 
+    #
     # .. warning:: The line_dash and line_dash_offset attributes aren't
     # supported if the render_mode is set to "css"
     # > Enum('canvas', 'css')
@@ -319,7 +319,7 @@ BoxAnnotation <- R6::R6Class("BoxAnnotation",
 
 # Abstract base class for groups with items rendered as check/radio
 # boxes.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -345,7 +345,7 @@ Group <- R6::R6Class("Group",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -443,7 +443,7 @@ LogAxis <- R6::R6Class("LogAxis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -452,7 +452,7 @@ LogAxis <- R6::R6Class("LogAxis",
 )
 
 # A base class for tools that respond to scroll events.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -473,7 +473,7 @@ Scroll <- R6::R6Class("Scroll",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -482,7 +482,7 @@ Scroll <- R6::R6Class("Scroll",
 )
 
 # Base class for all glyph models.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -503,7 +503,7 @@ Glyph <- R6::R6Class("Glyph",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -536,7 +536,7 @@ Dropdown <- R6::R6Class("Dropdown",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -576,7 +576,7 @@ LogTicker <- R6::R6Class("LogTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -586,15 +586,15 @@ LogTicker <- R6::R6Class("LogTicker",
 
 # Base class for ``Transform`` models that represent a computation to be
 # carried out on the client-side.
-# 
+#
 # JavaScript implementations should implement the following methods:
-# 
+#
 # .. code-block: coffeescript
-# 
+#
 # compute: (x) -> # compute the transform of a single value
-# 
+#
 # v_compute: (xs) -> # compute the transform of an array of values
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -615,7 +615,7 @@ Transform <- R6::R6Class("Transform",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -646,7 +646,7 @@ Toolbar <- R6::R6Class("Toolbar",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -695,7 +695,7 @@ RemoteSource <- R6::R6Class("RemoteSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -710,161 +710,161 @@ RemoteSource <- R6::R6Class("RemoteSource",
 
 # A ``TickFormatter`` for displaying datetime values nicely across a
 # range of scales.
-# 
+#
 # ``DatetimeTickFormatter`` has the following properties (listed together
 # with their default values) that can be used to control the formatting
 # of axis ticks at different scales scales:
-# 
+#
 # .. code-block:: python
-# 
+#
 # microseconds = ['%fus']
-# 
+#
 # milliseconds = ['%3Nms', '%S.%3Ns']
-# 
+#
 # seconds = ['%Ss']
-# 
+#
 # minsec = [':%M:%S']
-# 
+#
 # minutes = [':%M', '%Mm']
-# 
+#
 # hourmin = ['%H:%M']
-# 
+#
 # hours = ['%Hh', '%H:%M']
-# 
+#
 # days = ['%m/%d', '%a%d']
-# 
+#
 # months = ['%m/%Y', '%b%y']
-# 
+#
 # years = ['%Y']
-# 
+#
 # Each scale property can be set to format or list of formats to use for
 # formatting datetime tick values that fall in in that "time scale".  By
 # default, only the first format string passed for each time scale will
 # be used. By default, all leading zeros are stripped away from the
 # formatted labels.
-# 
+#
 # This list of supported `strftime`_ formats is reproduced below.
-# 
+#
 # %a The abbreviated name of the day of the week according to the current
 # locale.
-# 
+#
 # %A The full name of the day of the week according to the current
 # locale.
-# 
+#
 # %b The abbreviated month name according to the current locale.
-# 
+#
 # %B The full month name according to the current locale.
-# 
+#
 # %c The preferred date and time representation for the current locale.
-# 
+#
 # %C The century number (year/100) as a 2-digit integer.
-# 
+#
 # %d The day of the month as a decimal number (range 01 to 31).
-# 
+#
 # %D Equivalent to %m/%d/%y.  (Americans should note that in many other
 # countries %d/%m/%y is rather common. This means that in international
 # context this format is ambiguous and should not be used.)
-# 
+#
 # %e Like %d, the day of the month as a decimal number, but a leading
 # zero is replaced by a space.
-# 
+#
 # %f Microsecond as a decimal number, zero-padded on the left (range
 # 000000-999999). This is an extension to the set of directives available
 # to `timezone`_.
-# 
+#
 # %F Equivalent to %Y-%m-%d (the ISO 8601 date format).
-# 
+#
 # %G The ISO 8601 week-based year with century as a decimal number.  The
 # 4-digit year corresponding to the ISO week number (see %V).  This has
 # the same format and value as %Y, except that if the ISO week number
 # belongs to the previous or next year, that year is used instead.
-# 
+#
 # %g Like %G, but without century, that is, with a 2-digit year (00-99).
-# 
+#
 # %h Equivalent to %b.
-# 
+#
 # %H The hour as a decimal number using a 24-hour clock (range 00 to 23).
-# 
+#
 # %I The hour as a decimal number using a 12-hour clock (range 01 to 12).
-# 
+#
 # %j The day of the year as a decimal number (range 001 to 366).
-# 
+#
 # %k The hour (24-hour clock) as a decimal number (range 0 to 23).
 # Single digits are preceded by a blank.  (See also %H.)
-# 
+#
 # %l The hour (12-hour clock) as a decimal number (range 1 to 12).
 # Single digits are preceded by a blank.  (See also %I.)  (TZ)
-# 
+#
 # %m The month as a decimal number (range 01 to 12).
-# 
+#
 # %M The minute as a decimal number (range 00 to 59).
-# 
+#
 # %n A newline character. Bokeh text does not currently support newline
 # characters.
-# 
+#
 # %N Nanosecond as a decimal number, zero-padded on the left (range
 # 000000000-999999999). Supports a padding width specifier, i.e.  %3N
 # displays 3 leftmost digits. However, this is only accurate to the
 # millisecond level of precision due to limitations of `timezone`_.
-# 
+#
 # %p Either "AM" or "PM" according to the given time value, or the
 # corresponding strings for the current locale.  Noon is treated as "PM"
 # and midnight as "AM".
-# 
+#
 # %P Like %p but in lowercase: "am" or "pm" or a corresponding string for
 # the current locale.
-# 
+#
 # %r The time in a.m. or p.m. notation.  In the POSIX locale this is
 # equivalent to %I:%M:%S %p.
-# 
+#
 # %R The time in 24-hour notation (%H:%M). For a version including the
 # seconds, see %T below.
-# 
+#
 # %s The number of seconds since the Epoch, 1970-01-01 00:00:00 +0000
 # (UTC).
-# 
+#
 # %S The second as a decimal number (range 00 to 60).  (The range is up
 # to 60 to allow for occasional leap seconds.)
-# 
+#
 # %t A tab character. Bokeh text does not currently support tab
 # characters.
-# 
+#
 # %T The time in 24-hour notation (%H:%M:%S).
-# 
+#
 # %u The day of the week as a decimal, range 1 to 7, Monday being 1.  See
 # also %w.
-# 
+#
 # %U The week number of the current year as a decimal number, range 00 to
 # 53, starting with the first Sunday as the first day of week 01.  See
 # also %V and %W.
-# 
+#
 # %V The ISO 8601 week number (see NOTES) of the current year as a
 # decimal number, range 01 to 53, where week 1 is the first week that has
 # at least 4 days in the new year.  See also %U and %W.
-# 
+#
 # %w The day of the week as a decimal, range 0 to 6, Sunday being 0.  See
 # also %u.
-# 
+#
 # %W The week number of the current year as a decimal number, range 00 to
 # 53, starting with the first Monday as the first day of week 01.
-# 
+#
 # %x The preferred date representation for the current locale without the
 # time.
-# 
+#
 # %X The preferred time representation for the current locale without the
 # date.
-# 
+#
 # %y The year as a decimal number without a century (range 00 to 99).
-# 
+#
 # %Y The year as a decimal number including the century.
-# 
+#
 # %z The +hhmm or -hhmm numeric timezone (that is, the hour and minute
 # offset from UTC).
-# 
+#
 # %Z The timezone name or abbreviation.
-# 
+#
 # %% A literal '%' character.
-# 
+#
 # .. warning:: The client library BokehJS uses the `timezone`_ library to
 # format datetimes. The inclusion of the list below is based on the claim
 # that `timezone`_ makes to support "the full compliment of GNU date
@@ -872,7 +872,7 @@ RemoteSource <- R6::R6Class("RemoteSource",
 # exhaustively against this list. If you find formats that do not
 # function as expected, please submit a `github issue`_, so that the
 # documentation can be updated appropriately.
-# 
+#
 # .. _strftime: http://man7.org/linux/man-pages/man3/strftime.3.html ..
 # _timezone: http://bigeasy.github.io/timezone/ .. _github issue:
 # https://github.com/bokeh/bokeh/issues
@@ -898,68 +898,68 @@ DatetimeTickFormatter <- R6::R6Class("DatetimeTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # Formats for displaying datetime values in the ``days`` range.
-    # 
+    #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
     days = NULL,
     # Formats for displaying datetime values in the ``seconds`` range.
-    # 
+    #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
     seconds = NULL,
     # Formats for displaying datetime values in the ``hours`` range.
-    # 
+    #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
     hours = NULL,
     # Formats for displaying datetime values in the ``hourmin`` (for combined
     # hours and minutes) range.
-    # 
+    #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
     hourmin = NULL,
     # Formats for displaying datetime values in the ``minutes`` range.
-    # 
+    #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
     minutes = NULL,
     # Formats for displaying datetime values in the ``months`` range.
-    # 
+    #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
     months = NULL,
     # Formats for displaying datetime values in the ``milliseconds`` range.
-    # 
+    #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
     milliseconds = NULL,
     # Formats for displaying datetime values in the ``microseconds`` range.
-    # 
+    #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
     microseconds = NULL,
     # Formats for displaying datetime values in the ``years`` range.
-    # 
+    #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
     years = NULL,
     # Formats for displaying datetime values in the ``minsec`` (for combined
     # minutes and seconds) range.
-    # 
+    #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
@@ -988,7 +988,7 @@ MonthsTicker <- R6::R6Class("MonthsTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -999,7 +999,7 @@ MonthsTicker <- R6::R6Class("MonthsTicker",
 )
 
 # A base class that defines common properties for all button types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -1025,7 +1025,7 @@ AbstractButton <- R6::R6Class("AbstractButton",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1069,18 +1069,18 @@ Band <- R6::R6Class("Band",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
-    # 
+    #
     # > Enum('screen', 'data')
     lower_units = NULL,
     # A particular (named) x-range to use for computing screen locations when
     # rendering annotations on the plot. If unset, use the default x-range.
     # > String
     x_range_name = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     upper_units = NULL,
     # The fill alpha values for the band.
@@ -1123,7 +1123,7 @@ Band <- R6::R6Class("Band",
     # rendering annotations on the plot. If unset, use the default y-range.
     # > String
     y_range_name = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     base_units = NULL,
     # The line cap values for the band.
@@ -1136,7 +1136,7 @@ Band <- R6::R6Class("Band",
 )
 
 # Base class for continuous color mapper types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -1159,7 +1159,7 @@ ContinuousColorMapper <- R6::R6Class("ContinuousColorMapper",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1206,7 +1206,7 @@ Span <- R6::R6Class("Span",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1219,7 +1219,7 @@ Span <- R6::R6Class("Span",
     x_range_name = NULL,
     # Specifies whether the span is rendered as a canvas element or as an css
     # element overlaid on the canvas. The default mode is "canvas".
-    # 
+    #
     # .. warning:: The line_dash and line_dash_offset attributes aren't
     # supported if the render_mode is set to "css"
     # > Enum('canvas', 'css')
@@ -1260,9 +1260,9 @@ Span <- R6::R6Class("Span",
 )
 
 # Render circle markers with a '+' cross through the center.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/CircleCross.py :source-position: below
 CircleCross <- R6::R6Class("CircleCross",
   inherit = Marker,
@@ -1290,7 +1290,7 @@ CircleCross <- R6::R6Class("CircleCross",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1298,7 +1298,7 @@ CircleCross <- R6::R6Class("CircleCross",
   )
 )
 
-# 
+#
 LinearScale <- R6::R6Class("LinearScale",
   inherit = Scale,
   public = list(
@@ -1316,7 +1316,7 @@ LinearScale <- R6::R6Class("LinearScale",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1325,12 +1325,12 @@ LinearScale <- R6::R6Class("LinearScale",
 )
 
 # Render a single patch.
-# 
+#
 # The ``Patch`` glyph is different from most other glyphs in that the
 # vector of values only produces one glyph on the Plot.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Patch.py :source-position: below
 Patch <- R6::R6Class("Patch",
   inherit = Glyph,
@@ -1352,7 +1352,7 @@ Patch <- R6::R6Class("Patch",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1369,7 +1369,7 @@ Patch <- R6::R6Class("Patch",
     # > Int
     line_dash_offset = NULL,
     # The y-coordinates for the points of the patch.
-    # 
+    #
     # .. note:: A patch may comprise multiple polygons. In this case the
     # y-coordinates for each polygon should be separated by NaN values in the
     # sequence.
@@ -1391,7 +1391,7 @@ Patch <- R6::R6Class("Patch",
     # > Enum('butt', 'round', 'square')
     line_cap = NULL,
     # The x-coordinates for the points of the patch.
-    # 
+    #
     # .. note:: A patch may comprise multiple polygons. In this case the
     # x-coordinates for each polygon should be separated by NaN values in the
     # sequence.
@@ -1401,14 +1401,14 @@ Patch <- R6::R6Class("Patch",
 )
 
 # Maps names of columns to sequences or arrays.
-# 
+#
 # If the ColumnDataSource initializer is called with a single argument
 # that is a dict or pandas.DataFrame, that argument is used as the value
 # for the "data" attribute. For example::
-# 
+#
 # ColumnDataSource(mydict) # same as ColumnDataSource(data=mydict)
 # ColumnDataSource(df) # same as ColumnDataSource(data=df)
-# 
+#
 # .. note:: There is an implicit assumption that all the columns in a a
 # given ColumnDataSource have the same length.
 ColumnDataSource <- R6::R6Class("ColumnDataSource",
@@ -1437,7 +1437,7 @@ ColumnDataSource <- R6::R6Class("ColumnDataSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1449,7 +1449,7 @@ ColumnDataSource <- R6::R6Class("ColumnDataSource",
 )
 
 # A base class for data source types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -1476,7 +1476,7 @@ DataSource <- R6::R6Class("DataSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1485,18 +1485,18 @@ DataSource <- R6::R6Class("DataSource",
     callback = NULL,
     # A dict to indicate selected indices on different dimensions on this
     # DataSource. Keys are:
-    # 
+    #
     # .. code-block:: python
-    # 
+    #
     # # selection information for line and patch glyphs '0d' : { # the glyph
     # that was selected 'glyph': None
-    # 
+    #
     # # array with the [smallest] index of the segment of the line that was
     # hit 'indices': [] }
-    # 
+    #
     # # selection for most (point-like) glyphs, except lines and patches
     # '1d': { # indices of the points included in the selection indices: [] }
-    # 
+    #
     # # selection information for multiline and patches glyphs '2d': { #
     # mapping of indices of the multiglyph to array of glyph indices that
     # were hit # e.g. {3: [5, 6], 4: [5]} indices: {} }
@@ -1523,7 +1523,7 @@ DateEditor <- R6::R6Class("DateEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1535,7 +1535,7 @@ DateEditor <- R6::R6Class("DateEditor",
 # based on a templated url e.g.
 # ``http://your.tms.server.host/{Z}/{X}/{Y}.png``.  The defining feature
 # of TMS is the tile-origin in located at the bottom-left.
-# 
+#
 # The TMSTileSource can also be helpful in implementing tile renderers
 # for custom tile sets, including non-spatial datasets.
 TMSTileSource <- R6::R6Class("TMSTileSource",
@@ -1565,7 +1565,7 @@ TMSTileSource <- R6::R6Class("TMSTileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1574,7 +1574,7 @@ TMSTileSource <- R6::R6Class("TMSTileSource",
 )
 
 # A base class for tools that respond to tap/click events.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -1595,7 +1595,7 @@ Tap <- R6::R6Class("Tap",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1624,7 +1624,7 @@ DaysTicker <- R6::R6Class("DaysTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1653,7 +1653,7 @@ IntEditor <- R6::R6Class("IntEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1682,42 +1682,42 @@ DateFormatter <- R6::R6Class("DateFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # The date format can be combinations of the following:
-    # 
+    #
     # d day of month (no leading zero)
-    # 
+    #
     # dd day of month (two digit)
-    # 
+    #
     # o day of year (no leading zeros)
-    # 
+    #
     # oo day of year (three digit)
-    # 
+    #
     # D day name short
-    # 
+    #
     # DD day name long
-    # 
+    #
     # m month of year (no leading zero)
-    # 
+    #
     # mm month of year (two digit)
-    # 
+    #
     # M month name short
-    # 
+    #
     # MM month name long
-    # 
+    #
     # y year (two digit)
-    # 
+    #
     # yy year (four digit)
-    # 
+    #
     # @ Unix timestamp (ms since 01/01/1970)
-    # 
+    #
     # !  Windows ticks (100ns since 01/01/0001)
-    # 
+    #
     # "..."  literal text
-    # 
+    #
     # '' single quote
     # > Either(Enum('ATOM', 'W3C', 'RFC-3339', 'ISO-8601', 'COOKIE', 'RFC-822', 'RFC-850', 'RFC-1036', 'RFC-1123', 'RFC-2822', 'RSS', 'TICKS', 'TIMESTAMP'), String)
     format = NULL
@@ -1725,7 +1725,7 @@ DateFormatter <- R6::R6Class("DateFormatter",
 )
 
 # Render multiple text labels as annotations.
-# 
+#
 # ``LabelSet`` will render multiple text labels at given ``x`` and ``y``
 # coordinates, which can be in either screen (pixel) space, or data (axis
 # range) space. In this case (as opposed to the single ``Label`` model),
@@ -1733,18 +1733,18 @@ DateFormatter <- R6::R6Class("DateFormatter",
 # :class:`~bokeh.models.sources.ColumnDataSource`, in which case the
 # labels will be "vectorized" using coordinate values from the specified
 # columns.
-# 
+#
 # The label can also be configured with a screen space offset from ``x``
 # and ``y``, by using the ``x_offset`` and ``y_offset`` properties. These
 # offsets may be vectorized by giving the name of a data source column.
-# 
+#
 # Additionally, the label can be rotated with the ``angle`` property
 # (which may also be a column name.)
-# 
+#
 # There are also standard text, fill, and line properties to control the
 # appearance of the text, its background, as well as the rectangular
 # bounding box border.
-# 
+#
 # The data source is provided by setting the ``source`` property.
 LabelSet <- R6::R6Class("LabelSet",
   inherit = TextAnnotation,
@@ -1775,7 +1775,7 @@ LabelSet <- R6::R6Class("LabelSet",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1789,7 +1789,7 @@ LabelSet <- R6::R6Class("LabelSet",
     # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
     background_fill_color = NULL,
     # Offset values to apply to the y-coordinates.
-    # 
+    #
     # This is useful, for instance, if it is desired to "float" text a fixed
     # distance in screen units from a given data position.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
@@ -1812,7 +1812,7 @@ LabelSet <- R6::R6Class("LabelSet",
     # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
     text_baseline = NULL,
     # The angles to rotate the text, as measured from the horizontal.
-    # 
+    #
     # .. warning:: The center of rotation for canvas and css render_modes is
     # different.  For `render_mode="canvas"` the label is rotated from the
     # top-left corner of the annotation, while for `render_mode="css"` the
@@ -1833,10 +1833,10 @@ LabelSet <- R6::R6Class("LabelSet",
     text_font_style = NULL,
     # Specifies whether the text is rendered as a canvas element or as an css
     # element overlaid on the canvas. The default mode is "canvas".
-    # 
+    #
     # .. note:: The CSS labels won't be present in the output using the
     # "save" tool.
-    # 
+    #
     # .. warning:: Not all visual styling properties are supported if the
     # render_mode is set to "css". The border_line_dash property isn't fully
     # supported and border_line_dash_offset isn't supported at all. Setting
@@ -1857,7 +1857,7 @@ LabelSet <- R6::R6Class("LabelSet",
     # The text alpha values for the text.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     text_alpha = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     angle_units = NULL,
     # The unit type for the ys attribute. Interpreted as "data space" units
@@ -1868,7 +1868,7 @@ LabelSet <- R6::R6Class("LabelSet",
     # > String
     text_font = NULL,
     # Offset values to apply to the x-coordinates.
-    # 
+    #
     # This is useful, for instance, if it is desired to "float" text a fixed
     # distance in screen units from a given data position.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
@@ -1895,7 +1895,7 @@ LabelSet <- R6::R6Class("LabelSet",
   )
 )
 
-# 
+#
 DynamicImageRenderer <- R6::R6Class("DynamicImageRenderer",
   inherit = DataRenderer,
   public = list(
@@ -1915,7 +1915,7 @@ DynamicImageRenderer <- R6::R6Class("DynamicImageRenderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -1933,9 +1933,9 @@ DynamicImageRenderer <- R6::R6Class("DynamicImageRenderer",
 )
 
 # Render rectangles.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Rect.py :source-position: below
 Rect <- R6::R6Class("Rect",
   inherit = Glyph,
@@ -1959,13 +1959,13 @@ Rect <- R6::R6Class("Rect",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # Whether to always round fractional pixel locations in such a way as to
     # make the rectangles bigger.
-    # 
+    #
     # This setting may be useful if pixel rounding errors are causing
     # rectangles to have a gap between them, when they should appear flush.
     # > Bool
@@ -2003,16 +2003,16 @@ Rect <- R6::R6Class("Rect",
     # The overall heights of the rectangles.
     # > DistanceSpec(units_default='data')
     height = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     angle_units = NULL,
     # The line join values for the rectangles.
     # > Enum('miter', 'round', 'bevel')
     line_join = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     width_units = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     height_units = NULL,
     # The line cap values for the rectangles.
@@ -2044,7 +2044,7 @@ SingleIntervalTicker <- R6::R6Class("SingleIntervalTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2055,7 +2055,7 @@ SingleIntervalTicker <- R6::R6Class("SingleIntervalTicker",
 )
 
 # Base class for arrow heads.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -2077,7 +2077,7 @@ ArrowHead <- R6::R6Class("ArrowHead",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2090,21 +2090,21 @@ ArrowHead <- R6::R6Class("ArrowHead",
 # access other items in the row via the `dataContext` object passed to
 # the formatter.  So, for example, if another column in the datasource
 # was named `url`, the template could access it as:
-# 
+#
 # <a href="<%= url %>"><%= value %></a>
-# 
+#
 # To use a different set of template delimiters, pass the appropriate
 # values for `evaluate`, `interpolate', or `escape`.  See the Underscore
 # `template` documentation for more information.
 # http://underscorejs.org/#template
-# 
+#
 # Example: Simple HTML template to format the column value as code.
-# 
+#
 # HTMLTemplateFormatter(template='<code><%= value %></code>')
-# 
+#
 # Example: Use values from other columns (`manufacturer` and `model`) to
 # build a hyperlink.
-# 
+#
 # HTMLTemplateFormatter(template='<a
 # href="https:/www.google.com/search?q=<%= manufacturer %>+<%= model %>"
 # target="_blank"><%= value %></a>')
@@ -2126,7 +2126,7 @@ HTMLTemplateFormatter <- R6::R6Class("HTMLTemplateFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2159,7 +2159,7 @@ Select <- R6::R6Class("Select",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2180,7 +2180,7 @@ Select <- R6::R6Class("Select",
 )
 
 # A base class for all data range types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -2202,7 +2202,7 @@ DataRange <- R6::R6Class("DataRange",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2219,11 +2219,11 @@ DataRange <- R6::R6Class("DataRange",
 )
 
 # A fixed, closed range [start, end] in a continuous scalar dimension.
-# 
+#
 # In addition to supplying ``start`` and ``end`` keyword arguments to the
 # ``Range1d`` initializer, you can also instantiate with the convenience
 # syntax::
-# 
+#
 # Range(0, 10) # equivalent to Range(start=0, end=10)
 Range1d <- R6::R6Class("Range1d",
   inherit = Range,
@@ -2244,7 +2244,7 @@ Range1d <- R6::R6Class("Range1d",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2255,21 +2255,21 @@ Range1d <- R6::R6Class("Range1d",
     max_interval = NULL,
     # The bounds that the range is allowed to go to - typically used to
     # prevent the user from panning/zooming/etc away from the data.
-    # 
+    #
     # If set to ``'auto'``, the bounds will be computed to the start and end
     # of the Range.
-    # 
+    #
     # Bounds are provided as a tuple of ``(min, max)`` so regardless of
     # whether your range is increasing or decreasing, the first item should
     # be the minimum value of the range and the second item should be the
     # maximum. Setting min > max will result in a ``ValueError``.
-    # 
+    #
     # By default, bounds are ``None`` and your plot to pan/zoom as far as you
     # want. If you only want to constrain one end of the plot, you can set
     # min or max to None.
-    # 
+    #
     # Examples:
-    # 
+    #
     # Range1d(0, 1, bounds='auto') # Auto-bounded to 0 and 1 (Default
     # behavior) Range1d(start=0, end=1, bounds=(0, None)) # Maximum is
     # unbounded, minimum bounded to 0
@@ -2290,7 +2290,7 @@ Range1d <- R6::R6Class("Range1d",
 )
 
 # A base class for all interactive tool types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -2312,7 +2312,7 @@ Tool <- R6::R6Class("Tool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2342,7 +2342,7 @@ CustomJS <- R6::R6Class("CustomJS",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2358,7 +2358,7 @@ CustomJS <- R6::R6Class("CustomJS",
     # the callback and an optional ``cb_data`` parameter that contains any
     # tool-specific data (i.e. mouse coordinates and hovered glyph indices
     # for the HoverTool).
-    # 
+    #
     # .. note:: Use ``CustomJS.from_coffeescript()`` for CoffeeScript source
     # code.
     # > String
@@ -2386,7 +2386,7 @@ CustomJSTransform <- R6::R6Class("CustomJSTransform",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2400,14 +2400,14 @@ CustomJSTransform <- R6::R6Class("CustomJSTransform",
     # expected to be present in the function namespace at render time. The
     # snippet will be into the body of a function and therefore requires a
     # return statement.
-    # 
+    #
     # Example:
-    # 
+    #
     # .. code-block:: javascript
-    # 
+    #
     # v_func = ''' new_xs = new Array(xs.length) for(i = 0; i < xs.length;
     # i++) { new_xs[i] = xs[i] + 0.5 } return new_xs '''
-    # 
+    #
     # .. warning:: The vectorized function, ``v_func``, must return an array
     # of the same length as the input ``xs`` array.
     # > String
@@ -2416,11 +2416,11 @@ CustomJSTransform <- R6::R6Class("CustomJSTransform",
     # ``x`` will contain the untransformed value and can be expected to be
     # present in the function namespace at render time. The snippet will be
     # into the body of a function and therefore requires a return statement.
-    # 
+    #
     # Example:
-    # 
+    #
     # .. code-block:: javascript
-    # 
+    #
     # func = ''' return Math.floor(x) + 0.5 '''
     # > String
     func = NULL
@@ -2446,7 +2446,7 @@ SelectEditor <- R6::R6Class("SelectEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2483,13 +2483,13 @@ MercatorTileSource <- R6::R6Class("MercatorTileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # Enables continuous horizontal panning by wrapping the x-axis based on
     # bounds of map.
-    # 
+    #
     # ..note:: Axis coordinates are not wrapped. To toggle axis label
     # visibility, use ``plot.axis.visible = False``.
     # > Bool
@@ -2521,7 +2521,7 @@ Arrow <- R6::R6Class("Arrow",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2588,11 +2588,11 @@ Arrow <- R6::R6Class("Arrow",
 
 # Base class for glyphs that are simple markers with line and fill
 # properties, located at an (x, y) location with a specified size.
-# 
+#
 # .. note:: For simplicity, all markers have both line and fill
 # properties declared, however some markers (`Asterisk`, `Cross`, `X`)
 # only draw lines. For these markers, the fill values are simply ignored.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -2617,7 +2617,7 @@ Marker <- R6::R6Class("Marker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2648,7 +2648,7 @@ Marker <- R6::R6Class("Marker",
     # The line join values for the markers.
     # > Enum('miter', 'round', 'bevel')
     line_join = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     angle_units = NULL,
     # The line alpha values for the markers.
@@ -2667,7 +2667,7 @@ Marker <- R6::R6Class("Marker",
 )
 
 # Lay out child components in a single vertical row.
-# 
+#
 # Children can be specified as positional arguments, as a single argument
 # that is a sequence, or using the ``children`` keyword argument.
 Column <- R6::R6Class("Column",
@@ -2692,7 +2692,7 @@ Column <- R6::R6Class("Column",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2719,7 +2719,7 @@ BooleanFormatter <- R6::R6Class("BooleanFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2731,7 +2731,7 @@ BooleanFormatter <- R6::R6Class("BooleanFormatter",
 
 # A base class for all guide renderer types. ``GuideRenderer`` is not
 # generally useful to instantiate on its own.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -2753,7 +2753,7 @@ GuideRenderer <- R6::R6Class("GuideRenderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2763,7 +2763,7 @@ GuideRenderer <- R6::R6Class("GuideRenderer",
   )
 )
 
-# 
+#
 CategoricalScale <- R6::R6Class("CategoricalScale",
   inherit = LinearScale,
   public = list(
@@ -2781,7 +2781,7 @@ CategoricalScale <- R6::R6Class("CategoricalScale",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2812,7 +2812,7 @@ RadioGroup <- R6::R6Class("RadioGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2824,7 +2824,7 @@ RadioGroup <- R6::R6Class("RadioGroup",
 )
 
 # A base class for all ticker types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -2845,7 +2845,7 @@ Ticker <- R6::R6Class("Ticker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2854,10 +2854,10 @@ Ticker <- R6::R6Class("Ticker",
 )
 
 # *toolbar icon*: |wheel_pan_icon|
-# 
+#
 # The wheel pan tool allows the user to pan the plot along the configured
 # dimension using the scroll wheel.
-# 
+#
 # .. |wheel_pan_icon| image:: /_images/icons/WheelPan.png :height: 18pt
 WheelPanTool <- R6::R6Class("WheelPanTool",
   inherit = Scroll,
@@ -2876,7 +2876,7 @@ WheelPanTool <- R6::R6Class("WheelPanTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2905,7 +2905,7 @@ TimeEditor <- R6::R6Class("TimeEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2914,9 +2914,9 @@ TimeEditor <- R6::R6Class("TimeEditor",
 )
 
 # Render text.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Text.py :source-position: below
 Text <- R6::R6Class("Text",
   inherit = Glyph,
@@ -2940,7 +2940,7 @@ Text <- R6::R6Class("Text",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -2948,7 +2948,7 @@ Text <- R6::R6Class("Text",
     # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
     text_color = NULL,
     # Offset values to apply to the y-coordinates.
-    # 
+    #
     # This is useful, for instance, if it is desired to "float" text a fixed
     # distance in screen units from a given data position.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
@@ -2962,14 +2962,14 @@ Text <- R6::R6Class("Text",
     # The text font size values for the text.
     # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
     text_font_size = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     angle_units = NULL,
     # The text alpha values for the text.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     text_alpha = NULL,
     # Offset values to apply to the x-coordinates.
-    # 
+    #
     # This is useful, for instance, if it is desired to "float" text a fixed
     # distance in screen units from a given data position.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
@@ -3021,26 +3021,26 @@ Title <- R6::R6Class("Title",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # A color to use to fill text with.
-    # 
+    #
     # Acceptable values are:
-    # 
+    #
     # - any of the 147 named `CSS colors`_, e.g ``'green'``, ``'indigo'`` -
     # an RGB(A) hex value, e.g., ``'#FF0000'``, ``'#44444444'`` - a 3-tuple
     # of integers (r,g,b) between 0 and 255 - a 4-tuple of (r,g,b,a) where
     # r,g,b are integers between 0..255 and a is between 0..1
-    # 
+    #
     # .. _CSS colors: http://www.w3schools.com/cssref/css_colornames.asp
     # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
     text_color = NULL,
     # Offset the text by a number of pixels (can be positive or negative).
     # Shifts the text in different directions based on the location of the
     # title:
-    # 
+    #
     # * above: shifts title right * right: shifts title down * below: shifts
     # title right * left: shifts title up
     # > Float
@@ -3065,10 +3065,10 @@ Title <- R6::R6Class("Title",
     border_line_dash_offset = NULL,
     # Specifies whether the text is rendered as a canvas element or as an css
     # element overlaid on the canvas. The default mode is "canvas".
-    # 
+    #
     # .. note:: The CSS labels won't be present in the output using the
     # "save" tool.
-    # 
+    #
     # .. warning:: Not all visual styling properties are supported if the
     # render_mode is set to "css". The border_line_dash property isn't fully
     # supported and border_line_dash_offset isn't supported at all. Setting
@@ -3081,14 +3081,14 @@ Title <- R6::R6Class("Title",
     # > Enum('butt', 'round', 'square')
     border_line_cap = NULL,
     # A style to use for rendering text.
-    # 
+    #
     # Acceptable values are:
-    # 
+    #
     # - ``'normal'`` normal text - ``'italic'`` *italic text* - ``'bold'``
     # **bold text**
     # > Enum('normal', 'italic', 'bold')
     text_font_style = NULL,
-    # 
+    #
     # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
     text_font_size = NULL,
     # Name of a font to use for rendering text, e.g., ``'times'``,
@@ -3096,7 +3096,7 @@ Title <- R6::R6Class("Title",
     # > String
     text_font = NULL,
     # An alpha value to use to fill text with.
-    # 
+    #
     # Acceptable values are floating point numbers between 0 (transparent)
     # and 1 (opaque).
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
@@ -3203,7 +3203,7 @@ DatetimeAxis <- R6::R6Class("DatetimeAxis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3212,7 +3212,7 @@ DatetimeAxis <- R6::R6Class("DatetimeAxis",
 )
 
 # Generate ticks on a linear scale.
-# 
+#
 # .. note:: This class may be renamed to ``LinearTicker`` in the future.
 BasicTicker <- R6::R6Class("BasicTicker",
   inherit = AdaptiveTicker,
@@ -3236,7 +3236,7 @@ BasicTicker <- R6::R6Class("BasicTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3245,9 +3245,9 @@ BasicTicker <- R6::R6Class("BasicTicker",
 )
 
 # Render square markers with a '+' cross through the center.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/SquareCross.py :source-position: below
 SquareCross <- R6::R6Class("SquareCross",
   inherit = Marker,
@@ -3275,7 +3275,7 @@ SquareCross <- R6::R6Class("SquareCross",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3283,7 +3283,7 @@ SquareCross <- R6::R6Class("SquareCross",
   )
 )
 
-# 
+#
 TileRenderer <- R6::R6Class("TileRenderer",
   inherit = DataRenderer,
   public = list(
@@ -3304,7 +3304,7 @@ TileRenderer <- R6::R6Class("TileRenderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3330,7 +3330,7 @@ TileRenderer <- R6::R6Class("TileRenderer",
 )
 
 # A base class that defines common properties for all axis types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -3377,7 +3377,7 @@ Axis <- R6::R6Class("Axis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3494,24 +3494,24 @@ Axis <- R6::R6Class("Axis",
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     axis_label_text_alpha = NULL,
     # A Ticker to use for computing locations of axis components.
-    # 
+    #
     # The property may also be passed a sequence of floating point numbers as
     # a shorthand for creating and configuring a ``FixedTicker``, e.g. the
     # following code
-    # 
+    #
     # .. code-block:: python
-    # 
+    #
     # from bokeh.plotting import figure
-    # 
+    #
     # p = figure() p.xaxis.ticker = [10, 20, 37.4]
-    # 
+    #
     # is equivalent to:
-    # 
+    #
     # .. code-block:: python
-    # 
+    #
     # from bokeh.plotting import figure from bokeh.models.tickers import
     # FixedTicker
-    # 
+    #
     # p = figure() p.xaxis.ticker = FixedTicker(ticks=[10, 20, 37.4])
     # > Instance(Ticker)
     ticker = NULL,
@@ -3538,7 +3538,7 @@ Axis <- R6::R6Class("Axis",
     # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
     axis_line_color = NULL,
     # A text label for the axis, displayed parallel to the axis rule.
-    # 
+    #
     # .. note:: LaTeX notation is not currently supported; please see
     # :bokeh-issue:`647` to track progress or contribute.
     # > String
@@ -3565,7 +3565,7 @@ Axis <- R6::R6Class("Axis",
 )
 
 # A base class for tools that perform "inspections", e.g. ``HoverTool``.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -3586,7 +3586,7 @@ Inspection <- R6::R6Class("Inspection",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3599,9 +3599,9 @@ Inspection <- R6::R6Class("Inspection",
 )
 
 # Render axis-aligned quads.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Quad.py :source-position: below
 Quad <- R6::R6Class("Quad",
   inherit = Glyph,
@@ -3624,7 +3624,7 @@ Quad <- R6::R6Class("Quad",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3671,7 +3671,7 @@ Quad <- R6::R6Class("Quad",
 )
 
 # Lay out child components in a single horizontal row.
-# 
+#
 # Children can be specified as positional arguments, as a single argument
 # that is a sequence, or using the ``children`` keyword argument.
 Row <- R6::R6Class("Row",
@@ -3696,7 +3696,7 @@ Row <- R6::R6Class("Row",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3705,20 +3705,20 @@ Row <- R6::R6Class("Row",
 )
 
 # *toolbar icon*: |poly_select_icon|
-# 
+#
 # The polygon selection tool allows users to make selections on a Plot by
 # indicating a polygonal region with mouse clicks. single clicks (or
 # taps) add successive points to the definition of the polygon, and a
 # double click (or tap) indicates the selection region is ready.
-# 
+#
 # See :ref:`userguide_styling_selected_unselected_glyphs` for information
 # on styling selected and unselected glyphs.
-# 
+#
 # .. note:: Selections can be comprised of multiple regions, even those
 # made by different selection tools. Hold down the <<shift>> key while
 # making a selection to append the new selection to any previous
 # selection that might exist.
-# 
+#
 # .. |poly_select_icon| image:: /_images/icons/PolygonSelect.png :height:
 # 18pt
 PolySelectTool <- R6::R6Class("PolySelectTool",
@@ -3738,7 +3738,7 @@ PolySelectTool <- R6::R6Class("PolySelectTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3758,7 +3758,7 @@ PolySelectTool <- R6::R6Class("PolySelectTool",
 
 # A base class for data source types, which can be mapped onto a columnar
 # format.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -3786,7 +3786,7 @@ ColumnarDataSource <- R6::R6Class("ColumnarDataSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3797,16 +3797,16 @@ ColumnarDataSource <- R6::R6Class("ColumnarDataSource",
 )
 
 # *toolbar icon*: |crosshair_icon|
-# 
+#
 # The crosshair tool is a passive inspector tool. It is generally on at
 # all times, but can be configured in the inspector's menu associated
 # with the *toolbar icon* shown above.
-# 
+#
 # The crosshair tool draws a crosshair annotation over the plot, centered
 # on the current mouse position. The crosshair tool may be configured to
 # draw across only one dimension by setting the ``dimension`` property to
 # only ``width`` or ``height``.
-# 
+#
 # .. |crosshair_icon| image:: /_images/icons/Crosshair.png :height: 18pt
 CrosshairTool <- R6::R6Class("CrosshairTool",
   inherit = Inspection,
@@ -3827,7 +3827,7 @@ CrosshairTool <- R6::R6Class("CrosshairTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3835,19 +3835,19 @@ CrosshairTool <- R6::R6Class("CrosshairTool",
     # > Float
     line_width = NULL,
     # A color to use to stroke paths with.
-    # 
+    #
     # Acceptable values are:
-    # 
+    #
     # - any of the 147 named `CSS colors`_, e.g ``'green'``, ``'indigo'`` -
     # an RGB(A) hex value, e.g., ``'#FF0000'``, ``'#44444444'`` - a 3-tuple
     # of integers (r,g,b) between 0 and 255 - a 4-tuple of (r,g,b,a) where
     # r,g,b are integers between 0..255 and a is between 0..1
-    # 
+    #
     # .. _CSS colors: http://www.w3schools.com/cssref/css_colornames.asp
     # > Color
     line_color = NULL,
     # An alpha value to use to stroke paths with.
-    # 
+    #
     # Acceptable values are floating point numbers between 0 (transparent)
     # and 1 (opaque).
     # > Float
@@ -3862,9 +3862,9 @@ CrosshairTool <- R6::R6Class("CrosshairTool",
 )
 
 # Render diamond markers with a '+' cross through the center.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/DiamondCross.py :source-position: below
 DiamondCross <- R6::R6Class("DiamondCross",
   inherit = Marker,
@@ -3892,7 +3892,7 @@ DiamondCross <- R6::R6Class("DiamondCross",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3901,9 +3901,9 @@ DiamondCross <- R6::R6Class("DiamondCross",
 )
 
 # Render a 'X' cross markers.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/X.py :source-position: below
 X <- R6::R6Class("X",
   inherit = Marker,
@@ -3931,7 +3931,7 @@ X <- R6::R6Class("X",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3940,7 +3940,7 @@ X <- R6::R6Class("X",
 )
 
 # Display tick values from continuous ranges as powers of some base.
-# 
+#
 # Most often useful in conjunction with a ``LogTicker``.
 LogTickFormatter <- R6::R6Class("LogTickFormatter",
   inherit = TickFormatter,
@@ -3960,7 +3960,7 @@ LogTickFormatter <- R6::R6Class("LogTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -3990,7 +3990,7 @@ OpenURL <- R6::R6Class("OpenURL",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4002,9 +4002,9 @@ OpenURL <- R6::R6Class("OpenURL",
 )
 
 # Render segments.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Segment.py :source-position: below
 Segment <- R6::R6Class("Segment",
   inherit = Glyph,
@@ -4026,7 +4026,7 @@ Segment <- R6::R6Class("Segment",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4067,9 +4067,9 @@ Segment <- R6::R6Class("Segment",
 )
 
 # Render a square marker, optionally rotated.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Square.py :source-position: below
 Square <- R6::R6Class("Square",
   inherit = Marker,
@@ -4097,7 +4097,7 @@ Square <- R6::R6Class("Square",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4106,9 +4106,9 @@ Square <- R6::R6Class("Square",
 )
 
 # Render rays.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Ray.py :source-position: below
 Ray <- R6::R6Class("Ray",
   inherit = Glyph,
@@ -4131,14 +4131,14 @@ Ray <- R6::R6Class("Ray",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # The line width values for the rays.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     line_width = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     length_units = NULL,
     # The length to extend the ray. Note that this ``length`` defaults to
@@ -4160,7 +4160,7 @@ Ray <- R6::R6Class("Ray",
     # The line join values for the rays.
     # > Enum('miter', 'round', 'bevel')
     line_join = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     angle_units = NULL,
     # The line alpha values for the rays.
@@ -4180,13 +4180,13 @@ Ray <- R6::R6Class("Ray",
 )
 
 # Render ovals.
-# 
+#
 # This glyph renders ovals using Bézier curves, which are similar, but
 # not identical to ellipses. In particular, widths equal to heights will
 # not render circles. Use the ``Ellipse`` glyph for that.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Oval.py :source-position: below
 Oval <- R6::R6Class("Oval",
   inherit = Glyph,
@@ -4210,7 +4210,7 @@ Oval <- R6::R6Class("Oval",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4250,13 +4250,13 @@ Oval <- R6::R6Class("Oval",
     # The line join values for the ovals.
     # > Enum('miter', 'round', 'bevel')
     line_join = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     angle_units = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     width_units = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     height_units = NULL,
     # The line cap values for the ovals.
@@ -4292,7 +4292,7 @@ AutocompleteInput <- R6::R6Class("AutocompleteInput",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4327,18 +4327,18 @@ Slider <- R6::R6Class("Slider",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # When the callback is initiated. This parameter can take on only one of
     # three options:
-    # 
+    #
     # * "continuous": the callback will be executed immediately for each
     # movement of the slider * "throttle": the callback will be executed at
     # most every ``callback_throttle`` milliseconds.  * "mouseup": the
     # callback will be executed only once when the slider is released.
-    # 
+    #
     # The "mouseup" policy is intended for scenarios in which the callback is
     # expensive in time.
     # > Enum('continuous', 'throttle', 'mouseup')
@@ -4456,7 +4456,7 @@ CategoricalAxis <- R6::R6Class("CategoricalAxis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4466,10 +4466,10 @@ CategoricalAxis <- R6::R6Class("CategoricalAxis",
 
 # Map numbers in a range [*low*, *high*] linearly into a sequence of
 # colors (a palette).
-# 
+#
 # For example, if the range is [0, 99] and the palette is ``['red',
 # 'green', 'blue']``, the values would be mapped as follows::
-# 
+#
 # x < 0 : 'red' # values < low are clamped 0 >= x < 33 : 'red' 33 >= x <
 # 66 : 'green' 66 >= x < 99 : 'blue' 99 >= x : 'blue' # values > high are
 # clamped
@@ -4494,7 +4494,7 @@ LinearColorMapper <- R6::R6Class("LinearColorMapper",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4503,7 +4503,7 @@ LinearColorMapper <- R6::R6Class("LinearColorMapper",
 )
 
 # TickFormatter for values in WebMercator units.
-# 
+#
 # Some map plot types internally use WebMercator to describe coordinates,
 # plot bounds, etc. These units are not very human-friendly. This tick
 # formatter will convert WebMercator units into Latitude and Longitude
@@ -4530,21 +4530,21 @@ MercatorTickFormatter <- R6::R6Class("MercatorTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # Specify whether to format ticks for Latitude or Longitude.
-    # 
+    #
     # Projected coordinates are not separable, computing Latitude and
     # Longitude tick labels from Web Mercator requires considering
     # coordinates from both dimensions together. Use this property to specify
     # which result should be used for display.
-    # 
+    #
     # Typically, if the formatter is for an x-axis, then dimension should be
     # ``"lon"`` and if the formatter is for a y-axis, then the dimension
     # should be `"lat"``.
-    # 
+    #
     # In order to prevent hard to debug errors, there is no default value for
     # dimension. Using an un-configured MercatorTickFormatter will result in
     # a validation error and a JavaScript console error.
@@ -4555,20 +4555,20 @@ MercatorTickFormatter <- R6::R6Class("MercatorTickFormatter",
 
 # Base class for ``Scale`` models that represent an invertible
 # computation to be carried out on the client-side.
-# 
+#
 # JavaScript implementations should implement the following methods:
-# 
+#
 # .. code-block: coffeescript
-# 
+#
 # compute: (x) -> # compute the transform of a single value
-# 
+#
 # v_compute: (xs) -> # compute the transform of an array of values
-# 
+#
 # invert: (xprime) -> # compute the inverse transform of a single value
-# 
+#
 # v_invert: (xprimes) -> # compute the inverse transform of an array of
 # values
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -4589,7 +4589,7 @@ Scale <- R6::R6Class("Scale",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4598,12 +4598,12 @@ Scale <- R6::R6Class("Scale",
 )
 
 # Render several patches.
-# 
+#
 # The data for the ``Patches`` glyph is different in that the vector of
 # values is not a vector of scalars. Rather, it is a "list of lists".
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Patches.py :source-position: below
 Patches <- R6::R6Class("Patches",
   inherit = Glyph,
@@ -4625,7 +4625,7 @@ Patches <- R6::R6Class("Patches",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4633,14 +4633,14 @@ Patches <- R6::R6Class("Patches",
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     line_width = NULL,
     # The x-coordinates for all the patches, given as a "list of lists".
-    # 
+    #
     # .. note:: Individual patches may comprise multiple polygons. In this
     # case the x-coordinates for each polygon should be separated by NaN
     # values in the sublists.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     xs = NULL,
     # The y-coordinates for all the patches, given as a "list of lists".
-    # 
+    #
     # .. note:: Individual patches may comprise multiple polygons. In this
     # case the y-coordinates for each polygon should be separated by NaN
     # values in the sublists.
@@ -4674,9 +4674,9 @@ Patches <- R6::R6Class("Patches",
 )
 
 # Render triangle markers.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Triangle.py :source-position: below
 Triangle <- R6::R6Class("Triangle",
   inherit = Marker,
@@ -4704,7 +4704,7 @@ Triangle <- R6::R6Class("Triangle",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4732,13 +4732,13 @@ StepInterpolator <- R6::R6Class("StepInterpolator",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # Adjust the behavior of the returned value in relation to the control
     # points.  The parameter can assume one of three values:
-    # 
+    #
     # * ``after`` (default): Assume the y-value associated with the nearest
     # x-value which is less than or equal to the point to transform.  *
     # ``before``: Assume the y-value associated with the nearest x-value
@@ -4774,7 +4774,7 @@ DateRangeSlider <- R6::R6Class("DateRangeSlider",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4811,9 +4811,9 @@ DateRangeSlider <- R6::R6Class("DateRangeSlider",
 )
 
 # Render diamond markers.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Diamond.py :source-position: below
 Diamond <- R6::R6Class("Diamond",
   inherit = Marker,
@@ -4841,7 +4841,7 @@ Diamond <- R6::R6Class("Diamond",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4868,7 +4868,7 @@ NumeralTickFormatter <- R6::R6Class("NumeralTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -4877,9 +4877,9 @@ NumeralTickFormatter <- R6::R6Class("NumeralTickFormatter",
     # > Enum('be-nl', 'chs', 'cs', 'da-dk', 'de-ch', 'de', 'en', 'en-gb', 'es-ES', 'es', 'et', 'fi', 'fr-CA', 'fr-ch', 'fr', 'hu', 'it', 'ja', 'nl-nl', 'pl', 'pt-br', 'pt-pt', 'ru', 'ru-UA', 'sk', 'th', 'tr', 'uk-UA')
     language = NULL,
     # The number format, as defined in the following tables:
-    # 
+    #
     # **NUMBERS**:
-    # 
+    #
     # ============ ============== =============== Number Format String
     # ============ ============== =============== 10000 '0,0.0000'
     # 10,000.0000 10000.23 '0,0' 10,000 10000.23 '+0,0' +10,000 -10000
@@ -4888,36 +4888,36 @@ NumeralTickFormatter <- R6::R6Class("NumeralTickFormatter",
     # '(.00)' (.23) 0.23 '0.00000' 0.23000 0.23 '0.0[0000]' 0.23 1230974
     # '0.0a' 1.2m 1460 '0 a' 1 k -104000 '0a' -104k 1 '0o' 1st 52 '0o' 52nd
     # 23 '0o' 23rd 100 '0o' 100th ============ ============== ===============
-    # 
+    #
     # **CURRENCY**:
-    # 
+    #
     # =========== =============== ============= Number Format String
     # =========== =============== ============= 1000.234 '$0,0.00' $1,000.23
     # 1000.2 '0,0[.]00 $' 1,000.20 $ 1001 '$ 0,0[.]00' $ 1,001 -1000.234
     # '($0,0)' ($1,000) -1000.234 '$0.00' -$1000.23 1230974 '($ 0.00 a)' $
     # 1.23 m =========== =============== =============
-    # 
+    #
     # **BYTES**:
-    # 
+    #
     # =============== =========== ============ Number Format String
     # =============== =========== ============ 100 '0b' 100B 2048 '0 b' 2 KB
     # 7884486213 '0.0b' 7.3GB 3467479682787 '0.000 b' 3.154 TB
     # =============== =========== ============
-    # 
+    #
     # **PERCENTAGES**:
-    # 
+    #
     # ============= ============= =========== Number Format String
     # ============= ============= =========== 1 '0%' 100% 0.974878234
     # '0.000%' 97.488% -0.43 '0 %' -43 % 0.43 '(0.000 %)' 43.000 %
     # ============= ============= ===========
-    # 
+    #
     # **TIME**:
-    # 
+    #
     # ============ ============== ============ Number Format String
     # ============ ============== ============ 25 '00:00:00' 0:00:25 238
     # '00:00:00' 0:03:58 63846 '00:00:00' 17:44:06 ============
     # ============== ============
-    # 
+    #
     # For the complete specification, see http://numbrojs.com/format.html
     # > String
     format = NULL,
@@ -4953,11 +4953,11 @@ Whisker <- R6::R6Class("Whisker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
-    # 
+    #
     # > Enum('screen', 'data')
     lower_units = NULL,
     # Instance of ArrowHead.
@@ -4967,7 +4967,7 @@ Whisker <- R6::R6Class("Whisker",
     # rendering annotations on the plot. If unset, use the default x-range.
     # > String
     x_range_name = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     upper_units = NULL,
     # The line color values for the whisker body.
@@ -5007,7 +5007,7 @@ Whisker <- R6::R6Class("Whisker",
     # rendering annotations on the plot. If unset, use the default y-range.
     # > String
     y_range_name = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     base_units = NULL,
     # The line cap values for the whisker body.
@@ -5020,11 +5020,11 @@ Whisker <- R6::R6Class("Whisker",
 )
 
 # A block (div) of text.
-# 
+#
 # This Bokeh model corresponds to an HTML ``<div>`` element.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot::
 # ../sphinx/source/docs/user_guide/examples/interaction_div.py
 # :source-position: below
@@ -5050,7 +5050,7 @@ Div <- R6::R6Class("Div",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5086,21 +5086,21 @@ MercatorTicker <- R6::R6Class("MercatorTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # Specify whether to generate ticks for Latitude or Longitude.
-    # 
+    #
     # Projected coordinates are not separable, computing Latitude and
     # Longitude tick locations from Web Mercator requires considering
     # coordinates from both dimensions together. Use this property to specify
     # which result should be returned.
-    # 
+    #
     # Typically, if the ticker is for an x-axis, then dimension should be
     # ``"lon"`` and if the ticker is for a y-axis, then the dimension should
     # be `"lat"``.
-    # 
+    #
     # In order to prevent hard to debug errors, there is no default value for
     # dimension. Using an un-configured MercatorTicker will result in a
     # validation error and a JavaScript console error.
@@ -5110,9 +5110,9 @@ MercatorTicker <- R6::R6Class("MercatorTicker",
 )
 
 # Render square markers with an 'X' cross through the center.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/SquareX.py :source-position: below
 SquareX <- R6::R6Class("SquareX",
   inherit = Marker,
@@ -5140,7 +5140,7 @@ SquareX <- R6::R6Class("SquareX",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5170,7 +5170,7 @@ VeeHead <- R6::R6Class("VeeHead",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5227,7 +5227,7 @@ LinearInterpolator <- R6::R6Class("LinearInterpolator",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5236,7 +5236,7 @@ LinearInterpolator <- R6::R6Class("LinearInterpolator",
 )
 
 # Base class for all annotation models.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -5258,7 +5258,7 @@ Annotation <- R6::R6Class("Annotation",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5269,7 +5269,7 @@ Annotation <- R6::R6Class("Annotation",
 )
 
 # Render a tooltip.
-# 
+#
 # .. note:: This model is currently managed by BokehJS and is not useful
 # directly from python.
 Tooltip <- R6::R6Class("Tooltip",
@@ -5291,7 +5291,7 @@ Tooltip <- R6::R6Class("Tooltip",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5309,7 +5309,7 @@ Tooltip <- R6::R6Class("Tooltip",
   )
 )
 
-# 
+#
 LegendItem <- R6::R6Class("LegendItem",
   inherit = Model,
   public = list(
@@ -5328,7 +5328,7 @@ LegendItem <- R6::R6Class("LegendItem",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5345,7 +5345,7 @@ LegendItem <- R6::R6Class("LegendItem",
 )
 
 # An abstract base class for icon widgets.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -5370,7 +5370,7 @@ AbstractIcon <- R6::R6Class("AbstractIcon",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5378,7 +5378,7 @@ AbstractIcon <- R6::R6Class("AbstractIcon",
   )
 )
 
-# 
+#
 LogScale <- R6::R6Class("LogScale",
   inherit = Scale,
   public = list(
@@ -5396,7 +5396,7 @@ LogScale <- R6::R6Class("LogScale",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5405,9 +5405,9 @@ LogScale <- R6::R6Class("LogScale",
 )
 
 # A panel widget with navigation tabs.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot::
 # ../sphinx/source/docs/user_guide/examples/interaction_tab_panes.py
 # :source-position: below
@@ -5433,7 +5433,7 @@ Tabs <- R6::R6Class("Tabs",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5450,15 +5450,15 @@ Tabs <- R6::R6Class("Tabs",
 )
 
 # *toolbar icon*: |box_select_icon|
-# 
+#
 # The box selection tool allows users to make selections on a Plot by
 # indicating a rectangular region by dragging the mouse or a finger over
 # the plot region. The end of the drag event indicates the selection
 # region is ready.
-# 
+#
 # See :ref:`userguide_styling_selected_unselected_glyphs` for information
 # on styling selected and unselected glyphs.
-# 
+#
 # .. |box_select_icon| image:: /_images/icons/BoxSelect.png :height: 18pt
 BoxSelectTool <- R6::R6Class("BoxSelectTool",
   inherit = Drag,
@@ -5479,14 +5479,14 @@ BoxSelectTool <- R6::R6Class("BoxSelectTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # A callback to run in the browser on completion of drawing a selection
     # box.  The cb_data parameter that is available to the Callback code will
     # contain one BoxSelectTool-specific field:
-    # 
+    #
     # :geometry: object containing the coordinates of the selection box
     # > Instance(Callback)
     callback = NULL,
@@ -5549,7 +5549,7 @@ Legend <- R6::R6Class("Legend",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5597,23 +5597,23 @@ Legend <- R6::R6Class("Legend",
     border_line_color = NULL,
     # A list of :class:`~bokeh.model.annotations.LegendItem` instances to be
     # rendered in the legend.
-    # 
+    #
     # This can be specified explicitly, for instance:
-    # 
+    #
     # .. code-block:: python
-    # 
+    #
     # legend = Legend(items=[ LegendItem(label="sin(x)" , renderers=[r0,
     # r1]), LegendItem(label="2*sin(x)" , renderers=[r2]),
     # LegendItem(label="3*sin(x)" , renderers=[r3, r4]) ])
-    # 
+    #
     # But as a convenience, can also be given more compactly as a list of
     # tuples:
-    # 
+    #
     # .. code-block:: python
-    # 
+    #
     # legend = Legend(items=[ ("sin(x)" , [r0, r1]), ("2*sin(x)" , [r2]),
     # ("3*sin(x)" , [r3, r4]) ])
-    # 
+    #
     # where each tuple is of the form: *(label, renderers)*.
     # > List(Instance(LegendItem))
     items = NULL,
@@ -5673,7 +5673,7 @@ Legend <- R6::R6Class("Legend",
 )
 
 # Abstract base class for input widgets.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -5698,7 +5698,7 @@ InputWidget <- R6::R6Class("InputWidget",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5728,7 +5728,7 @@ CategoricalColorMapper <- R6::R6Class("CategoricalColorMapper",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5739,7 +5739,7 @@ CategoricalColorMapper <- R6::R6Class("CategoricalColorMapper",
 )
 
 # A base class for all interactive widget types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -5764,7 +5764,7 @@ Widget <- R6::R6Class("Widget",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5773,9 +5773,9 @@ Widget <- R6::R6Class("Widget",
 )
 
 # Render parabolas.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Quadratic.py :source-position: below
 Quadratic <- R6::R6Class("Quadratic",
   inherit = Glyph,
@@ -5798,7 +5798,7 @@ Quadratic <- R6::R6Class("Quadratic",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5862,7 +5862,7 @@ TextEditor <- R6::R6Class("TextEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5871,12 +5871,12 @@ TextEditor <- R6::R6Class("TextEditor",
 )
 
 # Render a single line.
-# 
+#
 # The ``Line`` glyph is different from most other glyphs in that the
 # vector of values only produces one glyph on the Plot.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Line.py :source-position: below
 Line <- R6::R6Class("Line",
   inherit = Glyph,
@@ -5898,7 +5898,7 @@ Line <- R6::R6Class("Line",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -5933,14 +5933,14 @@ Line <- R6::R6Class("Line",
 )
 
 # A range in a categorical dimension.
-# 
+#
 # In addition to supplying ``factors`` keyword argument to the
 # ``FactorRange`` initializer, you can also instantiate with the
 # convenience syntax::
-# 
+#
 # FactorRange("foo", "bar") # equivalent to FactorRange(factors=["foo",
 # "bar"])
-# 
+#
 # .. note:: ``FactorRange`` may be renamed to ``CategoricalRange`` in the
 # future.
 FactorRange <- R6::R6Class("FactorRange",
@@ -5962,12 +5962,12 @@ FactorRange <- R6::R6Class("FactorRange",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # An offset to the (synthetic) range (default: 0)
-    # 
+    #
     # .. note:: The primary usage of this is to support compatibility and
     # integration with other plotting systems, and will not generally of
     # interest to most users.
@@ -5980,43 +5980,43 @@ FactorRange <- R6::R6Class("FactorRange",
     max_interval = NULL,
     # The bounds that the range is allowed to go to - typically used to
     # prevent the user from panning/zooming/etc away from the data.
-    # 
+    #
     # Unlike Range1d and DataRange1d, factors do not have an order and so a
     # min and max cannot be proved in the same way. bounds accepts a list of
     # factors, that constrain the displayed factors.
-    # 
+    #
     # By default, bounds are ``None``, allows unlimited panning or zooming.
-    # 
+    #
     # If ``bounds='auto'``, bounds will be the same as factors and the plot
     # will not be able to pan or zoom beyond the first and last factors.
-    # 
+    #
     # If you provide a list, then only the factors that are in that list will
     # be displayed on the plot and the plot will not pan or zoom outside the
     # first and last items in the shortened factors list. Note the order of
     # factors is the defining order for your plot.
-    # 
+    #
     # Values of bounds that are not in factors are acceptable and will simply
     # have no impact on the plot.
-    # 
+    #
     # Examples:
-    # 
+    #
     # Auto behavior:
-    # 
+    #
     # .. code-block:: python
-    # 
+    #
     # x_range = FactorRange( factors=["apples", "dogs", "peaches", "bananas",
     # "pigs"], bounds='auto' )
-    # 
+    #
     # The plot will display all the factors and you will not be able to pan
     # left of apples or right of pigs.
-    # 
+    #
     # Constraining behavior:
-    # 
+    #
     # .. code-block:: python
-    # 
+    #
     # x_range = FactorRange( factors=["apples", "dogs", "peaches", "bananas",
     # "pigs"], bounds=["apples", "bananas", "peaches"] )
-    # 
+    #
     # Only the factors ``["apples", "peaches", "bananas"]`` (in that order)
     # will appear in the plot, and the plot will not pan left of ``"apples"``
     # or right of ``"bananas"``.
@@ -6035,14 +6035,14 @@ FactorRange <- R6::R6Class("FactorRange",
 )
 
 # Render images given as scalar data together with a color mapper.
-# 
+#
 # In addition to the defined model properties, ``Image`` also can accept
 # a keyword argument ``palette`` in place of an explicit
 # ``color_mapper``.  The value should be a list of colors, or the name of
 # one of the built-in palettes in ``bokeh.palettes``. This palette will
 # be used to automatically construct a ``ColorMapper`` model for the
 # ``color_mapper`` property.
-# 
+#
 # If both ``palette`` and ``color_mapper`` are passed, a ``ValueError``
 # exception will be raised. If neither is passed, then the ``Greys9``
 # palette will be used as a default.
@@ -6066,19 +6066,19 @@ Image <- R6::R6Class("Image",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # The height of the plot region that the image will occupy.
-    # 
+    #
     # .. note:: This is not the number of pixels that an image is tall.  That
     # number is fixed by the image itself.
     # > DistanceSpec(units_default='data')
     dh = NULL,
     # Whether to always round fractional pixel locations in such a way as to
     # make the images bigger.
-    # 
+    #
     # This setting may be useful if pixel rounding errors are causing images
     # to have a gap between them, when they should appear flush.
     # > Bool
@@ -6089,10 +6089,10 @@ Image <- R6::R6Class("Image",
     # The y-coordinates to locate the image anchors.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     y = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     dh_units = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     dw_units = NULL,
     # The arrays of scalar data for the images to be colormapped.
@@ -6100,12 +6100,12 @@ Image <- R6::R6Class("Image",
     image = NULL,
     # A ``ColorMapper`` to use to map the scalar data from ``image`` into
     # RGBA values for display.
-    # 
+    #
     # .. note:: The color mapping step happens on the client.
     # > Instance(ColorMapper)
     color_mapper = NULL,
     # The widths of the plot regions that the images will occupy.
-    # 
+    #
     # .. note:: This is not the number of pixels that an image is wide.  That
     # number is fixed by the image itself.
     # > DistanceSpec(units_default='data')
@@ -6134,7 +6134,7 @@ OpenHead <- R6::R6Class("OpenHead",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6183,7 +6183,7 @@ CategoricalTickFormatter <- R6::R6Class("CategoricalTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6192,15 +6192,15 @@ CategoricalTickFormatter <- R6::R6Class("CategoricalTickFormatter",
 )
 
 # *toolbar icon*: |wheel_zoom_icon|
-# 
+#
 # The wheel zoom tool will zoom the plot in and out, centered on the
 # current mouse location.
-# 
+#
 # The wheel zoom tool also activates the border regions of a Plot for
 # "single axis" zooming. For instance, zooming in the vertical border or
 # axis will effect a zoom in the vertical direction only, with the
 # horizontal dimension kept fixed.
-# 
+#
 # .. |wheel_zoom_icon| image:: /_images/icons/WheelZoom.png :height: 18pt
 WheelZoomTool <- R6::R6Class("WheelZoomTool",
   inherit = Scroll,
@@ -6219,7 +6219,7 @@ WheelZoomTool <- R6::R6Class("WheelZoomTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6258,7 +6258,7 @@ DataTable <- R6::R6Class("DataTable",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6326,7 +6326,7 @@ NormalHead <- R6::R6Class("NormalHead",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6393,7 +6393,7 @@ Grid <- R6::R6Class("Grid",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6469,9 +6469,9 @@ Grid <- R6::R6Class("Grid",
 )
 
 # Render '+' cross markers.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Cross.py :source-position: below
 Cross <- R6::R6Class("Cross",
   inherit = Marker,
@@ -6499,7 +6499,7 @@ Cross <- R6::R6Class("Cross",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6508,7 +6508,7 @@ Cross <- R6::R6Class("Cross",
 )
 
 # Generate ticks at fixed, explicitly supplied locations.
-# 
+#
 # .. note:: The ``desired_num_ticks`` property is ignored by this Ticker.
 FixedTicker <- R6::R6Class("FixedTicker",
   inherit = ContinuousTicker,
@@ -6529,7 +6529,7 @@ FixedTicker <- R6::R6Class("FixedTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6560,7 +6560,7 @@ BasicTickFormatter <- R6::R6Class("BasicTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6570,7 +6570,7 @@ BasicTickFormatter <- R6::R6Class("BasicTickFormatter",
     # > Bool
     use_scientific = NULL,
     # Limit the use of scientific notation to when::
-    # 
+    #
     # log(x) <= power_limit_low
     # > Int
     power_limit_low = NULL,
@@ -6578,7 +6578,7 @@ BasicTickFormatter <- R6::R6Class("BasicTickFormatter",
     # > Either(Auto, Int)
     precision = NULL,
     # Limit the use of scientific notation to when::
-    # 
+    #
     # log(x) >= power_limit_high
     # > Int
     power_limit_high = NULL
@@ -6586,7 +6586,7 @@ BasicTickFormatter <- R6::R6Class("BasicTickFormatter",
 )
 
 # An abstract base class for renderer types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -6608,7 +6608,7 @@ Renderer <- R6::R6Class("Renderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6645,7 +6645,7 @@ Button <- R6::R6Class("Button",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6655,7 +6655,7 @@ Button <- R6::R6Class("Button",
   )
 )
 
-# 
+#
 AjaxDataSource <- R6::R6Class("AjaxDataSource",
   inherit = RemoteSource,
   public = list(
@@ -6685,7 +6685,7 @@ AjaxDataSource <- R6::R6Class("AjaxDataSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6758,7 +6758,7 @@ DatetimeTicker <- R6::R6Class("DatetimeTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6767,12 +6767,12 @@ DatetimeTicker <- R6::R6Class("DatetimeTicker",
 )
 
 # Render several lines.
-# 
+#
 # The data for the ``MultiLine`` glyph is different in that the vector of
 # values is not a vector of scalars. Rather, it is a "list of lists".
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/MultiLine.py :source-position: below
 MultiLine <- R6::R6Class("MultiLine",
   inherit = Glyph,
@@ -6794,7 +6794,7 @@ MultiLine <- R6::R6Class("MultiLine",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6829,33 +6829,33 @@ MultiLine <- R6::R6Class("MultiLine",
 )
 
 # Base class for interpolator transforms.
-# 
+#
 # Interpolators return the value of a function which has been evaluated
 # between specified (x, y) pairs of data.  As an example, if two control
 # point pairs were provided to the interpolator, a linear interpolaction
 # at a specific value of 'x' would result in the value of 'y' which
 # existed on the line conneting the two control points.
-# 
+#
 # The control point pairs for the interpolators can be specified through
 # either
-# 
+#
 # * A literal sequence of values:
-# 
+#
 # .. code-block: python
-# 
+#
 # interp = Interpolator(x=[1, 2, 3, 4, 5], y=[2, 5, 10, 12, 16])
-# 
+#
 # * or a pair of columns defined in a `ColumnDataSource` object:
-# 
+#
 # .. code-block: python
-# 
+#
 # interp = Interpolator(x="year", y="earnings", data=jewlery_prices))
-# 
+#
 # This is the base class and is not intended to end use.  Please see the
 # documentation for the final derived classes (Jitter,
 # LineraInterpolator, StepInterpolator) for mor information on their
 # specific methods of interpolation.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -6877,7 +6877,7 @@ Interpolator <- R6::R6Class("Interpolator",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6919,7 +6919,7 @@ YearsTicker <- R6::R6Class("YearsTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6947,7 +6947,7 @@ FuncTickFormatter <- R6::R6Class("FuncTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -6960,11 +6960,11 @@ FuncTickFormatter <- R6::R6Class("FuncTickFormatter",
     # desired format. The variable ``tick`` will contain the unformatted tick
     # value and can be expected to be present in the code snippet namespace
     # at render time.
-    # 
+    #
     # Example:
-    # 
+    #
     # .. code-block:: javascript
-    # 
+    #
     # code = ''' return Math.floor(tick) + " + " + (tick % 1).toFixed(2) '''
     # > String
     code = NULL
@@ -6972,10 +6972,10 @@ FuncTickFormatter <- R6::R6Class("FuncTickFormatter",
 )
 
 # *toolbar icon*: |zoom_in_icon|
-# 
+#
 # The zoom-in tool allows users to click a button to zoom in by a fixed
 # amount.
-# 
+#
 # .. |zoom_in_icon| image:: /_images/icons/ZoomIn.png :height: 18pt
 ZoomInTool <- R6::R6Class("ZoomInTool",
   inherit = Action,
@@ -6994,7 +6994,7 @@ ZoomInTool <- R6::R6Class("ZoomInTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7011,7 +7011,7 @@ ZoomInTool <- R6::R6Class("ZoomInTool",
 )
 
 # A base class for all numeric, non-categorical axes types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -7100,7 +7100,7 @@ ContinuousAxis <- R6::R6Class("ContinuousAxis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7109,16 +7109,16 @@ ContinuousAxis <- R6::R6Class("ContinuousAxis",
 )
 
 # Render a single text label as an annotation.
-# 
+#
 # ``Label`` will render a single text label at given ``x`` and ``y``
 # coordinates, which can be in either screen (pixel) space, or data (axis
 # range) space.
-# 
+#
 # The label can also be configured with a screen space offset from ``x``
 # and ``y``, by using the ``x_offset`` and ``y_offset`` properties.
-# 
+#
 # Additionally, the label can be rotated with the ``angle`` property.
-# 
+#
 # There are also standard text, fill, and line properties to control the
 # appearance of the text, its background, as well as the rectangular
 # bounding box border.
@@ -7150,7 +7150,7 @@ Label <- R6::R6Class("Label",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7164,7 +7164,7 @@ Label <- R6::R6Class("Label",
     # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
     background_fill_color = NULL,
     # Offset value to apply to the y-coordinate.
-    # 
+    #
     # This is useful, for instance, if it is desired to "float" text a fixed
     # distance in screen units from a given data position.
     # > Float
@@ -7184,7 +7184,7 @@ Label <- R6::R6Class("Label",
     # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
     text_baseline = NULL,
     # The angle to rotate the text, as measured from the horizontal.
-    # 
+    #
     # .. warning:: The center of rotation for canvas and css render_modes is
     # different.  For `render_mode="canvas"` the label is rotated from the
     # top-left corner of the annotation, while for `render_mode="css"` the
@@ -7205,10 +7205,10 @@ Label <- R6::R6Class("Label",
     text_font_style = NULL,
     # Specifies whether the text is rendered as a canvas element or as an css
     # element overlaid on the canvas. The default mode is "canvas".
-    # 
+    #
     # .. note:: The CSS labels won't be present in the output using the
     # "save" tool.
-    # 
+    #
     # .. warning:: Not all visual styling properties are supported if the
     # render_mode is set to "css". The border_line_dash property isn't fully
     # supported and border_line_dash_offset isn't supported at all. Setting
@@ -7221,7 +7221,7 @@ Label <- R6::R6Class("Label",
     # > Enum('butt', 'round', 'square')
     border_line_cap = NULL,
     # The y-coordinate in screen coordinates to locate the text anchors.
-    # 
+    #
     # Datetime values are also accepted, but note that they are immediately
     # converted to milliseconds-since-epoch.
     # > Float
@@ -7243,7 +7243,7 @@ Label <- R6::R6Class("Label",
     # > Enum('deg', 'rad')
     angle_units = NULL,
     # Offset value to apply to the x-coordinate.
-    # 
+    #
     # This is useful, for instance, if it is desired to "float" text a fixed
     # distance in screen units from a given data position.
     # > Float
@@ -7262,7 +7262,7 @@ Label <- R6::R6Class("Label",
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     border_line_width = NULL,
     # The x-coordinate in screen coordinates to locate the text anchors.
-    # 
+    #
     # Datetime values are also accepted, but note that they are immediately
     # converted to milliseconds-since-epoch.
     # > Float
@@ -7274,7 +7274,7 @@ Label <- R6::R6Class("Label",
 )
 
 # Abstract base class for map options' models.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -7296,7 +7296,7 @@ MapOptions <- R6::R6Class("MapOptions",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7336,7 +7336,7 @@ ToolbarBox <- R6::R6Class("ToolbarBox",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7381,7 +7381,7 @@ TextInput <- R6::R6Class("TextInput",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7400,7 +7400,7 @@ TextInput <- R6::R6Class("TextInput",
 )
 
 # A base class for tools that respond to drag events.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -7421,7 +7421,7 @@ Drag <- R6::R6Class("Drag",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7430,9 +7430,9 @@ Drag <- R6::R6Class("Drag",
 )
 
 # Render upside-down triangle markers.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/InvertedTriangle.py :source-position:
 # below
 InvertedTriangle <- R6::R6Class("InvertedTriangle",
@@ -7461,7 +7461,7 @@ InvertedTriangle <- R6::R6Class("InvertedTriangle",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7489,7 +7489,7 @@ ImageSource <- R6::R6Class("ImageSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7506,9 +7506,9 @@ ImageSource <- R6::R6Class("ImageSource",
 )
 
 # Base class for Bokeh models that represent HTML markup elements.
-# 
+#
 # Markups include e.g., ``<div>``, ``<p>``, and ``<pre>``.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -7533,7 +7533,7 @@ Markup <- R6::R6Class("Markup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7544,9 +7544,9 @@ Markup <- R6::R6Class("Markup",
 )
 
 # Render arcs.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Arc.py :source-position: below
 Arc <- R6::R6Class("Arc",
   inherit = Glyph,
@@ -7570,14 +7570,14 @@ Arc <- R6::R6Class("Arc",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # The angles to start the arcs, as measured from the horizontal.
     # > AngleSpec(units_default='rad')
     start_angle = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     end_angle_units = NULL,
     # The line color values for the arcs.
@@ -7589,13 +7589,13 @@ Arc <- R6::R6Class("Arc",
     # The line alpha values for the arcs.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     line_alpha = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     radius_units = NULL,
     # The angles to end the arcs, as measured from the horizontal.
     # > AngleSpec(units_default='rad')
     end_angle = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     start_angle_units = NULL,
     # Which direction to stroke between the start and end angles.
@@ -7626,11 +7626,11 @@ Arc <- R6::R6Class("Arc",
 )
 
 # *toolbar icon*: |box_zoom_icon|
-# 
+#
 # The box zoom tool allows users to define a rectangular region of a Plot
 # to zoom to by dragging he mouse or a finger over the plot region. The
 # end of the drag event indicates the selection region is ready.
-# 
+#
 # .. |box_zoom_icon| image:: /_images/icons/BoxZoom.png :height: 18pt
 BoxZoomTool <- R6::R6Class("BoxZoomTool",
   inherit = Drag,
@@ -7649,7 +7649,7 @@ BoxZoomTool <- R6::R6Class("BoxZoomTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7667,7 +7667,7 @@ BoxZoomTool <- R6::R6Class("BoxZoomTool",
     dimensions = NULL,
     # Whether the box zoom region should be restricted to have the same
     # aspect ratio as the plot region.
-    # 
+    #
     # .. note:: If the tool is restricted to one dimension, this value has no
     # effect.
     # > Bool
@@ -7675,7 +7675,7 @@ BoxZoomTool <- R6::R6Class("BoxZoomTool",
   )
 )
 
-# 
+#
 GeoJSONDataSource <- R6::R6Class("GeoJSONDataSource",
   inherit = ColumnarDataSource,
   public = list(
@@ -7701,7 +7701,7 @@ GeoJSONDataSource <- R6::R6Class("GeoJSONDataSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7713,7 +7713,7 @@ GeoJSONDataSource <- R6::R6Class("GeoJSONDataSource",
   )
 )
 
-# 
+#
 GlyphRenderer <- R6::R6Class("GlyphRenderer",
   inherit = DataRenderer,
   public = list(
@@ -7735,11 +7735,11 @@ GlyphRenderer <- R6::R6Class("GlyphRenderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
-    # 
+    #
     # > Bool
     muted = NULL,
     # The glyph to render, in conjunction with the supplied data source and
@@ -7752,7 +7752,7 @@ GlyphRenderer <- R6::R6Class("GlyphRenderer",
     # An optional glyph used for explicitly non-selected points (i.e.,
     # non-selected when there are other points that are selected, but not
     # when no points at all are selected.)
-    # 
+    #
     # If set to "auto" then a glyph with a low alpha value (0.1) will be used
     # for non-selected points.
     # > Either(Auto, Instance(Glyph))
@@ -7761,7 +7761,7 @@ GlyphRenderer <- R6::R6Class("GlyphRenderer",
     # rendering glyphs on the plot. If unset, use the default x-range.
     # > String
     x_range_name = NULL,
-    # 
+    #
     # > Instance(Glyph)
     muted_glyph = NULL,
     # An optional glyph used for inspected points, e.g., those that are being
@@ -7769,7 +7769,7 @@ GlyphRenderer <- R6::R6Class("GlyphRenderer",
     # > Instance(Glyph)
     hover_glyph = NULL,
     # An optional glyph used for selected points.
-    # 
+    #
     # If set to "auto" then the standard glyph will be used for selected
     # points.
     # > Either(Auto, Instance(Glyph))
@@ -7782,16 +7782,16 @@ GlyphRenderer <- R6::R6Class("GlyphRenderer",
 )
 
 # *toolbar icon*: |pan_icon|
-# 
+#
 # The pan tool allows the user to pan a Plot by left-dragging a mouse, or
 # on touch devices by dragging a finger or stylus, across the plot
 # region.
-# 
+#
 # The pan tool also activates the border regions of a Plot for "single
 # axis" panning. For instance, dragging in the vertical border or axis
 # will effect a pan in the vertical direction only, with the horizontal
 # dimension kept fixed.
-# 
+#
 # .. |pan_icon| image:: /_images/icons/Pan.png :height: 18pt
 PanTool <- R6::R6Class("PanTool",
   inherit = Drag,
@@ -7810,7 +7810,7 @@ PanTool <- R6::R6Class("PanTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7846,7 +7846,7 @@ MultiSelect <- R6::R6Class("MultiSelect",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7911,7 +7911,7 @@ Plot <- R6::R6Class("Plot",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -7920,7 +7920,7 @@ Plot <- R6::R6Class("Plot",
     # > Enum('above', 'below', 'left', 'right')
     title_location = NULL,
     # Additional named ranges to make available for mapping y-coordinates.
-    # 
+    #
     # This is useful for adding additional axes.
     # > Dict(String, Instance(Range))
     extra_y_ranges = NULL,
@@ -7929,7 +7929,7 @@ Plot <- R6::R6Class("Plot",
     left = NULL,
     # Minimum size in pixels of the padding region above the top of the
     # central plot region.
-    # 
+    #
     # .. note:: This is a *minimum*. The padding region may expand as needed
     # to accommodate titles or axes, etc.
     # > Int
@@ -7947,7 +7947,7 @@ Plot <- R6::R6Class("Plot",
     # actual plot, without toolbars etc. Note this is computed in a web
     # browser, so this property will work only in backends capable of
     # bidirectional communication (server, notebook).
-    # 
+    #
     # .. note:: This is an experimental feature and the API may change in
     # near future.
     # > Int
@@ -7960,7 +7960,7 @@ Plot <- R6::R6Class("Plot",
     border_fill_alpha = NULL,
     # Total height of the entire plot (including any axes, titles, border
     # padding, etc.)
-    # 
+    #
     # .. note:: This corresponds directly to the height of the HTML canvas
     # that will be used.
     # > Int
@@ -7974,7 +7974,7 @@ Plot <- R6::R6Class("Plot",
     toolbar_location = NULL,
     # Total width of the entire plot (including any axes, titles, border
     # padding, etc.)
-    # 
+    #
     # .. note:: This corresponds directly to the width of the HTML canvas
     # that will be used.
     # > Int
@@ -7988,7 +7988,7 @@ Plot <- R6::R6Class("Plot",
     x_scale = NULL,
     # Minimum size in pixels of the padding region below the bottom of the
     # central plot region.
-    # 
+    #
     # .. note:: This is a *minimum*. The padding region may expand as needed
     # to accommodate titles or axes, etc.
     # > Int
@@ -8002,14 +8002,14 @@ Plot <- R6::R6Class("Plot",
     toolbar_sticky = NULL,
     # Minimum size in pixels of the padding region to the left of the central
     # plot region.
-    # 
+    #
     # .. note:: This is a *minimum*. The padding region may expand as needed
     # to accommodate titles or axes, etc.
     # > Int
     min_border_left = NULL,
     # A list of all renderers for this plot, including guides and annotations
     # in addition to glyphs and markers.
-    # 
+    #
     # This property can be manipulated by hand, but the ``add_glyph`` and
     # ``add_layout`` methods are recommended to help make sure all necessary
     # setup is performed.
@@ -8020,7 +8020,7 @@ Plot <- R6::R6Class("Plot",
     below = NULL,
     # Minimum size in pixels of the padding region to the right of the
     # central plot region.
-    # 
+    #
     # .. note:: This is a *minimum*. The padding region may expand as needed
     # to accommodate titles or axes, etc.
     # > Int
@@ -8035,7 +8035,7 @@ Plot <- R6::R6Class("Plot",
     # > Instance(Range)
     y_range = NULL,
     # Additional named ranges to make available for mapping x-coordinates.
-    # 
+    #
     # This is useful for adding additional axes.
     # > Dict(String, Instance(Range))
     extra_x_ranges = NULL,
@@ -8065,7 +8065,7 @@ Plot <- R6::R6Class("Plot",
     # > Int
     lod_threshold = NULL,
     # Specify the output backend for the plot area. Default is HTML5 Canvas.
-    # 
+    #
     # .. note:: When set to ``webgl``, glyphs without a WebGL rendering
     # implementation will fall back to rendering onto 2D canvas.
     # > Enum('canvas', 'svg', 'webgl')
@@ -8074,7 +8074,7 @@ Plot <- R6::R6Class("Plot",
     # > DashPattern
     outline_line_dash = NULL,
     # The toolbar associated with this plot which holds all the tools.
-    # 
+    #
     # The toolbar is automatically created with the plot.
     # > Instance(Toolbar)
     toolbar = NULL,
@@ -8093,7 +8093,7 @@ Plot <- R6::R6Class("Plot",
     # plot, with toolbars etc. Note this is computed in a web browser, so
     # this property will work only in backends capable of bidirectional
     # communication (server, notebook).
-    # 
+    #
     # .. note:: This is an experimental feature and the API may change in
     # near future.
     # > Int
@@ -8106,7 +8106,7 @@ Plot <- R6::R6Class("Plot",
     # actual plot, without toolbars etc. Note this is computed in a web
     # browser, so this property will work only in backends capable of
     # bidirectional communication (server, notebook).
-    # 
+    #
     # .. note:: This is an experimental feature and the API may change in
     # near future.
     # > Int
@@ -8118,7 +8118,7 @@ Plot <- R6::R6Class("Plot",
     # plot, with toolbars etc. Note this is computed in a web browser, so
     # this property will work only in backends capable of bidirectional
     # communication (server, notebook).
-    # 
+    #
     # .. note:: This is an experimental feature and the API may change in
     # near future.
     # > Int
@@ -8137,7 +8137,7 @@ Plot <- R6::R6Class("Plot",
 )
 
 # Abstract base class for Row and Column. Do not use directly.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -8163,7 +8163,7 @@ Box <- R6::R6Class("Box",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8175,7 +8175,7 @@ Box <- R6::R6Class("Box",
 )
 
 # Base class for interactive callback.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -8196,7 +8196,7 @@ Callback <- R6::R6Class("Callback",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8205,7 +8205,7 @@ Callback <- R6::R6Class("Callback",
 )
 
 # Base class for color mapper types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -8227,7 +8227,7 @@ ColorMapper <- R6::R6Class("ColorMapper",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8235,7 +8235,7 @@ ColorMapper <- R6::R6Class("ColorMapper",
     # > Color
     nan_color = NULL,
     # A sequence of colors to use as the target palette for mapping.
-    # 
+    #
     # This property can also be set as a ``String``, to the name of any of
     # the palettes shown in :ref:`bokeh.palettes`.
     # > Seq(Color)
@@ -8266,7 +8266,7 @@ WidgetBox <- R6::R6Class("WidgetBox",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8298,7 +8298,7 @@ Panel <- R6::R6Class("Panel",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8335,7 +8335,7 @@ StringEditor <- R6::R6Class("StringEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8363,7 +8363,7 @@ PercentEditor <- R6::R6Class("PercentEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8394,7 +8394,7 @@ CheckboxGroup <- R6::R6Class("CheckboxGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8435,7 +8435,7 @@ BBoxTileSource <- R6::R6Class("BBoxTileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8470,15 +8470,15 @@ DataRange1d <- R6::R6Class("DataRange1d",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # If ``follow`` is set to ``"start"`` or ``"end"`` then the range will
     # always be constrained to that::
-    # 
+    #
     # abs(r.start - r.end) <= follow_interval
-    # 
+    #
     # is maintained.
     # > Float
     follow_interval = NULL,
@@ -8501,16 +8501,16 @@ DataRange1d <- R6::R6Class("DataRange1d",
     end = NULL,
     # The bounds that the range is allowed to go to - typically used to
     # prevent the user from panning/zooming/etc away from the data.
-    # 
+    #
     # By default, the bounds will be None, allowing your plot to pan/zoom as
     # far as you want. If bounds are 'auto' they will be computed to be the
     # same as the start and end of the DataRange1d.
-    # 
+    #
     # Bounds are provided as a tuple of ``(min, max)`` so regardless of
     # whether your range is increasing or decreasing, the first item should
     # be the minimum value of the range and the second item should be the
     # maximum.  Setting ``min > max`` will result in a ``ValueError``.
-    # 
+    #
     # If you only want to constrain one end of the plot, you can set ``min``
     # or ``max`` to ``None`` e.g. ``DataRange1d(bounds=(None, 12))``
     # > MinMaxBounds(Auto, Tuple(Float, Float))
@@ -8525,11 +8525,11 @@ DataRange1d <- R6::R6Class("DataRange1d",
     # > Float
     min_interval = NULL,
     # How much padding to add around the computed data bounds.
-    # 
+    #
     # When ``range_padding_units`` is set to ``"percent"``, the span of the
     # range span is expanded to make the range ``range_padding`` percent
     # larger.
-    # 
+    #
     # When ``range_padding_units`` is set to ``"absolute"``, the start and
     # end of the range span are extended by the amount ``range_padding``.
     # > Float
@@ -8540,18 +8540,18 @@ DataRange1d <- R6::R6Class("DataRange1d",
     default_span = NULL,
     # Configure the data to follow one or the other data extreme, with a
     # maximum range size of ``follow_interval``.
-    # 
+    #
     # If set to ``"start"`` then the range will adjust so that ``start``
     # always corresponds to the minimum data value (or maximum, if
     # ``flipped`` is ``True``).
-    # 
+    #
     # If set to ``"end"`` then the range will adjust so that ``end`` always
     # corresponds to the maximum data value (or minimum, if ``flipped`` is
     # ``True``).
-    # 
+    #
     # If set to ``None`` (default), then auto-ranging does not follow, and
     # the range will encompass both the minimum and maximum data values.
-    # 
+    #
     # ``follow`` cannot be used with bounds, and if set, bounds will be set
     # to ``None``.
     # > Enum('start', 'end')
@@ -8583,7 +8583,7 @@ CheckboxButtonGroup <- R6::R6Class("CheckboxButtonGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8613,7 +8613,7 @@ GMapOptions <- R6::R6Class("GMapOptions",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8622,14 +8622,14 @@ GMapOptions <- R6::R6Class("GMapOptions",
     scale_control = NULL,
     # A JSON array of `map styles`_ to use for the GMapPlot. Many example
     # styles can `be found here`_.
-    # 
+    #
     # .. _map styles:
     # https://developers.google.com/maps/documentation/javascript/reference#MapTypeStyle
     # .. _be found here: https://snazzymaps.com
     # > JSON
     styles = NULL,
     # The `map type`_ to use for the GMapPlot.
-    # 
+    #
     # .. _map type:
     # https://developers.google.com/maps/documentation/javascript/reference#MapTypeId
     # > Enum('satellite', 'roadmap', 'terrain', 'hybrid')
@@ -8638,9 +8638,9 @@ GMapOptions <- R6::R6Class("GMapOptions",
 )
 
 # Render ellipses.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Ellipse.py :source-position: below
 Ellipse <- R6::R6Class("Ellipse",
   inherit = Glyph,
@@ -8664,7 +8664,7 @@ Ellipse <- R6::R6Class("Ellipse",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8704,13 +8704,13 @@ Ellipse <- R6::R6Class("Ellipse",
     # The line join values for the ovals.
     # > Enum('miter', 'round', 'bevel')
     line_join = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     angle_units = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     width_units = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     height_units = NULL,
     # The line cap values for the ovals.
@@ -8723,14 +8723,14 @@ Ellipse <- R6::R6Class("Ellipse",
 )
 
 # *toolbar icon*: |save_icon|
-# 
+#
 # The save tool is an action. When activated, the tool opens a download
 # dialog which allows to save an image reproduction of the plot in PNG
 # format. If automatic download is not support by a web browser, the tool
 # falls back to opening the generated image in a new tab or window. User
 # then can manually save it by right clicking on the image and choosing
 # "Save As" (or similar) menu item.
-# 
+#
 # .. |save_icon| image:: /_images/icons/Save.png :height: 18pt
 SaveTool <- R6::R6Class("SaveTool",
   inherit = Action,
@@ -8749,7 +8749,7 @@ SaveTool <- R6::R6Class("SaveTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8758,9 +8758,9 @@ SaveTool <- R6::R6Class("SaveTool",
 )
 
 # Render annuli.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Annulus.py :source-position: below
 Annulus <- R6::R6Class("Annulus",
   inherit = Glyph,
@@ -8784,7 +8784,7 @@ Annulus <- R6::R6Class("Annulus",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8821,10 +8821,10 @@ Annulus <- R6::R6Class("Annulus",
     # The outer radii of the annuli.
     # > DistanceSpec(units_default='data')
     outer_radius = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     outer_radius_units = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     inner_radius_units = NULL,
     # The line cap values for the annuli.
@@ -8837,7 +8837,7 @@ Annulus <- R6::R6Class("Annulus",
 )
 
 # Base class for text annotation models such as labels and titles.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -8859,7 +8859,7 @@ TextAnnotation <- R6::R6Class("TextAnnotation",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8868,9 +8868,9 @@ TextAnnotation <- R6::R6Class("TextAnnotation",
 )
 
 # Render circle markers.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Circle.py :source-position: below
 Circle <- R6::R6Class("Circle",
   inherit = Marker,
@@ -8899,17 +8899,17 @@ Circle <- R6::R6Class("Circle",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # The radius values for circle markers (in "data space" units, by
     # default).
-    # 
+    #
     # .. note:: Circle markers are slightly unusual in that they support
     # specifying a radius in addition to a size. Only one of ``radius`` or
     # ``size`` should be given.
-    # 
+    #
     # .. warning:: Note that ``Circle`` glyphs are always drawn as circles on
     # the screen, even in cases where the data space aspect ratio is not 1-1.
     # In all cases where radius values are specified, the "distance" for the
@@ -8919,11 +8919,11 @@ Circle <- R6::R6Class("Circle",
     # :bokeh-issue:`626` for more information.
     # > DistanceSpec(units_default='data')
     radius = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     radius_units = NULL,
     # What dimension to measure circle radii along.
-    # 
+    #
     # When the data space aspect ratio is not 1-1, then the size of the drawn
     # circles depends on what direction is used to measure the "distance" of
     # the radius. This property allows that direction to be controlled.
@@ -8933,7 +8933,7 @@ Circle <- R6::R6Class("Circle",
 )
 
 # Abstract base class for data table (data grid) widgets.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -8958,7 +8958,7 @@ TableWidget <- R6::R6Class("TableWidget",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -8969,15 +8969,15 @@ TableWidget <- R6::R6Class("TableWidget",
 )
 
 # *toolbar icon*: |tap_select_icon|
-# 
+#
 # The tap selection tool allows the user to select at single points by
 # left-clicking a mouse, or tapping with a finger.
-# 
+#
 # See :ref:`userguide_styling_selected_unselected_glyphs` for information
 # on styling selected and unselected glyphs.
-# 
+#
 # .. |tap_select_icon| image:: /_images/icons/TapSelect.png :height: 18pt
-# 
+#
 # .. note:: Selections can be comprised of multiple regions, even those
 # made by different selection tools. Hold down the <<shift>> key while
 # making a selection to append the new selection to any previous
@@ -9000,7 +9000,7 @@ TapTool <- R6::R6Class("TapTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9113,7 +9113,7 @@ LinearAxis <- R6::R6Class("LinearAxis",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9122,12 +9122,12 @@ LinearAxis <- R6::R6Class("LinearAxis",
 )
 
 # A Bokeh Plot with a `Google Map`_ displayed underneath.
-# 
+#
 # Data placed on this plot should be specified in decimal lat long
 # coordinates e.g. 37.123, -122.404.  It will be automatically converted
 # into the web mercator projection to display properly over google maps
 # tiles.
-# 
+#
 # .. _Google Map: https://www.google.com/maps/
 GMapPlot <- R6::R6Class("GMapPlot",
   inherit = MapPlot,
@@ -9195,7 +9195,7 @@ GMapPlot <- R6::R6Class("GMapPlot",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9233,7 +9233,7 @@ DatePicker <- R6::R6Class("DatePicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9277,7 +9277,7 @@ RadioButtonGroup <- R6::R6Class("RadioButtonGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9289,7 +9289,7 @@ RadioButtonGroup <- R6::R6Class("RadioButtonGroup",
 )
 
 # A class for reporting tools geometries from BokehJS.
-# 
+#
 # .. warning:: This class will be superceded by a new general events
 # system in the near future.
 ToolEvents <- R6::R6Class("ToolEvents",
@@ -9310,18 +9310,18 @@ ToolEvents <- R6::R6Class("ToolEvents",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
-    # 
+    #
     # > List(Dict(String, Any))
     geometries = NULL
   )
 )
 
 # An abstract base class for layout components.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -9344,34 +9344,34 @@ LayoutDOM <- R6::R6Class("LayoutDOM",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # How the item being displayed should size itself. Possible values are
     # ``"fixed"``, ``"scale_width"``, ``"scale_height"``, ``"scale_both"``,
     # and ``"stretch_both"``.
-    # 
+    #
     # ``"stretch_both"`` elements are completely responsive (independently in
     # width and height) and will resize to occupy all available space, even
     # if this changes the aspect ratio of the element.  This is sometimes
     # called outside-in, and is a typical behavior for desktop applications.
-    # 
+    #
     # ``"fixed"`` elements are not responsive. They will retain their
     # original width and height regardless of any subsequent browser window
     # resize events.
-    # 
+    #
     # ``"scale_width"`` elements will responsively resize to fit to the width
     # available, *while maintaining the original aspect ratio*. This is a
     # typical behavior for modern websites. For a ``Plot``, the aspect ratio
     # ``plot_width/plot_height`` is maintained.
-    # 
+    #
     # ``"scale_height"`` elements will responsively resize to fit to the
     # height available, *while maintaining the original aspect ratio*. For a
     # ``Plot``, the aspect ratio ``plot_width/plot_height`` is maintained. A
     # plot with ``"scale_height"`` mode needs to be wrapped in a ``Row`` or
     # ``Column`` to be responsive.
-    # 
+    #
     # ``"scale_both"`` elements will responsively resize to for both the
     # width and height available, *while maintaining the original aspect
     # ratio*.
@@ -9396,14 +9396,14 @@ LayoutDOM <- R6::R6Class("LayoutDOM",
 
 # Map numbers in a range [*low*, *high*] into a sequence of colors (a
 # palette) on a natural logarithm scale.
-# 
+#
 # For example, if the range is [0, 25] and the palette is ``['red',
 # 'green', 'blue']``, the values would be mapped as follows::
-# 
+#
 # x < 0 : 'red' # values < low are clamped 0 >= x < 2.72 : 'red' # math.e
 # ** 1 2.72 >= x < 7.39 : 'green' # math.e ** 2 7.39 >= x < 20.09 :
 # 'blue' # math.e ** 3 20.09 >= x : 'blue' # values > high are clamped
-# 
+#
 # .. warning:: The LogColorMapper only works for images with scalar
 # values that are non-negative.
 LogColorMapper <- R6::R6Class("LogColorMapper",
@@ -9427,7 +9427,7 @@ LogColorMapper <- R6::R6Class("LogColorMapper",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9436,7 +9436,7 @@ LogColorMapper <- R6::R6Class("LogColorMapper",
 )
 
 # Abstract base class for all kinds of groups.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -9461,7 +9461,7 @@ AbstractGroup <- R6::R6Class("AbstractGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9476,9 +9476,9 @@ AbstractGroup <- R6::R6Class("AbstractGroup",
 )
 
 # *toolbar icon*: |undo_icon|
-# 
+#
 # Undo tool allows to restore previous state of the plot.
-# 
+#
 # .. |undo_icon| image:: /_images/icons/Undo.png :height: 18pt
 UndoTool <- R6::R6Class("UndoTool",
   inherit = Action,
@@ -9497,7 +9497,7 @@ UndoTool <- R6::R6Class("UndoTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9506,11 +9506,11 @@ UndoTool <- R6::R6Class("UndoTool",
 )
 
 # A block (paragraph) of pre-formatted text.
-# 
+#
 # This Bokeh model corresponds to an HTML ``<pre>`` element.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot::
 # ../sphinx/source/docs/user_guide/examples/interaction_pretext.py
 # :source-position: below
@@ -9535,7 +9535,7 @@ PreText <- R6::R6Class("PreText",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9568,18 +9568,18 @@ RangeSlider <- R6::R6Class("RangeSlider",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # When the callback is initiated. This parameter can take on only one of
     # three options:
-    # 
+    #
     # * "continuous": the callback will be executed immediately for each
     # movement of the slider * "throttle": the callback will be executed at
     # most every ``callback_throttle`` milliseconds.  * "mouseup": the
     # callback will be executed only once when the slider is released.
-    # 
+    #
     # The "mouseup" policy is intended for scenarios in which the callback is
     # expensive in time.
     # > Enum('continuous', 'throttle', 'mouseup')
@@ -9611,11 +9611,11 @@ RangeSlider <- R6::R6Class("RangeSlider",
 )
 
 # Generate "nice" round ticks at any magnitude.
-# 
+#
 # Creates ticks that are "base" multiples of a set of given mantissas.
 # For example, with ``base=10`` and ``mantissas=[1, 2, 5]``, the ticker
 # will generate the sequence::
-# 
+#
 # ..., 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, ...
 AdaptiveTicker <- R6::R6Class("AdaptiveTicker",
   inherit = ContinuousTicker,
@@ -9637,12 +9637,12 @@ AdaptiveTicker <- R6::R6Class("AdaptiveTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # The largest allowable interval between two adjacent ticks.
-    # 
+    #
     # .. note:: To specify an unbounded interval, set to ``None``.
     # > Float
     max_interval = NULL,
@@ -9676,7 +9676,7 @@ CategoricalTicker <- R6::R6Class("CategoricalTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9686,9 +9686,9 @@ CategoricalTicker <- R6::R6Class("CategoricalTicker",
 
 # Render horizontal bars, given a center coordinate, ``height`` and
 # (``left``, ``right``) coordinates.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/HBar.py :source-position: below
 HBar <- R6::R6Class("HBar",
   inherit = Glyph,
@@ -9711,7 +9711,7 @@ HBar <- R6::R6Class("HBar",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9758,38 +9758,38 @@ HBar <- R6::R6Class("HBar",
 )
 
 # *toolbar icon*: |crosshair_icon|
-# 
+#
 # The hover tool is a passive inspector tool. It is generally on at all
 # times, but can be configured in the inspector's menu associated with
 # the *toolbar icon* shown above.
-# 
+#
 # By default, the hover tool displays informational tooltips whenever the
 # cursor is directly over a glyph. The data to show comes from the
 # glyph's data source, and what is to be displayed is configurable with
 # the ``tooltips`` attribute that maps display names to columns in the
 # data source, or to special known variables.
-# 
+#
 # Here is an example of how to configure and use the hover tool::
-# 
+#
 # # Add tooltip (name, field) pairs to the tool. See below for a #
 # description of possible field values.  hover.tooltips = [ ("index",
 # "$index"), ("(x,y)", "($x, $y)"), ("radius", "@radius"), ("fill color",
 # "$color[hex, swatch]:fill_color"), ("foo", "@foo"), ("bar", "@bar"),
 # ("baz", "@baz{safe}"), ("total", "@total{$0,0.00}" ]
-# 
+#
 # You can also supply a ``Callback`` to the HoverTool, to build custom
 # interactions on hover. In this case you may want to turn the tooltips
 # off by setting ``tooltips=None``.
-# 
+#
 # .. warning::
-# 
+#
 # Hover tool does not currently work with the following glyphs:
-# 
+#
 # .. hlist:: :columns: 3
-# 
+#
 # * annulus * arc * bezier * image * image_rgba * image_url * oval *
 # patch * quadratic * ray * text
-# 
+#
 # .. |hover_icon| image:: /_images/icons/Hover.png :height: 18pt
 HoverTool <- R6::R6Class("HoverTool",
   inherit = Inspection,
@@ -9815,14 +9815,14 @@ HoverTool <- R6::R6Class("HoverTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # A callback to run in the browser whenever the input's value changes.
     # The cb_data parameter that is available to the Callback code will
     # contain two HoverTool specific fields:
-    # 
+    #
     # :index: object containing the indices of the hovered points in the data
     # source :geometry: object containing the coordinates of the hover cursor
     # > Instance(Callback)
@@ -9843,13 +9843,13 @@ HoverTool <- R6::R6Class("HoverTool",
     line_policy = NULL,
     # The (name, field) pairs describing what the hover tool should display
     # when there is a hit.
-    # 
+    #
     # Field names starting with "@" are interpreted as columns on the data
     # source. For instance, "@temp" would look up values to display from the
     # "temp" column of the data source.
-    # 
+    #
     # Field names starting with "$" are special, known fields:
-    # 
+    #
     # :$index: index of selected point in the data source :$x: x-coordinate
     # under the cursor in data space :$y: y-coordinate under the cursor in
     # data space :$sx: x-coordinate under the cursor in screen (canvas) space
@@ -9858,39 +9858,39 @@ HoverTool <- R6::R6Class("HoverTool",
     # ``$color[options]:field_name``. The available options are: 'hex' (to
     # display the color as a hex value), and 'swatch' to also display a small
     # color swatch.
-    # 
+    #
     # Field names that begin with ``@`` are associated with columns in a
     # ``ColumnDataSource``. For instance the field name ``"@price"`` will
     # display values from the ``"price"`` column whenever a hover is
     # triggered.  If the hover is for the 17th glyph, then the hover tooltip
     # will correspondingly display the 17th price value.
-    # 
+    #
     # Note that if a column name contains spaces, the it must be supplied by
     # surrounding it in curly braces, e.g. ``@{adjusted close}`` will display
     # values from a column named ``"adjusted close"``.
-    # 
+    #
     # By default, values for fields (e.g. ``@foo``) are displayed in a basic
     # numeric format. However it is possible to control the formatting of
     # values more precisely. Fields can be modified by appending a format
     # specified to the end in curly braces. Some examples are below.
-    # 
+    #
     # .. code-block:: python
-    # 
+    #
     # "@foo{0,0.000}" # formats 10000.1234 as: 10,000.123
-    # 
+    #
     # "@foo{(.00)}" # formats -10000.1234 as: (10000.123)
-    # 
+    #
     # "@foo{($ 0.00 a)}" # formats 1230974 as: $ 1.23 m
-    # 
+    #
     # Specifying a format ``{safe}`` after a field name will override
     # automatic escaping of the tooltip data source. Any HTML tags in the
     # data tags will be rendered as HTML in the resulting HoverTool output.
     # See :ref:`custom_hover_tooltip` for a more detailed example.
-    # 
+    #
     # ``None`` is also a valid value for tooltips. This turns off the
     # rendering of tooltips. This is mostly useful when supplying other
     # actions on hover via the callback property.
-    # 
+    #
     # .. note:: The tooltips attribute can also be configured with a mapping
     # type, e.g. ``dict`` or ``OrderedDict``. However, if a ``dict`` is used,
     # the visual presentation order is unspecified.
@@ -9904,30 +9904,30 @@ HoverTool <- R6::R6Class("HoverTool",
     # > Enum('horizontal', 'vertical')
     attachment = NULL,
     # Specify the formatting scheme for data source columns, e.g.
-    # 
+    #
     # .. code-block:: python
-    # 
+    #
     # tool.formatters = dict(date="datetime")
-    # 
+    #
     # will cause format specifications for the "date" column to be
     # interpreted according to the "datetime" formatting scheme. The
     # following schemed are available:
-    # 
+    #
     # :``"numeral"``: Provides a wide variety of formats for numbers,
     # currency, bytes, times, and percentages. The full set of formats can be
     # found in the |NumeralTickFormatter| reference documentation.
-    # 
+    #
     # :``"datetime"``: Provides formats for date and time values. The full
     # set of formats is listed in the |DatetimeTickFormatter| reference
     # documentation.
-    # 
+    #
     # :``"printf"``: Provides formats similar to C-style "printf" type
     # specifiers. See the |PrintfTickFormatter| reference documentation for
     # complete details.
-    # 
+    #
     # If no formatter is specified for a column name, the default
     # ``"numeral"`` formatter is assumed.
-    # 
+    #
     # .. |NumeralTickFormatter| replace::
     # :class:`~bokeh.models.formatters.NumeralTickFormatter` ..
     # |DatetimeTickFormatter| replace::
@@ -9954,9 +9954,9 @@ HoverTool <- R6::R6Class("HoverTool",
 )
 
 # Render annular wedges.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/AnnularWedge.py :source-position: below
 AnnularWedge <- R6::R6Class("AnnularWedge",
   inherit = Glyph,
@@ -9982,7 +9982,7 @@ AnnularWedge <- R6::R6Class("AnnularWedge",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -9993,7 +9993,7 @@ AnnularWedge <- R6::R6Class("AnnularWedge",
     # The fill alpha values for the annular wedges.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     fill_alpha = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     end_angle_units = NULL,
     # The line color values for the annular wedges.
@@ -10011,16 +10011,16 @@ AnnularWedge <- R6::R6Class("AnnularWedge",
     # The outer radii of the annular wedges.
     # > DistanceSpec(units_default='data')
     outer_radius = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     outer_radius_units = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     inner_radius_units = NULL,
     # The angles to end the annular wedges, as measured from the horizontal.
     # > AngleSpec(units_default='rad')
     end_angle = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     start_angle_units = NULL,
     # Which direction to stroke between the start and end angles.
@@ -10051,7 +10051,7 @@ AnnularWedge <- R6::R6Class("AnnularWedge",
 )
 
 # A base class for all tile source types.
-# 
+#
 # In general, tile sources are used as a required input for
 # ``TileRenderer``.
 TileSource <- R6::R6Class("TileSource",
@@ -10075,7 +10075,7 @@ TileSource <- R6::R6Class("TileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10087,7 +10087,7 @@ TileSource <- R6::R6Class("TileSource",
     # > Int
     max_zoom = NULL,
     # A dictionary that maps url variable template keys to values.
-    # 
+    #
     # These variables are useful for parts of tile urls which do not change
     # from tile to tile (e.g. server host name, or layer name).
     # > Dict(String, Any)
@@ -10116,7 +10116,7 @@ TileSource <- R6::R6Class("TileSource",
 )
 
 # A base class for all tick formatter types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -10137,7 +10137,7 @@ TickFormatter <- R6::R6Class("TickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10167,7 +10167,7 @@ Spacer <- R6::R6Class("Spacer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10177,7 +10177,7 @@ Spacer <- R6::R6Class("Spacer",
 
 # An abstract base class for data renderer types (e.g. ``GlyphRenderer``,
 # ``TileRenderer``).
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -10199,7 +10199,7 @@ DataRenderer <- R6::R6Class("DataRenderer",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10209,9 +10209,9 @@ DataRenderer <- R6::R6Class("DataRenderer",
 
 # Render vertical bars, given a center coordinate, width and (top,
 # bottom) coordinates.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/VBar.py :source-position: below
 VBar <- R6::R6Class("VBar",
   inherit = Glyph,
@@ -10234,7 +10234,7 @@ VBar <- R6::R6Class("VBar",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10281,9 +10281,9 @@ VBar <- R6::R6Class("VBar",
 )
 
 # Render circle markers with an 'X' cross through the center.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/CircleX.py :source-position: below
 CircleX <- R6::R6Class("CircleX",
   inherit = Marker,
@@ -10311,7 +10311,7 @@ CircleX <- R6::R6Class("CircleX",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10320,14 +10320,14 @@ CircleX <- R6::R6Class("CircleX",
 )
 
 # *toolbar icon*: |reset_icon|
-# 
+#
 # The reset tool is an action. When activated in the toolbar, the tool
 # resets the data bounds of the plot to their values when the plot was
 # initially created.
-# 
+#
 # Optionally, the reset tool also resets the plat canvas dimensions to
 # their original size
-# 
+#
 # .. |reset_icon| image:: /_images/icons/Reset.png :height: 18pt
 ResetTool <- R6::R6Class("ResetTool",
   inherit = Action,
@@ -10346,7 +10346,7 @@ ResetTool <- R6::R6Class("ResetTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10358,9 +10358,9 @@ ResetTool <- R6::R6Class("ResetTool",
 )
 
 # Render asterisk '*' markers.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Asterisk.py :source-position: below
 Asterisk <- R6::R6Class("Asterisk",
   inherit = Marker,
@@ -10388,7 +10388,7 @@ Asterisk <- R6::R6Class("Asterisk",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10417,7 +10417,7 @@ TeeHead <- R6::R6Class("TeeHead",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10450,7 +10450,7 @@ TeeHead <- R6::R6Class("TeeHead",
 
 # The ``WMTSTileSource`` behaves much like ``TMSTileSource`` but has its
 # tile-origin in the top-left.
-# 
+#
 # This is the most common used tile source for web mapping applications.
 # Such companies as Google, MapQuest, Stamen, Esri, and OpenStreetMap
 # provide service which use the WMTS specification e.g.
@@ -10482,7 +10482,7 @@ WMTSTileSource <- R6::R6Class("WMTSTileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10520,7 +10520,7 @@ QUADKEYTileSource <- R6::R6Class("QUADKEYTileSource",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10529,7 +10529,7 @@ QUADKEYTileSource <- R6::R6Class("QUADKEYTileSource",
 )
 
 # A base class for non-categorical ticker types.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -10551,13 +10551,13 @@ ContinuousTicker <- R6::R6Class("ContinuousTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # A desired target number of major tick positions to generate across the
     # plot range.
-    # 
+    #
     # .. note: This value is a suggestion, and ticker subclasses may ignore
     # it entirely, or use it only as an ideal goal to approach as well as can
     # be, in the context of a specific ticking strategy.
@@ -10571,7 +10571,7 @@ ContinuousTicker <- R6::R6Class("ContinuousTicker",
 )
 
 # A base class for different toolbars.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -10597,7 +10597,7 @@ ToolbarBase <- R6::R6Class("ToolbarBase",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10612,20 +10612,20 @@ ToolbarBase <- R6::R6Class("ToolbarBase",
 )
 
 # *toolbar icon*: |lasso_select_icon|
-# 
+#
 # The lasso selection tool allows users to make selections on a Plot by
 # indicating a free-drawn "lasso" region by dragging the mouse or a
 # finger over the plot region. The end of the drag event indicates the
 # selection region is ready.
-# 
+#
 # See :ref:`userguide_styling_selected_unselected_glyphs` for information
 # on styling selected and unselected glyphs.
-# 
+#
 # .. note:: Selections can be comprised of multiple regions, even those
 # made by different selection tools. Hold down the <<shift>> key while
 # making a selection to append the new selection to any previous
 # selection that might exist.
-# 
+#
 # .. |lasso_select_icon| image:: /_images/icons/LassoSelect.png :height:
 # 18pt
 LassoSelectTool <- R6::R6Class("LassoSelectTool",
@@ -10646,14 +10646,14 @@ LassoSelectTool <- R6::R6Class("LassoSelectTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # A callback to run in the browser on every selection of a lasso area.
     # The cb_data parameter that is available to the Callback code will
     # contain one LassoSelectTool-specific field:
-    # 
+    #
     # :geometry: object containing the coordinates of the lasso area
     # > Instance(Callback)
     callback = NULL,
@@ -10676,7 +10676,7 @@ LassoSelectTool <- R6::R6Class("LassoSelectTool",
 )
 
 # Combine different tickers at different scales.
-# 
+#
 # Uses the ``min_interval`` and ``max_interval`` interval attributes of
 # the tickers to select the appropriate ticker at different scales.
 CompositeTicker <- R6::R6Class("CompositeTicker",
@@ -10698,14 +10698,14 @@ CompositeTicker <- R6::R6Class("CompositeTicker",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # A list of Ticker objects to combine at different scales in order to
     # generate tick values. The supplied tickers should be in order.
     # Specifically, if S comes before T, then it should be the case that::
-    # 
+    #
     # S.get_max_interval() < T.get_min_interval()
     # > Seq(Instance(Ticker))
     tickers = NULL
@@ -10733,7 +10733,7 @@ ImageRGBA <- R6::R6Class("ImageRGBA",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10741,14 +10741,14 @@ ImageRGBA <- R6::R6Class("ImageRGBA",
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     cols = NULL,
     # The height of the plot region that the image will occupy.
-    # 
+    #
     # .. note:: This is not the number of pixels that an image is tall.  That
     # number is fixed by the image itself.
     # > DistanceSpec(units_default='data')
     dh = NULL,
     # Whether to always round fractional pixel locations in such a way as to
     # make the images bigger.
-    # 
+    #
     # This setting may be useful if pixel rounding errors are causing images
     # to have a gap between them, when they should appear flush.
     # > Bool
@@ -10759,10 +10759,10 @@ ImageRGBA <- R6::R6Class("ImageRGBA",
     # The y-coordinates to locate the image anchors.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     y = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     dh_units = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     dw_units = NULL,
     # The arrays of RGBA data for the images.
@@ -10772,7 +10772,7 @@ ImageRGBA <- R6::R6Class("ImageRGBA",
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     x = NULL,
     # The widths of the plot regions that the images will occupy.
-    # 
+    #
     # .. note:: This is not the number of pixels that an image is wide.  That
     # number is fixed by the image itself.
     # > DistanceSpec(units_default='data')
@@ -10803,7 +10803,7 @@ NumberFormatter <- R6::R6Class("NumberFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10812,9 +10812,9 @@ NumberFormatter <- R6::R6Class("NumberFormatter",
     # > Enum('be-nl', 'chs', 'cs', 'da-dk', 'de-ch', 'de', 'en', 'en-gb', 'es-ES', 'es', 'et', 'fi', 'fr-CA', 'fr-ch', 'fr', 'hu', 'it', 'ja', 'nl-nl', 'pl', 'pt-br', 'pt-pt', 'ru', 'ru-UA', 'sk', 'th', 'tr', 'uk-UA')
     language = NULL,
     # The number format, as defined in the following tables:
-    # 
+    #
     # **NUMBERS**:
-    # 
+    #
     # ============ ============== =============== Number Format String
     # ============ ============== =============== 10000 '0,0.0000'
     # 10,000.0000 10000.23 '0,0' 10,000 10000.23 '+0,0' +10,000 -10000
@@ -10823,36 +10823,36 @@ NumberFormatter <- R6::R6Class("NumberFormatter",
     # '(.00)' (.23) 0.23 '0.00000' 0.23000 0.23 '0.0[0000]' 0.23 1230974
     # '0.0a' 1.2m 1460 '0 a' 1 k -104000 '0a' -104k 1 '0o' 1st 52 '0o' 52nd
     # 23 '0o' 23rd 100 '0o' 100th ============ ============== ===============
-    # 
+    #
     # **CURRENCY**:
-    # 
+    #
     # =========== =============== ============= Number Format String
     # =========== =============== ============= 1000.234 '$0,0.00' $1,000.23
     # 1000.2 '0,0[.]00 $' 1,000.20 $ 1001 '$ 0,0[.]00' $ 1,001 -1000.234
     # '($0,0)' ($1,000) -1000.234 '$0.00' -$1000.23 1230974 '($ 0.00 a)' $
     # 1.23 m =========== =============== =============
-    # 
+    #
     # **BYTES**:
-    # 
+    #
     # =============== =========== ============ Number Format String
     # =============== =========== ============ 100 '0b' 100B 2048 '0 b' 2 KB
     # 7884486213 '0.0b' 7.3GB 3467479682787 '0.000 b' 3.154 TB
     # =============== =========== ============
-    # 
+    #
     # **PERCENTAGES**:
-    # 
+    #
     # ============= ============= =========== Number Format String
     # ============= ============= =========== 1 '0%' 100% 0.974878234
     # '0.000%' 97.488% -0.43 '0 %' -43 % 0.43 '(0.000 %)' 43.000 %
     # ============= ============= ===========
-    # 
+    #
     # **TIME**:
-    # 
+    #
     # ============ ============== ============ Number Format String
     # ============ ============== ============ 25 '00:00:00' 0:00:25 238
     # '00:00:00' 0:03:58 63846 '00:00:00' 17:44:06 ============
     # ============== ============
-    # 
+    #
     # For the complete specification, see http://numbrojs.com/format.html
     # > String
     format = NULL,
@@ -10881,7 +10881,7 @@ CheckboxEditor <- R6::R6Class("CheckboxEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10908,36 +10908,36 @@ PrintfTickFormatter <- R6::R6Class("PrintfTickFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # The number format, as defined as follows: the placeholder in the format
     # string is marked by % and is followed by one or more of these elements,
     # in this order:
-    # 
+    #
     # * An optional ``+`` sign Causes the result to be preceded with a plus
     # or minus sign on numeric values. By default, only the ``-`` sign is
     # used on negative numbers.
-    # 
+    #
     # * An optional padding specifier Specifies what (if any) character to
     # use for padding. Possible values are 0 or any other character preceded
     # by a ``'`` (single quote). The default is to pad with spaces.
-    # 
+    #
     # * An optional ``-`` sign Causes sprintf to left-align the result of
     # this placeholder. The default is to right-align the result.
-    # 
+    #
     # * An optional number Specifies how many characters the result should
     # have. If the value to be returned is shorter than this number, the
     # result will be padded.
-    # 
+    #
     # * An optional precision modifier Consists of a ``.`` (dot) followed by
     # a number, specifies how many digits should be displayed for floating
     # point numbers. When used on a string, it causes the result to be
     # truncated.
-    # 
+    #
     # * A type specifier Can be any of:
-    # 
+    #
     # - ``%`` --- yields a literal ``%`` character - ``b`` --- yields an
     # integer as a binary number - ``c`` --- yields an integer as the
     # character with that ASCII value - ``d`` or ``i`` --- yields an integer
@@ -10972,7 +10972,7 @@ StringFormatter <- R6::R6Class("StringFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -10990,9 +10990,9 @@ StringFormatter <- R6::R6Class("StringFormatter",
 )
 
 # Render images loaded from given URLs.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/ImageURL.py :source-position: below
 ImageURL <- R6::R6Class("ImageURL",
   inherit = Glyph,
@@ -11015,12 +11015,12 @@ ImageURL <- R6::R6Class("ImageURL",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
     # The height of the plot region that the image will occupy in data space.
-    # 
+    #
     # The default value is ``None``, in which case the image will be
     # displayed at its actual image size (regardless of the units specified
     # here).
@@ -11036,13 +11036,13 @@ ImageURL <- R6::R6Class("ImageURL",
     retry_timeout = NULL,
     # Whether to always round fractional pixel locations in such a way as to
     # make the images bigger.
-    # 
+    #
     # This setting may be useful if pixel rounding errors are causing images
     # to have a gap between them, when they should appear flush.
     # > Bool
     dilate = NULL,
     # The URLs to retrieve images from.
-    # 
+    #
     # .. note:: The actual retrieving and loading of the images happens on
     # the client.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
@@ -11054,7 +11054,7 @@ ImageURL <- R6::R6Class("ImageURL",
     # inherent alpha values in the image itself).
     # > Float
     global_alpha = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     angle_units = NULL,
     # What position of the image should be anchored at the `x`, `y`
@@ -11064,29 +11064,29 @@ ImageURL <- R6::R6Class("ImageURL",
     # The angles to rotate the images, as measured from the horizontal.
     # > AngleSpec(units_default='rad')
     angle = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     w_units = NULL,
     # The x-coordinates to locate the image anchors.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     x = NULL,
     # The height of the plot region that the image will occupy in data space.
-    # 
+    #
     # The default value is ``None``, in which case the image will be
     # displayed at its actual image size (regardless of the units specified
     # here).
     # > DistanceSpec(units_default='data')
     w = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     h_units = NULL
   )
 )
 
 # Render wedges.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot:: ../tests/glyphs/Wedge.py :source-position: below
 Wedge <- R6::R6Class("Wedge",
   inherit = Glyph,
@@ -11111,7 +11111,7 @@ Wedge <- R6::R6Class("Wedge",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11121,7 +11121,7 @@ Wedge <- R6::R6Class("Wedge",
     # The fill alpha values for the wedges.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     fill_alpha = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     end_angle_units = NULL,
     # The line color values for the wedges.
@@ -11136,13 +11136,13 @@ Wedge <- R6::R6Class("Wedge",
     # The line alpha values for the wedges.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     line_alpha = NULL,
-    # 
+    #
     # > Enum('screen', 'data')
     radius_units = NULL,
     # The angles to end the wedges, as measured from the horizontal.
     # > AngleSpec(units_default='rad')
     end_angle = NULL,
-    # 
+    #
     # > Enum('deg', 'rad')
     start_angle_units = NULL,
     # Which direction to stroke between the start and end angles.
@@ -11173,10 +11173,10 @@ Wedge <- R6::R6Class("Wedge",
 )
 
 # *toolbar icon*: |zoom_out_icon|
-# 
+#
 # The zoom-out tool allows users to click a button to zoom out by a fixed
 # amount.
-# 
+#
 # .. |zoom_out_icon| image:: /_images/icons/ZoomOut.png :height: 18pt
 ZoomOutTool <- R6::R6Class("ZoomOutTool",
   inherit = Action,
@@ -11195,7 +11195,7 @@ ZoomOutTool <- R6::R6Class("ZoomOutTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11212,7 +11212,7 @@ ZoomOutTool <- R6::R6Class("ZoomOutTool",
 )
 
 # Abstract base class for data table's cell formatters.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -11233,7 +11233,7 @@ CellFormatter <- R6::R6Class("CellFormatter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11260,7 +11260,7 @@ Jitter <- R6::R6Class("Jitter",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11278,9 +11278,9 @@ Jitter <- R6::R6Class("Jitter",
 )
 
 # *toolbar icon*: |redo_icon|
-# 
+#
 # Redo tool reverses the last action performed by undo tool.
-# 
+#
 # .. |redo_icon| image:: /_images/icons/Redo.png :height: 18pt
 RedoTool <- R6::R6Class("RedoTool",
   inherit = Action,
@@ -11299,7 +11299,7 @@ RedoTool <- R6::R6Class("RedoTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11308,7 +11308,7 @@ RedoTool <- R6::R6Class("RedoTool",
 )
 
 # Abstract base class for data table's cell editors.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -11329,7 +11329,7 @@ CellEditor <- R6::R6Class("CellEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11338,7 +11338,7 @@ CellEditor <- R6::R6Class("CellEditor",
 )
 
 # Abstract base class for groups with items rendered as buttons.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -11364,7 +11364,7 @@ ButtonGroup <- R6::R6Class("ButtonGroup",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11394,7 +11394,7 @@ TableColumn <- R6::R6Class("TableColumn",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11446,7 +11446,7 @@ NumberEditor <- R6::R6Class("NumberEditor",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11457,10 +11457,10 @@ NumberEditor <- R6::R6Class("NumberEditor",
 )
 
 # *toolbar icon*: |resize_icon|
-# 
+#
 # The resize tool allows the user to left-drag a mouse or drag a finger
 # to resize the entire plot area on the screen.
-# 
+#
 # .. |resize_icon| image:: /_images/icons/Resize.png :height: 18pt
 ResizeTool <- R6::R6Class("ResizeTool",
   inherit = Drag,
@@ -11479,7 +11479,7 @@ ResizeTool <- R6::R6Class("ResizeTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11488,7 +11488,7 @@ ResizeTool <- R6::R6Class("ResizeTool",
 )
 
 # A button tool to provide a "help" link to users.
-# 
+#
 # The hover text can be customized through the ``help_tooltip`` attribute
 # and the redirect site overridden as well.
 HelpTool <- R6::R6Class("HelpTool",
@@ -11511,7 +11511,7 @@ HelpTool <- R6::R6Class("HelpTool",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11548,7 +11548,7 @@ Toggle <- R6::R6Class("Toggle",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11583,7 +11583,7 @@ PolyAnnotation <- R6::R6Class("PolyAnnotation",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11642,7 +11642,7 @@ PolyAnnotation <- R6::R6Class("PolyAnnotation",
 )
 
 # A base class for tools that are buttons in the toolbar.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -11663,7 +11663,7 @@ Action <- R6::R6Class("Action",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11719,7 +11719,7 @@ ColorBar <- R6::R6Class("ColorBar",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11746,7 +11746,7 @@ ColorBar <- R6::R6Class("ColorBar",
     # > Int
     major_tick_out = NULL,
     # A continuous color mapper containing a color palette to render.
-    # 
+    #
     # .. warning:: If the `low` and `high` attributes of the ColorMapper
     # aren't set, ticks and tick labels won't be rendered. Additionally, if a
     # LogTicker is passed to the `ticker` argument and either or both of the
@@ -11810,7 +11810,7 @@ ColorBar <- R6::R6Class("ColorBar",
     # ``bokeh.core.enums.LegendLocation``'s enumerated values, or a ``(x,
     # y)`` tuple indicating an absolute location absolute location in screen
     # coordinates (pixels from the bottom-left corner).
-    # 
+    #
     # .. warning:: If the color bar is placed in a side panel, the location
     # will likely have to be set to `(0,0)`.
     # > Either(Enum('top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right'), Tuple(Float, Float))
@@ -11928,11 +11928,11 @@ ColorBar <- R6::R6Class("ColorBar",
 )
 
 # A block (paragraph) of text.
-# 
+#
 # This Bokeh model corresponds to an HTML ``<p>`` element.
-# 
+#
 # Example -------
-# 
+#
 # .. bokeh-plot::
 # ../sphinx/source/docs/user_guide/examples/interaction_paragraph.py
 # :source-position: below
@@ -11957,7 +11957,7 @@ Paragraph <- R6::R6Class("Paragraph",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -11966,7 +11966,7 @@ Paragraph <- R6::R6Class("Paragraph",
 )
 
 # Abstract base class for map plot models.
-# 
+#
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
@@ -12036,7 +12036,7 @@ MapPlot <- R6::R6Class("MapPlot",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(
@@ -12056,7 +12056,7 @@ Base <- R6::R6Class("Base",
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
-      self$specified_args <- get_specified_args(match.call())
+      self$specified_args <- get_specified_arg_names(match.call())
     }
   ),
   private = list(

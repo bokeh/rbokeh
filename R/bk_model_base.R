@@ -1,4 +1,4 @@
-get_specified_args <- function(mc) {
+get_specified_arg_names <- function(mc) {
   nm <- names(mc)
   if (length(nm) > 0)
     nm <- nm[-1]
