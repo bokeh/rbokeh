@@ -24,8 +24,7 @@ ann_box <- function(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,
 
 
 
-# x_start = NULL,  y_start = NULL,  x_end = NULL,  y_end = NULL,
-
+#' @export
 ann_arrow <- function(fig, x_start = NULL, y_start = NULL, x_end = NULL, y_end = NULL,
   color = NULL, alpha = NULL, width = NULL, data = figure_data(fig),
   start = NULL, start_units = NULL, end = NULL, end_units = NULL,
@@ -58,6 +57,7 @@ ann_arrow <- function(fig, x_start = NULL, y_start = NULL, x_end = NULL, y_end =
 # "normal", "open", "tee", "vee"
 # "screen", "data"
 
+#' @export
 arrow <- function(type = c("normal", "open", "tee", "vee"), size = NULL,
   color = NULL, alpha = NULL,
   line_width = NULL, line_join = NULL, line_cap = NULL,
@@ -81,6 +81,7 @@ arrow <- function(type = c("normal", "open", "tee", "vee"), size = NULL,
   spec
 }
 
+#' @export
 get_arrow_mod <- function(spec, theme) {
   # resolve color -> line_color and fill_color
   if (is.null(spec$color))
@@ -106,6 +107,7 @@ get_arrow_mod <- function(spec, theme) {
   do.call(mod$new, spec[intersect(names(spec), par_nms)])
 }
 
+#' @export
 ann_band <- function(fig, base = NULL, lower = NULL, upper = NULL,
   base_units = NULL, lower_units = NULL, upper_units = NULL,
   dimension = c("height", "width"), color = NULL, alpha = NULL,
@@ -134,6 +136,8 @@ ann_band <- function(fig, base = NULL, lower = NULL, upper = NULL,
 # TODO: this is silly to specify lower_head and upper_head as arror models...
 # instead set these models automatically and let other parameters easily
 # control the attributes of the heads
+
+#' @export
 ann_whisker <- function(fig, base = NULL, lower = NULL, upper = NULL,
   lower_head = NULL, upper_head = NULL, dimension = NULL, data = figure_data(fig),
   base_units = NULL, lower_units = NULL, upper_units = NULL,
@@ -163,7 +167,7 @@ ann_whisker <- function(fig, base = NULL, lower = NULL, upper = NULL,
   add_layer(fig, spec, lgroup, lname)
 }
 
-
+#' @export
 ann_labels <- function(fig, x = NULL, y = NULL, text = NULL, angle = NULL,
   data = figure_data(fig),
   x_units = NULL, y_units = NULL, angle_units = NULL, x_offset = NULL, y_offset = NULL,
@@ -199,6 +203,7 @@ ann_labels <- function(fig, x = NULL, y = NULL, text = NULL, angle = NULL,
   add_layer(fig, spec, lgroup, lname)
 }
 
+#' @export
 ann_span <- function(fig, location = NULL, dimension = c("height", "width"),
   location_units = NULL, line_color = NULL, line_alpha = NULL,
   line_width = NULL, line_cap = NULL, line_join = NULL, line_dash = NULL,
@@ -219,6 +224,7 @@ ann_span <- function(fig, location = NULL, dimension = c("height", "width"),
   add_layer(fig, spec, lgroup, lname)
 }
 
+#' @export
 ann_poly <- function(fig, xs = NULL, ys = NULL, color = NULL, alpha = NULL,
   ys_units = NULL, xs_units = NULL, line_width = NULL, line_cap = NULL,
   line_join = NULL, line_dash = NULL, line_dash_offset = NULL,
@@ -237,6 +243,7 @@ ann_poly <- function(fig, xs = NULL, ys = NULL, color = NULL, alpha = NULL,
   add_layer(fig, spec, lgroup, lname)
 }
 
+#' @export
 ann_title <- function(fig, text = NULL, align = NULL, text_color = NULL,
   text_alpha = NULL, text_font_size = NULL, text_font = NULL,
   text_font_style = NULL, offset = NULL, background_fill_color = NULL,
