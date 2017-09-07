@@ -14,7 +14,7 @@ custom_callback(code, lnames = NULL, args = NULL)
 \item{args}{named list of additional references to objects to be addressable in the callback}
 }
 \description{
-This registers a callback that allows you to specify your own custom callback javascript code.  A probalby more useful callback to use in conjunction with this for working on the javascript code is the \code{\link{debug_callback}} which will place you inside a debugger in your web browser allowing you to inspect the callback objects.
+This registers a callback that allows you to specify your own custom callback javascript code.  A probably more useful callback to use in conjunction with this for working on the javascript code is the \code{\link{debug_callback}} which will place you inside a debugger in your web browser allowing you to inspect the callback objects.
 }
 \details{
 If we add a layer and provide it, for example the \code{lname} "points", then if we refer to it using the \code{lnames} parameter to the callback, several objects will be made available inside the callback for you to access, given the names "points_data", "points_glyph", "points_glyph_rend", "points_hov_glyph", "points_ns_glyph", all pointers to different objects associated with the "points" layer that your callback can manipulate.

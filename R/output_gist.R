@@ -2,7 +2,7 @@
 #'
 #' @param widget_string a string containing R code to create an htmlwidget
 #' @param name name of the gist
-#' @param created optional string for a "Created by" to preceed the README
+#' @param created optional string for a "Created by" to precede the README
 #' @param description optional text to go in README.md to describe the gist
 #' @param license license under which gist is released - one of those accepted here: \url{http://bl.ocks.org/licenses.txt}
 #' @param border should the bl.ocks.org iframe have a border?

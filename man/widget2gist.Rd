@@ -16,7 +16,7 @@ widget2gist(widget_string, name, created = NULL, description = "",
 
 \item{name}{name of the gist}
 
-\item{created}{optional string for a "Created by" to preceed the README}
+\item{created}{optional string for a "Created by" to precede the README}
 
 \item{description}{optional text to go in README.md to describe the gist}
 

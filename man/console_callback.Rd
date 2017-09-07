@@ -7,7 +7,7 @@
 console_callback()
 }
 \description{
-This registers a callback that simply prints the callback objects in the javascript console of your web browser.  A probalby more useful callback is the \code{\link{debug_callback}} which will place you inside a debugger in your web browser allowing you to inspect the callback objects.
+This registers a callback that simply prints the callback objects in the javascript console of your web browser.  A probably more useful callback is the \code{\link{debug_callback}} which will place you inside a debugger in your web browser allowing you to inspect the callback objects.
 }
 \examples{
 \donttest{
