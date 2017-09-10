@@ -12,6 +12,8 @@ get_mod_json <- function(json_path) {
     base = list(NULL),
     desc = "Base class"
   )
+  # AbstractButton inherits from both  Widget and ButtonLike
+  # ButtonGroup inherits from both AbstractGroup and ButtonLike
   mods$AbstractButton$bases <- mods$AbstractButton$bases[1]
   mods$ButtonGroup$base <- mods$ButtonGroup$base[1]
   for (ii in seq_along(mods))
