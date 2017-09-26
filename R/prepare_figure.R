@@ -90,9 +90,9 @@ prepare_figure <- function(x) {
 
         # keep track of axis ranges and types
         for (xy in c("x", "y")) {
-          nms_chk <- c("x", "xs", "left", "right")
+          nms_chk <- c("x", "xs", "x0", "left", "right")
           if (xy == "y")
-            nms_chk <- c("y", "ys", "bottom", "top")
+            nms_chk <- c("y", "ys", "y0", "bottom", "top")
           if (attr_nm %in% nms_chk) {
             type <- get_glyph_axis_type(val, x$pars$axes$type[[xy]])
             if (is.null(x$pars$axes$type[[xy]])) {
