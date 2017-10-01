@@ -1,11 +1,11 @@
 # run
 # git fetch --all --tags --prune
-# git checkout tags/0.12.6 -b 0.12.6
-# python ~/Documents/Code/_cloned/bokeh/scripts/spec.py > code-gen/spec_0.12.6.json
+# git checkout tags/0.12.9 -b 0.12.9
+# python ~/Documents/Code/_cloned/bokeh/scripts/spec.py > code-gen/spec_0.12.9.json
 
 source("code-gen/fns.R")
 
-mods <- get_mod_json("code-gen/spec_0.12.6.json")
+mods <- get_mod_json("code-gen/spec_0.12.9.json")
 
 ## write out R6 class code for all models
 ##---------------------------------------------------------

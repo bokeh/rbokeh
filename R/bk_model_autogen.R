@@ -5,8 +5,9 @@ Model <- R6::R6Class("Model",
     specified_args = NULL,
     initialize = function(
       js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
     ) {
       super$initialize(id = id)
       types <- bk_prop_types[["Model"]]
@@ -28,39 +29,6 @@ Model <- R6::R6Class("Model",
     # plot.js_on_event('tap', callback)
     # > Dict(String, List(Instance(CustomJS)))
     js_event_callbacks = NULL,
-    # List of events that are subscribed to by Python callbacks. This is the
-    # set of events that will be communicated from BokehJS back to Python for
-    # this model.
-    # > List(String)
-    subscribed_events = NULL,
-    # A mapping of attribute names to lists of CustomJS callbacks, to be set
-    # up on BokehJS side when the document is created.
-    #
-    # Typically, rather then modifying this property directly, callbacks
-    # should be added using the ``Model.js_on_change`` method:
-    #
-    # .. code:: python
-    #
-    # callback = CustomJS(code="console.log('stuff')")
-    # plot.x_range.js_on_change('start', callback)
-    # > Dict(String, List(Instance(CustomJS)))
-    js_property_callbacks = NULL,
-    # An arbitrary, user-supplied name for this model.
-    #
-    # This name can be useful when querying the document to retrieve specific
-    # Bokeh models.
-    #
-    # .. code:: python
-    #
-    # >>> plot.circle([1,2,3], [4,5,6], name="temp") >>>
-    # plot.select(name="temp")
-    # [GlyphRenderer(id='399d53f5-73e9-44d9-9527-544b761c7705', ...)]
-    #
-    # .. note:: No uniqueness guarantees or other conditions are enforced on
-    # any names that are provided, nor is the name used directly by Bokeh for
-    # any reason.
-    # > String
-    name = NULL,
     # An optional list of arbitrary, user-supplied values to attach to this
     # model.
     #
@@ -80,30 +48,64 @@ Model <- R6::R6Class("Model",
     # any tags that are provided, nor are the tags used directly by Bokeh for
     # any reason.
     # > List(Any)
-    tags = NULL
+    tags = NULL,
+    # List of events that are subscribed to by Python callbacks. This is the
+    # set of events that will be communicated from BokehJS back to Python for
+    # this model.
+    # > List(String)
+    subscribed_events = NULL,
+    # An arbitrary, user-supplied name for this model.
+    #
+    # This name can be useful when querying the document to retrieve specific
+    # Bokeh models.
+    #
+    # .. code:: python
+    #
+    # >>> plot.circle([1,2,3], [4,5,6], name="temp") >>>
+    # plot.select(name="temp")
+    # [GlyphRenderer(id='399d53f5-73e9-44d9-9527-544b761c7705', ...)]
+    #
+    # .. note:: No uniqueness guarantees or other conditions are enforced on
+    # any names that are provided, nor is the name used directly by Bokeh for
+    # any reason.
+    # > String
+    name = NULL,
+    # A mapping of attribute names to lists of CustomJS callbacks, to be set
+    # up on BokehJS side when the document is created.
+    #
+    # Typically, rather then modifying this property directly, callbacks
+    # should be added using the ``Model.js_on_change`` method:
+    #
+    # .. code:: python
+    #
+    # callback = CustomJS(code="console.log('stuff')")
+    # plot.x_range.js_on_change('start', callback)
+    # > Dict(String, List(Instance(CustomJS)))
+    js_property_callbacks = NULL
   )
 )
 
-# A base class for all range types.
+# Base class for all annotation models.
 #
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
-Range <- R6::R6Class("Range",
-  inherit = Model,
+Annotation <- R6::R6Class("Annotation",
+  inherit = Renderer,
   public = list(
     specified_args = NULL,
     initialize = function(
-      callback = NULL, js_property_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), tags = list(),
-      id = NULL
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      level = "annotation", plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      visible = TRUE, id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Range"]]
+        visible = visible, subscribed_events = subscribed_events,
+        tags = tags, js_property_callbacks = js_property_callbacks,
+        level = level, name = name, id = id)
+      types <- bk_prop_types[["Annotation"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -111,40 +113,258 @@ Range <- R6::R6Class("Range",
     }
   ),
   private = list(
-    # A callback to run in the browser whenever the range is updated.
-    # > Instance(Callback)
-    callback = NULL
+    # The plot to which this annotation is attached.
+    # > Instance(Plot)
+    plot = NULL
   )
 )
 
-# Render Bézier curves.
+# Map numbers in a range [*low*, *high*] into a sequence of colors (a
+# palette) on a natural logarithm scale.
 #
-# For more information consult the `Wikipedia article for Bézier curve`_.
+# For example, if the range is [0, 25] and the palette is ``['red',
+# 'green', 'blue']``, the values would be mapped as follows::
 #
-# .. _Wikipedia article for Bézier curve:
-# http://en.wikipedia.org/wiki/Bézier_curve
+# x < 0 : 'red' # values < low are clamped 0 >= x < 2.72 : 'red' # math.e
+# ** 1 2.72 >= x < 7.39 : 'green' # math.e ** 2 7.39 >= x < 20.09 :
+# 'blue' # math.e ** 3 20.09 >= x : 'blue' # values > high are clamped
+#
+# .. warning:: The LogColorMapper only works for images with scalar
+# values that are non-negative.
+LogColorMapper <- R6::R6Class("LogColorMapper",
+  inherit = ContinuousColorMapper,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      high_color = NULL, low_color = NULL, tags = list(),
+      subscribed_events = list(), js_property_callbacks = structure(list(),
+      .Names = character(0)), name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      high = NULL, nan_color = "gray", low = NULL, palette = NULL, id = NULL
+    ) {
+      super$initialize(high_color = high_color, low_color = low_color,
+        tags = tags, subscribed_events = subscribed_events,
+        js_property_callbacks = js_property_callbacks, name = name,
+        js_event_callbacks = js_event_callbacks, high = high,
+        nan_color = nan_color, low = low, palette = palette, id = id)
+      types <- bk_prop_types[["LogColorMapper"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A click button.
+Button <- R6::R6Class("Button",
+  inherit = AbstractButton,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, icon = NULL, button_type = "default",
+      name = NULL, js_event_callbacks = structure(list(), .Names =
+      character(0)), disabled = FALSE, width = NULL, css_classes = NULL,
+      sizing_mode = "fixed", label = "Button", clicks = 0L, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        callback = callback, icon = icon, button_type = button_type,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, label = label, id = id)
+      types <- bk_prop_types[["Button"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A private property used to trigger ``on_click`` event handler.
+    # > Int
+    clicks = NULL
+  )
+)
+
+# Date cell formatter.
+DateFormatter <- R6::R6Class("DateFormatter",
+  inherit = CellFormatter,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      format = "yy M d", subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["DateFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The date format can be combinations of the following:
+    #
+    # d day of month (no leading zero)
+    #
+    # dd day of month (two digit)
+    #
+    # o day of year (no leading zeros)
+    #
+    # oo day of year (three digit)
+    #
+    # D day name short
+    #
+    # DD day name long
+    #
+    # m month of year (no leading zero)
+    #
+    # mm month of year (two digit)
+    #
+    # M month name short
+    #
+    # MM month name long
+    #
+    # y year (two digit)
+    #
+    # yy year (four digit)
+    #
+    # @ Unix timestamp (ms since 01/01/1970)
+    #
+    # !  Windows ticks (100ns since 01/01/0001)
+    #
+    # "..."  literal text
+    #
+    # '' single quote
+    # > Either(Enum('ATOM', 'W3C', 'RFC-3339', 'ISO-8601', 'COOKIE', 'RFC-822', 'RFC-850', 'RFC-1036', 'RFC-1123', 'RFC-2822', 'RSS', 'TICKS', 'TIMESTAMP'), String)
+    format = NULL
+  )
+)
+
+# Render a whisker along a dimension.
+Whisker <- R6::R6Class("Whisker",
+  inherit = Annotation,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      upper_units = "data", line_join = "miter", upper_head = NULL,
+      tags = list(), line_width = 1L, subscribed_events = list(),
+      dimension = "height", js_property_callbacks = structure(list(),
+      .Names = character(0)), line_dash = list(), level = "underlay",
+      name = NULL, line_dash_offset = 0L, lower_head = NULL, line_alpha = 1,
+      x_range_name = "default", line_cap = "butt", line_color = "black",
+      base = NULL, base_units = "data", lower_units = "data", plot = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      y_range_name = "default", visible = TRUE, source = NULL, upper = NULL,
+      lower = NULL, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["Whisker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    #
+    # > Enum('screen', 'data')
+    upper_units = NULL,
+    # The line join values for the whisker body.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # Instance of ArrowHead.
+    # > Instance(ArrowHead)
+    upper_head = NULL,
+    # The line width values for the whisker body.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The direction of the band.
+    # > Enum('width', 'height')
+    dimension = NULL,
+    # The line dash values for the whisker body.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the whisker body.
+    # > Int
+    line_dash_offset = NULL,
+    # Instance of ArrowHead.
+    # > Instance(ArrowHead)
+    lower_head = NULL,
+    # The line alpha values for the whisker body.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # A particular (named) x-range to use for computing screen locations when
+    # rendering annotations on the plot. If unset, use the default x-range.
+    # > String
+    x_range_name = NULL,
+    # The line cap values for the whisker body.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the whisker body.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    # The orthogonal coordinates of the upper and lower values.
+    # > DistanceSpec(units_default='data')
+    base = NULL,
+    #
+    # > Enum('screen', 'data')
+    base_units = NULL,
+    #
+    # > Enum('screen', 'data')
+    lower_units = NULL,
+    # A particular (named) y-range to use for computing screen locations when
+    # rendering annotations on the plot. If unset, use the default y-range.
+    # > String
+    y_range_name = NULL,
+    # Local data source to use when rendering annotations on the plot.
+    # > Instance(DataSource)
+    source = NULL,
+    # The coordinations of the upper end of the whiskers.
+    # > DistanceSpec(units_default='data')
+    upper = NULL,
+    # The coordinates of the lower end of the whiskers.
+    # > DistanceSpec(units_default='data')
+    lower = NULL
+  )
+)
+
+# Render images loaded from given URLs.
 #
 # Example -------
 #
-# .. bokeh-plot:: ../tests/glyphs/Bezier.py :source-position: below
-Bezier <- R6::R6Class("Bezier",
+# .. bokeh-plot:: ../tests/glyphs/ImageURL.py :source-position: below
+ImageURL <- R6::R6Class("ImageURL",
   inherit = Glyph,
   public = list(
     specified_args = NULL,
     initialize = function(
-      cx1 = NULL, cy1 = NULL, y1 = NULL, line_cap = "butt", name = NULL,
-      line_width = 1L, line_dash = list(), line_color = "black",
-      line_dash_offset = 0L, line_join = "miter", cx0 = NULL,
-      subscribed_events = list(), tags = list(), line_alpha = 1,
+      w = NULL, subscribed_events = list(), tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
+      angle_units = "rad", retry_attempts = 0L, y = NULL, angle = 0L,
+      name = NULL, dilate = FALSE, w_units = "data",
       js_event_callbacks = structure(list(), .Names = character(0)),
-      x1 = NULL, y0 = NULL, cy0 = NULL, x0 = NULL, id = NULL
+      h_units = "data", x = NULL, url = NULL, anchor = "top_left", h = NULL,
+      global_alpha = 1, retry_timeout = 0L, id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Bezier"]]
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["ImageURL"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -152,51 +372,1810 @@ Bezier <- R6::R6Class("Bezier",
     }
   ),
   private = list(
-    # The x-coordinates of second control points.
+    # The height of the plot region that the image will occupy in data space.
+    #
+    # The default value is ``None``, in which case the image will be
+    # displayed at its actual image size (regardless of the units specified
+    # here).
+    # > DistanceSpec(units_default='data')
+    w = NULL,
+    #
+    # > Enum('deg', 'rad')
+    angle_units = NULL,
+    # Number of attempts to retry loading the images from the specified URL.
+    # Default is zero.
+    # > Int
+    retry_attempts = NULL,
+    # The y-coordinates to locate the image anchors.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    cx1 = NULL,
-    # The y-coordinates of second control points.
+    y = NULL,
+    # The angles to rotate the images, as measured from the horizontal.
+    # > AngleSpec(units_default='rad')
+    angle = NULL,
+    # Whether to always round fractional pixel locations in such a way as to
+    # make the images bigger.
+    #
+    # This setting may be useful if pixel rounding errors are causing images
+    # to have a gap between them, when they should appear flush.
+    # > Bool
+    dilate = NULL,
+    #
+    # > Enum('screen', 'data')
+    w_units = NULL,
+    #
+    # > Enum('screen', 'data')
+    h_units = NULL,
+    # The x-coordinates to locate the image anchors.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    cy1 = NULL,
+    x = NULL,
+    # The URLs to retrieve images from.
+    #
+    # .. note:: The actual retrieving and loading of the images happens on
+    # the client.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    url = NULL,
+    # What position of the image should be anchored at the `x`, `y`
+    # coordinates.
+    # > Enum('top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right')
+    anchor = NULL,
+    # The height of the plot region that the image will occupy in data space.
+    #
+    # The default value is ``None``, in which case the image will be
+    # displayed at its actual image size (regardless of the units specified
+    # here).
+    # > DistanceSpec(units_default='data')
+    h = NULL,
+    # An overall opacity that each image is rendered with (in addition to any
+    # inherent alpha values in the image itself).
+    # > Float
+    global_alpha = NULL,
+    # Timeout (in ms) between retry attempts to load the image from the
+    # specified URL. Default is zero ms.
+    # > Int
+    retry_timeout = NULL
+  )
+)
+
+# Render several patches.
+#
+# The data for the ``Patches`` glyph is different in that the vector of
+# values is not a vector of scalars. Rather, it is a "list of lists".
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Patches.py :source-position: below
+Patches <- R6::R6Class("Patches",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, line_dash = list(), name = NULL, xs = NULL,
+      line_dash_offset = 0L, js_event_callbacks = structure(list(), .Names
+      = character(0)), fill_color = "gray", line_alpha = 1, fill_alpha = 1,
+      ys = NULL, line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Patches"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the patches.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the patches.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The line dash values for the patches.
+    # > DashPattern
+    line_dash = NULL,
+    # The x-coordinates for all the patches, given as a "list of lists".
+    #
+    # .. note:: Individual patches may comprise multiple polygons. In this
+    # case the x-coordinates for each polygon should be separated by NaN
+    # values in the sublists.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    xs = NULL,
+    # The line dash offset values for the patches.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the patches.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the patches.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The fill alpha values for the patches.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The y-coordinates for all the patches, given as a "list of lists".
+    #
+    # .. note:: Individual patches may comprise multiple polygons. In this
+    # case the y-coordinates for each polygon should be separated by NaN
+    # values in the sublists.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    ys = NULL,
+    # The line cap values for the patches.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the patches.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# Abstract base class for all kinds of groups.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+AbstractGroup <- R6::R6Class("AbstractGroup",
+  inherit = Widget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      disabled = FALSE, width = NULL, css_classes = NULL, labels = list(),
+      sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["AbstractGroup"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A callback to run in the browser whenever a button group is
+    # manipulated.
+    # > Instance(Callback)
+    callback = NULL,
+    # List of text labels contained in this group.
+    # > List(String)
+    labels = NULL
+  )
+)
+
+# Single-line input widget.
+TextInput <- R6::R6Class("TextInput",
+  inherit = InputWidget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, name = NULL, placeholder = "",
+      disabled = FALSE, width = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), value = "", css_classes = NULL, title = "",
+      sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        title = title, sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["TextInput"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A callback to run in the browser whenever the user unfocuses the
+    # TextInput widget by hitting Enter or clicking outside of the text box
+    # area.
+    # > Instance(Callback)
+    callback = NULL,
+    # Placeholder for empty input field
+    # > String
+    placeholder = NULL,
+    # Initial or entered text value.
+    # > String
+    value = NULL
+  )
+)
+
+# A base class for all tick formatter types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+TickFormatter <- R6::R6Class("TickFormatter",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["TickFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A base class for tools that respond to tap/click events.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Tap <- R6::R6Class("Tap",
+  inherit = Tool,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      plot = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["Tap"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Compute a step-wise interpolation between the points provided through
+# the ``x``, ``y``, and ``data`` parameters.
+StepInterpolator <- R6::R6Class("StepInterpolator",
+  inherit = Interpolator,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      mode = "after", y = NULL, data = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      x = NULL, clip = TRUE, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, y = y, data = data,
+        name = name, js_event_callbacks = js_event_callbacks, x = x,
+        clip = clip, id = id)
+      types <- bk_prop_types[["StepInterpolator"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Adjust the behavior of the returned value in relation to the control
+    # points.  The parameter can assume one of three values:
+    #
+    # * ``after`` (default): Assume the y-value associated with the nearest
+    # x-value which is less than or equal to the point to transform.  *
+    # ``before``: Assume the y-value associated with the nearest x-value
+    # which is greater than the point to transform.  * ``center``: Assume the
+    # y-value associated with the nearest x-value to the point to transform.
+    # > Enum('before', 'after', 'center')
+    mode = NULL
+  )
+)
+
+# Render circle markers with an 'X' cross through the center.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/CircleX.py :source-position: below
+CircleX <- R6::R6Class("CircleX",
+  inherit = Marker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["CircleX"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render parabolas.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Quadratic.py :source-position: below
+Quadratic <- R6::R6Class("Quadratic",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      cy = NULL, subscribed_events = list(), y0 = NULL, cx = NULL,
+      line_join = "miter", line_width = 1L, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_dash = list(), name = NULL, y1 = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      line_alpha = 1, x1 = NULL, line_cap = "butt", x0 = NULL,
+      line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Quadratic"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The y-coordinates of the control points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    cy = NULL,
+    # The y-coordinates of the starting points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y0 = NULL,
+    # The x-coordinates of the control points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    cx = NULL,
+    # The line join values for the parabolas.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the parabolas.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The line dash values for the parabolas.
+    # > DashPattern
+    line_dash = NULL,
     # The y-coordinates of the ending points.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     y1 = NULL,
-    # The line cap values for the Bézier curves.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The line width values for the Bézier curves.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the Bézier curves.
-    # > DashPattern
-    line_dash = NULL,
-    # The line color values for the Bézier curves.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line dash offset values for the Bézier curves.
+    # The line dash offset values for the parabolas.
     # > Int
     line_dash_offset = NULL,
-    # The line join values for the Bézier curves.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The x-coordinates of first control points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    cx0 = NULL,
-    # The line alpha values for the Bézier curves.
+    # The line alpha values for the parabolas.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     line_alpha = NULL,
     # The x-coordinates of the ending points.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     x1 = NULL,
-    # The y-coordinates of the starting points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y0 = NULL,
-    # The y-coordinates of first control points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    cy0 = NULL,
+    # The line cap values for the parabolas.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
     # The x-coordinates of the starting points.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x0 = NULL
+    x0 = NULL,
+    # The line color values for the parabolas.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# Generate ticks on a linear scale.
+#
+# .. note:: This class may be renamed to ``LinearTicker`` in the future.
+BasicTicker <- R6::R6Class("BasicTicker",
+  inherit = AdaptiveTicker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      base = 10, subscribed_events = list(), mantissas = list(1L, 2L, 5L),
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), num_minor_ticks = 5L, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      min_interval = 0, max_interval = NULL, desired_num_ticks = 6L, id = NULL
+    ) {
+      super$initialize(base = base, subscribed_events = subscribed_events,
+        mantissas = mantissas, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        num_minor_ticks = num_minor_ticks, name = name,
+        js_event_callbacks = js_event_callbacks,
+        min_interval = min_interval, max_interval = max_interval,
+        desired_num_ticks = desired_num_ticks, id = id)
+      types <- bk_prop_types[["BasicTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Map categories to colors. Values that are passed to this mapper that
+# aren't in factors will be assigned the nan_color.
+CategoricalColorMapper <- R6::R6Class("CategoricalColorMapper",
+  inherit = ColorMapper,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      factors = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), nan_color = "gray", palette = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, tags = tags,
+        nan_color = nan_color,
+        js_property_callbacks = js_property_callbacks, name = name,
+        palette = palette, id = id)
+      types <- bk_prop_types[["CategoricalColorMapper"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A sequence of factors / categories that map to the color palette.
+    # > Either(Seq(String), Seq(Int), Seq(Float), Seq(Datetime), Seq(Date))
+    factors = NULL
+  )
+)
+
+# Base class for Bokeh models that represent HTML markup elements.
+#
+# Markups include e.g., ``<div>``, ``<p>``, and ``<pre>``.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Markup <- R6::R6Class("Markup",
+  inherit = Widget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, sizing_mode = "fixed", text = "", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Markup"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The contents of the widget.
+    # > String
+    text = NULL
+  )
+)
+
+# Abstract base class for map options' models.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+MapOptions <- R6::R6Class("MapOptions",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      zoom = 12L, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      lng = NULL, name = NULL, js_event_callbacks = structure(list(), .Names
+      = character(0)), lat = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["MapOptions"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The initial zoom level to use when displaying the map.
+    # > Int
+    zoom = NULL,
+    # The longitude where the map should be centered.
+    # > Float
+    lng = NULL,
+    # The latitude where the map should be centered.
+    # > Float
+    lat = NULL
+  )
+)
+
+# Multi-select widget.
+MultiSelect <- R6::R6Class("MultiSelect",
+  inherit = InputWidget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      options = list(), subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, size = 4L, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      disabled = FALSE, width = NULL, value = list(), css_classes = NULL,
+      title = "", sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        title = title, sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["MultiSelect"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Available selection options. Options may be provided either as a list
+    # of possible string values, or as a list of tuples, each of the form
+    # ``(value, label)``. In the latter case, the visible widget text for
+    # each value will be corresponding given label.
+    # > List(Either(String, Tuple(String, String)))
+    options = NULL,
+    # A callback to run in the browser whenever the current selection value
+    # changes.
+    # > Instance(Callback)
+    callback = NULL,
+    # The number of visible options in the dropdown list. (This uses the
+    # ``select`` HTML element's ``size`` attribute. Some browsers might not
+    # show less than 3 options.)
+    # > Int
+    size = NULL,
+    # Initial or selected values.
+    # > List(String)
+    value = NULL
+  )
+)
+
+# Render informational legends for a plot.
+Legend <- R6::R6Class("Legend",
+  inherit = Annotation,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      label_text_font_size = list(value = "10pt"),
+      subscribed_events = list(), label_text_baseline = "middle",
+      glyph_width = 20L, label_text_align = "left", glyph_height = 20L,
+      border_line_width = 1L, tags = list(), inactive_fill_alpha = 0.9,
+      level = "annotation", name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      border_line_cap = "butt", border_line_alpha = 0.5, margin = 10L,
+      border_line_dash_offset = 0L, label_text_alpha = 1,
+      border_line_dash = list(), label_text_font_style = "normal",
+      label_standoff = 5L, click_policy = "none",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      orientation = "vertical", label_height = 20L,
+      label_text_font = "helvetica", label_text_color = "#444444",
+      plot = NULL, location = "top_right", border_line_color = "#e5e5e5",
+      inactive_fill_color = "white", label_width = 20L, spacing = 3L,
+      visible = TRUE, border_line_join = "miter", items = list(),
+      padding = 10L, background_fill_color = "#ffffff",
+      background_fill_alpha = 0.95, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["Legend"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The text font size for the legend labels.
+    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    label_text_font_size = NULL,
+    # The text baseline for the legend labels.
+    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
+    label_text_baseline = NULL,
+    # The width (in pixels) that the rendered legend glyph should occupy.
+    # > Int
+    glyph_width = NULL,
+    # The text align for the legend labels.
+    # > Enum('left', 'right', 'center')
+    label_text_align = NULL,
+    # The height (in pixels) that the rendered legend glyph should occupy.
+    # > Int
+    glyph_height = NULL,
+    # The line width for the legend border outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    border_line_width = NULL,
+    # The fill alpha for the legend background style when inactive.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    inactive_fill_alpha = NULL,
+    # The line cap for the legend border outline.
+    # > Enum('butt', 'round', 'square')
+    border_line_cap = NULL,
+    # The line alpha for the legend border outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    border_line_alpha = NULL,
+    # Amount of margin around the legend.
+    # > Int
+    margin = NULL,
+    # The line dash offset for the legend border outline.
+    # > Int
+    border_line_dash_offset = NULL,
+    # The text alpha for the legend labels.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    label_text_alpha = NULL,
+    # The line dash for the legend border outline.
+    # > DashPattern
+    border_line_dash = NULL,
+    # The text font style for the legend labels.
+    # > Enum('normal', 'italic', 'bold')
+    label_text_font_style = NULL,
+    # The distance (in pixels) to separate the label from its associated
+    # glyph.
+    # > Int
+    label_standoff = NULL,
+    # Defines what happens when a lengend's item is clicked.
+    # > Enum('none', 'hide', 'mute')
+    click_policy = NULL,
+    # Whether the legend entries should be placed vertically or horizontally
+    # when they are drawn.
+    # > Enum('horizontal', 'vertical')
+    orientation = NULL,
+    # The minimum height (in pixels) of the area that legend labels should
+    # occupy.
+    # > Int
+    label_height = NULL,
+    # The text font for the legend labels.
+    # > String
+    label_text_font = NULL,
+    # The text color for the legend labels.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    label_text_color = NULL,
+    # The location where the legend should draw itself. It's either one of
+    # ``bokeh.core.enums.LegendLocation``'s enumerated values, or a ``(x,
+    # y)`` tuple indicating an absolute location absolute location in screen
+    # coordinates (pixels from the bottom-left corner).
+    # > Either(Enum('top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right'), Tuple(Float, Float))
+    location = NULL,
+    # The line color for the legend border outline.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    border_line_color = NULL,
+    # The fill color for the legend background style when inactive.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    inactive_fill_color = NULL,
+    # The minimum width (in pixels) of the area that legend labels should
+    # occupy.
+    # > Int
+    label_width = NULL,
+    # Amount of spacing (in pixles) between legend entries.
+    # > Int
+    spacing = NULL,
+    # The line join for the legend border outline.
+    # > Enum('miter', 'round', 'bevel')
+    border_line_join = NULL,
+    # A list of :class:`~bokeh.model.annotations.LegendItem` instances to be
+    # rendered in the legend.
+    #
+    # This can be specified explicitly, for instance:
+    #
+    # .. code-block:: python
+    #
+    # legend = Legend(items=[ LegendItem(label="sin(x)" , renderers=[r0,
+    # r1]), LegendItem(label="2*sin(x)" , renderers=[r2]),
+    # LegendItem(label="3*sin(x)" , renderers=[r3, r4]) ])
+    #
+    # But as a convenience, can also be given more compactly as a list of
+    # tuples:
+    #
+    # .. code-block:: python
+    #
+    # legend = Legend(items=[ ("sin(x)" , [r0, r1]), ("2*sin(x)" , [r2]),
+    # ("3*sin(x)" , [r3, r4]) ])
+    #
+    # where each tuple is of the form: *(label, renderers)*.
+    # > List(Instance(LegendItem))
+    items = NULL,
+    # Amount of padding around the contents of the legend.
+    # > Int
+    padding = NULL,
+    # The fill color for the legend background style.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    background_fill_color = NULL,
+    # The fill alpha for the legend background style.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    background_fill_alpha = NULL
+  )
+)
+
+# Collect tools to display for a single plot.
+Toolbar <- R6::R6Class("Toolbar",
+  inherit = ToolbarBase,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      active_scroll = "auto", subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, active_drag = "auto", disabled = FALSE,
+      logo = "normal", width = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), active_tap = "auto", sizing_mode = NULL,
+      tools = list(), css_classes = NULL, active_inspect = "auto", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, logo = logo, width = width,
+        css_classes = css_classes, tools = tools, sizing_mode = sizing_mode,
+        id = id)
+      types <- bk_prop_types[["Toolbar"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Specify a scroll/pinch tool to be active when the plot is displayed.
+    # > Either(Auto, Instance(Scroll))
+    active_scroll = NULL,
+    # Specify a drag tool to be active when the plot is displayed.
+    # > Either(Auto, Instance(Drag))
+    active_drag = NULL,
+    # Specify a tap/click tool to be active when the plot is displayed.
+    # > Either(Auto, Instance(Tap))
+    active_tap = NULL,
+    # Specify an inspection tool or sequence of inspection tools to be active
+    # when the plot is displayed.
+    # > Either(Auto, Instance(Inspection), Seq(Instance(Inspection)))
+    active_inspect = NULL
+  )
+)
+
+# Render axis-aligned quads.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Quad.py :source-position: below
+Quad <- R6::R6Class("Quad",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      bottom = NULL, left = NULL, subscribed_events = list(),
+      line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, line_dash = list(), name = NULL, right = NULL,
+      line_dash_offset = 0L, js_event_callbacks = structure(list(), .Names
+      = character(0)), fill_color = "gray", line_alpha = 1, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", top = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Quad"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The y-coordinates of the bottom edges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    bottom = NULL,
+    # The x-coordinates of the left edges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    left = NULL,
+    # The line join values for the quads.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the quads.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The line dash values for the quads.
+    # > DashPattern
+    line_dash = NULL,
+    # The x-coordinates of the right edges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    right = NULL,
+    # The line dash offset values for the quads.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the quads.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the quads.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The fill alpha values for the quads.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The line cap values for the quads.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the quads.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    # The y-coordinates of the top edges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    top = NULL
+  )
+)
+
+# Render a single title box as an annotation.
+Title <- R6::R6Class("Title",
+  inherit = TextAnnotation,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      text_font_size = list(value = "10pt"), text_font = "helvetica",
+      border_line_width = 1L, offset = 0L, level = "annotation", name = NULL,
+      border_line_cap = "butt", border_line_alpha = 1,
+      text_font_style = "bold", border_line_dash_offset = 0L, text_alpha = 1,
+      border_line_dash = list(), text = NULL, render_mode = "canvas",
+      plot = NULL, border_line_color = NULL, visible = TRUE, align = "left",
+      text_color = "#444444", js_event_callbacks = structure(list(), .Names
+      = character(0)), border_line_join = "miter",
+      background_fill_color = NULL, background_fill_alpha = 1, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["Title"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    #
+    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    text_font_size = NULL,
+    # Name of a font to use for rendering text, e.g., ``'times'``,
+    # ``'helvetica'``.
+    # > String
+    text_font = NULL,
+    # The line width values for the text bounding box.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    border_line_width = NULL,
+    # Offset the text by a number of pixels (can be positive or negative).
+    # Shifts the text in different directions based on the location of the
+    # title:
+    #
+    # * above: shifts title right * right: shifts title down * below: shifts
+    # title right * left: shifts title up
+    # > Float
+    offset = NULL,
+    # The line cap values for the text bounding box.
+    # > Enum('butt', 'round', 'square')
+    border_line_cap = NULL,
+    # The line alpha values for the text bounding box.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    border_line_alpha = NULL,
+    # A style to use for rendering text.
+    #
+    # Acceptable values are:
+    #
+    # - ``'normal'`` normal text - ``'italic'`` *italic text* - ``'bold'``
+    # **bold text**
+    # > Enum('normal', 'italic', 'bold')
+    text_font_style = NULL,
+    # The line dash offset values for the text bounding box.
+    # > Int
+    border_line_dash_offset = NULL,
+    # An alpha value to use to fill text with.
+    #
+    # Acceptable values are floating point numbers between 0 (transparent)
+    # and 1 (opaque).
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    text_alpha = NULL,
+    # The line dash values for the text bounding box.
+    # > DashPattern
+    border_line_dash = NULL,
+    # The text value to render.
+    # > String
+    text = NULL,
+    # Specifies whether the text is rendered as a canvas element or as an css
+    # element overlaid on the canvas. The default mode is "canvas".
+    #
+    # .. note:: The CSS labels won't be present in the output using the
+    # "save" tool.
+    #
+    # .. warning:: Not all visual styling properties are supported if the
+    # render_mode is set to "css". The border_line_dash property isn't fully
+    # supported and border_line_dash_offset isn't supported at all. Setting
+    # text_alpha will modify the opacity of the entire background box and
+    # border in addition to the text. Finally, clipping Label annotations
+    # inside of the plot area isn't supported in "css" mode.
+    # > Enum('canvas', 'css')
+    render_mode = NULL,
+    # The line color values for the text bounding box.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    border_line_color = NULL,
+    # Location to align the title text.
+    # > Enum('left', 'right', 'center')
+    align = NULL,
+    # A color to use to fill text with.
+    #
+    # Acceptable values are:
+    #
+    # - any of the 147 named `CSS colors`_, e.g ``'green'``, ``'indigo'`` -
+    # an RGB(A) hex value, e.g., ``'#FF0000'``, ``'#44444444'`` - a 3-tuple
+    # of integers (r,g,b) between 0 and 255 - a 4-tuple of (r,g,b,a) where
+    # r,g,b are integers between 0..255 and a is between 0..1
+    #
+    # .. _CSS colors: http://www.w3schools.com/cssref/css_colornames.asp
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    text_color = NULL,
+    # The line join values for the text bounding box.
+    # > Enum('miter', 'round', 'bevel')
+    border_line_join = NULL,
+    # The fill color values for the text bounding box.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    background_fill_color = NULL,
+    # The fill alpha values for the text bounding box.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    background_fill_alpha = NULL
+  )
+)
+
+# Render images given as RGBA data.
+ImageRGBA <- R6::R6Class("ImageRGBA",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      cols = NULL, dw_units = "data", dh = NULL, dw = NULL, tags = list(),
+      subscribed_events = list(), js_property_callbacks = structure(list(),
+      .Names = character(0)), image = NULL, y = NULL, name = NULL,
+      dilate = FALSE, js_event_callbacks = structure(list(), .Names =
+      character(0)), x = NULL, dh_units = "data", rows = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["ImageRGBA"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The numbers of columns in the images
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    cols = NULL,
+    #
+    # > Enum('screen', 'data')
+    dw_units = NULL,
+    # The height of the plot region that the image will occupy.
+    #
+    # .. note:: This is not the number of pixels that an image is tall.  That
+    # number is fixed by the image itself.
+    # > DistanceSpec(units_default='data')
+    dh = NULL,
+    # The widths of the plot regions that the images will occupy.
+    #
+    # .. note:: This is not the number of pixels that an image is wide.  That
+    # number is fixed by the image itself.
+    # > DistanceSpec(units_default='data')
+    dw = NULL,
+    # The arrays of RGBA data for the images.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    image = NULL,
+    # The y-coordinates to locate the image anchors.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # Whether to always round fractional pixel locations in such a way as to
+    # make the images bigger.
+    #
+    # This setting may be useful if pixel rounding errors are causing images
+    # to have a gap between them, when they should appear flush.
+    # > Bool
+    dilate = NULL,
+    # The x-coordinates to locate the image anchors.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    #
+    # > Enum('screen', 'data')
+    dh_units = NULL,
+    # The numbers of rows in the images
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    rows = NULL
+  )
+)
+
+# A base class for different toolbars.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+ToolbarBase <- R6::R6Class("ToolbarBase",
+  inherit = LayoutDOM,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, logo = "normal",
+      width = NULL, css_classes = NULL, tools = list(), sizing_mode = NULL,
+      id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["ToolbarBase"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # What version of the Bokeh logo to display on the toolbar. If set to
+    # None, no logo will be displayed.
+    # > Enum('normal', 'grey')
+    logo = NULL,
+    # A list of tools to add to the plot.
+    # > List(Instance(Tool))
+    tools = NULL
+  )
+)
+
+# Render a 'X' cross markers.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/X.py :source-position: below
+X <- R6::R6Class("X",
+  inherit = Marker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["X"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render circle markers with a '+' cross through the center.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/CircleCross.py :source-position: below
+CircleCross <- R6::R6Class("CircleCross",
+  inherit = Marker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["CircleCross"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Abstract base class for groups with items rendered as buttons.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+ButtonGroup <- R6::R6Class("ButtonGroup",
+  inherit = AbstractGroup,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, button_type = "default", name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      disabled = FALSE, width = NULL, css_classes = NULL, labels = list(),
+      sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        callback = callback, name = name,
+        js_event_callbacks = js_event_callbacks, disabled = disabled,
+        width = width, css_classes = css_classes, labels = labels,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["ButtonGroup"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A style for the button, signifying it's role.
+    # > Enum('default', 'primary', 'success', 'warning', 'danger', 'link')
+    button_type = NULL
+  )
+)
+
+# Render a single patch.
+#
+# The ``Patch`` glyph is different from most other glyphs in that the
+# vector of values only produces one glyph on the Plot.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Patch.py :source-position: below
+Patch <- R6::R6Class("Patch",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, y = NULL, line_dash = list(), name = NULL,
+      line_dash_offset = 0L, js_event_callbacks = structure(list(), .Names
+      = character(0)), fill_color = "gray", line_alpha = 1, x = NULL,
+      fill_alpha = 1, line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Patch"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the patch.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the patch.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The y-coordinates for the points of the patch.
+    #
+    # .. note:: A patch may comprise multiple polygons. In this case the
+    # y-coordinates for each polygon should be separated by NaN values in the
+    # sequence.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line dash values for the patch.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the patch.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the patch.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the patch.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The x-coordinates for the points of the patch.
+    #
+    # .. note:: A patch may comprise multiple polygons. In this case the
+    # x-coordinates for each polygon should be separated by NaN values in the
+    # sequence.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    # The fill alpha values for the patch.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The line cap values for the patch.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the patch.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# Display tick values from categorical ranges as string values.
+CategoricalTickFormatter <- R6::R6Class("CategoricalTickFormatter",
+  inherit = TickFormatter,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["CategoricalTickFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Abstract base class for data table's cell formatters.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+CellFormatter <- R6::R6Class("CellFormatter",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["CellFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A base class for Mercator tile services (e.g.``WMTSTileSource``).
+MercatorTileSource <- R6::R6Class("MercatorTileSource",
+  inherit = TileSource,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      max_zoom = 30L, subscribed_events = list(), tags = list(),
+      extra_url_vars = structure(list(), .Names = character(0)),
+      attribution = "", initial_resolution = 156543.033928041,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      wrap_around = TRUE, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), min_zoom = 0L, url = "", tile_size = 256L,
+      y_origin_offset = 20037508.34, x_origin_offset = 20037508.34, id = NULL
+    ) {
+      super$initialize(max_zoom = max_zoom,
+        subscribed_events = subscribed_events, tags = tags,
+        extra_url_vars = extra_url_vars, attribution = attribution,
+        initial_resolution = initial_resolution,
+        js_property_callbacks = js_property_callbacks, name = name,
+        js_event_callbacks = js_event_callbacks, min_zoom = min_zoom,
+        url = url, tile_size = tile_size, y_origin_offset = y_origin_offset,
+        x_origin_offset = x_origin_offset, id = id)
+      types <- bk_prop_types[["MercatorTileSource"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Enables continuous horizontal panning by wrapping the x-axis based on
+    # bounds of map.
+    #
+    # ..note:: Axis coordinates are not wrapped. To toggle axis label
+    # visibility, use ``plot.axis.visible = False``.
+    # > Bool
+    wrap_around = NULL
+  )
+)
+
+# Render an arrow as an annotation.
+Arrow <- R6::R6Class("Arrow",
+  inherit = Annotation,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, start_units = "data", line_dash = list(),
+      level = "annotation", line_dash_offset = 0L, name = NULL, line_alpha = 1,
+      x_range_name = "default", start = NULL, y_start = NULL,
+      line_cap = "butt", line_color = "black", end_units = "data",
+      x_start = NULL, x_end = NULL, plot = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      y_range_name = "default", end = NULL, source = NULL, visible = TRUE,
+      y_end = NULL, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["Arrow"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the arrow body.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the arrow body.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The unit type for the start_x and start_y attributes. Interpreted as
+    # "data space" units by default.
+    # > Enum('screen', 'data')
+    start_units = NULL,
+    # The line dash values for the arrow body.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the arrow body.
+    # > Int
+    line_dash_offset = NULL,
+    # The line alpha values for the arrow body.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # A particular (named) x-range to use for computing screen locations when
+    # rendering annotations on the plot. If unset, use the default x-range.
+    # > String
+    x_range_name = NULL,
+    # Instance of ArrowHead.
+    # > Instance(ArrowHead)
+    start = NULL,
+    # The y-coordinates to locate the start of the arrows.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y_start = NULL,
+    # The line cap values for the arrow body.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the arrow body.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    # The unit type for the end_x and end_y attributes. Interpreted as "data
+    # space" units by default.
+    # > Enum('screen', 'data')
+    end_units = NULL,
+    # The x-coordinates to locate the start of the arrows.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x_start = NULL,
+    # The x-coordinates to locate the end of the arrows.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x_end = NULL,
+    # A particular (named) y-range to use for computing screen locations when
+    # rendering annotations on the plot. If unset, use the default y-range.
+    # > String
+    y_range_name = NULL,
+    # Instance of ArrowHead.
+    # > Instance(ArrowHead)
+    end = NULL,
+    # Local data source to use when rendering annotations on the plot.
+    # > Instance(DataSource)
+    source = NULL,
+    # The y-coordinates to locate the end of the arrows.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y_end = NULL
+  )
+)
+
+# Tick formatter based on a human-readable format string.
+NumeralTickFormatter <- R6::R6Class("NumeralTickFormatter",
+  inherit = TickFormatter,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      language = "en", subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, rounding = "round", js_event_callbacks = structure(list(),
+      .Names = character(0)), format = "0,0", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["NumeralTickFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The language to use for formatting language-specific features (e.g.
+    # thousands separator).
+    # > Enum('be-nl', 'chs', 'cs', 'da-dk', 'de-ch', 'de', 'en', 'en-gb', 'es-ES', 'es', 'et', 'fi', 'fr-CA', 'fr-ch', 'fr', 'hu', 'it', 'ja', 'nl-nl', 'pl', 'pt-br', 'pt-pt', 'ru', 'ru-UA', 'sk', 'th', 'tr', 'uk-UA')
+    language = NULL,
+    # Rounding functions (round, floor, ceil) and their synonyms (nearest,
+    # rounddown, roundup).
+    # > Enum('round', 'nearest', 'floor', 'rounddown', 'ceil', 'roundup')
+    rounding = NULL,
+    # The number format, as defined in the following tables:
+    #
+    # **NUMBERS**:
+    #
+    # ============ ============== =============== Number Format String
+    # ============ ============== =============== 10000 '0,0.0000'
+    # 10,000.0000 10000.23 '0,0' 10,000 10000.23 '+0,0' +10,000 -10000
+    # '0,0.0' -10,000.0 10000.1234 '0.000' 10000.123 10000.1234 '0[.]00000'
+    # 10000.12340 -10000 '(0,0.0000)' (10,000.0000) -0.23 '.00' -.23 -0.23
+    # '(.00)' (.23) 0.23 '0.00000' 0.23000 0.23 '0.0[0000]' 0.23 1230974
+    # '0.0a' 1.2m 1460 '0 a' 1 k -104000 '0a' -104k 1 '0o' 1st 52 '0o' 52nd
+    # 23 '0o' 23rd 100 '0o' 100th ============ ============== ===============
+    #
+    # **CURRENCY**:
+    #
+    # =========== =============== ============= Number Format String
+    # =========== =============== ============= 1000.234 '$0,0.00' $1,000.23
+    # 1000.2 '0,0[.]00 $' 1,000.20 $ 1001 '$ 0,0[.]00' $ 1,001 -1000.234
+    # '($0,0)' ($1,000) -1000.234 '$0.00' -$1000.23 1230974 '($ 0.00 a)' $
+    # 1.23 m =========== =============== =============
+    #
+    # **BYTES**:
+    #
+    # =============== =========== ============ Number Format String
+    # =============== =========== ============ 100 '0b' 100B 2048 '0 b' 2 KB
+    # 7884486213 '0.0b' 7.3GB 3467479682787 '0.000 b' 3.154 TB
+    # =============== =========== ============
+    #
+    # **PERCENTAGES**:
+    #
+    # ============= ============= =========== Number Format String
+    # ============= ============= =========== 1 '0%' 100% 0.974878234
+    # '0.000%' 97.488% -0.43 '0 %' -43 % 0.43 '(0.000 %)' 43.000 %
+    # ============= ============= ===========
+    #
+    # **TIME**:
+    #
+    # ============ ============== ============ Number Format String
+    # ============ ============== ============ 25 '00:00:00' 0:00:25 238
+    # '00:00:00' 0:03:58 63846 '00:00:00' 17:44:06 ============
+    # ============== ============
+    #
+    # For the complete specification, see http://numbrojs.com/format.html
+    # > String
+    format = NULL
+  )
+)
+
+# *toolbar icon*: |reset_icon|
+#
+# The reset tool is an action. When activated in the toolbar, the tool
+# resets the data bounds of the plot to their values when the plot was
+# initially created.
+#
+# Optionally, the reset tool also resets the plat canvas dimensions to
+# their original size
+#
+# .. |reset_icon| image:: /_images/icons/Reset.png :height: 18pt
+ResetTool <- R6::R6Class("ResetTool",
+  inherit = Action,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, reset_size = TRUE,
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), plot = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["ResetTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Whether activating the Reset tool should also reset the plot's canvas
+    # dimensions to their original size.
+    # > Bool
+    reset_size = NULL
+  )
+)
+
+# Basic string cell formatter.
+StringFormatter <- R6::R6Class("StringFormatter",
+  inherit = CellFormatter,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      font_style = "normal", name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      text_color = NULL, text_align = "left", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["StringFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # An optional text font style, e.g. bold, italic.
+    # > Enum('normal', 'italic', 'bold')
+    font_style = NULL,
+    # An optional text color. See :class:`bokeh.core.properties.Color` for
+    # details.
+    # > Color
+    text_color = NULL,
+    # An optional text align, i.e. left, center or right.
+    # > Enum('left', 'right', 'center')
+    text_align = NULL
+  )
+)
+
+# An abstract base class for layout components.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+LayoutDOM <- R6::R6Class("LayoutDOM",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["LayoutDOM"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # An optional height for the component (in pixels).
+    # > Int
+    height = NULL,
+    # Whether the widget will be disabled when rendered. If ``True``, the
+    # widget will be greyed-out, and not respond to UI events.
+    # > Bool
+    disabled = NULL,
+    # An optional width for the component (in pixels).
+    # > Int
+    width = NULL,
+    # A list of css class names to add to this DOM element. Note: the class
+    # names are simply added as-is, no other guarantees are provided.
+    # > Seq(String)
+    css_classes = NULL,
+    # How the item being displayed should size itself. Possible values are
+    # ``"fixed"``, ``"scale_width"``, ``"scale_height"``, ``"scale_both"``,
+    # and ``"stretch_both"``.
+    #
+    # ``"stretch_both"`` elements are completely responsive (independently in
+    # width and height) and will resize to occupy all available space, even
+    # if this changes the aspect ratio of the element.  This is sometimes
+    # called outside-in, and is a typical behavior for desktop applications.
+    #
+    # ``"fixed"`` elements are not responsive. They will retain their
+    # original width and height regardless of any subsequent browser window
+    # resize events.
+    #
+    # ``"scale_width"`` elements will responsively resize to fit to the width
+    # available, *while maintaining the original aspect ratio*. This is a
+    # typical behavior for modern websites. For a ``Plot``, the aspect ratio
+    # ``plot_width/plot_height`` is maintained.
+    #
+    # ``"scale_height"`` elements will responsively resize to fit to the
+    # height available, *while maintaining the original aspect ratio*. For a
+    # ``Plot``, the aspect ratio ``plot_width/plot_height`` is maintained. A
+    # plot with ``"scale_height"`` mode needs to be wrapped in a ``Row`` or
+    # ``Column`` to be responsive.
+    #
+    # ``"scale_both"`` elements will responsively resize to for both the
+    # width and height available, *while maintaining the original aspect
+    # ratio*.
+    # > Enum('stretch_both', 'scale_width', 'scale_height', 'scale_both', 'fixed')
+    sizing_mode = NULL
+  )
+)
+
+# A block (paragraph) of pre-formatted text.
+#
+# This Bokeh model corresponds to an HTML ``<pre>`` element.
+#
+# Example -------
+#
+# .. bokeh-plot::
+# ../sphinx/source/docs/user_guide/examples/interaction_pretext.py
+# :source-position: below
+PreText <- R6::R6Class("PreText",
+  inherit = Paragraph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, sizing_mode = "fixed", text = "", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, text = text, id = id)
+      types <- bk_prop_types[["PreText"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render a closed-body arrow head.
+NormalHead <- R6::R6Class("NormalHead",
+  inherit = ArrowHead,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, size = 25L, line_dash = list(), plot = NULL,
+      level = "annotation", line_dash_offset = 0L, visible = TRUE,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "black", line_alpha = 1, name = NULL, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["NormalHead"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the arrow head outline.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the arrow head outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The size, in pixels, of the arrow head.
+    # > Float
+    size = NULL,
+    # The line dash values for the arrow head outline.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the arrow head outline.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the arrow head interior.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the arrow head outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The fill alpha values for the arrow head interior.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The line cap values for the arrow head outline.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the arrow head outline.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
   )
 )
 
@@ -206,22 +2185,22 @@ BoxAnnotation <- R6::R6Class("BoxAnnotation",
   public = list(
     specified_args = NULL,
     initialize = function(
-      left = NULL, right_units = "data", name = NULL, x_range_name = "default",
-      fill_alpha = 0.4, level = "annotation", line_color = "#cccccc",
-      plot = NULL, tags = list(), fill_color = "#fff9ba", line_alpha = 0.3,
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      right = NULL, bottom = NULL, visible = TRUE, left_units = "data",
-      top = NULL, line_width = 1L, bottom_units = "data",
-      render_mode = "canvas", line_dash = list(), line_dash_offset = 0L,
-      line_join = "miter", y_range_name = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      top_units = "data", line_cap = "butt", subscribed_events = list(),
-      id = NULL
+      left = NULL, subscribed_events = list(), line_join = "miter",
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), line_width = 1L, line_dash = list(),
+      level = "annotation", right = NULL, line_dash_offset = 0L,
+      left_units = "data", name = NULL, fill_color = "#fff9ba",
+      line_alpha = 0.3, fill_alpha = 0.4, x_range_name = "default",
+      bottom_units = "data", line_cap = "butt", line_color = "#cccccc",
+      top = NULL, bottom = NULL, render_mode = "canvas", plot = NULL,
+      top_units = "data", js_event_callbacks = structure(list(), .Names =
+      character(0)), y_range_name = "default", visible = TRUE,
+      right_units = "data", id = NULL
     ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
       types <- bk_prop_types[["BoxAnnotation"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -236,56 +2215,64 @@ BoxAnnotation <- R6::R6Class("BoxAnnotation",
     # converted to milliseconds-since-epoch.
     # > Either(Auto, NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float))
     left = NULL,
-    # The unit type for the right attribute. Interpreted as "data space"
-    # units by default.
-    # > Enum('screen', 'data')
-    right_units = NULL,
-    # A particular (named) x-range to use for computing screen locations when
-    # rendering box annotations on the plot. If unset, use the default
-    # x-range.
-    # > String
-    x_range_name = NULL,
-    # The fill alpha values for the box.
+    # The line join values for the box.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the box.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line color values for the box.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The fill color values for the box.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line alpha values for the box.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
+    line_width = NULL,
+    # The line dash values for the box.
+    # > DashPattern
+    line_dash = NULL,
     # The x-coordinates of the right edge of the box annotation.
     #
     # Datetime values are also accepted, but note that they are immediately
     # converted to milliseconds-since-epoch.
     # > Either(Auto, NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float))
     right = NULL,
-    # The y-coordinates of the bottom edge of the box annotation.
-    #
-    # Datetime values are also accepted, but note that they are immediately
-    # converted to milliseconds-since-epoch.
-    # > Either(Auto, NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float))
-    bottom = NULL,
+    # The line dash offset values for the box.
+    # > Int
+    line_dash_offset = NULL,
     # The unit type for the left attribute. Interpreted as "data space" units
     # by default.
     # > Enum('screen', 'data')
     left_units = NULL,
+    # The fill color values for the box.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the box.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The fill alpha values for the box.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # A particular (named) x-range to use for computing screen locations when
+    # rendering box annotations on the plot. If unset, use the default
+    # x-range.
+    # > String
+    x_range_name = NULL,
+    # The unit type for the bottom attribute. Interpreted as "data space"
+    # units by default.
+    # > Enum('screen', 'data')
+    bottom_units = NULL,
+    # The line cap values for the box.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the box.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
     # The y-coordinates of the top edge of the box annotation.
     #
     # Datetime values are also accepted, but note that they are immediately
     # converted to milliseconds-since-epoch.
     # > Either(Auto, NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float))
     top = NULL,
-    # The line width values for the box.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The unit type for the bottom attribute. Interpreted as "data space"
-    # units by default.
-    # > Enum('screen', 'data')
-    bottom_units = NULL,
+    # The y-coordinates of the bottom edge of the box annotation.
+    #
+    # Datetime values are also accepted, but note that they are immediately
+    # converted to milliseconds-since-epoch.
+    # > Either(Auto, NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float))
+    bottom = NULL,
     # Specifies whether the box is rendered as a canvas element or as an css
     # element overlaid on the canvas. The default mode is "canvas".
     #
@@ -293,55 +2280,189 @@ BoxAnnotation <- R6::R6Class("BoxAnnotation",
     # supported if the render_mode is set to "css"
     # > Enum('canvas', 'css')
     render_mode = NULL,
-    # The line dash values for the box.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the box.
-    # > Int
-    line_dash_offset = NULL,
-    # The line join values for the box.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
+    # The unit type for the top attribute. Interpreted as "data space" units
+    # by default.
+    # > Enum('screen', 'data')
+    top_units = NULL,
     # A particular (named) y-range to use for computing screen locations when
     # rendering box annotations on the plot. If unset, use the default
     # y-range.
     # > String
     y_range_name = NULL,
-    # The unit type for the top attribute. Interpreted as "data space" units
+    # The unit type for the right attribute. Interpreted as "data space"
+    # units by default.
+    # > Enum('screen', 'data')
+    right_units = NULL
+  )
+)
+
+# *toolbar icon*: |lasso_select_icon|
+#
+# The lasso selection tool allows users to make selections on a Plot by
+# indicating a free-drawn "lasso" region by dragging the mouse or a
+# finger over the plot region. The end of the drag event indicates the
+# selection region is ready.
+#
+# See :ref:`userguide_styling_selected_unselected_glyphs` for information
+# on styling selected and unselected glyphs.
+#
+# .. note:: Selections can be comprised of multiple regions, even those
+# made by different selection tools. Hold down the <<shift>> key while
+# making a selection to append the new selection to any previous
+# selection that might exist.
+#
+# .. |lasso_select_icon| image:: /_images/icons/LassoSelect.png :height:
+# 18pt
+LassoSelectTool <- R6::R6Class("LassoSelectTool",
+  inherit = Drag,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      overlay = NULL, subscribed_events = list(), renderers = list(),
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), callback = NULL, plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      select_every_mousemove = TRUE, names = list(), id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["LassoSelectTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A shaded annotation drawn to indicate the selection region.
+    # > Instance(PolyAnnotation)
+    overlay = NULL,
+    # An explicit list of renderers to hit test again. If unset, defaults to
+    # all renderers on a plot.
+    # > List(Instance(Renderer))
+    renderers = NULL,
+    # A callback to run in the browser on every selection of a lasso area.
+    # The cb_data parameter that is available to the Callback code will
+    # contain one LassoSelectTool-specific field:
+    #
+    # :geometry: object containing the coordinates of the lasso area
+    # > Instance(Callback)
+    callback = NULL,
+    # Whether a selection computation should happen on every mouse event, or
+    # only once, when the selection region is completed. Default: True
+    # > Bool
+    select_every_mousemove = NULL,
+    # A list of names to query for. If set, only renderers that have a
+    # matching value for their ``name`` attribute will be used.
+    # > List(String)
+    names = NULL
+  )
+)
+
+# Render a shaded polygonal region as an annotation.
+PolyAnnotation <- R6::R6Class("PolyAnnotation",
+  inherit = Annotation,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, line_dash = list(), level = "annotation", name = NULL,
+      line_dash_offset = 0L, fill_color = "#fff9ba", line_alpha = 0.3,
+      x_range_name = "default", fill_alpha = 0.4, ys = list(),
+      line_cap = "butt", line_color = "#cccccc", xs_units = "data",
+      ys_units = "data", plot = NULL, xs = list(), y_range_name = "default",
+      visible = TRUE, js_event_callbacks = structure(list(), .Names =
+      character(0)), id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["PolyAnnotation"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the polygon.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the polygon.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The line dash values for the polygon.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the polygon.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the polygon.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the polygon.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # A particular (named) x-range to use for computing screen locations when
+    # rendering box annotations on the plot. If unset, use the default
+    # x-range.
+    # > String
+    x_range_name = NULL,
+    # The fill alpha values for the polygon.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The y-coordinates of the region to draw.
+    # > Seq(Float)
+    ys = NULL,
+    # The line cap values for the polygon.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the polygon.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    # The unit type for the xs attribute. Interpreted as "data space" units
     # by default.
     # > Enum('screen', 'data')
-    top_units = NULL,
-    # The line cap values for the box.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL
+    xs_units = NULL,
+    # The unit type for the ys attribute. Interpreted as "data space" units
+    # by default.
+    # > Enum('screen', 'data')
+    ys_units = NULL,
+    # The x-coordinates of the region to draw.
+    # > Seq(Float)
+    xs = NULL,
+    # A particular (named) y-range to use for computing screen locations when
+    # rendering box annotations on the plot. If unset, use the default
+    # y-range.
+    # > String
+    y_range_name = NULL
   )
 )
 
-# Abstract base class for groups with items rendered as check/radio
-# boxes.
+# *toolbar icon*: |zoom_out_icon|
 #
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Group <- R6::R6Class("Group",
-  inherit = AbstractGroup,
+# The zoom-out tool allows users to click a button to zoom out by a fixed
+# amount.
+#
+# .. |zoom_out_icon| image:: /_images/icons/ZoomOut.png :height: 18pt
+ZoomOutTool <- R6::R6Class("ZoomOutTool",
+  inherit = Action,
   public = list(
     specified_args = NULL,
     initialize = function(
-      inline = FALSE, callback = NULL, name = NULL, sizing_mode = "fixed",
-      width = NULL, height = NULL, tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
+      factor = 0.1, subscribed_events = list(), dimensions = "both",
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), plot = NULL, name = NULL,
       js_event_callbacks = structure(list(), .Names = character(0)),
-      labels = list(), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
+      id = NULL
     ) {
-      super$initialize(callback = callback, name = name,
-        sizing_mode = sizing_mode, width = width, height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, labels = labels,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Group"]]
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["ZoomOutTool"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -349,105 +2470,15 @@ Group <- R6::R6Class("Group",
     }
   ),
   private = list(
-    # Should items be arrange vertically (``False``) or horizontally in-line
-    # (``True``).
-    # > Bool
-    inline = NULL
-  )
-)
-
-# An axis that picks nice numbers for tick locations on a log scale.
-# Configured with a ``LogTickFormatter`` by default.
-LogAxis <- R6::R6Class("LogAxis",
-  inherit = ContinuousAxis,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      axis_line_cap = "butt", major_label_standoff = 5L, name = NULL,
-      major_label_text_baseline = "alphabetic", major_label_text_alpha = 1,
-      level = "overlay", major_label_overrides = structure(list(), .Names =
-      character(0)), axis_label_text_font_style = "italic",
-      major_label_text_color = "#444444",
-      axis_label_text_font_size = list(value = "10pt"),
-      major_tick_out = 6L, axis_line_width = 1L, major_tick_line_alpha = 1,
-      axis_label_text_baseline = "bottom", axis_line_alpha = 1,
-      axis_label_standoff = 5L, major_label_text_font_style = "normal",
-      minor_tick_line_cap = "butt", axis_label_text_align = "left",
-      major_tick_line_cap = "butt", y_range_name = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      major_label_text_font_size = list(value = "8pt"),
-      axis_label_text_color = "#444444", minor_tick_line_dash = list(),
-      subscribed_events = list(), minor_tick_out = 4L, formatter = NULL,
-      major_tick_line_join = "miter", minor_tick_line_dash_offset = 0L,
-      minor_tick_line_join = "miter", axis_line_join = "miter",
-      minor_tick_in = 0L, bounds = "auto", x_range_name = "default",
-      tags = list(), major_label_text_font = "helvetica",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      major_label_orientation = "horizontal", axis_label_text_alpha = 1,
-      ticker = NULL, minor_tick_line_width = 1L, visible = TRUE,
-      minor_tick_line_color = "black", major_tick_line_dash = list(),
-      major_tick_line_dash_offset = 0L, major_tick_in = 2L,
-      axis_line_dash_offset = 0L, axis_line_color = "black", axis_label = "",
-      axis_line_dash = list(), minor_tick_line_alpha = 1,
-      axis_label_text_font = "helvetica", major_tick_line_color = "black",
-      major_tick_line_width = 1L, plot = NULL,
-      major_label_text_align = "center", id = NULL
-    ) {
-      super$initialize(axis_line_cap = axis_line_cap,
-        major_label_standoff = major_label_standoff, name = name,
-        major_label_text_baseline = major_label_text_baseline,
-        major_label_text_alpha = major_label_text_alpha, level = level,
-        major_label_overrides = major_label_overrides,
-        axis_label_text_font_style = axis_label_text_font_style,
-        major_label_text_color = major_label_text_color,
-        axis_label_text_font_size = axis_label_text_font_size,
-        major_tick_out = major_tick_out, axis_line_width = axis_line_width,
-        major_tick_line_alpha = major_tick_line_alpha,
-        axis_label_text_baseline = axis_label_text_baseline,
-        axis_line_alpha = axis_line_alpha,
-        axis_label_standoff = axis_label_standoff,
-        major_label_text_font_style = major_label_text_font_style,
-        minor_tick_line_cap = minor_tick_line_cap,
-        axis_label_text_align = axis_label_text_align,
-        major_tick_line_cap = major_tick_line_cap,
-        y_range_name = y_range_name,
-        js_property_callbacks = js_property_callbacks,
-        major_label_text_font_size = major_label_text_font_size,
-        axis_label_text_color = axis_label_text_color,
-        minor_tick_line_dash = minor_tick_line_dash,
-        subscribed_events = subscribed_events,
-        minor_tick_out = minor_tick_out, formatter = formatter,
-        major_tick_line_join = major_tick_line_join,
-        minor_tick_line_dash_offset = minor_tick_line_dash_offset,
-        minor_tick_line_join = minor_tick_line_join,
-        axis_line_join = axis_line_join, minor_tick_in = minor_tick_in,
-        bounds = bounds, x_range_name = x_range_name, tags = tags,
-        major_label_text_font = major_label_text_font,
-        js_event_callbacks = js_event_callbacks,
-        major_label_orientation = major_label_orientation,
-        axis_label_text_alpha = axis_label_text_alpha, ticker = ticker,
-        minor_tick_line_width = minor_tick_line_width, visible = visible,
-        minor_tick_line_color = minor_tick_line_color,
-        major_tick_line_dash = major_tick_line_dash,
-        major_tick_line_dash_offset = major_tick_line_dash_offset,
-        major_tick_in = major_tick_in,
-        axis_line_dash_offset = axis_line_dash_offset,
-        axis_line_color = axis_line_color, axis_label = axis_label,
-        axis_line_dash = axis_line_dash,
-        minor_tick_line_alpha = minor_tick_line_alpha,
-        axis_label_text_font = axis_label_text_font,
-        major_tick_line_color = major_tick_line_color,
-        major_tick_line_width = major_tick_line_width, plot = plot,
-        major_label_text_align = major_label_text_align, id = id)
-      types <- bk_prop_types[["LogAxis"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
+    # Percentage to zoom for each click of the zoom-in tool.
+    # > Percent
+    factor = NULL,
+    # Which dimensions the zoom-out tool is constrained to act in. By default
+    # the zoom-out tool will zoom in any dimension, but can be configured to
+    # only zoom horizontally across the width of the plot, or vertically
+    # across the height of the plot.
+    # > Enum('width', 'height', 'both')
+    dimensions = NULL
   )
 )
 
@@ -461,14 +2492,14 @@ Scroll <- R6::R6Class("Scroll",
   public = list(
     specified_args = NULL,
     initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
+      plot = NULL, id = NULL
     ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
       types <- bk_prop_types[["Scroll"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -481,25 +2512,627 @@ Scroll <- R6::R6Class("Scroll",
   )
 )
 
-# Base class for all glyph models.
+# A base class for tools that respond to drag events.
 #
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
-Glyph <- R6::R6Class("Glyph",
+Drag <- R6::R6Class("Drag",
+  inherit = Tool,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      plot = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["Drag"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render square markers with an 'X' cross through the center.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/SquareX.py :source-position: below
+SquareX <- R6::R6Class("SquareX",
+  inherit = Marker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["SquareX"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A base class for all ticker types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Ticker <- R6::R6Class("Ticker",
   inherit = Model,
   public = list(
     specified_args = NULL,
     initialize = function(
       js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Glyph"]]
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Ticker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render text.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Text.py :source-position: below
+Text <- R6::R6Class("Text",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      y_offset = 0L, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      text_font_size = list(value = "12pt"), text_font = "helvetica",
+      angle_units = "rad", x_offset = 0L, y = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      text_color = "#444444", text_font_style = "normal", x = NULL, angle = 0L,
+      text_alpha = 1, text_baseline = "bottom", text_align = "left",
+      text = "text", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Text"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Offset values to apply to the y-coordinates.
+    #
+    # This is useful, for instance, if it is desired to "float" text a fixed
+    # distance in screen units from a given data position.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y_offset = NULL,
+    # The text font size values for the text.
+    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    text_font_size = NULL,
+    # The text font values for the text.
+    # > String
+    text_font = NULL,
+    #
+    # > Enum('deg', 'rad')
+    angle_units = NULL,
+    # Offset values to apply to the x-coordinates.
+    #
+    # This is useful, for instance, if it is desired to "float" text a fixed
+    # distance in screen units from a given data position.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x_offset = NULL,
+    # The y-coordinates to locate the text anchors.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The text color values for the text.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    text_color = NULL,
+    # The text font style values for the text.
+    # > Enum('normal', 'italic', 'bold')
+    text_font_style = NULL,
+    # The x-coordinates to locate the text anchors.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    # The angles to rotate the text, as measured from the horizontal.
+    # > AngleSpec(units_default='rad')
+    angle = NULL,
+    # The text alpha values for the text.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    text_alpha = NULL,
+    # The text baseline values for the text.
+    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
+    text_baseline = NULL,
+    # The text align values for the text.
+    # > Enum('left', 'right', 'center')
+    text_align = NULL,
+    # The text values to render.
+    # > StringSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    text = NULL
+  )
+)
+
+# Render a tooltip.
+#
+# .. note:: This model is currently managed by BokehJS and is not useful
+# directly from python.
+Tooltip <- R6::R6Class("Tooltip",
+  inherit = Annotation,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      show_arrow = TRUE, level = "overlay", plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      visible = TRUE, attachment = "horizontal", inner_only = TRUE, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["Tooltip"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Whether tooltip's arrow should be showed.
+    # > Bool
+    show_arrow = NULL,
+    # Whether the tooltip should display to the left or right off the cursor
+    # position or above or below it, or if it should be automatically placed
+    # in the horizontal or vertical dimension.
+    # > Enum('horizontal', 'vertical', 'left', 'right', 'above', 'below')
+    attachment = NULL,
+    # Whether to display outside a central plot frame area.
+    # > Bool
+    inner_only = NULL
+  )
+)
+
+# Calendar-based date picker widget.
+DatePicker <- R6::R6Class("DatePicker",
+  inherit = InputWidget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(), min_date = NULL,
+      height = NULL, callback = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, js_event_callbacks = structure(list(), .Names =
+      character(0)), max_date = NULL, disabled = FALSE, width = NULL,
+      value = "2017-09-30", css_classes = NULL, title = "",
+      sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        title = title, sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["DatePicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Optional earliest allowable date.
+    # > Date
+    min_date = NULL,
+    # A callback to run in the browser whenever the current date value
+    # changes.
+    # > Instance(Callback)
+    callback = NULL,
+    # Optional latest allowable date.
+    # > Date
+    max_date = NULL,
+    # The initial or picked date.
+    # > Date
+    value = NULL
+  )
+)
+
+# Base class for color mapper types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+ColorMapper <- R6::R6Class("ColorMapper",
+  inherit = Transform,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), tags = list(), nan_color = "gray",
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, palette = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["ColorMapper"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Color to be used if data is NaN. Default: 'gray'
+    # > Color
+    nan_color = NULL,
+    # A sequence of colors to use as the target palette for mapping.
+    #
+    # This property can also be set as a ``String``, to the name of any of
+    # the palettes shown in :ref:`bokeh.palettes`.
+    # > Seq(Color)
+    palette = NULL
+  )
+)
+
+# Maps names of columns to sequences or arrays.
+#
+# If the ColumnDataSource initializer is called with a single argument
+# that is a dict or pandas.DataFrame, that argument is used as the value
+# for the "data" attribute. For example::
+#
+# ColumnDataSource(mydict) # same as ColumnDataSource(data=mydict)
+# ColumnDataSource(df) # same as ColumnDataSource(data=df)
+#
+# .. note:: There is an implicit assumption that all the columns in a a
+# given ColumnDataSource have the same length.
+ColumnDataSource <- R6::R6Class("ColumnDataSource",
+  inherit = ColumnarDataSource,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(), column_names = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      callback = NULL, data = structure(list(), .Names = character(0)),
+      selected = structure(list(`1d` = structure(list(indices = list()),
+      .Names = "indices"), `2d` = structure(list(indices =
+      structure(list(), .Names = character(0))), .Names = "indices"),
+      `0d` = structure(list(glyph = NULL, indices = list()), .Names =
+      c("glyph", "indices"))), .Names = c("1d", "2d", "0d")),
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        column_names = column_names,
+        js_property_callbacks = js_property_callbacks, callback = callback,
+        name = name, selected = selected,
+        js_event_callbacks = js_event_callbacks, id = id)
+      types <- bk_prop_types[["ColumnDataSource"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Mapping of column names to sequences of data. The data can be, e.g,
+    # Python lists or tuples, NumPy arrays, etc.
+    # > ColumnData(String, Seq(Any))
+    data = NULL
+  )
+)
+
+#
+DynamicImageRenderer <- R6::R6Class("DynamicImageRenderer",
+  inherit = DataRenderer,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      level = "underlay", name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), visible = TRUE, alpha = 1,
+      render_parents = TRUE, image_source = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        visible = visible, subscribed_events = subscribed_events,
+        tags = tags, js_property_callbacks = js_property_callbacks,
+        level = level, name = name, id = id)
+      types <- bk_prop_types[["DynamicImageRenderer"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # tile opacity 0.0 - 1.0
+    # > Float
+    alpha = NULL,
+    # Flag enable/disable drawing of parent tiles while waiting for new tiles
+    # to arrive. Default value is True.
+    # > Bool
+    render_parents = NULL,
+    # Image source to use when rendering on the plot.
+    # > Instance(ImageSource)
+    image_source = NULL
+  )
+)
+
+# An abstract base class for data renderer types (e.g. ``GlyphRenderer``,
+# ``TileRenderer``).
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+DataRenderer <- R6::R6Class("DataRenderer",
+  inherit = Renderer,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      visible = TRUE, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      level = "image", name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        visible = visible, subscribed_events = subscribed_events,
+        tags = tags, js_property_callbacks = js_property_callbacks,
+        level = level, name = name, id = id)
+      types <- bk_prop_types[["DataRenderer"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# An abstract base class for icon widgets.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+AbstractIcon <- R6::R6Class("AbstractIcon",
+  inherit = Widget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["AbstractIcon"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render vertical bars, given a center coordinate, width and (top,
+# bottom) coordinates.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/VBar.py :source-position: below
+VBar <- R6::R6Class("VBar",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      bottom = 0L, subscribed_events = list(), line_join = "miter",
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), line_width = 1L, line_dash = list(), name = NULL,
+      line_dash_offset = 0L, js_event_callbacks = structure(list(), .Names
+      = character(0)), width = NULL, fill_color = "gray", line_alpha = 1,
+      x = NULL, fill_alpha = 1, line_cap = "butt", line_color = "black",
+      top = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["VBar"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The y-coordinates of the bottom edges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    bottom = NULL,
+    # The line join values for the vertical bars.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the vertical bars.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The line dash values for the vertical bars.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the vertical bars.
+    # > Int
+    line_dash_offset = NULL,
+    # The widths of the vertical bars.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    width = NULL,
+    # The fill color values for the vertical bars.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the vertical bars.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The x-coordinates of the centers of the vertical bars.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    # The fill alpha values for the vertical bars.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The line cap values for the vertical bars.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the vertical bars.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    # The y-coordinates of the top edges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    top = NULL
+  )
+)
+
+# *toolbar icon*: |crosshair_icon|
+#
+# The crosshair tool is a passive inspector tool. It is generally on at
+# all times, but can be configured in the inspector's menu associated
+# with the *toolbar icon* shown above.
+#
+# The crosshair tool draws a crosshair annotation over the plot, centered
+# on the current mouse position. The crosshair tool may be configured to
+# draw across only one dimension by setting the ``dimension`` property to
+# only ``width`` or ``height``.
+#
+# .. |crosshair_icon| image:: /_images/icons/Crosshair.png :height: 18pt
+CrosshairTool <- R6::R6Class("CrosshairTool",
+  inherit = Inspection,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), dimensions = "both", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      line_alpha = 1, toggleable = TRUE, line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        toggleable = toggleable,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["CrosshairTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Which dimensions the crosshair tool is to track. By default, both a
+    # vertical and horizontal line will be drawn. If only "width" is
+    # supplied, only a horizontal line will be drawn. If only "height" is
+    # supplied, only a vertical line will be drawn.
+    # > Enum('width', 'height', 'both')
+    dimensions = NULL,
+    # Stroke width in units of pixels.
+    # > Float
+    line_width = NULL,
+    # An alpha value to use to stroke paths with.
+    #
+    # Acceptable values are floating point numbers between 0 (transparent)
+    # and 1 (opaque).
+    # > Float
+    line_alpha = NULL,
+    # A color to use to stroke paths with.
+    #
+    # Acceptable values are:
+    #
+    # - any of the 147 named `CSS colors`_, e.g ``'green'``, ``'indigo'`` -
+    # an RGB(A) hex value, e.g., ``'#FF0000'``, ``'#44444444'`` - a 3-tuple
+    # of integers (r,g,b) between 0 and 255 - a 4-tuple of (r,g,b,a) where
+    # r,g,b are integers between 0..255 and a is between 0..1
+    #
+    # .. _CSS colors: http://www.w3schools.com/cssref/css_colornames.asp
+    # > Color
+    line_color = NULL
+  )
+)
+
+# Base class for ``Scale`` models that represent an invertible
+# computation to be carried out on the client-side.
+#
+# JavaScript implementations should implement the following methods:
+#
+# .. code-block: coffeescript
+#
+# compute: (x) -> # compute the transform of a single value
+#
+# v_compute: (xs) -> # compute the transform of an array of values
+#
+# invert: (xprime) -> # compute the inverse transform of a single value
+#
+# v_invert: (xprimes) -> # compute the inverse transform of an array of
+# values
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Scale <- R6::R6Class("Scale",
+  inherit = Transform,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Scale"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -517,21 +3150,20 @@ Dropdown <- R6::R6Class("Dropdown",
   public = list(
     specified_args = NULL,
     initialize = function(
-      callback = NULL, menu = list(), default_value = NULL, label = "Dropdown",
-      name = NULL, disabled = FALSE, sizing_mode = "fixed", width = NULL,
-      height = NULL, subscribed_events = list(), tags = list(),
-      button_type = "default", js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), value = NULL, icon = NULL, css_classes = NULL,
-      id = NULL
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, icon = NULL, menu = list(), name = NULL,
+      button_type = "default", js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      default_value = NULL, value = NULL, css_classes = NULL,
+      sizing_mode = "fixed", label = "Dropdown", id = NULL
     ) {
-      super$initialize(callback = callback, name = name, label = label,
-        disabled = disabled, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags, button_type = button_type,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, icon = icon,
-        css_classes = css_classes, id = id)
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        callback = callback, icon = icon, button_type = button_type,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, label = label, id = id)
       types <- bk_prop_types[["Dropdown"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -553,26 +3185,153 @@ Dropdown <- R6::R6Class("Dropdown",
   )
 )
 
-# Generate ticks on a log scale.
-LogTicker <- R6::R6Class("LogTicker",
-  inherit = AdaptiveTicker,
+# An abstract base class for renderer types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Renderer <- R6::R6Class("Renderer",
+  inherit = Model,
   public = list(
     specified_args = NULL,
     initialize = function(
-      num_minor_ticks = 5L, name = NULL, max_interval = NULL, tags = list(),
-      min_interval = 0, mantissas = list(1L, 5L), desired_num_ticks = 6L,
-      base = 10, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), id = NULL
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      visible = TRUE, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      level = "image", name = NULL, id = NULL
     ) {
-      super$initialize(num_minor_ticks = num_minor_ticks, name = name,
-        max_interval = max_interval, tags = tags,
-        min_interval = min_interval, mantissas = mantissas,
-        desired_num_ticks = desired_num_ticks, base = base,
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Renderer"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Is the renderer visible.
+    # > Bool
+    visible = NULL,
+    # Specifies the level in which to paint this renderer.
+    # > Enum('image', 'underlay', 'glyph', 'annotation', 'overlay')
+    level = NULL
+  )
+)
+
+# Render ellipses.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Ellipse.py :source-position: below
+Ellipse <- R6::R6Class("Ellipse",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", height = NULL, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L, fill_color = "gray",
+      line_alpha = 1, fill_alpha = 1, angle = 0, line_cap = "butt",
+      line_color = "black", width_units = "data",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      width = NULL, x = NULL, height_units = "data", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Ellipse"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the ovals.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the ovals.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    #
+    # > Enum('deg', 'rad')
+    angle_units = NULL,
+    # The heights of each ellipse.
+    # > DistanceSpec(units_default='data')
+    height = NULL,
+    # The line dash values for the ovals.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-coordinates of the centers of the ellipses.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line dash offset values for the ovals.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the ovals.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the ovals.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The fill alpha values for the ovals.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The angle the ellipses are rotated from horizontal. [rad]
+    # > AngleSpec(units_default='rad')
+    angle = NULL,
+    # The line cap values for the ovals.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the ovals.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    #
+    # > Enum('screen', 'data')
+    width_units = NULL,
+    # The widths of each ellipse.
+    # > DistanceSpec(units_default='data')
+    width = NULL,
+    # The x-coordinates of the centers of the ellipses.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    #
+    # > Enum('screen', 'data')
+    height_units = NULL
+  )
+)
+
+# Render '+' cross markers.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Cross.py :source-position: below
+Cross <- R6::R6Class("Cross",
+  inherit = Marker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
         js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["LogTicker"]]
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["Cross"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -581,6 +3340,2532 @@ LogTicker <- R6::R6Class("LogTicker",
   ),
   private = list(
 
+  )
+)
+
+# Render annular wedges.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/AnnularWedge.py :source-position: below
+AnnularWedge <- R6::R6Class("AnnularWedge",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, outer_radius_units = "data", outer_radius = NULL,
+      end_angle = NULL, line_dash = list(), y = NULL, name = NULL,
+      line_dash_offset = 0L, fill_color = "gray", line_alpha = 1,
+      inner_radius_units = "data", fill_alpha = 1, line_cap = "butt",
+      line_color = "black", inner_radius = NULL, start_angle_units = "rad",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      start_angle = NULL, x = NULL, end_angle_units = "rad",
+      direction = "anticlock", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["AnnularWedge"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the annular wedges.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the annular wedges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    #
+    # > Enum('screen', 'data')
+    outer_radius_units = NULL,
+    # The outer radii of the annular wedges.
+    # > DistanceSpec(units_default='data')
+    outer_radius = NULL,
+    # The angles to end the annular wedges, as measured from the horizontal.
+    # > AngleSpec(units_default='rad')
+    end_angle = NULL,
+    # The line dash values for the annular wedges.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-coordinates of the center of the annular wedges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line dash offset values for the annular wedges.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the annular wedges.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the annular wedges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    #
+    # > Enum('screen', 'data')
+    inner_radius_units = NULL,
+    # The fill alpha values for the annular wedges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The line cap values for the annular wedges.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the annular wedges.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    # The inner radii of the annular wedges.
+    # > DistanceSpec(units_default='data')
+    inner_radius = NULL,
+    #
+    # > Enum('deg', 'rad')
+    start_angle_units = NULL,
+    # The angles to start the annular wedges, as measured from the
+    # horizontal.
+    # > AngleSpec(units_default='rad')
+    start_angle = NULL,
+    # The x-coordinates of the center of the annular wedges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    #
+    # > Enum('deg', 'rad')
+    end_angle_units = NULL,
+    # Which direction to stroke between the start and end angles.
+    # > Enum('clock', 'anticlock')
+    direction = NULL
+  )
+)
+
+# Single-select widget.
+Select <- R6::R6Class("Select",
+  inherit = InputWidget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      options = list(), subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      disabled = FALSE, width = NULL, value = "", css_classes = NULL, title = "",
+      sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        title = title, sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Select"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Available selection options. Options may be provided either as a list
+    # of possible string values, or as a list of tuples, each of the form
+    # ``(value, label)``. In the latter case, the visible widget text for
+    # each value will be corresponding given label.
+    # > List(Either(String, Tuple(String, String)))
+    options = NULL,
+    # A callback to run in the browser whenever the current Select dropdown
+    # value changes.
+    # > Instance(Callback)
+    callback = NULL,
+    # Initial or selected value.
+    # > String
+    value = NULL
+  )
+)
+
+# Abstract base class for map plot models.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+MapPlot <- R6::R6Class("MapPlot",
+  inherit = Plot,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      min_border_right = NULL, outline_line_join = "miter", left = list(),
+      outline_line_alpha = 1, js_property_callbacks = structure(list(),
+      .Names = character(0)), lod_interval = 300L, min_border_top = NULL,
+      hidpi = TRUE, toolbar_sticky = TRUE, output_backend = "canvas",
+      extra_x_ranges = structure(list(), .Names = character(0)),
+      border_fill_alpha = 1, outline_line_color = "#e5e5e5", title = NULL,
+      h_symmetry = TRUE, inner_height = NULL, sizing_mode = "fixed",
+      x_scale = NULL, below = list(), outline_line_dash_offset = 0L,
+      outline_line_dash = list(), outline_line_width = 1L,
+      plot_height = 600L, layout_width = NULL, lod_factor = 10L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      width = NULL, border_fill_color = "#ffffff", css_classes = NULL,
+      background_fill_color = "#ffffff", tool_events = NULL,
+      subscribed_events = list(), tags = list(), layout_height = NULL,
+      height = NULL, min_border = 5L, lod_timeout = 500L, name = NULL,
+      right = list(), min_border_left = NULL,
+      extra_y_ranges = structure(list(), .Names = character(0)),
+      disabled = FALSE, lod_threshold = 2000L, min_border_bottom = NULL,
+      x_range = NULL, renderers = list(), title_location = "above",
+      plot_width = 600L, y_scale = NULL, inner_width = NULL,
+      outline_line_cap = "butt", toolbar_location = "right", above = list(),
+      y_range = NULL, toolbar = NULL, background_fill_alpha = 1,
+      v_symmetry = FALSE, id = NULL
+    ) {
+      super$initialize(min_border_right = min_border_right,
+        outline_line_join = outline_line_join, left = left,
+        outline_line_alpha = outline_line_alpha,
+        js_property_callbacks = js_property_callbacks,
+        lod_interval = lod_interval, min_border_top = min_border_top,
+        hidpi = hidpi, toolbar_sticky = toolbar_sticky,
+        output_backend = output_backend, extra_x_ranges = extra_x_ranges,
+        border_fill_alpha = border_fill_alpha,
+        outline_line_color = outline_line_color, title = title,
+        h_symmetry = h_symmetry, inner_height = inner_height,
+        sizing_mode = sizing_mode, x_scale = x_scale, below = below,
+        outline_line_dash_offset = outline_line_dash_offset,
+        outline_line_dash = outline_line_dash,
+        outline_line_width = outline_line_width, plot_height = plot_height,
+        layout_width = layout_width, lod_factor = lod_factor,
+        js_event_callbacks = js_event_callbacks, width = width,
+        border_fill_color = border_fill_color, css_classes = css_classes,
+        background_fill_color = background_fill_color,
+        tool_events = tool_events, subscribed_events = subscribed_events,
+        tags = tags, layout_height = layout_height, height = height,
+        min_border = min_border, lod_timeout = lod_timeout, name = name,
+        right = right, min_border_left = min_border_left,
+        extra_y_ranges = extra_y_ranges, disabled = disabled,
+        lod_threshold = lod_threshold,
+        min_border_bottom = min_border_bottom, x_range = x_range,
+        renderers = renderers, title_location = title_location,
+        plot_width = plot_width, y_scale = y_scale,
+        inner_width = inner_width, outline_line_cap = outline_line_cap,
+        toolbar_location = toolbar_location, above = above,
+        y_range = y_range, toolbar = toolbar,
+        background_fill_alpha = background_fill_alpha,
+        v_symmetry = v_symmetry, id = id)
+      types <- bk_prop_types[["MapPlot"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Generate ticks spaced apart by specific, even multiples of months.
+MonthsTicker <- R6::R6Class("MonthsTicker",
+  inherit = SingleIntervalTicker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      interval = NULL, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      num_minor_ticks = 5L, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      desired_num_ticks = 6L, months = list(), id = NULL
+    ) {
+      super$initialize(interval = interval,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        num_minor_ticks = num_minor_ticks, name = name,
+        js_event_callbacks = js_event_callbacks,
+        desired_num_ticks = desired_num_ticks, id = id)
+      types <- bk_prop_types[["MonthsTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The intervals of months to use.
+    # > Seq(Int)
+    months = NULL
+  )
+)
+
+# Generate nice ticks across different date and time scales.
+DatetimeTicker <- R6::R6Class("DatetimeTicker",
+  inherit = CompositeTicker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      num_minor_ticks = 0L, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tickers = list("{\"id\": \"682907bc-52db-4be8-9ddf-48fc9ebb3bbe\",
+      \"max_interval\": 500.0, \"num_minor_ticks\": 0}", "{\"base\":
+      60, \"id\": \"f75ad45d-c173-4e17-9c0d-fd1482eaa48a\",
+      \"mantissas\": [1, 2, 5, 10, 15, 20, 30], \"max_interval\":
+      1800000.0, \"min_interval\": 1000.0, \"num_minor_ticks\": 0}",
+      "{\"base\": 24, \"id\": \"d718e7c1-9e05-4e49-8490-adf2932df1f4\",
+      \"mantissas\": [1, 2, 4, 6, 8, 12], \"max_interval\": 43200000.0,
+      \"min_interval\": 3600000.0, \"num_minor_ticks\": 0}",
+      "{\"days\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+      16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+      \"id\": \"ef14e3e4-83fd-4972-9d14-96252dd67ae4\"}", "{\"days\":
+      [1, 4, 7, 10, 13, 16, 19, 22, 25, 28], \"id\":
+      \"2fc39ad8-d3cd-4918-b37a-2660e052dc67\"}", "{\"days\": [1, 8,
+      15, 22], \"id\": \"b111ece4-3aa1-46d9-846d-4eaa512ba922\"}",
+      "{\"days\": [1, 15], \"id\":
+      \"661468ff-0359-4a1c-8de3-58e4b7d48647\"}", "{\"id\":
+      \"39681e8d-d769-48ce-af20-7861b4d27deb\", \"months\": [0, 1, 2,
+      3, 4, 5, 6, 7, 8, 9, 10, 11]}", "{\"id\":
+      \"2d9a40d3-0790-4d69-9011-5cdaec479e20\", \"months\": [0, 2, 4,
+      6, 8, 10]}", "{\"id\": \"1204f346-3bec-47d9-b3e5-11015275080f\",
+      \"months\": [0, 4, 8]}", "{\"id\":
+      \"02d1e886-8d15-4c0c-a072-7a1cb13493b1\", \"months\": [0, 6]}",
+      "{\"id\": \"5c162849-2f30-4e79-bef7-87ce8f183845\"}"),
+      desired_num_ticks = 6L, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        num_minor_ticks = num_minor_ticks, name = name,
+        js_event_callbacks = js_event_callbacks, tickers = tickers,
+        desired_num_ticks = desired_num_ticks, id = id)
+      types <- bk_prop_types[["DatetimeTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+#
+TileRenderer <- R6::R6Class("TileRenderer",
+  inherit = DataRenderer,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      tile_source = NULL, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      level = "underlay", name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), y_range_name = "default", visible = TRUE,
+      alpha = 1, x_range_name = "default", render_parents = TRUE, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        visible = visible, subscribed_events = subscribed_events,
+        tags = tags, js_property_callbacks = js_property_callbacks,
+        level = level, name = name, id = id)
+      types <- bk_prop_types[["TileRenderer"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Local data source to use when rendering glyphs on the plot.
+    # > Instance(TileSource)
+    tile_source = NULL,
+    # A particular (named) y-range to use for computing screen locations when
+    # rendering glyphs on the plot. If unset, use the default y-range.
+    # > String
+    y_range_name = NULL,
+    # tile opacity 0.0 - 1.0
+    # > Float
+    alpha = NULL,
+    # A particular (named) x-range to use for computing screen locations when
+    # rendering glyphs on the plot. If unset, use the default x-range.
+    # > String
+    x_range_name = NULL,
+    # Flag enable/disable drawing of parent tiles while waiting for new tiles
+    # to arrive. Default value is True.
+    # > Bool
+    render_parents = NULL
+  )
+)
+
+# A panel widget with navigation tabs.
+#
+# Example -------
+#
+# .. bokeh-plot::
+# ../sphinx/source/docs/user_guide/examples/interaction_tab_panes.py
+# :source-position: below
+Tabs <- R6::R6Class("Tabs",
+  inherit = Widget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, tabs = list(), name = NULL, active = 0L,
+      disabled = FALSE, width = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), css_classes = NULL, sizing_mode = "fixed",
+      id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Tabs"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A callback to run in the browser whenever the button is activated.
+    # > Instance(Callback)
+    callback = NULL,
+    # The list of child panel widgets.
+    # > List(Instance(Panel))
+    tabs = NULL,
+    # The index of the active tab.
+    # > Int
+    active = NULL
+  )
+)
+
+#
+GlyphRenderer <- R6::R6Class("GlyphRenderer",
+  inherit = DataRenderer,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), selection_glyph = "auto", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      hover_glyph = NULL, level = "glyph", name = NULL, data_source = NULL,
+      y_range_name = "default", visible = TRUE,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      glyph = NULL, muted = FALSE, muted_glyph = NULL,
+      x_range_name = "default", nonselection_glyph = "auto", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        visible = visible, subscribed_events = subscribed_events,
+        tags = tags, js_property_callbacks = js_property_callbacks,
+        level = level, name = name, id = id)
+      types <- bk_prop_types[["GlyphRenderer"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # An optional glyph used for selected points.
+    #
+    # If set to "auto" then the standard glyph will be used for selected
+    # points.
+    # > Either(Auto, Instance(Glyph))
+    selection_glyph = NULL,
+    # An optional glyph used for inspected points, e.g., those that are being
+    # hovered over by a HoverTool.
+    # > Instance(Glyph)
+    hover_glyph = NULL,
+    # Local data source to use when rendering glyphs on the plot.
+    # > Instance(DataSource)
+    data_source = NULL,
+    # A particular (named) y-range to use for computing screen locations when
+    # rendering glyphs on the plot. If unset, use the default -range.
+    # > String
+    y_range_name = NULL,
+    # The glyph to render, in conjunction with the supplied data source and
+    # ranges.
+    # > Instance(Glyph)
+    glyph = NULL,
+    #
+    # > Bool
+    muted = NULL,
+    #
+    # > Instance(Glyph)
+    muted_glyph = NULL,
+    # A particular (named) x-range to use for computing screen locations when
+    # rendering glyphs on the plot. If unset, use the default x-range.
+    # > String
+    x_range_name = NULL,
+    # An optional glyph used for explicitly non-selected points (i.e.,
+    # non-selected when there are other points that are selected, but not
+    # when no points at all are selected.)
+    #
+    # If set to "auto" then a glyph with a low alpha value (0.1) will be used
+    # for non-selected points.
+    # > Either(Auto, Instance(Glyph))
+    nonselection_glyph = NULL
+  )
+)
+
+# A layoutable toolbar that can accept the tools of multiple plots, and
+# can merge the tools into a single button for convenience.
+ToolbarBox <- R6::R6Class("ToolbarBox",
+  inherit = Box,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, toolbar_location = "right",
+      logo = "normal", width = NULL, css_classes = NULL, children = list(),
+      sizing_mode = "fixed", merge_tools = TRUE, tools = list(), id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        children = children, sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["ToolbarBox"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Should the toolbar be presented as if it was stuck to the `above`,
+    # `right`, `left`, `below` edge of a plot. Default is `right`.
+    # > Enum('above', 'below', 'left', 'right')
+    toolbar_location = NULL,
+    # What version of the Bokeh logo to display on the toolbar. If set to
+    # None, no logo will be displayed.
+    # > Enum('normal', 'grey')
+    logo = NULL,
+    # Merge all the tools together so there is one tool to control all the
+    # plots.
+    # > Bool
+    merge_tools = NULL,
+    # A list of tools to add to the plot.
+    # > List(Instance(Tool))
+    tools = NULL
+  )
+)
+
+# Render annuli.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Annulus.py :source-position: below
+Annulus <- R6::R6Class("Annulus",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), inner_radius = NULL, line_join = "miter",
+      tags = list(), line_width = 1L, outer_radius_units = "data",
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      outer_radius = NULL, line_dash = list(), y = NULL, name = NULL,
+      line_dash_offset = 0L, js_event_callbacks = structure(list(), .Names
+      = character(0)), fill_color = "gray", line_alpha = 1,
+      inner_radius_units = "data", x = NULL, fill_alpha = 1, line_cap = "butt",
+      line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Annulus"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The inner radii of the annuli.
+    # > DistanceSpec(units_default='data')
+    inner_radius = NULL,
+    # The line join values for the annuli.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the annuli.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    #
+    # > Enum('screen', 'data')
+    outer_radius_units = NULL,
+    # The outer radii of the annuli.
+    # > DistanceSpec(units_default='data')
+    outer_radius = NULL,
+    # The line dash values for the annuli.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-coordinates of the center of the annuli.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line dash offset values for the annuli.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the annuli.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the annuli.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    #
+    # > Enum('screen', 'data')
+    inner_radius_units = NULL,
+    # The x-coordinates of the center of the annuli.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    # The fill alpha values for the annuli.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The line cap values for the annuli.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the annuli.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# Combine different tickers at different scales.
+#
+# Uses the ``min_interval`` and ``max_interval`` interval attributes of
+# the tickers to select the appropriate ticker at different scales.
+CompositeTicker <- R6::R6Class("CompositeTicker",
+  inherit = ContinuousTicker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      num_minor_ticks = 5L, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tickers = list(), desired_num_ticks = 6L, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        desired_num_ticks = desired_num_ticks,
+        num_minor_ticks = num_minor_ticks, name = name, id = id)
+      types <- bk_prop_types[["CompositeTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A list of Ticker objects to combine at different scales in order to
+    # generate tick values. The supplied tickers should be in order.
+    # Specifically, if S comes before T, then it should be the case that::
+    #
+    # S.get_max_interval() < T.get_min_interval()
+    # > Seq(Instance(Ticker))
+    tickers = NULL
+  )
+)
+
+# A base class for all range types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Range <- R6::R6Class("Range",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      callback = NULL, name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Range"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A callback to run in the browser whenever the range is updated.
+    # > Instance(Callback)
+    callback = NULL
+  )
+)
+
+# An axis that picks nice numbers for tick locations on a log scale.
+# Configured with a ``LogTickFormatter`` by default.
+LogAxis <- R6::R6Class("LogAxis",
+  inherit = ContinuousAxis,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      minor_tick_line_dash = list(), axis_label_text_color = "#444444",
+      formatter = NULL, js_property_callbacks = structure(list(), .Names =
+      character(0)), level = "overlay", ticker = NULL,
+      axis_label_text_alpha = 1, axis_line_width = 1L, minor_tick_in = 0L,
+      minor_tick_line_cap = "butt", axis_line_alpha = 1, axis_label = "",
+      axis_line_join = "miter", major_tick_line_cap = "butt",
+      major_label_text_font_style = "normal", bounds = "auto",
+      minor_tick_line_width = 1L, axis_label_text_baseline = "bottom",
+      major_tick_line_dash = list(), minor_tick_out = 4L,
+      major_label_text_align = "center",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      major_label_overrides = structure(list(), .Names = character(0)),
+      y_range_name = "default", minor_tick_line_join = "miter",
+      visible = TRUE, major_label_orientation = "horizontal",
+      minor_tick_line_color = "black", axis_label_text_font = "helvetica",
+      major_tick_in = 2L, major_tick_line_alpha = 1,
+      axis_label_text_font_style = "italic",
+      major_label_text_font_size = list(value = "8pt"),
+      subscribed_events = list(), axis_line_dash = list(),
+      major_label_text_color = "#444444", tags = list(),
+      major_tick_line_join = "miter", major_tick_out = 6L, name = NULL,
+      major_label_text_font = "helvetica", x_range_name = "default",
+      axis_label_text_align = "left", minor_tick_line_alpha = 1,
+      major_tick_line_dash_offset = 0L,
+      major_label_text_baseline = "alphabetic", axis_line_cap = "butt",
+      major_tick_line_width = 1L, axis_line_dash_offset = 0L,
+      major_tick_line_color = "black", plot = NULL,
+      axis_label_text_font_size = list(value = "10pt"),
+      minor_tick_line_dash_offset = 0L, axis_label_standoff = 5L,
+      axis_line_color = "black", major_label_text_alpha = 1,
+      major_label_standoff = 5L, id = NULL
+    ) {
+      super$initialize(minor_tick_line_dash = minor_tick_line_dash,
+        axis_label_text_color = axis_label_text_color,
+        formatter = formatter,
+        js_property_callbacks = js_property_callbacks, level = level,
+        ticker = ticker, axis_label_text_alpha = axis_label_text_alpha,
+        axis_line_width = axis_line_width, minor_tick_in = minor_tick_in,
+        minor_tick_line_cap = minor_tick_line_cap,
+        axis_line_alpha = axis_line_alpha, axis_label = axis_label,
+        axis_line_join = axis_line_join,
+        major_tick_line_cap = major_tick_line_cap,
+        major_label_text_font_style = major_label_text_font_style,
+        bounds = bounds, minor_tick_line_width = minor_tick_line_width,
+        axis_label_text_baseline = axis_label_text_baseline,
+        major_tick_line_dash = major_tick_line_dash,
+        minor_tick_out = minor_tick_out,
+        major_label_text_align = major_label_text_align,
+        js_event_callbacks = js_event_callbacks,
+        major_label_overrides = major_label_overrides,
+        y_range_name = y_range_name,
+        minor_tick_line_join = minor_tick_line_join, visible = visible,
+        major_label_orientation = major_label_orientation,
+        minor_tick_line_color = minor_tick_line_color,
+        axis_label_text_font = axis_label_text_font,
+        major_tick_in = major_tick_in,
+        major_tick_line_alpha = major_tick_line_alpha,
+        axis_label_text_font_style = axis_label_text_font_style,
+        major_label_text_font_size = major_label_text_font_size,
+        subscribed_events = subscribed_events,
+        axis_line_dash = axis_line_dash,
+        major_label_text_color = major_label_text_color, tags = tags,
+        major_tick_line_join = major_tick_line_join,
+        major_tick_out = major_tick_out, name = name,
+        major_label_text_font = major_label_text_font,
+        x_range_name = x_range_name,
+        axis_label_text_align = axis_label_text_align,
+        minor_tick_line_alpha = minor_tick_line_alpha,
+        major_tick_line_dash_offset = major_tick_line_dash_offset,
+        major_label_text_baseline = major_label_text_baseline,
+        axis_line_cap = axis_line_cap,
+        major_tick_line_width = major_tick_line_width,
+        axis_line_dash_offset = axis_line_dash_offset,
+        major_tick_line_color = major_tick_line_color, plot = plot,
+        axis_label_text_font_size = axis_label_text_font_size,
+        minor_tick_line_dash_offset = minor_tick_line_dash_offset,
+        axis_label_standoff = axis_label_standoff,
+        axis_line_color = axis_line_color,
+        major_label_text_alpha = major_label_text_alpha,
+        major_label_standoff = major_label_standoff, id = id)
+      types <- bk_prop_types[["LogAxis"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A two-state toggle button.
+Toggle <- R6::R6Class("Toggle",
+  inherit = AbstractButton,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, icon = NULL, button_type = "default",
+      name = NULL, active = FALSE, disabled = FALSE, width = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      css_classes = NULL, sizing_mode = "fixed", label = "Toggle", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        callback = callback, icon = icon, button_type = button_type,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, label = label, id = id)
+      types <- bk_prop_types[["Toggle"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The initial state of a button. Also used to trigger ``on_click`` event
+    # handler.
+    # > Bool
+    active = NULL
+  )
+)
+
+# Slider-based number selection widget.
+Slider <- R6::R6Class("Slider",
+  inherit = InputWidget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      callback_policy = "throttle", subscribed_events = list(),
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), height = NULL, callback = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      disabled = FALSE, end = 1L, width = NULL, value = 0.5,
+      callback_throttle = 200L, step = 0.1, title = "", start = 0L,
+      sizing_mode = "fixed", orientation = "horizontal", css_classes = NULL,
+      id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        title = title, sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Slider"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # When the callback is initiated. This parameter can take on only one of
+    # three options:
+    #
+    # * "continuous": the callback will be executed immediately for each
+    # movement of the slider * "throttle": the callback will be executed at
+    # most every ``callback_throttle`` milliseconds.  * "mouseup": the
+    # callback will be executed only once when the slider is released.
+    #
+    # The "mouseup" policy is intended for scenarios in which the callback is
+    # expensive in time.
+    # > Enum('continuous', 'throttle', 'mouseup')
+    callback_policy = NULL,
+    # A callback to run in the browser whenever the current Slider value
+    # changes.
+    # > Instance(Callback)
+    callback = NULL,
+    # The maximum allowable value.
+    # > Float
+    end = NULL,
+    # Initial or selected value.
+    # > Float
+    value = NULL,
+    # Number of microseconds to pause between callback calls as the slider is
+    # moved.
+    # > Float
+    callback_throttle = NULL,
+    # The step between consecutive values.
+    # > Float
+    step = NULL,
+    # The minimum allowable value.
+    # > Float
+    start = NULL,
+    # Orient the slider either horizontally (default) or vertically.
+    # > Enum('horizontal', 'vertical')
+    orientation = NULL
+  )
+)
+
+# Generate ticks spaced apart even numbers of years.
+YearsTicker <- R6::R6Class("YearsTicker",
+  inherit = SingleIntervalTicker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      interval = NULL, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      num_minor_ticks = 5L, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      desired_num_ticks = 6L, id = NULL
+    ) {
+      super$initialize(interval = interval,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        num_minor_ticks = num_minor_ticks, name = name,
+        js_event_callbacks = js_event_callbacks,
+        desired_num_ticks = desired_num_ticks, id = id)
+      types <- bk_prop_types[["YearsTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A base class for tools that perform "inspections", e.g. ``HoverTool``.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Inspection <- R6::R6Class("Inspection",
+  inherit = Tool,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
+      toggleable = TRUE, js_property_callbacks = structure(list(), .Names =
+      character(0)), plot = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["Inspection"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Whether an on/off toggle button should appear in the toolbar for this
+    # inpection tool. If ``False``, the viewers of a plot will not be able to
+    # toggle the inspector on or off using the toolbar.
+    # > Bool
+    toggleable = NULL
+  )
+)
+
+#
+LinearScale <- R6::R6Class("LinearScale",
+  inherit = Scale,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["LinearScale"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A base class that defines common properties for all button types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+AbstractButton <- R6::R6Class("AbstractButton",
+  inherit = Widget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, icon = NULL, button_type = "default",
+      name = NULL, js_event_callbacks = structure(list(), .Names =
+      character(0)), disabled = FALSE, width = NULL, css_classes = NULL,
+      sizing_mode = "fixed", label = "Button", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["AbstractButton"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A callback to run in the browser whenever the button is activated.
+    # > Instance(Callback)
+    callback = NULL,
+    # An optional image appearing to the left of button's text.
+    # > Instance(AbstractIcon)
+    icon = NULL,
+    # A style for the button, signifying it's role.
+    # > Enum('default', 'primary', 'success', 'warning', 'danger', 'link')
+    button_type = NULL,
+    # The text label for the button to display.
+    # > String
+    label = NULL
+  )
+)
+
+# Base class for arrow heads.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+ArrowHead <- R6::R6Class("ArrowHead",
+  inherit = Annotation,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      level = "annotation", plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      visible = TRUE, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["ArrowHead"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# *toolbar icon*: |poly_select_icon|
+#
+# The polygon selection tool allows users to make selections on a Plot by
+# indicating a polygonal region with mouse clicks. single clicks (or
+# taps) add successive points to the definition of the polygon, and a
+# double click (or tap) indicates the selection region is ready.
+#
+# See :ref:`userguide_styling_selected_unselected_glyphs` for information
+# on styling selected and unselected glyphs.
+#
+# .. note:: Selections can be comprised of multiple regions, even those
+# made by different selection tools. Hold down the <<shift>> key while
+# making a selection to append the new selection to any previous
+# selection that might exist.
+#
+# .. |poly_select_icon| image:: /_images/icons/PolygonSelect.png :height:
+# 18pt
+PolySelectTool <- R6::R6Class("PolySelectTool",
+  inherit = Tap,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      overlay = NULL, subscribed_events = list(), renderers = list(),
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      names = list(), id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["PolySelectTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A shaded annotation drawn to indicate the selection region.
+    # > Instance(PolyAnnotation)
+    overlay = NULL,
+    # An explicit list of renderers to hit test again. If unset, defaults to
+    # all renderers on a plot.
+    # > List(Instance(Renderer))
+    renderers = NULL,
+    # A list of names to query for. If set, only renderers that have a
+    # matching value for their ``name`` attribute will be used.
+    # > List(String)
+    names = NULL
+  )
+)
+
+# Display tick values from continuous ranges as powers of some base.
+#
+# Most often useful in conjunction with a ``LogTicker``.
+LogTickFormatter <- R6::R6Class("LogTickFormatter",
+  inherit = TickFormatter,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      ticker = NULL, js_event_callbacks = structure(list(), .Names =
+      character(0)), subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["LogTickFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The corresponding ``LogTicker``, used to determine the correct base to
+    # use. If unset, the formatter will use base 10 as a default.
+    # > Instance(Ticker)
+    ticker = NULL
+  )
+)
+
+# Render arcs.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Arc.py :source-position: below
+Arc <- R6::R6Class("Arc",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, radius = NULL, end_angle = NULL, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L, line_alpha = 1,
+      radius_units = "data", line_cap = "butt", line_color = "black",
+      start_angle_units = "rad", js_event_callbacks = structure(list(),
+      .Names = character(0)), start_angle = NULL, x = NULL,
+      end_angle_units = "rad", direction = "anticlock", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Arc"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the arcs.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the arcs.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # Radius of the arc.
+    # > DistanceSpec(units_default='data')
+    radius = NULL,
+    # The angles to end the arcs, as measured from the horizontal.
+    # > AngleSpec(units_default='rad')
+    end_angle = NULL,
+    # The line dash values for the arcs.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-coordinates of the center of the arcs.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line dash offset values for the arcs.
+    # > Int
+    line_dash_offset = NULL,
+    # The line alpha values for the arcs.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    #
+    # > Enum('screen', 'data')
+    radius_units = NULL,
+    # The line cap values for the arcs.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the arcs.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    #
+    # > Enum('deg', 'rad')
+    start_angle_units = NULL,
+    # The angles to start the arcs, as measured from the horizontal.
+    # > AngleSpec(units_default='rad')
+    start_angle = NULL,
+    # The x-coordinates of the center of the arcs.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    #
+    # > Enum('deg', 'rad')
+    end_angle_units = NULL,
+    # Which direction to stroke between the start and end angles.
+    # > Enum('clock', 'anticlock')
+    direction = NULL
+  )
+)
+
+# A base class for non-categorical ticker types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+ContinuousTicker <- R6::R6Class("ContinuousTicker",
+  inherit = Ticker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      desired_num_ticks = 6L, num_minor_ticks = 5L, name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["ContinuousTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A desired target number of major tick positions to generate across the
+    # plot range.
+    #
+    # .. note: This value is a suggestion, and ticker subclasses may ignore
+    # it entirely, or use it only as an ideal goal to approach as well as can
+    # be, in the context of a specific ticking strategy.
+    # > Int
+    desired_num_ticks = NULL,
+    # The number of minor tick positions to generate between adjacent major
+    # tick values.
+    # > Int
+    num_minor_ticks = NULL
+  )
+)
+
+# Base class for glyphs that are simple markers with line and fill
+# properties, located at an (x, y) location with a specified size.
+#
+# .. note:: For simplicity, all markers have both line and fill
+# properties declared, however some markers (`Asterisk`, `Cross`, `X`)
+# only draw lines. For these markers, the fill values are simply ignored.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Marker <- R6::R6Class("Marker",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Marker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the markers.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the markers.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    #
+    # > Enum('deg', 'rad')
+    angle_units = NULL,
+    # The size (diameter) values for the markers in screen space units.
+    # > ScreenDistanceSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    size = NULL,
+    # The line dash values for the markers.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-axis coordinates for the center of the markers.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line dash offset values for the markers.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the markers.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the markers.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The x-axis coordinates for the center of the markers.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    # The angles to rotate the markers.
+    # > AngleSpec(units_default='rad')
+    angle = NULL,
+    # The fill alpha values for the markers.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The line cap values for the markers.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the markers.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# Select cell editor.
+SelectEditor <- R6::R6Class("SelectEditor",
+  inherit = CellEditor,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      options = list(), subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["SelectEditor"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The list of options to select from.
+    # > List(String)
+    options = NULL
+  )
+)
+
+# A base class for data source types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+DataSource <- R6::R6Class("DataSource",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      callback = NULL, name = NULL, selected = structure(list(`1d` =
+      structure(list(indices = list()), .Names = "indices"), `2d` =
+      structure(list(indices = structure(list(), .Names =
+      character(0))), .Names = "indices"), `0d` = structure(list(glyph
+      = NULL, indices = list()), .Names = c("glyph", "indices"))),
+      .Names = c("1d", "2d", "0d")), id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["DataSource"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A callback to run in the browser whenever the selection is changed.
+    # > Instance(Callback)
+    callback = NULL,
+    # A dict to indicate selected indices on different dimensions on this
+    # DataSource. Keys are:
+    #
+    # .. code-block:: python
+    #
+    # # selection information for line and patch glyphs '0d' : { # the glyph
+    # that was selected 'glyph': None
+    #
+    # # array with the [smallest] index of the segment of the line that was
+    # hit 'indices': [] }
+    #
+    # # selection for most (point-like) glyphs, except lines and patches
+    # '1d': { # indices of the points included in the selection indices: [] }
+    #
+    # # selection information for multiline and patches glyphs '2d': { #
+    # mapping of indices of the multiglyph to array of glyph indices that
+    # were hit # e.g. {3: [5, 6], 4: [5]} indices: {} }
+    # > Dict(String, Dict(String, Any))
+    selected = NULL
+  )
+)
+
+# *toolbar icon*: |box_select_icon|
+#
+# The box selection tool allows users to make selections on a Plot by
+# indicating a rectangular region by dragging the mouse or a finger over
+# the plot region. The end of the drag event indicates the selection
+# region is ready.
+#
+# See :ref:`userguide_styling_selected_unselected_glyphs` for information
+# on styling selected and unselected glyphs.
+#
+# .. |box_select_icon| image:: /_images/icons/BoxSelect.png :height: 18pt
+BoxSelectTool <- R6::R6Class("BoxSelectTool",
+  inherit = Drag,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      overlay = NULL, subscribed_events = list(), renderers = list(),
+      dimensions = "both", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      callback = NULL, plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      select_every_mousemove = FALSE, names = list(), id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["BoxSelectTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A shaded annotation drawn to indicate the selection region.
+    # > Instance(BoxAnnotation)
+    overlay = NULL,
+    # An explicit list of renderers to hit test again. If unset, defaults to
+    # all renderers on a plot.
+    # > List(Instance(Renderer))
+    renderers = NULL,
+    # Which dimensions the box selection is to be free in. By default, users
+    # may freely draw selections boxes with any dimensions. If only "width"
+    # is supplied, the box will be constrained to span the entire vertical
+    # space of the plot, only the horizontal dimension can be controlled. If
+    # only "height" is supplied, the box will be constrained to span the
+    # entire horizontal space of the plot, and the vertical dimension can be
+    # controlled.
+    # > Enum('width', 'height', 'both')
+    dimensions = NULL,
+    # A callback to run in the browser on completion of drawing a selection
+    # box.  The cb_data parameter that is available to the Callback code will
+    # contain one BoxSelectTool-specific field:
+    #
+    # :geometry: object containing the coordinates of the selection box
+    # > Instance(Callback)
+    callback = NULL,
+    # Whether a selection computation should happen on every mouse event, or
+    # only once, when the selection region is completed. Default: False
+    # > Bool
+    select_every_mousemove = NULL,
+    # A list of names to query for. If set, only renderers that have a
+    # matching value for their ``name`` attribute will be used.
+    # > List(String)
+    names = NULL
+  )
+)
+
+# A button tool to provide a "help" link to users.
+#
+# The hover text can be customized through the ``help_tooltip`` attribute
+# and the redirect site overridden as well.
+HelpTool <- R6::R6Class("HelpTool",
+  inherit = Action,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      redirect = "http://bokeh.pydata.org/en/latest/docs/user_guide/tools.html#built-in-tools",
+      help_tooltip = "Click the question mark to learn more about Bokeh
+      plot tools.", subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      plot = NULL, name = NULL, js_event_callbacks = structure(list(), .Names
+      = character(0)), id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["HelpTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Site to be redirected through upon click.
+    # > String
+    redirect = NULL,
+    # Tooltip displayed when hovering over the help icon.
+    # > String
+    help_tooltip = NULL
+  )
+)
+
+# Render a square marker, optionally rotated.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Square.py :source-position: below
+Square <- R6::R6Class("Square",
+  inherit = Marker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["Square"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+#
+LegendItem <- R6::R6Class("LegendItem",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), renderers = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      label = NULL, name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["LegendItem"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A list of the glyph renderers to draw in the legend. If ``label`` is a
+    # field, then all data_sources of renderers must be the same.
+    # > List(Instance(GlyphRenderer))
+    renderers = NULL,
+    # A label for this legend. Can be a string, or a column of a
+    # ColumnDataSource. If ``label`` is a field, then it must be in the
+    # renderers' data_source.
+    # > StringSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    label = NULL
+  )
+)
+
+# *toolbar icon*: |box_zoom_icon|
+#
+# The box zoom tool allows users to define a rectangular region of a Plot
+# to zoom to by dragging he mouse or a finger over the plot region. The
+# end of the drag event indicates the selection region is ready.
+#
+# .. |box_zoom_icon| image:: /_images/icons/BoxZoom.png :height: 18pt
+BoxZoomTool <- R6::R6Class("BoxZoomTool",
+  inherit = Drag,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      overlay = NULL, subscribed_events = list(), dimensions = "both",
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      match_aspect = FALSE, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["BoxZoomTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A shaded annotation drawn to indicate the selection region.
+    # > Instance(BoxAnnotation)
+    overlay = NULL,
+    # Which dimensions the zoom box is to be free in. By default, users may
+    # freely draw zoom boxes with any dimensions. If only "width" is
+    # supplied, the box will be constrained to span the entire vertical space
+    # of the plot, only the horizontal dimension can be controlled. If only
+    # "height" is supplied, the box will be constrained to span the entire
+    # horizontal space of the plot, and the vertical dimension can be
+    # controlled.
+    # > Enum('width', 'height', 'both')
+    dimensions = NULL,
+    # Whether the box zoom region should be restricted to have the same
+    # aspect ratio as the plot region.
+    #
+    # .. note:: If the tool is restricted to one dimension, this value has no
+    # effect.
+    # > Bool
+    match_aspect = NULL
+  )
+)
+
+# Render asterisk '*' markers.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Asterisk.py :source-position: below
+Asterisk <- R6::R6Class("Asterisk",
+  inherit = Marker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["Asterisk"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A group of radio boxes.
+RadioGroup <- R6::R6Class("RadioGroup",
+  inherit = Group,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      inline = FALSE, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, name = NULL, active = NULL,
+      disabled = FALSE, width = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), css_classes = NULL, labels = list(),
+      sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(inline = inline,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        callback = callback, name = name,
+        js_event_callbacks = js_event_callbacks, disabled = disabled,
+        width = width, css_classes = css_classes, labels = labels,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["RadioGroup"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The index of the selected radio box, or ``None`` if nothing is
+    # selected.
+    # > Int
+    active = NULL
+  )
+)
+
+# ``IntEditor`` optimized for editing percentages.
+PercentEditor <- R6::R6Class("PercentEditor",
+  inherit = CellEditor,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["PercentEditor"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A base class for all numeric, non-categorical axes types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+ContinuousAxis <- R6::R6Class("ContinuousAxis",
+  inherit = Axis,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      minor_tick_line_dash = list(), axis_label_text_color = "#444444",
+      formatter = NULL, js_property_callbacks = structure(list(), .Names =
+      character(0)), level = "overlay", ticker = NULL,
+      axis_label_text_alpha = 1, axis_line_width = 1L, minor_tick_in = 0L,
+      minor_tick_line_cap = "butt", axis_line_alpha = 1, axis_label = "",
+      axis_line_join = "miter", major_tick_line_cap = "butt",
+      major_label_text_font_style = "normal", bounds = "auto",
+      minor_tick_line_width = 1L, axis_label_text_baseline = "bottom",
+      major_tick_line_dash = list(), minor_tick_out = 4L,
+      major_label_text_align = "center",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      major_label_overrides = structure(list(), .Names = character(0)),
+      y_range_name = "default", minor_tick_line_join = "miter",
+      visible = TRUE, major_label_orientation = "horizontal",
+      minor_tick_line_color = "black", axis_label_text_font = "helvetica",
+      major_tick_in = 2L, major_tick_line_alpha = 1,
+      axis_label_text_font_style = "italic",
+      major_label_text_font_size = list(value = "8pt"),
+      subscribed_events = list(), axis_line_dash = list(),
+      major_label_text_color = "#444444", tags = list(),
+      major_tick_line_join = "miter", major_tick_out = 6L, name = NULL,
+      major_label_text_font = "helvetica", x_range_name = "default",
+      axis_label_text_align = "left", minor_tick_line_alpha = 1,
+      major_tick_line_dash_offset = 0L,
+      major_label_text_baseline = "alphabetic", axis_line_cap = "butt",
+      major_tick_line_width = 1L, axis_line_dash_offset = 0L,
+      major_tick_line_color = "black", plot = NULL,
+      axis_label_text_font_size = list(value = "10pt"),
+      minor_tick_line_dash_offset = 0L, axis_label_standoff = 5L,
+      axis_line_color = "black", major_label_text_alpha = 1,
+      major_label_standoff = 5L, id = NULL
+    ) {
+      super$initialize(minor_tick_line_dash = minor_tick_line_dash,
+        axis_label_text_color = axis_label_text_color,
+        formatter = formatter,
+        js_property_callbacks = js_property_callbacks, level = level,
+        ticker = ticker, axis_label_text_alpha = axis_label_text_alpha,
+        axis_line_width = axis_line_width, minor_tick_in = minor_tick_in,
+        minor_tick_line_cap = minor_tick_line_cap,
+        axis_line_alpha = axis_line_alpha, axis_label = axis_label,
+        axis_line_join = axis_line_join,
+        major_tick_line_cap = major_tick_line_cap,
+        major_label_text_font_style = major_label_text_font_style,
+        bounds = bounds, minor_tick_line_width = minor_tick_line_width,
+        axis_label_text_baseline = axis_label_text_baseline,
+        major_tick_line_dash = major_tick_line_dash,
+        minor_tick_out = minor_tick_out,
+        major_label_text_align = major_label_text_align,
+        js_event_callbacks = js_event_callbacks,
+        major_label_overrides = major_label_overrides,
+        y_range_name = y_range_name,
+        minor_tick_line_join = minor_tick_line_join, visible = visible,
+        major_label_orientation = major_label_orientation,
+        minor_tick_line_color = minor_tick_line_color,
+        axis_label_text_font = axis_label_text_font,
+        major_tick_in = major_tick_in,
+        major_tick_line_alpha = major_tick_line_alpha,
+        axis_label_text_font_style = axis_label_text_font_style,
+        major_label_text_font_size = major_label_text_font_size,
+        subscribed_events = subscribed_events,
+        axis_line_dash = axis_line_dash,
+        major_label_text_color = major_label_text_color, tags = tags,
+        major_tick_line_join = major_tick_line_join,
+        major_tick_out = major_tick_out, name = name,
+        major_label_text_font = major_label_text_font,
+        x_range_name = x_range_name,
+        axis_label_text_align = axis_label_text_align,
+        minor_tick_line_alpha = minor_tick_line_alpha,
+        major_tick_line_dash_offset = major_tick_line_dash_offset,
+        major_label_text_baseline = major_label_text_baseline,
+        axis_line_cap = axis_line_cap,
+        major_tick_line_width = major_tick_line_width,
+        axis_line_dash_offset = axis_line_dash_offset,
+        major_tick_line_color = major_tick_line_color, plot = plot,
+        axis_label_text_font_size = axis_label_text_font_size,
+        minor_tick_line_dash_offset = minor_tick_line_dash_offset,
+        axis_label_standoff = axis_label_standoff,
+        axis_line_color = axis_line_color,
+        major_label_text_alpha = major_label_text_alpha,
+        major_label_standoff = major_label_standoff, id = id)
+      types <- bk_prop_types[["ContinuousAxis"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Generate ticks spaced apart by specific, even multiples of days.
+DaysTicker <- R6::R6Class("DaysTicker",
+  inherit = SingleIntervalTicker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      interval = NULL, days = list(), subscribed_events = list(),
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), num_minor_ticks = 5L, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      desired_num_ticks = 6L, id = NULL
+    ) {
+      super$initialize(interval = interval,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        num_minor_ticks = num_minor_ticks, name = name,
+        js_event_callbacks = js_event_callbacks,
+        desired_num_ticks = desired_num_ticks, id = id)
+      types <- bk_prop_types[["DaysTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The intervals of days to use.
+    # > Seq(Int)
+    days = NULL
+  )
+)
+
+# A base class that defines common properties for all axis types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Axis <- R6::R6Class("Axis",
+  inherit = GuideRenderer,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      minor_tick_line_dash = list(), axis_label_text_color = "#444444",
+      formatter = NULL, js_property_callbacks = structure(list(), .Names =
+      character(0)), level = "overlay", ticker = NULL,
+      axis_label_text_alpha = 1, axis_line_width = 1L, minor_tick_in = 0L,
+      minor_tick_line_cap = "butt", axis_line_alpha = 1, axis_label = "",
+      axis_line_join = "miter", major_tick_line_cap = "butt",
+      major_label_text_font_style = "normal", bounds = "auto",
+      minor_tick_line_width = 1L, axis_label_text_baseline = "bottom",
+      major_tick_line_dash = list(), minor_tick_out = 4L,
+      major_label_text_align = "center",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      major_label_overrides = structure(list(), .Names = character(0)),
+      y_range_name = "default", minor_tick_line_join = "miter",
+      visible = TRUE, major_label_orientation = "horizontal",
+      minor_tick_line_color = "black", axis_label_text_font = "helvetica",
+      major_tick_in = 2L, major_tick_line_alpha = 1,
+      axis_label_text_font_style = "italic",
+      major_label_text_font_size = list(value = "8pt"),
+      subscribed_events = list(), axis_line_dash = list(),
+      major_label_text_color = "#444444", tags = list(),
+      major_tick_line_join = "miter", major_tick_out = 6L, name = NULL,
+      major_label_text_font = "helvetica", x_range_name = "default",
+      axis_label_text_align = "left", minor_tick_line_alpha = 1,
+      major_tick_line_dash_offset = 0L,
+      major_label_text_baseline = "alphabetic", axis_line_cap = "butt",
+      major_tick_line_width = 1L, axis_line_dash_offset = 0L,
+      major_tick_line_color = "black", plot = NULL,
+      axis_label_text_font_size = list(value = "10pt"),
+      minor_tick_line_dash_offset = 0L, axis_label_standoff = 5L,
+      axis_line_color = "black", major_label_text_alpha = 1,
+      major_label_standoff = 5L, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["Axis"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line dash of the minor ticks.
+    # > DashPattern
+    minor_tick_line_dash = NULL,
+    # The text color of the axis label.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    axis_label_text_color = NULL,
+    # A TickFormatter to use for formatting the visual appearance of ticks.
+    # > Instance(TickFormatter)
+    formatter = NULL,
+    # A Ticker to use for computing locations of axis components.
+    #
+    # The property may also be passed a sequence of floating point numbers as
+    # a shorthand for creating and configuring a ``FixedTicker``, e.g. the
+    # following code
+    #
+    # .. code-block:: python
+    #
+    # from bokeh.plotting import figure
+    #
+    # p = figure() p.xaxis.ticker = [10, 20, 37.4]
+    #
+    # is equivalent to:
+    #
+    # .. code-block:: python
+    #
+    # from bokeh.plotting import figure from bokeh.models.tickers import
+    # FixedTicker
+    #
+    # p = figure() p.xaxis.ticker = FixedTicker(ticks=[10, 20, 37.4])
+    # > Instance(Ticker)
+    ticker = NULL,
+    # The text alpha of the axis label.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    axis_label_text_alpha = NULL,
+    # The line width of the axis line.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    axis_line_width = NULL,
+    # The distance in pixels that minor ticks should extend into the main
+    # plot area.
+    # > Int
+    minor_tick_in = NULL,
+    # The line cap of the minor ticks.
+    # > Enum('butt', 'round', 'square')
+    minor_tick_line_cap = NULL,
+    # The line alpha of the axis line.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    axis_line_alpha = NULL,
+    # A text label for the axis, displayed parallel to the axis rule.
+    #
+    # .. note:: LaTeX notation is not currently supported; please see
+    # :bokeh-issue:`647` to track progress or contribute.
+    # > String
+    axis_label = NULL,
+    # The line join of the axis line.
+    # > Enum('miter', 'round', 'bevel')
+    axis_line_join = NULL,
+    # The line cap of the major ticks.
+    # > Enum('butt', 'round', 'square')
+    major_tick_line_cap = NULL,
+    # The text font style of the major tick labels.
+    # > Enum('normal', 'italic', 'bold')
+    major_label_text_font_style = NULL,
+    # Bounds for the rendered axis. If unset, the axis will span the entire
+    # plot in the given dimension.
+    # > Either(Auto, Tuple(Float, Float), Tuple(Datetime, Datetime))
+    bounds = NULL,
+    # The line width of the minor ticks.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    minor_tick_line_width = NULL,
+    # The text baseline of the axis label.
+    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
+    axis_label_text_baseline = NULL,
+    # The line dash of the major ticks.
+    # > DashPattern
+    major_tick_line_dash = NULL,
+    # The distance in pixels that major ticks should extend out of the main
+    # plot area.
+    # > Int
+    minor_tick_out = NULL,
+    # The text align of the major tick labels.
+    # > Enum('left', 'right', 'center')
+    major_label_text_align = NULL,
+    # Provide explicit tick label values for specific tick locations that
+    # override normal formatting.
+    # > Dict(Either(Float, String), String)
+    major_label_overrides = NULL,
+    # A particular (named) y-range to use for computing screen locations when
+    # rendering an axis on the plot. If unset, use the default y-range.
+    # > String
+    y_range_name = NULL,
+    # The line join of the minor ticks.
+    # > Enum('miter', 'round', 'bevel')
+    minor_tick_line_join = NULL,
+    # What direction the major label text should be oriented. If a number is
+    # supplied, the angle of the text is measured from horizontal.
+    # > Either(Enum('horizontal', 'vertical'), Float)
+    major_label_orientation = NULL,
+    # The line color of the minor ticks.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    minor_tick_line_color = NULL,
+    # The text font of the axis label.
+    # > String
+    axis_label_text_font = NULL,
+    # The distance in pixels that major ticks should extend into the main
+    # plot area.
+    # > Int
+    major_tick_in = NULL,
+    # The line alpha of the major ticks.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    major_tick_line_alpha = NULL,
+    # The text font style of the axis label.
+    # > Enum('normal', 'italic', 'bold')
+    axis_label_text_font_style = NULL,
+    # The text font size of the major tick labels.
+    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    major_label_text_font_size = NULL,
+    # The line dash of the axis line.
+    # > DashPattern
+    axis_line_dash = NULL,
+    # The text color of the major tick labels.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    major_label_text_color = NULL,
+    # The line join of the major ticks.
+    # > Enum('miter', 'round', 'bevel')
+    major_tick_line_join = NULL,
+    # The distance in pixels that major ticks should extend out of the main
+    # plot area.
+    # > Int
+    major_tick_out = NULL,
+    # The text font of the major tick labels.
+    # > String
+    major_label_text_font = NULL,
+    # A particular (named) x-range to use for computing screen locations when
+    # rendering an axis on the plot. If unset, use the default x-range.
+    # > String
+    x_range_name = NULL,
+    # The text align of the axis label.
+    # > Enum('left', 'right', 'center')
+    axis_label_text_align = NULL,
+    # The line alpha of the minor ticks.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    minor_tick_line_alpha = NULL,
+    # The line dash offset of the major ticks.
+    # > Int
+    major_tick_line_dash_offset = NULL,
+    # The text baseline of the major tick labels.
+    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
+    major_label_text_baseline = NULL,
+    # The line cap of the axis line.
+    # > Enum('butt', 'round', 'square')
+    axis_line_cap = NULL,
+    # The line width of the major ticks.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    major_tick_line_width = NULL,
+    # The line dash offset of the axis line.
+    # > Int
+    axis_line_dash_offset = NULL,
+    # The line color of the major ticks.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    major_tick_line_color = NULL,
+    # The text font size of the axis label.
+    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    axis_label_text_font_size = NULL,
+    # The line dash offset of the minor ticks.
+    # > Int
+    minor_tick_line_dash_offset = NULL,
+    # The distance in pixels that the axis labels should be offset from the
+    # tick labels.
+    # > Int
+    axis_label_standoff = NULL,
+    # The line color of the axis line.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    axis_line_color = NULL,
+    # The text alpha of the major tick labels.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    major_label_text_alpha = NULL,
+    # The distance in pixels that the major tick labels should be offset from
+    # the associated ticks.
+    # > Int
+    major_label_standoff = NULL
+  )
+)
+
+# *toolbar icon*: |zoom_in_icon|
+#
+# The zoom-in tool allows users to click a button to zoom in by a fixed
+# amount.
+#
+# .. |zoom_in_icon| image:: /_images/icons/ZoomIn.png :height: 18pt
+ZoomInTool <- R6::R6Class("ZoomInTool",
+  inherit = Action,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      factor = 0.1, subscribed_events = list(), dimensions = "both",
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["ZoomInTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Percentage to zoom for each click of the zoom-in tool.
+    # > Percent
+    factor = NULL,
+    # Which dimensions the zoom-in tool is constrained to act in. By default
+    # the zoom-in zoom tool will zoom in any dimension, but can be configured
+    # to only zoom horizontally across the width of the plot, or vertically
+    # across the height of the plot.
+    # > Enum('width', 'height', 'both')
+    dimensions = NULL
+  )
+)
+
+# Render a single line.
+#
+# The ``Line`` glyph is different from most other glyphs in that the
+# vector of values only produces one glyph on the Plot.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Line.py :source-position: below
+Line <- R6::R6Class("Line",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, line_dash = list(), y = NULL, name = NULL,
+      line_dash_offset = 0L, js_event_callbacks = structure(list(), .Names
+      = character(0)), line_alpha = 1, x = NULL, line_cap = "butt",
+      line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Line"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the line.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the line.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The line dash values for the line.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-coordinates for the points of the line.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line dash offset values for the line.
+    # > Int
+    line_dash_offset = NULL,
+    # The line alpha values for the line.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The x-coordinates for the points of the line.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    # The line cap values for the line.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the line.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# A container for space used to fill an empty spot in a row or column.
+Spacer <- R6::R6Class("Spacer",
+  inherit = LayoutDOM,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Spacer"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Table column widget.
+TableColumn <- R6::R6Class("TableColumn",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), formatter = NULL, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      default_sort = "ascending", field = NULL, sortable = TRUE, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      width = 300L, title = NULL, editor = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["TableColumn"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The cell formatter for this column. By default, a simple string
+    # formatter is used.
+    # > Instance(CellFormatter)
+    formatter = NULL,
+    # The default sorting order. By default ``ascending`` order is used.
+    # > Enum('ascending', 'descending')
+    default_sort = NULL,
+    # The name of the field mapping to a column in the data source.
+    # > String
+    field = NULL,
+    # Whether this column is sortable or not. Note that data table has to
+    # have sorting enabled to allow sorting in general.
+    # > Bool
+    sortable = NULL,
+    # The width or maximum width (depending on data table's configuration) in
+    # pixels of this column.
+    # > Int
+    width = NULL,
+    # The title of this column. If not set, column's data field is used
+    # instead.
+    # > String
+    title = NULL,
+    # The cell editor for this column. By default, a simple string editor is
+    # used.
+    # > Instance(CellEditor)
+    editor = NULL
+  )
+)
+
+# Render a vee-style arrow head.
+VeeHead <- R6::R6Class("VeeHead",
+  inherit = ArrowHead,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, size = 25L, line_dash = list(), plot = NULL,
+      level = "annotation", line_dash_offset = 0L, visible = TRUE,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "black", line_alpha = 1, name = NULL, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["VeeHead"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the arrow head outline.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the arrow head outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The size, in pixels, of the arrow head.
+    # > Float
+    size = NULL,
+    # The line dash values for the arrow head outline.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the arrow head outline.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the arrow head interior.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the arrow head outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The fill alpha values for the arrow head interior.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The line cap values for the arrow head outline.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the arrow head outline.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# Render a tee-style arrow head.
+TeeHead <- R6::R6Class("TeeHead",
+  inherit = ArrowHead,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, size = 25L, line_dash = list(), plot = NULL,
+      level = "annotation", line_dash_offset = 0L, visible = TRUE,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, line_alpha = 1, line_cap = "butt", line_color = "black",
+      id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["TeeHead"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the arrow head outline.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the arrow head outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The size, in pixels, of the arrow head.
+    # > Float
+    size = NULL,
+    # The line dash values for the arrow head outline.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the arrow head outline.
+    # > Int
+    line_dash_offset = NULL,
+    # The line alpha values for the arrow head outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The line cap values for the arrow head outline.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the arrow head outline.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# Number cell formatter.
+NumberFormatter <- R6::R6Class("NumberFormatter",
+  inherit = StringFormatter,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      language = "en", subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      font_style = "normal", name = NULL, rounding = "round",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      format = "0,0", text_color = NULL, text_align = "left", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        font_style = font_style, name = name,
+        js_event_callbacks = js_event_callbacks, text_color = text_color,
+        text_align = text_align, id = id)
+      types <- bk_prop_types[["NumberFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The language to use for formatting language-specific features (e.g.
+    # thousands separator).
+    # > Enum('be-nl', 'chs', 'cs', 'da-dk', 'de-ch', 'de', 'en', 'en-gb', 'es-ES', 'es', 'et', 'fi', 'fr-CA', 'fr-ch', 'fr', 'hu', 'it', 'ja', 'nl-nl', 'pl', 'pt-br', 'pt-pt', 'ru', 'ru-UA', 'sk', 'th', 'tr', 'uk-UA')
+    language = NULL,
+    # Rounding functions (round, floor, ceil) and their synonyms (nearest,
+    # rounddown, roundup).
+    # > Enum('round', 'nearest', 'floor', 'rounddown', 'ceil', 'roundup')
+    rounding = NULL,
+    # The number format, as defined in the following tables:
+    #
+    # **NUMBERS**:
+    #
+    # ============ ============== =============== Number Format String
+    # ============ ============== =============== 10000 '0,0.0000'
+    # 10,000.0000 10000.23 '0,0' 10,000 10000.23 '+0,0' +10,000 -10000
+    # '0,0.0' -10,000.0 10000.1234 '0.000' 10000.123 10000.1234 '0[.]00000'
+    # 10000.12340 -10000 '(0,0.0000)' (10,000.0000) -0.23 '.00' -.23 -0.23
+    # '(.00)' (.23) 0.23 '0.00000' 0.23000 0.23 '0.0[0000]' 0.23 1230974
+    # '0.0a' 1.2m 1460 '0 a' 1 k -104000 '0a' -104k 1 '0o' 1st 52 '0o' 52nd
+    # 23 '0o' 23rd 100 '0o' 100th ============ ============== ===============
+    #
+    # **CURRENCY**:
+    #
+    # =========== =============== ============= Number Format String
+    # =========== =============== ============= 1000.234 '$0,0.00' $1,000.23
+    # 1000.2 '0,0[.]00 $' 1,000.20 $ 1001 '$ 0,0[.]00' $ 1,001 -1000.234
+    # '($0,0)' ($1,000) -1000.234 '$0.00' -$1000.23 1230974 '($ 0.00 a)' $
+    # 1.23 m =========== =============== =============
+    #
+    # **BYTES**:
+    #
+    # =============== =========== ============ Number Format String
+    # =============== =========== ============ 100 '0b' 100B 2048 '0 b' 2 KB
+    # 7884486213 '0.0b' 7.3GB 3467479682787 '0.000 b' 3.154 TB
+    # =============== =========== ============
+    #
+    # **PERCENTAGES**:
+    #
+    # ============= ============= =========== Number Format String
+    # ============= ============= =========== 1 '0%' 100% 0.974878234
+    # '0.000%' 97.488% -0.43 '0 %' -43 % 0.43 '(0.000 %)' 43.000 %
+    # ============= ============= ===========
+    #
+    # **TIME**:
+    #
+    # ============ ============== ============ Number Format String
+    # ============ ============== ============ 25 '00:00:00' 0:00:25 238
+    # '00:00:00' 0:03:58 63846 '00:00:00' 17:44:06 ============
+    # ============== ============
+    #
+    # For the complete specification, see http://numbrojs.com/format.html
+    # > String
+    format = NULL
+  )
+)
+
+# Generate ticks at fixed, explicitly supplied locations.
+#
+# .. note:: The ``desired_num_ticks`` property is ignored by this Ticker.
+FixedTicker <- R6::R6Class("FixedTicker",
+  inherit = ContinuousTicker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      num_minor_ticks = 5L, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      desired_num_ticks = 6L, ticks = list(), id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        desired_num_ticks = desired_num_ticks,
+        num_minor_ticks = num_minor_ticks, name = name, id = id)
+      types <- bk_prop_types[["FixedTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # List of tick locations.
+    # > Seq(Float)
+    ticks = NULL
+  )
+)
+
+# A group of check boxes.
+CheckboxGroup <- R6::R6Class("CheckboxGroup",
+  inherit = Group,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      inline = FALSE, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, name = NULL, active = list(),
+      disabled = FALSE, width = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), css_classes = NULL, labels = list(),
+      sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(inline = inline,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        callback = callback, name = name,
+        js_event_callbacks = js_event_callbacks, disabled = disabled,
+        width = width, css_classes = css_classes, labels = labels,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["CheckboxGroup"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The list of indices of selected check boxes.
+    # > List(Int)
+    active = NULL
   )
 )
 
@@ -604,13 +5889,13 @@ Transform <- R6::R6Class("Transform",
     specified_args = NULL,
     initialize = function(
       js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
       types <- bk_prop_types[["Transform"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -623,26 +5908,34 @@ Transform <- R6::R6Class("Transform",
   )
 )
 
-# Collect tools to display for a single plot.
-Toolbar <- R6::R6Class("Toolbar",
-  inherit = ToolbarBase,
+# The BBoxTileSource has the same default tile origin as the
+# WMTSTileSource but requested tiles use a ``{XMIN}``, ``{YMIN}``,
+# ``{XMAX}``, ``{YMAX}`` e.g.
+# ``http://your.custom.tile.service?bbox={XMIN},{YMIN},{XMAX},{YMAX}``.
+BBoxTileSource <- R6::R6Class("BBoxTileSource",
+  inherit = MercatorTileSource,
   public = list(
     specified_args = NULL,
     initialize = function(
-      active_tap = "auto", name = NULL, active_drag = "auto",
-      sizing_mode = NULL, active_inspect = "auto", height = NULL, width = NULL,
-      subscribed_events = list(), tags = list(), active_scroll = "auto",
+      max_zoom = 30L, subscribed_events = list(), use_latlon = FALSE,
+      tags = list(), extra_url_vars = structure(list(), .Names =
+      character(0)), attribution = "",
+      initial_resolution = 156543.033928041,
       js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      logo = "normal", tools = list(), disabled = FALSE, css_classes = NULL,
-      id = NULL
+      wrap_around = TRUE, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), min_zoom = 0L, url = "", tile_size = 256L,
+      y_origin_offset = 20037508.34, x_origin_offset = 20037508.34, id = NULL
     ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, subscribed_events = subscribed_events, tags = tags,
+      super$initialize(max_zoom = max_zoom,
+        subscribed_events = subscribed_events, tags = tags,
+        extra_url_vars = extra_url_vars, attribution = attribution,
+        initial_resolution = initial_resolution,
         js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, logo = logo, tools = tools,
-        disabled = disabled, css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Toolbar"]]
+        wrap_around = wrap_around, name = name,
+        js_event_callbacks = js_event_callbacks, min_zoom = min_zoom,
+        url = url, tile_size = tile_size, y_origin_offset = y_origin_offset,
+        x_origin_offset = x_origin_offset, id = id)
+      types <- bk_prop_types[["BBoxTileSource"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -650,19 +5943,228 @@ Toolbar <- R6::R6Class("Toolbar",
     }
   ),
   private = list(
-    # Specify a tap/click tool to be active when the plot is displayed.
-    # > Either(Auto, Instance(Tap))
-    active_tap = NULL,
-    # Specify a drag tool to be active when the plot is displayed.
-    # > Either(Auto, Instance(Drag))
-    active_drag = NULL,
-    # Specify an inspection tool or sequence of inspection tools to be active
-    # when the plot is displayed.
-    # > Either(Auto, Instance(Inspection), Seq(Instance(Inspection)))
-    active_inspect = NULL,
-    # Specify a scroll/pinch tool to be active when the plot is displayed.
-    # > Either(Auto, Instance(Scroll))
-    active_scroll = NULL
+    # Flag which indicates option to output {XMIN},{YMIN},{XMAX},{YMAX} in
+    # meters or latitude and longitude.
+    # > Bool
+    use_latlon = NULL
+  )
+)
+
+# Render diamond markers.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Diamond.py :source-position: below
+Diamond <- R6::R6Class("Diamond",
+  inherit = Marker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["Diamond"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render segments.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Segment.py :source-position: below
+Segment <- R6::R6Class("Segment",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), y0 = NULL, line_join = "miter",
+      tags = list(), line_width = 1L,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_dash = list(), name = NULL, y1 = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      line_alpha = 1, x1 = NULL, line_cap = "butt", x0 = NULL,
+      line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Segment"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The y-coordinates of the starting points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y0 = NULL,
+    # The line join values for the segments.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the segments.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The line dash values for the segments.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-coordinates of the ending points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y1 = NULL,
+    # The line dash offset values for the segments.
+    # > Int
+    line_dash_offset = NULL,
+    # The line alpha values for the segments.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The x-coordinates of the ending points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x1 = NULL,
+    # The line cap values for the segments.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The x-coordinates of the starting points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x0 = NULL,
+    # The line color values for the segments.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# An auto-fitting range in a continuous scalar dimension.  The upper and
+# lower bounds are set to the min and max of the data.
+DataRange1d <- R6::R6Class("DataRange1d",
+  inherit = DataRange,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      bounds = NULL, range_padding_units = "percent", default_span = 2,
+      renderers = list(), tags = list(), subscribed_events = list(),
+      callback = NULL, js_property_callbacks = structure(list(), .Names =
+      character(0)), follow_interval = NULL, name = NULL, flipped = FALSE,
+      max_interval = NULL, min_interval = NULL, follow = NULL, end = NULL,
+      names = list(), range_padding = 0.1,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      start = NULL, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events,
+        renderers = renderers, tags = tags,
+        js_property_callbacks = js_property_callbacks, callback = callback,
+        name = name, js_event_callbacks = js_event_callbacks, names = names,
+        id = id)
+      types <- bk_prop_types[["DataRange1d"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The bounds that the range is allowed to go to - typically used to
+    # prevent the user from panning/zooming/etc away from the data.
+    #
+    # By default, the bounds will be None, allowing your plot to pan/zoom as
+    # far as you want. If bounds are 'auto' they will be computed to be the
+    # same as the start and end of the DataRange1d.
+    #
+    # Bounds are provided as a tuple of ``(min, max)`` so regardless of
+    # whether your range is increasing or decreasing, the first item should
+    # be the minimum value of the range and the second item should be the
+    # maximum.  Setting ``min > max`` will result in a ``ValueError``.
+    #
+    # If you only want to constrain one end of the plot, you can set ``min``
+    # or ``max`` to ``None`` e.g. ``DataRange1d(bounds=(None, 12))``
+    # > MinMaxBounds(Auto, Tuple(Float, Float))
+    bounds = NULL,
+    # Whether the ``range_padding`` should be interpreted as a percentage, or
+    # as an absolute quantity. (default: ``"percent"``)
+    # > Enum('percent', 'absolute')
+    range_padding_units = NULL,
+    # A default width for the interval, in case ``start`` is equal to ``end``
+    # (if used with a log axis, default_span is in powers of 10).
+    # > Float
+    default_span = NULL,
+    # If ``follow`` is set to ``"start"`` or ``"end"`` then the range will
+    # always be constrained to that::
+    #
+    # abs(r.start - r.end) <= follow_interval
+    #
+    # is maintained.
+    # > Float
+    follow_interval = NULL,
+    # Whether the range should be "flipped" from its normal direction when
+    # auto-ranging.
+    # > Bool
+    flipped = NULL,
+    # The level that the range is allowed to zoom out, expressed as the
+    # maximum visible interval. Note that ``bounds`` can impose an implicit
+    # constraint on the maximum interval as well.
+    # > Float
+    max_interval = NULL,
+    # The level that the range is allowed to zoom in, expressed as the
+    # minimum visible interval. If set to ``None`` (default), the minimum
+    # interval is not bound.
+    # > Float
+    min_interval = NULL,
+    # Configure the data to follow one or the other data extreme, with a
+    # maximum range size of ``follow_interval``.
+    #
+    # If set to ``"start"`` then the range will adjust so that ``start``
+    # always corresponds to the minimum data value (or maximum, if
+    # ``flipped`` is ``True``).
+    #
+    # If set to ``"end"`` then the range will adjust so that ``end`` always
+    # corresponds to the maximum data value (or minimum, if ``flipped`` is
+    # ``True``).
+    #
+    # If set to ``None`` (default), then auto-ranging does not follow, and
+    # the range will encompass both the minimum and maximum data values.
+    #
+    # ``follow`` cannot be used with bounds, and if set, bounds will be set
+    # to ``None``.
+    # > Enum('start', 'end')
+    follow = NULL,
+    # An explicitly supplied range end. If provided, will override
+    # automatically computed end value.
+    # > Float
+    end = NULL,
+    # How much padding to add around the computed data bounds.
+    #
+    # When ``range_padding_units`` is set to ``"percent"``, the span of the
+    # range span is expanded to make the range ``range_padding`` percent
+    # larger.
+    #
+    # When ``range_padding_units`` is set to ``"absolute"``, the start and
+    # end of the range span are extended by the amount ``range_padding``.
+    # > Float
+    range_padding = NULL,
+    # An explicitly supplied range start. If provided, will override
+    # automatically computed start value.
+    # > Float
+    start = NULL
   )
 )
 
@@ -674,23 +6176,23 @@ RemoteSource <- R6::R6Class("RemoteSource",
   public = list(
     specified_args = NULL,
     initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      polling_interval = NULL, callback = NULL, name = NULL,
-      selected = structure(list(`2d` = structure(list(indices =
-      structure(list(), .Names = character(0))), .Names = "indices"),
-      `1d` = structure(list(indices = list()), .Names = "indices"),
-      `0d` = structure(list(glyph = NULL, indices = list()), .Names =
-      c("glyph", "indices"))), .Names = c("2d", "1d", "0d")),
-      tags = list(), column_names = list(),
+      subscribed_events = list(), tags = list(), column_names = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
-      data = structure(list(), .Names = character(0)), data_url = NULL,
-      subscribed_events = list(), id = NULL
+      data_url = NULL, callback = NULL, polling_interval = NULL,
+      data = structure(list(), .Names = character(0)),
+      selected = structure(list(`1d` = structure(list(indices = list()),
+      .Names = "indices"), `2d` = structure(list(indices =
+      structure(list(), .Names = character(0))), .Names = "indices"),
+      `0d` = structure(list(glyph = NULL, indices = list()), .Names =
+      c("glyph", "indices"))), .Names = c("1d", "2d", "0d")),
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, id = NULL
     ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        callback = callback, name = name, selected = selected, tags = tags,
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
         column_names = column_names,
-        js_property_callbacks = js_property_callbacks, data = data,
-        subscribed_events = subscribed_events, id = id)
+        js_property_callbacks = js_property_callbacks, callback = callback,
+        data = data, selected = selected,
+        js_event_callbacks = js_event_callbacks, name = name, id = id)
       types <- bk_prop_types[["RemoteSource"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -699,12 +6201,3631 @@ RemoteSource <- R6::R6Class("RemoteSource",
     }
   ),
   private = list(
-    # polling interval for updating data source in milliseconds
-    # > Int
-    polling_interval = NULL,
     # The URL to the endpoint for the data.
     # > String
-    data_url = NULL
+    data_url = NULL,
+    # polling interval for updating data source in milliseconds
+    # > Int
+    polling_interval = NULL
+  )
+)
+
+# A base class for all guide renderer types. ``GuideRenderer`` is not
+# generally useful to instantiate on its own.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+GuideRenderer <- R6::R6Class("GuideRenderer",
+  inherit = Renderer,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      level = "overlay", plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      visible = TRUE, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        visible = visible, subscribed_events = subscribed_events,
+        tags = tags, js_property_callbacks = js_property_callbacks,
+        level = level, name = name, id = id)
+      types <- bk_prop_types[["GuideRenderer"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The plot to which this guide renderer is attached.
+    # > Instance(Plot)
+    plot = NULL
+  )
+)
+
+# Generate "nice" round ticks at any magnitude.
+#
+# Creates ticks that are "base" multiples of a set of given mantissas.
+# For example, with ``base=10`` and ``mantissas=[1, 2, 5]``, the ticker
+# will generate the sequence::
+#
+# ..., 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, ...
+AdaptiveTicker <- R6::R6Class("AdaptiveTicker",
+  inherit = ContinuousTicker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      base = 10, subscribed_events = list(), mantissas = list(1L, 2L, 5L),
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), num_minor_ticks = 5L, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      min_interval = 0, max_interval = NULL, desired_num_ticks = 6L, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        desired_num_ticks = desired_num_ticks,
+        num_minor_ticks = num_minor_ticks, name = name, id = id)
+      types <- bk_prop_types[["AdaptiveTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The multiplier to use for scaling mantissas.
+    # > Float
+    base = NULL,
+    # The acceptable list numbers to generate multiples of.
+    # > Seq(Float)
+    mantissas = NULL,
+    # The smallest allowable interval between two adjacent ticks.
+    # > Float
+    min_interval = NULL,
+    # The largest allowable interval between two adjacent ticks.
+    #
+    # .. note:: To specify an unbounded interval, set to ``None``.
+    # > Float
+    max_interval = NULL
+  )
+)
+
+# A base class for all tile source types.
+#
+# In general, tile sources are used as a required input for
+# ``TileRenderer``.
+TileSource <- R6::R6Class("TileSource",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      max_zoom = 30L, subscribed_events = list(), tags = list(),
+      extra_url_vars = structure(list(), .Names = character(0)),
+      attribution = "", initial_resolution = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, js_event_callbacks = structure(list(), .Names =
+      character(0)), min_zoom = 0L, url = "", tile_size = 256L,
+      y_origin_offset = NULL, x_origin_offset = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["TileSource"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A maximum zoom level for the tile layer. This is the most zoomed-in
+    # level.
+    # > Int
+    max_zoom = NULL,
+    # A dictionary that maps url variable template keys to values.
+    #
+    # These variables are useful for parts of tile urls which do not change
+    # from tile to tile (e.g. server host name, or layer name).
+    # > Dict(String, Any)
+    extra_url_vars = NULL,
+    # Data provider attribution content. This can include HTML content.
+    # > String
+    attribution = NULL,
+    # Resolution (plot_units / pixels) of minimum zoom level of tileset
+    # projection. None to auto-compute.
+    # > Float
+    initial_resolution = NULL,
+    # A minimum zoom level for the tile layer. This is the most zoomed-out
+    # level.
+    # > Int
+    min_zoom = NULL,
+    # Tile service url e.g., http://c.tile.openstreetmap.org/{Z}/{X}/{Y}.png
+    # > String
+    url = NULL,
+    # Tile size in pixels (e.g. 256)
+    # > Int
+    tile_size = NULL,
+    # A y-offset in plot coordinates
+    # > Float
+    y_origin_offset = NULL,
+    # An x-offset in plot coordinates
+    # > Float
+    x_origin_offset = NULL
+  )
+)
+
+# Abstract base class for data table's cell editors.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+CellEditor <- R6::R6Class("CellEditor",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["CellEditor"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render several lines.
+#
+# The data for the ``MultiLine`` glyph is different in that the vector of
+# values is not a vector of scalars. Rather, it is a "list of lists".
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/MultiLine.py :source-position: below
+MultiLine <- R6::R6Class("MultiLine",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, line_dash = list(), name = NULL, xs = NULL,
+      line_dash_offset = 0L, js_event_callbacks = structure(list(), .Names
+      = character(0)), line_alpha = 1, ys = NULL, line_cap = "butt",
+      line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["MultiLine"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the lines.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the lines.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The line dash values for the lines.
+    # > DashPattern
+    line_dash = NULL,
+    # The x-coordinates for all the lines, given as a "list of lists".
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    xs = NULL,
+    # The line dash offset values for the lines.
+    # > Int
+    line_dash_offset = NULL,
+    # The line alpha values for the lines.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The y-coordinates for all the lines, given as a "list of lists".
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    ys = NULL,
+    # The line cap values for the lines.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the lines.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# Display horizontal or vertical grid lines at locations given by a
+# supplied ``Ticker``.
+Grid <- R6::R6Class("Grid",
+  inherit = GuideRenderer,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      grid_line_join = "miter", subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      grid_line_dash_offset = 0L, dimension = 0L,
+      minor_grid_line_dash = list(), level = "underlay", name = NULL,
+      ticker = NULL, minor_grid_line_dash_offset = 0L,
+      grid_line_dash = list(), grid_line_alpha = 1,
+      minor_grid_line_cap = "butt", band_fill_color = NULL,
+      x_range_name = "default", grid_line_cap = "butt",
+      minor_grid_line_color = NULL, bounds = "auto",
+      minor_grid_line_width = 1L, grid_line_color = "#e5e5e5",
+      minor_grid_line_join = "miter", plot = NULL, minor_grid_line_alpha = 1,
+      band_fill_alpha = 0L, y_range_name = "default", visible = TRUE,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      grid_line_width = 1L, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["Grid"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join of the Grid lines.
+    # > Enum('miter', 'round', 'bevel')
+    grid_line_join = NULL,
+    # The line dash offset of the Grid lines.
+    # > Int
+    grid_line_dash_offset = NULL,
+    # Which dimension the Axis Grid lines will intersect. The x-axis is
+    # dimension 0 (vertical Grid lines) and the y-axis is dimension 1
+    # (horizontal Grid lines).
+    # > Int
+    dimension = NULL,
+    # The line dash of the minor Grid lines.
+    # > DashPattern
+    minor_grid_line_dash = NULL,
+    # The Ticker to use for computing locations for the Grid lines.
+    # > Instance(Ticker)
+    ticker = NULL,
+    # The line dash offset of the minor Grid lines.
+    # > Int
+    minor_grid_line_dash_offset = NULL,
+    # The line dash of the Grid lines.
+    # > DashPattern
+    grid_line_dash = NULL,
+    # The line alpha of the Grid lines.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    grid_line_alpha = NULL,
+    # The line cap of the minor Grid lines.
+    # > Enum('butt', 'round', 'square')
+    minor_grid_line_cap = NULL,
+    # The fill color of alternating bands between Grid lines.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    band_fill_color = NULL,
+    # A particular (named) x-range to use for computing screen locations when
+    # rendering a grid on the plot. If unset, use the default x-range.
+    # > String
+    x_range_name = NULL,
+    # The line cap of the Grid lines.
+    # > Enum('butt', 'round', 'square')
+    grid_line_cap = NULL,
+    # The line color of the minor Grid lines.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    minor_grid_line_color = NULL,
+    # Bounds for the rendered grid lines. If unset, the grid lines will span
+    # the entire plot in the given dimension.
+    # > Either(Auto, Tuple(Float, Float))
+    bounds = NULL,
+    # The line width of the minor Grid lines.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    minor_grid_line_width = NULL,
+    # The line color of the Grid lines.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    grid_line_color = NULL,
+    # The line join of the minor Grid lines.
+    # > Enum('miter', 'round', 'bevel')
+    minor_grid_line_join = NULL,
+    # The line alpha of the minor Grid lines.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    minor_grid_line_alpha = NULL,
+    # The fill alpha of alternating bands between Grid lines.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    band_fill_alpha = NULL,
+    # A particular (named) y-range to use for computing screen locations when
+    # rendering a grid on the plot. If unset, use the default y-range.
+    # > String
+    y_range_name = NULL,
+    # The line width of the Grid lines.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    grid_line_width = NULL
+  )
+)
+
+# Render wedges.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Wedge.py :source-position: below
+Wedge <- R6::R6Class("Wedge",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, radius = NULL, end_angle = NULL, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L, fill_color = "gray",
+      line_alpha = 1, radius_units = "data", fill_alpha = 1, line_cap = "butt",
+      line_color = "black", start_angle_units = "rad",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      start_angle = NULL, x = NULL, end_angle_units = "rad",
+      direction = "anticlock", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Wedge"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the wedges.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the wedges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # Radii of the wedges.
+    # > DistanceSpec(units_default='data')
+    radius = NULL,
+    # The angles to end the wedges, as measured from the horizontal.
+    # > AngleSpec(units_default='rad')
+    end_angle = NULL,
+    # The line dash values for the wedges.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-coordinates of the points of the wedges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line dash offset values for the wedges.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the wedges.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the wedges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    #
+    # > Enum('screen', 'data')
+    radius_units = NULL,
+    # The fill alpha values for the wedges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The line cap values for the wedges.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the wedges.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    #
+    # > Enum('deg', 'rad')
+    start_angle_units = NULL,
+    # The angles to start the wedges, as measured from the horizontal.
+    # > AngleSpec(units_default='rad')
+    start_angle = NULL,
+    # The x-coordinates of the points of the wedges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    #
+    # > Enum('deg', 'rad')
+    end_angle_units = NULL,
+    # Which direction to stroke between the start and end angles.
+    # > Enum('clock', 'anticlock')
+    direction = NULL
+  )
+)
+
+# A base class for all interactive tool types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Tool <- R6::R6Class("Tool",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      plot = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Tool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The Plot that this tool will act on.
+    # > Instance(Plot)
+    plot = NULL
+  )
+)
+
+# A base class for all data range types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+DataRange <- R6::R6Class("DataRange",
+  inherit = Range,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), renderers = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      callback = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), names = list(), id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, callback = callback,
+        name = name, id = id)
+      types <- bk_prop_types[["DataRange"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # An explicit list of renderers to autorange against. If unset, defaults
+    # to all renderers on a plot.
+    # > List(Instance(Renderer))
+    renderers = NULL,
+    # A list of names to query for. If set, only renderers that have a
+    # matching value for their ``name`` attribute will be used for
+    # autoranging.
+    # > List(String)
+    names = NULL
+  )
+)
+
+# Render a single text label as an annotation.
+#
+# ``Label`` will render a single text label at given ``x`` and ``y``
+# coordinates, which can be in either screen (pixel) space, or data (axis
+# range) space.
+#
+# The label can also be configured with a screen space offset from ``x``
+# and ``y``, by using the ``x_offset`` and ``y_offset`` properties.
+#
+# Additionally, the label can be rotated with the ``angle`` property.
+#
+# There are also standard text, fill, and line properties to control the
+# appearance of the text, its background, as well as the rectangular
+# bounding box border.
+Label <- R6::R6Class("Label",
+  inherit = TextAnnotation,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      y_offset = 0L, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      text_font_size = list(value = "12pt"), text_font = "helvetica",
+      border_line_width = 1L, angle_units = "rad", y = NULL,
+      level = "annotation", name = NULL, border_line_cap = "butt",
+      border_line_alpha = 1, text_font_style = "normal",
+      border_line_dash_offset = 0L, text_alpha = 1, angle = 0L,
+      x_range_name = "default", border_line_dash = list(),
+      text_align = "left", y_units = "data", text = NULL,
+      render_mode = "canvas", x_offset = 0L, x_units = "data", plot = NULL,
+      border_line_color = NULL, y_range_name = "default",
+      text_color = "#444444", visible = TRUE,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      x = NULL, border_line_join = "miter", background_fill_color = NULL,
+      background_fill_alpha = 1, text_baseline = "bottom", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["Label"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Offset value to apply to the y-coordinate.
+    #
+    # This is useful, for instance, if it is desired to "float" text a fixed
+    # distance in screen units from a given data position.
+    # > Float
+    y_offset = NULL,
+    # The text font size values for the text.
+    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    text_font_size = NULL,
+    # The text font values for the text.
+    # > String
+    text_font = NULL,
+    # The line width values for the text bounding box.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    border_line_width = NULL,
+    # Acceptable values for units are ``"rad"`` and ``"deg"``
+    # > Enum('deg', 'rad')
+    angle_units = NULL,
+    # The y-coordinate in screen coordinates to locate the text anchors.
+    #
+    # Datetime values are also accepted, but note that they are immediately
+    # converted to milliseconds-since-epoch.
+    # > Float
+    y = NULL,
+    # The line cap values for the text bounding box.
+    # > Enum('butt', 'round', 'square')
+    border_line_cap = NULL,
+    # The line alpha values for the text bounding box.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    border_line_alpha = NULL,
+    # The text font style values for the text.
+    # > Enum('normal', 'italic', 'bold')
+    text_font_style = NULL,
+    # The line dash offset values for the text bounding box.
+    # > Int
+    border_line_dash_offset = NULL,
+    # The text alpha values for the text.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    text_alpha = NULL,
+    # The angle to rotate the text, as measured from the horizontal.
+    #
+    # .. warning:: The center of rotation for canvas and css render_modes is
+    # different.  For `render_mode="canvas"` the label is rotated from the
+    # top-left corner of the annotation, while for `render_mode="css"` the
+    # annotation is rotated around it's center.
+    # > Angle
+    angle = NULL,
+    # A particular (named) x-range to use for computing screen location when
+    # rendering an annotation on the plot. If unset, use the default x-range.
+    # > String
+    x_range_name = NULL,
+    # The line dash values for the text bounding box.
+    # > DashPattern
+    border_line_dash = NULL,
+    # The text align values for the text.
+    # > Enum('left', 'right', 'center')
+    text_align = NULL,
+    # The unit type for the y attribute. Interpreted as "data space" units by
+    # default.
+    # > Enum('screen', 'data')
+    y_units = NULL,
+    # The text value to render.
+    # > String
+    text = NULL,
+    # Specifies whether the text is rendered as a canvas element or as an css
+    # element overlaid on the canvas. The default mode is "canvas".
+    #
+    # .. note:: The CSS labels won't be present in the output using the
+    # "save" tool.
+    #
+    # .. warning:: Not all visual styling properties are supported if the
+    # render_mode is set to "css". The border_line_dash property isn't fully
+    # supported and border_line_dash_offset isn't supported at all. Setting
+    # text_alpha will modify the opacity of the entire background box and
+    # border in addition to the text. Finally, clipping Label annotations
+    # inside of the plot area isn't supported in "css" mode.
+    # > Enum('canvas', 'css')
+    render_mode = NULL,
+    # Offset value to apply to the x-coordinate.
+    #
+    # This is useful, for instance, if it is desired to "float" text a fixed
+    # distance in screen units from a given data position.
+    # > Float
+    x_offset = NULL,
+    # The unit type for the x attribute. Interpreted as "data space" units by
+    # default.
+    # > Enum('screen', 'data')
+    x_units = NULL,
+    # The line color values for the text bounding box.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    border_line_color = NULL,
+    # A particular (named) y-range to use for computing screen location when
+    # rendering an annotation on the plot. If unset, use the default y-range.
+    # > String
+    y_range_name = NULL,
+    # The text color values for the text.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    text_color = NULL,
+    # The x-coordinate in screen coordinates to locate the text anchors.
+    #
+    # Datetime values are also accepted, but note that they are immediately
+    # converted to milliseconds-since-epoch.
+    # > Float
+    x = NULL,
+    # The line join values for the text bounding box.
+    # > Enum('miter', 'round', 'bevel')
+    border_line_join = NULL,
+    # The fill color values for the text bounding box.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    background_fill_color = NULL,
+    # The fill alpha values for the text bounding box.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    background_fill_alpha = NULL,
+    # The text baseline values for the text.
+    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
+    text_baseline = NULL
+  )
+)
+
+#
+CategoricalScale <- R6::R6Class("CategoricalScale",
+  inherit = LinearScale,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["CategoricalScale"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Generate ticks for categorical ranges.
+CategoricalTicker <- R6::R6Class("CategoricalTicker",
+  inherit = Ticker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["CategoricalTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+#
+GeoJSONDataSource <- R6::R6Class("GeoJSONDataSource",
+  inherit = ColumnarDataSource,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(), column_names = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      callback = NULL, name = NULL, selected = structure(list(`1d` =
+      structure(list(indices = list()), .Names = "indices"), `2d` =
+      structure(list(indices = structure(list(), .Names =
+      character(0))), .Names = "indices"), `0d` = structure(list(glyph
+      = NULL, indices = list()), .Names = c("glyph", "indices"))),
+      .Names = c("1d", "2d", "0d")),
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      geojson = NULL, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        column_names = column_names,
+        js_property_callbacks = js_property_callbacks, callback = callback,
+        name = name, selected = selected,
+        js_event_callbacks = js_event_callbacks, id = id)
+      types <- bk_prop_types[["GeoJSONDataSource"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # GeoJSON that contains features for plotting. Currently
+    # GeoJSONDataSource can only process a FeatureCollection or
+    # GeometryCollection.
+    # > JSON
+    geojson = NULL
+  )
+)
+
+# A class for reporting tools geometries from BokehJS.
+#
+# .. warning:: This class will be superceded by a new general events
+# system in the near future.
+ToolEvents <- R6::R6Class("ToolEvents",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      geometries = list(), name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["ToolEvents"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    #
+    # > List(Dict(String, Any))
+    geometries = NULL
+  )
+)
+
+# Abstract base class for data table (data grid) widgets.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+TableWidget <- R6::R6Class("TableWidget",
+  inherit = Widget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL, source = NULL,
+      css_classes = NULL, sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["TableWidget"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The source of data for the widget.
+    # > Instance(DataSource)
+    source = NULL
+  )
+)
+
+# Map numbers in a range [*low*, *high*] linearly into a sequence of
+# colors (a palette).
+#
+# For example, if the range is [0, 99] and the palette is ``['red',
+# 'green', 'blue']``, the values would be mapped as follows::
+#
+# x < 0 : 'red' # values < low are clamped 0 >= x < 33 : 'red' 33 >= x <
+# 66 : 'green' 66 >= x < 99 : 'blue' 99 >= x : 'blue' # values > high are
+# clamped
+LinearColorMapper <- R6::R6Class("LinearColorMapper",
+  inherit = ContinuousColorMapper,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      high_color = NULL, low_color = NULL, tags = list(),
+      subscribed_events = list(), js_property_callbacks = structure(list(),
+      .Names = character(0)), name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      high = NULL, nan_color = "gray", low = NULL, palette = NULL, id = NULL
+    ) {
+      super$initialize(high_color = high_color, low_color = low_color,
+        tags = tags, subscribed_events = subscribed_events,
+        js_property_callbacks = js_property_callbacks, name = name,
+        js_event_callbacks = js_event_callbacks, high = high,
+        nan_color = nan_color, low = low, palette = palette, id = id)
+      types <- bk_prop_types[["LinearColorMapper"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# *toolbar icon*: |pan_icon|
+#
+# The pan tool allows the user to pan a Plot by left-dragging a mouse, or
+# on touch devices by dragging a finger or stylus, across the plot
+# region.
+#
+# The pan tool also activates the border regions of a Plot for "single
+# axis" panning. For instance, dragging in the vertical border or axis
+# will effect a pan in the vertical direction only, with the horizontal
+# dimension kept fixed.
+#
+# .. |pan_icon| image:: /_images/icons/Pan.png :height: 18pt
+PanTool <- R6::R6Class("PanTool",
+  inherit = Drag,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), dimensions = "both", tags = list(),
+      name = NULL, js_property_callbacks = structure(list(), .Names =
+      character(0)), plot = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["PanTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Which dimensions the pan tool is constrained to act in. By default the
+    # pan tool will pan in any dimension, but can be configured to only pan
+    # horizontally across the width of the plot, or vertically across the
+    # height of the plot.
+    # > Enum('width', 'height', 'both')
+    dimensions = NULL
+  )
+)
+
+# Boolean value cell editor.
+CheckboxEditor <- R6::R6Class("CheckboxEditor",
+  inherit = CellEditor,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["CheckboxEditor"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Options for GMapPlot objects.
+GMapOptions <- R6::R6Class("GMapOptions",
+  inherit = MapOptions,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      zoom = 12L, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      scale_control = FALSE, lng = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      lat = NULL, map_type = "roadmap", styles = NULL, id = NULL
+    ) {
+      super$initialize(zoom = zoom, subscribed_events = subscribed_events,
+        tags = tags, js_property_callbacks = js_property_callbacks,
+        lng = lng, name = name, js_event_callbacks = js_event_callbacks,
+        lat = lat, id = id)
+      types <- bk_prop_types[["GMapOptions"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Whether the Google map should display its distance scale control.
+    # > Bool
+    scale_control = NULL,
+    # The `map type`_ to use for the GMapPlot.
+    #
+    # .. _map type:
+    # https://developers.google.com/maps/documentation/javascript/reference#MapTypeId
+    # > Enum('satellite', 'roadmap', 'terrain', 'hybrid')
+    map_type = NULL,
+    # A JSON array of `map styles`_ to use for the GMapPlot. Many example
+    # styles can `be found here`_.
+    #
+    # .. _map styles:
+    # https://developers.google.com/maps/documentation/javascript/reference#MapTypeStyle
+    # .. _be found here: https://snazzymaps.com
+    # > JSON
+    styles = NULL
+  )
+)
+
+# Base class for continuous color mapper types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+ContinuousColorMapper <- R6::R6Class("ContinuousColorMapper",
+  inherit = ColorMapper,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      high_color = NULL, low_color = NULL, tags = list(),
+      subscribed_events = list(), js_property_callbacks = structure(list(),
+      .Names = character(0)), name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      high = NULL, nan_color = "gray", low = NULL, palette = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, tags = tags,
+        nan_color = nan_color,
+        js_property_callbacks = js_property_callbacks, name = name,
+        palette = palette, id = id)
+      types <- bk_prop_types[["ContinuousColorMapper"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Color to be used if data is lower than ``high`` value. If None, values
+    # lower than ``high`` are mapped to the last color in the palette.
+    # > Color
+    high_color = NULL,
+    # Color to be used if data is lower than ``low`` value. If None, values
+    # lower than ``low`` are mapped to the first color in the palette.
+    # > Color
+    low_color = NULL,
+    # The maximum value of the range to map into the palette. Values above
+    # this are clamped to ``high``.
+    # > Float
+    high = NULL,
+    # The minimum value of the range to map into the palette. Values below
+    # this are clamped to ``low``.
+    # > Float
+    low = NULL
+  )
+)
+
+# TickFormatter for values in WebMercator units.
+#
+# Some map plot types internally use WebMercator to describe coordinates,
+# plot bounds, etc. These units are not very human-friendly. This tick
+# formatter will convert WebMercator units into Latitude and Longitude
+# for display on axes.
+MercatorTickFormatter <- R6::R6Class("MercatorTickFormatter",
+  inherit = BasicTickFormatter,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      use_scientific = TRUE, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      dimension = NULL, name = NULL, precision = "auto", power_limit_low = -3L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      power_limit_high = 5L, id = NULL
+    ) {
+      super$initialize(use_scientific = use_scientific,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, name = name,
+        precision = precision, power_limit_low = power_limit_low,
+        js_event_callbacks = js_event_callbacks,
+        power_limit_high = power_limit_high, id = id)
+      types <- bk_prop_types[["MercatorTickFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Specify whether to format ticks for Latitude or Longitude.
+    #
+    # Projected coordinates are not separable, computing Latitude and
+    # Longitude tick labels from Web Mercator requires considering
+    # coordinates from both dimensions together. Use this property to specify
+    # which result should be used for display.
+    #
+    # Typically, if the formatter is for an x-axis, then dimension should be
+    # ``"lon"`` and if the formatter is for a y-axis, then the dimension
+    # should be `"lat"``.
+    #
+    # In order to prevent hard to debug errors, there is no default value for
+    # dimension. Using an un-configured MercatorTickFormatter will result in
+    # a validation error and a JavaScript console error.
+    # > Enum('lat', 'lon')
+    dimension = NULL
+  )
+)
+
+# *toolbar icon*: |save_icon|
+#
+# The save tool is an action. When activated, the tool opens a download
+# dialog which allows to save an image reproduction of the plot in PNG
+# format. If automatic download is not support by a web browser, the tool
+# falls back to opening the generated image in a new tab or window. User
+# then can manually save it by right clicking on the image and choosing
+# "Save As" (or similar) menu item.
+#
+# .. |save_icon| image:: /_images/icons/Save.png :height: 18pt
+SaveTool <- R6::R6Class("SaveTool",
+  inherit = Action,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      plot = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["SaveTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render rectangles.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Rect.py :source-position: below
+Rect <- R6::R6Class("Rect",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", height = NULL, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L, dilate = FALSE,
+      fill_color = "gray", line_alpha = 1, fill_alpha = 1, angle = 0,
+      line_cap = "butt", line_color = "black", width_units = "data",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      width = NULL, x = NULL, height_units = "data", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Rect"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the rectangles.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the rectangles.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    #
+    # > Enum('deg', 'rad')
+    angle_units = NULL,
+    # The overall heights of the rectangles.
+    # > DistanceSpec(units_default='data')
+    height = NULL,
+    # The line dash values for the rectangles.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-coordinates of the centers of the rectangles.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line dash offset values for the rectangles.
+    # > Int
+    line_dash_offset = NULL,
+    # Whether to always round fractional pixel locations in such a way as to
+    # make the rectangles bigger.
+    #
+    # This setting may be useful if pixel rounding errors are causing
+    # rectangles to have a gap between them, when they should appear flush.
+    # > Bool
+    dilate = NULL,
+    # The fill color values for the rectangles.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the rectangles.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The fill alpha values for the rectangles.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The angles to rotate the rectangles, as measured from the horizontal.
+    # > AngleSpec(units_default='rad')
+    angle = NULL,
+    # The line cap values for the rectangles.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the rectangles.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    #
+    # > Enum('screen', 'data')
+    width_units = NULL,
+    # The overall widths of the rectangles.
+    # > DistanceSpec(units_default='data')
+    width = NULL,
+    # The x-coordinates of the centers of the rectangles.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    #
+    # > Enum('screen', 'data')
+    height_units = NULL
+  )
+)
+
+# Render Bézier curves.
+#
+# For more information consult the `Wikipedia article for Bézier curve`_.
+#
+# .. _Wikipedia article for Bézier curve:
+# http://en.wikipedia.org/wiki/Bézier_curve
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Bezier.py :source-position: below
+Bezier <- R6::R6Class("Bezier",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), y0 = NULL, line_join = "miter", cx1 = NULL,
+      line_width = 1L, cy1 = NULL, tags = list(), cx0 = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_dash = list(), name = NULL, y1 = NULL, line_dash_offset = 0L,
+      cy0 = NULL, js_event_callbacks = structure(list(), .Names =
+      character(0)), line_alpha = 1, x1 = NULL, line_cap = "butt", x0 = NULL,
+      line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Bezier"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The y-coordinates of the starting points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y0 = NULL,
+    # The line join values for the Bézier curves.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The x-coordinates of second control points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    cx1 = NULL,
+    # The line width values for the Bézier curves.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The y-coordinates of second control points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    cy1 = NULL,
+    # The x-coordinates of first control points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    cx0 = NULL,
+    # The line dash values for the Bézier curves.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-coordinates of the ending points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y1 = NULL,
+    # The line dash offset values for the Bézier curves.
+    # > Int
+    line_dash_offset = NULL,
+    # The y-coordinates of first control points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    cy0 = NULL,
+    # The line alpha values for the Bézier curves.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The x-coordinates of the ending points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x1 = NULL,
+    # The line cap values for the Bézier curves.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The x-coordinates of the starting points.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x0 = NULL,
+    # The line color values for the Bézier curves.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# *toolbar icon*: |wheel_zoom_icon|
+#
+# The wheel zoom tool will zoom the plot in and out, centered on the
+# current mouse location.
+#
+# The wheel zoom tool also activates the border regions of a Plot for
+# "single axis" zooming. For instance, zooming in the vertical border or
+# axis will effect a zoom in the vertical direction only, with the
+# horizontal dimension kept fixed.
+#
+# .. |wheel_zoom_icon| image:: /_images/icons/WheelZoom.png :height: 18pt
+WheelZoomTool <- R6::R6Class("WheelZoomTool",
+  inherit = Scroll,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), dimensions = "both", tags = list(),
+      name = NULL, js_property_callbacks = structure(list(), .Names =
+      character(0)), plot = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["WheelZoomTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Which dimensions the wheel zoom tool is constrained to act in. By
+    # default the wheel zoom tool will zoom in any dimension, but can be
+    # configured to only zoom horizontally across the width of the plot, or
+    # vertically across the height of the plot.
+    # > Enum('width', 'height', 'both')
+    dimensions = NULL
+  )
+)
+
+# Base class for all glyph models.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Glyph <- R6::R6Class("Glyph",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Glyph"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Tick formatter based on a printf-style format string.
+PrintfTickFormatter <- R6::R6Class("PrintfTickFormatter",
+  inherit = TickFormatter,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      format = "%s", subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["PrintfTickFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The number format, as defined as follows: the placeholder in the format
+    # string is marked by % and is followed by one or more of these elements,
+    # in this order:
+    #
+    # * An optional ``+`` sign Causes the result to be preceded with a plus
+    # or minus sign on numeric values. By default, only the ``-`` sign is
+    # used on negative numbers.
+    #
+    # * An optional padding specifier Specifies what (if any) character to
+    # use for padding. Possible values are 0 or any other character preceded
+    # by a ``'`` (single quote). The default is to pad with spaces.
+    #
+    # * An optional ``-`` sign Causes sprintf to left-align the result of
+    # this placeholder. The default is to right-align the result.
+    #
+    # * An optional number Specifies how many characters the result should
+    # have. If the value to be returned is shorter than this number, the
+    # result will be padded.
+    #
+    # * An optional precision modifier Consists of a ``.`` (dot) followed by
+    # a number, specifies how many digits should be displayed for floating
+    # point numbers. When used on a string, it causes the result to be
+    # truncated.
+    #
+    # * A type specifier Can be any of:
+    #
+    # - ``%`` --- yields a literal ``%`` character - ``b`` --- yields an
+    # integer as a binary number - ``c`` --- yields an integer as the
+    # character with that ASCII value - ``d`` or ``i`` --- yields an integer
+    # as a signed decimal number - ``e`` --- yields a float using scientific
+    # notation - ``u`` --- yields an integer as an unsigned decimal number -
+    # ``f`` --- yields a float as is - ``o`` --- yields an integer as an
+    # octal number - ``s`` --- yields a string as is - ``x`` --- yields an
+    # integer as a hexadecimal number (lower-case) - ``X`` --- yields an
+    # integer as a hexadecimal number (upper-case)
+    # > String
+    format = NULL
+  )
+)
+
+# Multi-line string cell editor.
+TextEditor <- R6::R6Class("TextEditor",
+  inherit = CellEditor,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["TextEditor"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Compute a linear interpolation between the control points provided
+# through the ``x``, ``y``, and ``data`` parameters.
+LinearInterpolator <- R6::R6Class("LinearInterpolator",
+  inherit = Interpolator,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      y = NULL, data = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      x = NULL, clip = TRUE, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, y = y, data = data,
+        name = name, js_event_callbacks = js_event_callbacks, x = x,
+        clip = clip, id = id)
+      types <- bk_prop_types[["LinearInterpolator"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render circle markers.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Circle.py :source-position: below
+Circle <- R6::R6Class("Circle",
+  inherit = Marker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, radius = NULL, angle_units = "rad", size = 4L,
+      line_dash = list(), y = NULL, name = NULL, line_dash_offset = 0L,
+      fill_color = "gray", line_alpha = 1, radius_units = "data", angle = 0,
+      fill_alpha = 1, line_cap = "butt", line_color = "black",
+      radius_dimension = "x", js_event_callbacks = structure(list(), .Names
+      = character(0)), x = NULL, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["Circle"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The radius values for circle markers (in "data space" units, by
+    # default).
+    #
+    # .. note:: Circle markers are slightly unusual in that they support
+    # specifying a radius in addition to a size. Only one of ``radius`` or
+    # ``size`` should be given.
+    #
+    # .. warning:: Note that ``Circle`` glyphs are always drawn as circles on
+    # the screen, even in cases where the data space aspect ratio is not 1-1.
+    # In all cases where radius values are specified, the "distance" for the
+    # radius is measured along the dimension specified by
+    # ``radius_dimension``. If the aspect ratio is very large or small, the
+    # drawn circles may appear much larger or smaller than expected. See
+    # :bokeh-issue:`626` for more information.
+    # > DistanceSpec(units_default='data')
+    radius = NULL,
+    #
+    # > Enum('screen', 'data')
+    radius_units = NULL,
+    # What dimension to measure circle radii along.
+    #
+    # When the data space aspect ratio is not 1-1, then the size of the drawn
+    # circles depends on what direction is used to measure the "distance" of
+    # the radius. This property allows that direction to be controlled.
+    # > Enum('x', 'y')
+    radius_dimension = NULL
+  )
+)
+
+# A group of check boxes rendered as toggle buttons.
+CheckboxButtonGroup <- R6::R6Class("CheckboxButtonGroup",
+  inherit = ButtonGroup,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, button_type = "default", name = NULL,
+      active = list(), disabled = FALSE, width = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      css_classes = NULL, labels = list(), sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        callback = callback, button_type = button_type, name = name,
+        js_event_callbacks = js_event_callbacks, disabled = disabled,
+        width = width, css_classes = css_classes, labels = labels,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["CheckboxButtonGroup"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The list of indices of selected check boxes.
+    # > List(Int)
+    active = NULL
+  )
+)
+
+# An axis that picks nice numbers for tick locations on a linear scale.
+# Configured with a ``BasicTickFormatter`` by default.
+LinearAxis <- R6::R6Class("LinearAxis",
+  inherit = ContinuousAxis,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      minor_tick_line_dash = list(), axis_label_text_color = "#444444",
+      formatter = NULL, js_property_callbacks = structure(list(), .Names =
+      character(0)), level = "overlay", ticker = NULL,
+      axis_label_text_alpha = 1, axis_line_width = 1L, minor_tick_in = 0L,
+      minor_tick_line_cap = "butt", axis_line_alpha = 1, axis_label = "",
+      axis_line_join = "miter", major_tick_line_cap = "butt",
+      major_label_text_font_style = "normal", bounds = "auto",
+      minor_tick_line_width = 1L, axis_label_text_baseline = "bottom",
+      major_tick_line_dash = list(), minor_tick_out = 4L,
+      major_label_text_align = "center",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      major_label_overrides = structure(list(), .Names = character(0)),
+      y_range_name = "default", minor_tick_line_join = "miter",
+      visible = TRUE, major_label_orientation = "horizontal",
+      minor_tick_line_color = "black", axis_label_text_font = "helvetica",
+      major_tick_in = 2L, major_tick_line_alpha = 1,
+      axis_label_text_font_style = "italic",
+      major_label_text_font_size = list(value = "8pt"),
+      subscribed_events = list(), axis_line_dash = list(),
+      major_label_text_color = "#444444", tags = list(),
+      major_tick_line_join = "miter", major_tick_out = 6L, name = NULL,
+      major_label_text_font = "helvetica", x_range_name = "default",
+      axis_label_text_align = "left", minor_tick_line_alpha = 1,
+      major_tick_line_dash_offset = 0L,
+      major_label_text_baseline = "alphabetic", axis_line_cap = "butt",
+      major_tick_line_width = 1L, axis_line_dash_offset = 0L,
+      major_tick_line_color = "black", plot = NULL,
+      axis_label_text_font_size = list(value = "10pt"),
+      minor_tick_line_dash_offset = 0L, axis_label_standoff = 5L,
+      axis_line_color = "black", major_label_text_alpha = 1,
+      major_label_standoff = 5L, id = NULL
+    ) {
+      super$initialize(minor_tick_line_dash = minor_tick_line_dash,
+        axis_label_text_color = axis_label_text_color,
+        formatter = formatter,
+        js_property_callbacks = js_property_callbacks, level = level,
+        ticker = ticker, axis_label_text_alpha = axis_label_text_alpha,
+        axis_line_width = axis_line_width, minor_tick_in = minor_tick_in,
+        minor_tick_line_cap = minor_tick_line_cap,
+        axis_line_alpha = axis_line_alpha, axis_label = axis_label,
+        axis_line_join = axis_line_join,
+        major_tick_line_cap = major_tick_line_cap,
+        major_label_text_font_style = major_label_text_font_style,
+        bounds = bounds, minor_tick_line_width = minor_tick_line_width,
+        axis_label_text_baseline = axis_label_text_baseline,
+        major_tick_line_dash = major_tick_line_dash,
+        minor_tick_out = minor_tick_out,
+        major_label_text_align = major_label_text_align,
+        js_event_callbacks = js_event_callbacks,
+        major_label_overrides = major_label_overrides,
+        y_range_name = y_range_name,
+        minor_tick_line_join = minor_tick_line_join, visible = visible,
+        major_label_orientation = major_label_orientation,
+        minor_tick_line_color = minor_tick_line_color,
+        axis_label_text_font = axis_label_text_font,
+        major_tick_in = major_tick_in,
+        major_tick_line_alpha = major_tick_line_alpha,
+        axis_label_text_font_style = axis_label_text_font_style,
+        major_label_text_font_size = major_label_text_font_size,
+        subscribed_events = subscribed_events,
+        axis_line_dash = axis_line_dash,
+        major_label_text_color = major_label_text_color, tags = tags,
+        major_tick_line_join = major_tick_line_join,
+        major_tick_out = major_tick_out, name = name,
+        major_label_text_font = major_label_text_font,
+        x_range_name = x_range_name,
+        axis_label_text_align = axis_label_text_align,
+        minor_tick_line_alpha = minor_tick_line_alpha,
+        major_tick_line_dash_offset = major_tick_line_dash_offset,
+        major_label_text_baseline = major_label_text_baseline,
+        axis_line_cap = axis_line_cap,
+        major_tick_line_width = major_tick_line_width,
+        axis_line_dash_offset = axis_line_dash_offset,
+        major_tick_line_color = major_tick_line_color, plot = plot,
+        axis_label_text_font_size = axis_label_text_font_size,
+        minor_tick_line_dash_offset = minor_tick_line_dash_offset,
+        axis_label_standoff = axis_label_standoff,
+        axis_line_color = axis_line_color,
+        major_label_text_alpha = major_label_text_alpha,
+        major_label_standoff = major_label_standoff, id = id)
+      types <- bk_prop_types[["LinearAxis"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A base class for data source types, which can be mapped onto a columnar
+# format.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+ColumnarDataSource <- R6::R6Class("ColumnarDataSource",
+  inherit = DataSource,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(), column_names = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      callback = NULL, name = NULL, selected = structure(list(`1d` =
+      structure(list(indices = list()), .Names = "indices"), `2d` =
+      structure(list(indices = structure(list(), .Names =
+      character(0))), .Names = "indices"), `0d` = structure(list(glyph
+      = NULL, indices = list()), .Names = c("glyph", "indices"))),
+      .Names = c("1d", "2d", "0d")),
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, callback = callback,
+        name = name, selected = selected, id = id)
+      types <- bk_prop_types[["ColumnarDataSource"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # An list of names for all the columns in this DataSource.
+    # > List(String)
+    column_names = NULL
+  )
+)
+
+# A container for widgets that are part of a layout.
+WidgetBox <- R6::R6Class("WidgetBox",
+  inherit = LayoutDOM,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, children = list(), sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["WidgetBox"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The list of widgets to put in the layout box.
+    # > List(Instance(Widget))
+    children = NULL
+  )
+)
+
+# Range-slider based range selection widget
+RangeSlider <- R6::R6Class("RangeSlider",
+  inherit = InputWidget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      callback_policy = "throttle", subscribed_events = list(),
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), height = NULL, callback = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      disabled = FALSE, end = 1L, width = NULL, callback_throttle = 200L,
+      step = 0.1, title = "", start = 0L, sizing_mode = "fixed",
+      orientation = "horizontal", css_classes = NULL, range = list(0.1, 0.9),
+      id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        title = title, sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["RangeSlider"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # When the callback is initiated. This parameter can take on only one of
+    # three options:
+    #
+    # * "continuous": the callback will be executed immediately for each
+    # movement of the slider * "throttle": the callback will be executed at
+    # most every ``callback_throttle`` milliseconds.  * "mouseup": the
+    # callback will be executed only once when the slider is released.
+    #
+    # The "mouseup" policy is intended for scenarios in which the callback is
+    # expensive in time.
+    # > Enum('continuous', 'throttle', 'mouseup')
+    callback_policy = NULL,
+    # A callback to run in the browser whenever the current Slider value
+    # changes.
+    # > Instance(Callback)
+    callback = NULL,
+    # The maximum allowable value.
+    # > Float
+    end = NULL,
+    # Number of microseconds to pause between callback calls as the slider is
+    # moved.
+    # > Float
+    callback_throttle = NULL,
+    # The step between consecutive values.
+    # > Float
+    step = NULL,
+    # The minimum allowable value.
+    # > Float
+    start = NULL,
+    # Orient the slider either horizontally (default) or vertically.
+    # > Enum('horizontal', 'vertical')
+    orientation = NULL,
+    # Initial or selected range.
+    # > Tuple(Float, Float)
+    range = NULL
+  )
+)
+
+# An LinearAxis that picks nice numbers for tick locations on a datetime
+# scale. Configured with a ``DatetimeTickFormatter`` by default.
+DatetimeAxis <- R6::R6Class("DatetimeAxis",
+  inherit = LinearAxis,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      minor_tick_line_dash = list(), axis_label_text_color = "#444444",
+      formatter = NULL, js_property_callbacks = structure(list(), .Names =
+      character(0)), level = "overlay", ticker = NULL,
+      axis_label_text_alpha = 1, axis_line_width = 1L, minor_tick_in = 0L,
+      minor_tick_line_cap = "butt", axis_line_alpha = 1, axis_label = "",
+      axis_line_join = "miter", major_tick_line_cap = "butt",
+      major_label_text_font_style = "normal", bounds = "auto",
+      minor_tick_line_width = 1L, axis_label_text_baseline = "bottom",
+      major_tick_line_dash = list(), minor_tick_out = 4L,
+      major_label_text_align = "center",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      major_label_overrides = structure(list(), .Names = character(0)),
+      y_range_name = "default", minor_tick_line_join = "miter",
+      visible = TRUE, major_label_orientation = "horizontal",
+      minor_tick_line_color = "black", axis_label_text_font = "helvetica",
+      major_tick_in = 2L, major_tick_line_alpha = 1,
+      axis_label_text_font_style = "italic",
+      major_label_text_font_size = list(value = "8pt"),
+      subscribed_events = list(), axis_line_dash = list(),
+      major_label_text_color = "#444444", tags = list(),
+      major_tick_line_join = "miter", major_tick_out = 6L, name = NULL,
+      major_label_text_font = "helvetica", x_range_name = "default",
+      axis_label_text_align = "left", minor_tick_line_alpha = 1,
+      major_tick_line_dash_offset = 0L,
+      major_label_text_baseline = "alphabetic", axis_line_cap = "butt",
+      major_tick_line_width = 1L, axis_line_dash_offset = 0L,
+      major_tick_line_color = "black", plot = NULL,
+      axis_label_text_font_size = list(value = "10pt"),
+      minor_tick_line_dash_offset = 0L, axis_label_standoff = 5L,
+      axis_line_color = "black", major_label_text_alpha = 1,
+      major_label_standoff = 5L, id = NULL
+    ) {
+      super$initialize(minor_tick_line_dash = minor_tick_line_dash,
+        axis_label_text_color = axis_label_text_color,
+        formatter = formatter,
+        js_property_callbacks = js_property_callbacks, level = level,
+        ticker = ticker, axis_label_text_alpha = axis_label_text_alpha,
+        axis_line_width = axis_line_width, minor_tick_in = minor_tick_in,
+        minor_tick_line_cap = minor_tick_line_cap,
+        axis_line_alpha = axis_line_alpha, axis_label = axis_label,
+        axis_line_join = axis_line_join,
+        major_tick_line_cap = major_tick_line_cap,
+        major_label_text_font_style = major_label_text_font_style,
+        bounds = bounds, minor_tick_line_width = minor_tick_line_width,
+        axis_label_text_baseline = axis_label_text_baseline,
+        major_tick_line_dash = major_tick_line_dash,
+        minor_tick_out = minor_tick_out,
+        major_label_text_align = major_label_text_align,
+        js_event_callbacks = js_event_callbacks,
+        major_label_overrides = major_label_overrides,
+        y_range_name = y_range_name,
+        minor_tick_line_join = minor_tick_line_join, visible = visible,
+        major_label_orientation = major_label_orientation,
+        minor_tick_line_color = minor_tick_line_color,
+        axis_label_text_font = axis_label_text_font,
+        major_tick_in = major_tick_in,
+        major_tick_line_alpha = major_tick_line_alpha,
+        axis_label_text_font_style = axis_label_text_font_style,
+        major_label_text_font_size = major_label_text_font_size,
+        subscribed_events = subscribed_events,
+        axis_line_dash = axis_line_dash,
+        major_label_text_color = major_label_text_color, tags = tags,
+        major_tick_line_join = major_tick_line_join,
+        major_tick_out = major_tick_out, name = name,
+        major_label_text_font = major_label_text_font,
+        x_range_name = x_range_name,
+        axis_label_text_align = axis_label_text_align,
+        minor_tick_line_alpha = minor_tick_line_alpha,
+        major_tick_line_dash_offset = major_tick_line_dash_offset,
+        major_label_text_baseline = major_label_text_baseline,
+        axis_line_cap = axis_line_cap,
+        major_tick_line_width = major_tick_line_width,
+        axis_line_dash_offset = axis_line_dash_offset,
+        major_tick_line_color = major_tick_line_color, plot = plot,
+        axis_label_text_font_size = axis_label_text_font_size,
+        minor_tick_line_dash_offset = minor_tick_line_dash_offset,
+        axis_label_standoff = axis_label_standoff,
+        axis_line_color = axis_line_color,
+        major_label_text_alpha = major_label_text_alpha,
+        major_label_standoff = major_label_standoff, id = id)
+      types <- bk_prop_types[["DatetimeAxis"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Spinner-based time cell editor.
+TimeEditor <- R6::R6Class("TimeEditor",
+  inherit = CellEditor,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["TimeEditor"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Basic string cell editor with auto-completion.
+StringEditor <- R6::R6Class("StringEditor",
+  inherit = CellEditor,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      completions = list(), subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["StringEditor"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # An optional list of completion strings.
+    # > List(String)
+    completions = NULL
+  )
+)
+
+# Render multiple text labels as annotations.
+#
+# ``LabelSet`` will render multiple text labels at given ``x`` and ``y``
+# coordinates, which can be in either screen (pixel) space, or data (axis
+# range) space. In this case (as opposed to the single ``Label`` model),
+# ``x`` and ``y`` can also be the name of a column from a
+# :class:`~bokeh.models.sources.ColumnDataSource`, in which case the
+# labels will be "vectorized" using coordinate values from the specified
+# columns.
+#
+# The label can also be configured with a screen space offset from ``x``
+# and ``y``, by using the ``x_offset`` and ``y_offset`` properties. These
+# offsets may be vectorized by giving the name of a data source column.
+#
+# Additionally, the label can be rotated with the ``angle`` property
+# (which may also be a column name.)
+#
+# There are also standard text, fill, and line properties to control the
+# appearance of the text, its background, as well as the rectangular
+# bounding box border.
+#
+# The data source is provided by setting the ``source`` property.
+LabelSet <- R6::R6Class("LabelSet",
+  inherit = TextAnnotation,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      y_offset = 0L, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      text_font_size = list(value = "12pt"), text_font = "helvetica",
+      border_line_width = 1L, angle_units = "rad", y = NULL,
+      level = "annotation", name = NULL, border_line_cap = "butt",
+      border_line_alpha = 1, text_font_style = "normal",
+      border_line_dash_offset = 0L, text_alpha = 1, angle = 0L,
+      x_range_name = "default", border_line_dash = list(),
+      text_align = "left", y_units = "data", text = "text",
+      render_mode = "canvas", x_offset = 0L, x_units = "data", plot = NULL,
+      border_line_color = NULL, y_range_name = "default",
+      text_color = "#444444", source = NULL, visible = TRUE, x = NULL,
+      border_line_join = "miter", js_event_callbacks = structure(list(),
+      .Names = character(0)), background_fill_color = NULL,
+      background_fill_alpha = 1, text_baseline = "bottom", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["LabelSet"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Offset values to apply to the y-coordinates.
+    #
+    # This is useful, for instance, if it is desired to "float" text a fixed
+    # distance in screen units from a given data position.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y_offset = NULL,
+    # The text font size values for the text.
+    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    text_font_size = NULL,
+    # The text font values for the text.
+    # > String
+    text_font = NULL,
+    # The line width values for the text bounding box.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    border_line_width = NULL,
+    #
+    # > Enum('deg', 'rad')
+    angle_units = NULL,
+    # The y-coordinates to locate the text anchors.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line cap values for the text bounding box.
+    # > Enum('butt', 'round', 'square')
+    border_line_cap = NULL,
+    # The line alpha values for the text bounding box.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    border_line_alpha = NULL,
+    # The text font style values for the text.
+    # > Enum('normal', 'italic', 'bold')
+    text_font_style = NULL,
+    # The line dash offset values for the text bounding box.
+    # > Int
+    border_line_dash_offset = NULL,
+    # The text alpha values for the text.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    text_alpha = NULL,
+    # The angles to rotate the text, as measured from the horizontal.
+    #
+    # .. warning:: The center of rotation for canvas and css render_modes is
+    # different.  For `render_mode="canvas"` the label is rotated from the
+    # top-left corner of the annotation, while for `render_mode="css"` the
+    # annotation is rotated around it's center.
+    # > AngleSpec(units_default='rad')
+    angle = NULL,
+    # A particular (named) x-range to use for computing screen locations when
+    # rendering annotations on the plot. If unset, use the default x-range.
+    # > String
+    x_range_name = NULL,
+    # The line dash values for the text bounding box.
+    # > DashPattern
+    border_line_dash = NULL,
+    # The text align values for the text.
+    # > Enum('left', 'right', 'center')
+    text_align = NULL,
+    # The unit type for the ys attribute. Interpreted as "data space" units
+    # by default.
+    # > Enum('screen', 'data')
+    y_units = NULL,
+    # The text values to render.
+    # > StringSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    text = NULL,
+    # Specifies whether the text is rendered as a canvas element or as an css
+    # element overlaid on the canvas. The default mode is "canvas".
+    #
+    # .. note:: The CSS labels won't be present in the output using the
+    # "save" tool.
+    #
+    # .. warning:: Not all visual styling properties are supported if the
+    # render_mode is set to "css". The border_line_dash property isn't fully
+    # supported and border_line_dash_offset isn't supported at all. Setting
+    # text_alpha will modify the opacity of the entire background box and
+    # border in addition to the text. Finally, clipping Label annotations
+    # inside of the plot area isn't supported in "css" mode.
+    # > Enum('canvas', 'css')
+    render_mode = NULL,
+    # Offset values to apply to the x-coordinates.
+    #
+    # This is useful, for instance, if it is desired to "float" text a fixed
+    # distance in screen units from a given data position.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x_offset = NULL,
+    # The unit type for the xs attribute. Interpreted as "data space" units
+    # by default.
+    # > Enum('screen', 'data')
+    x_units = NULL,
+    # The line color values for the text bounding box.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    border_line_color = NULL,
+    # A particular (named) y-range to use for computing screen locations when
+    # rendering annotations on the plot. If unset, use the default y-range.
+    # > String
+    y_range_name = NULL,
+    # The text color values for the text.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    text_color = NULL,
+    # Local data source to use when rendering annotations on the plot.
+    # > Instance(DataSource)
+    source = NULL,
+    # The x-coordinates to locate the text anchors.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    # The line join values for the text bounding box.
+    # > Enum('miter', 'round', 'bevel')
+    border_line_join = NULL,
+    # The fill color values for the text bounding box.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    background_fill_color = NULL,
+    # The fill alpha values for the text bounding box.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    background_fill_alpha = NULL,
+    # The text baseline values for the text.
+    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
+    text_baseline = NULL
+  )
+)
+
+# A block (div) of text.
+#
+# This Bokeh model corresponds to an HTML ``<div>`` element.
+#
+# Example -------
+#
+# .. bokeh-plot::
+# ../sphinx/source/docs/user_guide/examples/interaction_div.py
+# :source-position: below
+Div <- R6::R6Class("Div",
+  inherit = Markup,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      render_as_text = FALSE, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, sizing_mode = "fixed", text = "", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, text = text, id = id)
+      types <- bk_prop_types[["Div"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Whether the contents should be rendered as raw text or as interpreted
+    # HTML.  The default value is ``False``, meaning contents are rendered as
+    # HTML.
+    # > Bool
+    render_as_text = NULL
+  )
+)
+
+# Slider-based date range selection widget.
+DateRangeSlider <- R6::R6Class("DateRangeSlider",
+  inherit = InputWidget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      arrows = TRUE, bounds = NULL, value_labels = "show",
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, wheel_mode = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      disabled = FALSE, width = NULL, value = NULL, step = structure(list(),
+      .Names = character(0)), title = "", css_classes = NULL,
+      sizing_mode = "fixed", enabled = TRUE, range = NULL, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        title = title, sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["DateRangeSlider"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Whether to show clickable arrows on both ends of the slider.
+    # > Bool
+    arrows = NULL,
+    # The earliest and latest allowable dates.
+    # > Tuple(Date, Date)
+    bounds = NULL,
+    # Show or hide value labels on both sides of the slider.
+    # > Enum('show', 'hide', 'change')
+    value_labels = NULL,
+    # A callback to run in the browser whenever either slider's value
+    # changes.
+    # > Instance(Callback)
+    callback = NULL,
+    # Whether mouse zoom should scroll or zoom selected range (or do
+    # nothing).
+    # > Enum('scroll', 'zoom')
+    wheel_mode = NULL,
+    # The initial or selected date range.
+    # > Tuple(Date, Date)
+    value = NULL,
+    # The step between consecutive dates.
+    # > RelativeDelta
+    step = NULL,
+    # Enable or disable this widget.
+    # > Bool
+    enabled = NULL,
+    # [TDB]
+    # > Tuple(RelativeDelta, RelativeDelta)
+    range = NULL
+  )
+)
+
+# Render a filled area band along a dimension.
+Band <- R6::R6Class("Band",
+  inherit = Annotation,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      upper_units = "data", line_join = "miter", tags = list(),
+      subscribed_events = list(), line_width = 1L,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      dimension = "height", line_dash = list(), level = "annotation",
+      name = NULL, line_dash_offset = 0L, fill_color = "#fff9ba",
+      line_alpha = 0.3, fill_alpha = 0.4, x_range_name = "default",
+      line_cap = "butt", line_color = "#cccccc", base = NULL,
+      base_units = "data", lower_units = "data", plot = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      y_range_name = "default", visible = TRUE, source = NULL, upper = NULL,
+      lower = NULL, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["Band"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    #
+    # > Enum('screen', 'data')
+    upper_units = NULL,
+    # The line join values for the band.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the band.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The direction of the band.
+    # > Enum('width', 'height')
+    dimension = NULL,
+    # The line dash values for the band.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the band.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the band.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the band.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The fill alpha values for the band.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # A particular (named) x-range to use for computing screen locations when
+    # rendering annotations on the plot. If unset, use the default x-range.
+    # > String
+    x_range_name = NULL,
+    # The line cap values for the band.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the band.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    # The orthogonal coordinates of the upper and lower values.
+    # > DistanceSpec(units_default='data')
+    base = NULL,
+    #
+    # > Enum('screen', 'data')
+    base_units = NULL,
+    #
+    # > Enum('screen', 'data')
+    lower_units = NULL,
+    # A particular (named) y-range to use for computing screen locations when
+    # rendering annotations on the plot. If unset, use the default y-range.
+    # > String
+    y_range_name = NULL,
+    # Local data source to use when rendering annotations on the plot.
+    # > Instance(DataSource)
+    source = NULL,
+    # The coordinations of the upper portion of the filled area band.
+    # > DistanceSpec(units_default='data')
+    upper = NULL,
+    # The coordinates of the lower portion of the filled area band.
+    # > DistanceSpec(units_default='data')
+    lower = NULL
+  )
+)
+
+# Abstract base class for input widgets.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+InputWidget <- R6::R6Class("InputWidget",
+  inherit = Widget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, title = "", sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["InputWidget"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Widget's label.
+    # > String
+    title = NULL
+  )
+)
+
+# Calendar-based date cell editor.
+DateEditor <- R6::R6Class("DateEditor",
+  inherit = CellEditor,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["DateEditor"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Spinner-based number cell editor.
+NumberEditor <- R6::R6Class("NumberEditor",
+  inherit = CellEditor,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), step = 0.01, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["NumberEditor"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The major step value.
+    # > Float
+    step = NULL
+  )
+)
+
+# Apply either a uniform or normally sampled random jitter to data.
+Jitter <- R6::R6Class("Jitter",
+  inherit = Transform,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, js_event_callbacks = structure(list(), .Names =
+      character(0)), width = 1L, distribution = "uniform", mean = 0L, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Jitter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The width (absolute for uniform distribution and sigma for the normal
+    # distribution) of the random sample.
+    # > Float
+    width = NULL,
+    # The random distribution upon which to pull the random scatter
+    # > Enum('uniform', 'normal')
+    distribution = NULL,
+    # The central value for the random sample
+    # > Float
+    mean = NULL
+  )
+)
+
+# Lay out child components in a single horizontal row.
+#
+# Children can be specified as positional arguments, as a single argument
+# that is a sequence, or using the ``children`` keyword argument.
+Row <- R6::R6Class("Row",
+  inherit = Box,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, children = list(), sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        children = children, sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Row"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A single-widget container with title bar and controls.
+Panel <- R6::R6Class("Panel",
+  inherit = Widget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, closable = FALSE, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      disabled = FALSE, width = NULL, child = NULL, css_classes = NULL,
+      title = "", sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Panel"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Whether this panel is closeable or not. If True, an "x" button will
+    # appear.
+    # > Bool
+    closable = NULL,
+    # The child widget. If you need more children, use a layout widget, e.g.
+    # ``Row`` or ``Column``.
+    # > Instance(LayoutDOM)
+    child = NULL,
+    # An optional text title of the panel.
+    # > String
+    title = NULL
+  )
+)
+
+# Abstract base class for groups with items rendered as check/radio
+# boxes.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Group <- R6::R6Class("Group",
+  inherit = AbstractGroup,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      inline = FALSE, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      disabled = FALSE, width = NULL, css_classes = NULL, labels = list(),
+      sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        callback = callback, name = name,
+        js_event_callbacks = js_event_callbacks, disabled = disabled,
+        width = width, css_classes = css_classes, labels = labels,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Group"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Should items be arrange vertically (``False``) or horizontally in-line
+    # (``True``).
+    # > Bool
+    inline = NULL
+  )
+)
+
+# Boolean (check mark) cell formatter.
+BooleanFormatter <- R6::R6Class("BooleanFormatter",
+  inherit = CellFormatter,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      icon = "check", name = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["BooleanFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The icon visualizing the check mark.
+    # > Enum('check', 'check-circle', 'check-circle-o', 'check-square', 'check-square-o')
+    icon = NULL
+  )
+)
+
+# Render rays.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Ray.py :source-position: below
+Ray <- R6::R6Class("Ray",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", length = NULL,
+      tags = list(), line_width = 1L, angle_units = "rad",
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      length_units = "data", y = NULL, line_dash = list(), name = NULL,
+      line_dash_offset = 0L, js_event_callbacks = structure(list(), .Names
+      = character(0)), line_alpha = 1, x = NULL, angle = NULL,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Ray"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the rays.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The length to extend the ray. Note that this ``length`` defaults to
+    # screen units.
+    # > DistanceSpec(units_default='data')
+    length = NULL,
+    # The line width values for the rays.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    #
+    # > Enum('deg', 'rad')
+    angle_units = NULL,
+    #
+    # > Enum('screen', 'data')
+    length_units = NULL,
+    # The y-coordinates to start the rays.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line dash values for the rays.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the rays.
+    # > Int
+    line_dash_offset = NULL,
+    # The line alpha values for the rays.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The x-coordinates to start the rays.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    # The angles in radians to extend the rays, as measured from the
+    # horizontal.
+    # > AngleSpec(units_default='rad')
+    angle = NULL,
+    # The line cap values for the rays.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the rays.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# A base class for all interactive widget types.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Widget <- R6::R6Class("Widget",
+  inherit = LayoutDOM,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Widget"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A range in a categorical dimension.
+#
+# In addition to supplying ``factors`` keyword argument to the
+# ``FactorRange`` initializer, you can also instantiate with the
+# convenience syntax::
+#
+# FactorRange("foo", "bar") # equivalent to FactorRange(factors=["foo",
+# "bar"])
+#
+# .. note:: ``FactorRange`` may be renamed to ``CategoricalRange`` in the
+# future.
+FactorRange <- R6::R6Class("FactorRange",
+  inherit = Range,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      bounds = NULL, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      factors = list(), callback = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      min_interval = NULL, max_interval = NULL, offset = 0L, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, callback = callback,
+        name = name, id = id)
+      types <- bk_prop_types[["FactorRange"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The bounds that the range is allowed to go to - typically used to
+    # prevent the user from panning/zooming/etc away from the data.
+    #
+    # Unlike Range1d and DataRange1d, factors do not have an order and so a
+    # min and max cannot be proved in the same way. bounds accepts a list of
+    # factors, that constrain the displayed factors.
+    #
+    # By default, bounds are ``None``, allows unlimited panning or zooming.
+    #
+    # If ``bounds='auto'``, bounds will be the same as factors and the plot
+    # will not be able to pan or zoom beyond the first and last factors.
+    #
+    # If you provide a list, then only the factors that are in that list will
+    # be displayed on the plot and the plot will not pan or zoom outside the
+    # first and last items in the shortened factors list. Note the order of
+    # factors is the defining order for your plot.
+    #
+    # Values of bounds that are not in factors are acceptable and will simply
+    # have no impact on the plot.
+    #
+    # Examples:
+    #
+    # Auto behavior:
+    #
+    # .. code-block:: python
+    #
+    # x_range = FactorRange( factors=["apples", "dogs", "peaches", "bananas",
+    # "pigs"], bounds='auto' )
+    #
+    # The plot will display all the factors and you will not be able to pan
+    # left of apples or right of pigs.
+    #
+    # Constraining behavior:
+    #
+    # .. code-block:: python
+    #
+    # x_range = FactorRange( factors=["apples", "dogs", "peaches", "bananas",
+    # "pigs"], bounds=["apples", "bananas", "peaches"] )
+    #
+    # Only the factors ``["apples", "peaches", "bananas"]`` (in that order)
+    # will appear in the plot, and the plot will not pan left of ``"apples"``
+    # or right of ``"bananas"``.
+    # > Either(Auto, List(String), List(Int))
+    bounds = NULL,
+    # A list of string or integer factors (categories) to comprise this
+    # categorical range.
+    # > Either(List(String), List(Int))
+    factors = NULL,
+    # The level that the range is allowed to zoom in, expressed as the
+    # minimum number of visible categories. If set to ``None`` (default), the
+    # minimum interval is not bound.
+    # > Int
+    min_interval = NULL,
+    # The level that the range is allowed to zoom out, expressed as the
+    # maximum number of visible categories. Note that ``bounds`` can impose
+    # an implicit constraint on the maximum interval as well.
+    # > Int
+    max_interval = NULL,
+    # An offset to the (synthetic) range (default: 0)
+    #
+    # .. note:: The primary usage of this is to support compatibility and
+    # integration with other plotting systems, and will not generally of
+    # interest to most users.
+    # > Float
+    offset = NULL
+  )
+)
+
+# The QUADKEYTileSource has the same tile origin as the WMTSTileSource
+# but requests tiles using a `quadkey` argument instead of X, Y, Z e.g.
+# ``http://your.quadkey.tile.host/{Q}.png``
+QUADKEYTileSource <- R6::R6Class("QUADKEYTileSource",
+  inherit = MercatorTileSource,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      max_zoom = 30L, subscribed_events = list(), tags = list(),
+      extra_url_vars = structure(list(), .Names = character(0)),
+      attribution = "", initial_resolution = 156543.033928041,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      wrap_around = TRUE, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), min_zoom = 0L, url = "", tile_size = 256L,
+      y_origin_offset = 20037508.34, x_origin_offset = 20037508.34, id = NULL
+    ) {
+      super$initialize(max_zoom = max_zoom,
+        subscribed_events = subscribed_events, tags = tags,
+        extra_url_vars = extra_url_vars, attribution = attribution,
+        initial_resolution = initial_resolution,
+        js_property_callbacks = js_property_callbacks,
+        wrap_around = wrap_around, name = name,
+        js_event_callbacks = js_event_callbacks, min_zoom = min_zoom,
+        url = url, tile_size = tile_size, y_origin_offset = y_origin_offset,
+        x_origin_offset = x_origin_offset, id = id)
+      types <- bk_prop_types[["QUADKEYTileSource"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# An axis that picks evenly spaced tick locations for a collection of
+# categories/factors.
+CategoricalAxis <- R6::R6Class("CategoricalAxis",
+  inherit = Axis,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      minor_tick_line_dash = list(), axis_label_text_color = "#444444",
+      formatter = NULL, js_property_callbacks = structure(list(), .Names =
+      character(0)), level = "overlay", ticker = NULL,
+      axis_label_text_alpha = 1, axis_line_width = 1L, minor_tick_in = 0L,
+      minor_tick_line_cap = "butt", axis_line_alpha = 1, axis_label = "",
+      axis_line_join = "miter", major_tick_line_cap = "butt",
+      major_label_text_font_style = "normal", bounds = "auto",
+      minor_tick_line_width = 1L, axis_label_text_baseline = "bottom",
+      major_tick_line_dash = list(), minor_tick_out = 4L,
+      major_label_text_align = "center",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      major_label_overrides = structure(list(), .Names = character(0)),
+      y_range_name = "default", minor_tick_line_join = "miter",
+      visible = TRUE, major_label_orientation = "horizontal",
+      minor_tick_line_color = "black", axis_label_text_font = "helvetica",
+      major_tick_in = 2L, major_tick_line_alpha = 1,
+      axis_label_text_font_style = "italic",
+      major_label_text_font_size = list(value = "8pt"),
+      subscribed_events = list(), axis_line_dash = list(),
+      major_label_text_color = "#444444", tags = list(),
+      major_tick_line_join = "miter", major_tick_out = 6L, name = NULL,
+      major_label_text_font = "helvetica", x_range_name = "default",
+      axis_label_text_align = "left", minor_tick_line_alpha = 1,
+      major_tick_line_dash_offset = 0L,
+      major_label_text_baseline = "alphabetic", axis_line_cap = "butt",
+      major_tick_line_width = 1L, axis_line_dash_offset = 0L,
+      major_tick_line_color = "black", plot = NULL,
+      axis_label_text_font_size = list(value = "10pt"),
+      minor_tick_line_dash_offset = 0L, axis_label_standoff = 5L,
+      axis_line_color = "black", major_label_text_alpha = 1,
+      major_label_standoff = 5L, id = NULL
+    ) {
+      super$initialize(minor_tick_line_dash = minor_tick_line_dash,
+        axis_label_text_color = axis_label_text_color,
+        formatter = formatter,
+        js_property_callbacks = js_property_callbacks, level = level,
+        ticker = ticker, axis_label_text_alpha = axis_label_text_alpha,
+        axis_line_width = axis_line_width, minor_tick_in = minor_tick_in,
+        minor_tick_line_cap = minor_tick_line_cap,
+        axis_line_alpha = axis_line_alpha, axis_label = axis_label,
+        axis_line_join = axis_line_join,
+        major_tick_line_cap = major_tick_line_cap,
+        major_label_text_font_style = major_label_text_font_style,
+        bounds = bounds, minor_tick_line_width = minor_tick_line_width,
+        axis_label_text_baseline = axis_label_text_baseline,
+        major_tick_line_dash = major_tick_line_dash,
+        minor_tick_out = minor_tick_out,
+        major_label_text_align = major_label_text_align,
+        js_event_callbacks = js_event_callbacks,
+        major_label_overrides = major_label_overrides,
+        y_range_name = y_range_name,
+        minor_tick_line_join = minor_tick_line_join, visible = visible,
+        major_label_orientation = major_label_orientation,
+        minor_tick_line_color = minor_tick_line_color,
+        axis_label_text_font = axis_label_text_font,
+        major_tick_in = major_tick_in,
+        major_tick_line_alpha = major_tick_line_alpha,
+        axis_label_text_font_style = axis_label_text_font_style,
+        major_label_text_font_size = major_label_text_font_size,
+        subscribed_events = subscribed_events,
+        axis_line_dash = axis_line_dash,
+        major_label_text_color = major_label_text_color, tags = tags,
+        major_tick_line_join = major_tick_line_join,
+        major_tick_out = major_tick_out, name = name,
+        major_label_text_font = major_label_text_font,
+        x_range_name = x_range_name,
+        axis_label_text_align = axis_label_text_align,
+        minor_tick_line_alpha = minor_tick_line_alpha,
+        major_tick_line_dash_offset = major_tick_line_dash_offset,
+        major_label_text_baseline = major_label_text_baseline,
+        axis_line_cap = axis_line_cap,
+        major_tick_line_width = major_tick_line_width,
+        axis_line_dash_offset = axis_line_dash_offset,
+        major_tick_line_color = major_tick_line_color, plot = plot,
+        axis_label_text_font_size = axis_label_text_font_size,
+        minor_tick_line_dash_offset = minor_tick_line_dash_offset,
+        axis_label_standoff = axis_label_standoff,
+        axis_line_color = axis_line_color,
+        major_label_text_alpha = major_label_text_alpha,
+        major_label_standoff = major_label_standoff, id = id)
+      types <- bk_prop_types[["CategoricalAxis"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render triangle markers.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/Triangle.py :source-position: below
+Triangle <- R6::R6Class("Triangle",
+  inherit = Marker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["Triangle"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# A base class for tools that are buttons in the toolbar.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Action <- R6::R6Class("Action",
+  inherit = Tool,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      plot = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["Action"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Base class for interpolator transforms.
+#
+# Interpolators return the value of a function which has been evaluated
+# between specified (x, y) pairs of data.  As an example, if two control
+# point pairs were provided to the interpolator, a linear interpolaction
+# at a specific value of 'x' would result in the value of 'y' which
+# existed on the line conneting the two control points.
+#
+# The control point pairs for the interpolators can be specified through
+# either
+#
+# * A literal sequence of values:
+#
+# .. code-block: python
+#
+# interp = Interpolator(x=[1, 2, 3, 4, 5], y=[2, 5, 10, 12, 16])
+#
+# * or a pair of columns defined in a `ColumnDataSource` object:
+#
+# .. code-block: python
+#
+# interp = Interpolator(x="year", y="earnings", data=jewlery_prices))
+#
+# This is the base class and is not intended to end use.  Please see the
+# documentation for the final derived classes (Jitter,
+# LineraInterpolator, StepInterpolator) for mor information on their
+# specific methods of interpolation.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Interpolator <- R6::R6Class("Interpolator",
+  inherit = Transform,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      y = NULL, data = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      x = NULL, clip = TRUE, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Interpolator"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Dependant coordinate denoting the value of a point at a location.
+    # > Either(String, Seq(Float))
+    y = NULL,
+    # Data which defines the source for the named columns if a string is
+    # passed to either the ``x`` or ``y`` parameters.
+    # > Instance(ColumnarDataSource)
+    data = NULL,
+    # Independant coordiante denoting the location of a point.
+    # > Either(String, Seq(Float))
+    x = NULL,
+    # Determine if the interpolation should clip the result to include only
+    # values inside its predefined range.  If this is set to False, it will
+    # return the most value of the closest point.
+    # > Bool
+    clip = NULL
+  )
+)
+
+# Base class for interactive callback.
+#
+# .. note:: This is an abstract base class used to help organize the
+# hierarchy of Bokeh model types. **It is not useful to instantiate on
+# its own.**
+Callback <- R6::R6Class("Callback",
+  inherit = Model,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Callback"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Generate nice lat/lon ticks form underlying WebMercator coordinates.
+MercatorTicker <- R6::R6Class("MercatorTicker",
+  inherit = BasicTicker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      base = 10, subscribed_events = list(), mantissas = list(1L, 2L, 5L),
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), dimension = NULL, num_minor_ticks = 5L, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      min_interval = 0, max_interval = NULL, desired_num_ticks = 6L, id = NULL
+    ) {
+      super$initialize(base = base, subscribed_events = subscribed_events,
+        mantissas = mantissas, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        num_minor_ticks = num_minor_ticks, name = name,
+        js_event_callbacks = js_event_callbacks,
+        min_interval = min_interval, max_interval = max_interval,
+        desired_num_ticks = desired_num_ticks, id = id)
+      types <- bk_prop_types[["MercatorTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Specify whether to generate ticks for Latitude or Longitude.
+    #
+    # Projected coordinates are not separable, computing Latitude and
+    # Longitude tick locations from Web Mercator requires considering
+    # coordinates from both dimensions together. Use this property to specify
+    # which result should be returned.
+    #
+    # Typically, if the ticker is for an x-axis, then dimension should be
+    # ``"lon"`` and if the ticker is for a y-axis, then the dimension should
+    # be `"lat"``.
+    #
+    # In order to prevent hard to debug errors, there is no default value for
+    # dimension. Using an un-configured MercatorTicker will result in a
+    # validation error and a JavaScript console error.
+    # > Enum('lat', 'lon')
+    dimension = NULL
+  )
+)
+
+# A Bokeh Plot with a `Google Map`_ displayed underneath.
+#
+# Data placed on this plot should be specified in decimal lat long
+# coordinates e.g. 37.123, -122.404.  It will be automatically converted
+# into the web mercator projection to display properly over google maps
+# tiles.
+#
+# .. _Google Map: https://www.google.com/maps/
+GMapPlot <- R6::R6Class("GMapPlot",
+  inherit = MapPlot,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      min_border_right = NULL, outline_line_join = "miter", left = list(),
+      outline_line_alpha = 1, js_property_callbacks = structure(list(),
+      .Names = character(0)), lod_interval = 300L, min_border_top = NULL,
+      hidpi = TRUE, toolbar_sticky = TRUE, output_backend = "canvas",
+      extra_x_ranges = structure(list(), .Names = character(0)),
+      border_fill_alpha = 1, outline_line_color = "#e5e5e5", api_key = NULL,
+      title = NULL, h_symmetry = TRUE, inner_height = NULL, x_scale = NULL,
+      sizing_mode = "fixed", below = list(), outline_line_dash_offset = 0L,
+      outline_line_dash = list(), outline_line_width = 1L,
+      plot_height = 600L, layout_width = NULL, lod_factor = 10L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      width = NULL, border_fill_color = "#ffffff", css_classes = NULL,
+      background_fill_color = "#ffffff", tool_events = NULL,
+      subscribed_events = list(), tags = list(), layout_height = NULL,
+      height = NULL, min_border = 5L, lod_timeout = 500L, name = NULL,
+      right = list(), min_border_left = NULL,
+      extra_y_ranges = structure(list(), .Names = character(0)),
+      disabled = FALSE, lod_threshold = 2000L, min_border_bottom = NULL,
+      x_range = NULL, renderers = list(), title_location = "above",
+      map_options = NULL, plot_width = 600L, y_scale = NULL,
+      inner_width = NULL, outline_line_cap = "butt",
+      toolbar_location = "right", above = list(), y_range = NULL,
+      toolbar = NULL, background_fill_alpha = 1, v_symmetry = FALSE, id = NULL
+    ) {
+      super$initialize(min_border_right = min_border_right,
+        outline_line_join = outline_line_join, left = left,
+        outline_line_alpha = outline_line_alpha,
+        js_property_callbacks = js_property_callbacks,
+        lod_interval = lod_interval, min_border_top = min_border_top,
+        hidpi = hidpi, toolbar_sticky = toolbar_sticky,
+        output_backend = output_backend, extra_x_ranges = extra_x_ranges,
+        border_fill_alpha = border_fill_alpha,
+        outline_line_color = outline_line_color, title = title,
+        h_symmetry = h_symmetry, inner_height = inner_height,
+        sizing_mode = sizing_mode, x_scale = x_scale, below = below,
+        outline_line_dash_offset = outline_line_dash_offset,
+        outline_line_dash = outline_line_dash,
+        outline_line_width = outline_line_width, plot_height = plot_height,
+        layout_width = layout_width, lod_factor = lod_factor,
+        js_event_callbacks = js_event_callbacks, width = width,
+        border_fill_color = border_fill_color, css_classes = css_classes,
+        background_fill_color = background_fill_color,
+        tool_events = tool_events, subscribed_events = subscribed_events,
+        tags = tags, layout_height = layout_height, height = height,
+        min_border = min_border, lod_timeout = lod_timeout, name = name,
+        right = right, min_border_left = min_border_left,
+        extra_y_ranges = extra_y_ranges, disabled = disabled,
+        lod_threshold = lod_threshold,
+        min_border_bottom = min_border_bottom, x_range = x_range,
+        renderers = renderers, title_location = title_location,
+        plot_width = plot_width, y_scale = y_scale,
+        inner_width = inner_width, outline_line_cap = outline_line_cap,
+        toolbar_location = toolbar_location, above = above,
+        y_range = y_range, toolbar = toolbar,
+        background_fill_alpha = background_fill_alpha,
+        v_symmetry = v_symmetry, id = id)
+      types <- bk_prop_types[["GMapPlot"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Google Maps API requires an API key. See
+    # https://developers.google.com/maps/documentation/javascript/get-api-key
+    # for more information on how to obtain your own.
+    # > String
+    api_key = NULL,
+    # Options for displaying the plot.
+    # > Instance(GMapOptions)
+    map_options = NULL
+  )
+)
+
+# Render a color bar based on a color mapper.
+ColorBar <- R6::R6Class("ColorBar",
+  inherit = Annotation,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      minor_tick_line_dash = list(), formatter = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      border_line_width = 1L, title_standoff = 2L, scale_alpha = 1,
+      bar_line_cap = "butt", ticker = NULL, level = "annotation",
+      border_line_alpha = 1, minor_tick_in = 0L,
+      minor_tick_line_cap = "butt", title = NULL, bar_line_alpha = 1,
+      major_tick_line_cap = "butt", major_label_text_font_style = "normal",
+      title_text_color = "#444444", minor_tick_line_width = 1L,
+      major_tick_line_dash = list(), minor_tick_out = 0L,
+      major_label_text_align = "center", border_line_color = NULL,
+      visible = TRUE, width = "auto", minor_tick_line_join = "miter",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      minor_tick_line_color = NULL, background_fill_color = "#ffffff",
+      orientation = "vertical", title_text_alpha = 1, major_tick_in = 5L,
+      major_tick_line_alpha = 1, major_label_text_font_size = list(value =
+      "8pt"), subscribed_events = list(),
+      major_label_text_color = "#444444", title_text_baseline = "bottom",
+      height = "auto", tags = list(), major_tick_line_join = "miter",
+      major_tick_out = 0L, title_text_align = "left",
+      major_label_text_font = "helvetica", name = NULL,
+      border_line_cap = "butt", margin = 30L, border_line_dash_offset = 0L,
+      border_line_dash = list(), minor_tick_line_alpha = 1,
+      major_tick_line_dash_offset = 0L, title_text_font = "helvetica",
+      label_standoff = 5L, bar_line_width = 1L,
+      major_label_text_baseline = "middle", major_tick_line_width = 1L,
+      bar_line_dash_offset = 0L, bar_line_color = NULL,
+      title_text_font_size = list(value = "10pt"),
+      major_tick_line_color = "#ffffff", color_mapper = NULL, plot = NULL,
+      location = "top_right", minor_tick_line_dash_offset = 0L,
+      border_line_join = "miter", bar_line_join = "miter", padding = 10L,
+      bar_line_dash = list(), background_fill_alpha = 0.95,
+      major_label_text_alpha = 1, title_text_font_style = "italic", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["ColorBar"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line dash of the minor ticks.
+    # > DashPattern
+    minor_tick_line_dash = NULL,
+    # A TickFormatter to use for formatting the visual appearance of ticks.
+    # > Instance(TickFormatter)
+    formatter = NULL,
+    # The line width for the color bar border outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    border_line_width = NULL,
+    # The distance (in pixels) to separate the title from the color bar.
+    # > Int
+    title_standoff = NULL,
+    # The alpha with which to render the color scale.
+    # > Float
+    scale_alpha = NULL,
+    # The line cap for the color scale bar outline.
+    # > Enum('butt', 'round', 'square')
+    bar_line_cap = NULL,
+    # A Ticker to use for computing locations of axis components.
+    # > Instance(Ticker)
+    ticker = NULL,
+    # The line alpha for the color bar border outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    border_line_alpha = NULL,
+    # The distance (in pixels) that minor ticks should extend into the main
+    # plot area.
+    # > Int
+    minor_tick_in = NULL,
+    # The line cap of the minor ticks.
+    # > Enum('butt', 'round', 'square')
+    minor_tick_line_cap = NULL,
+    # The title text to render.
+    # > String
+    title = NULL,
+    # The line alpha for the color scale bar outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    bar_line_alpha = NULL,
+    # The line cap of the major ticks.
+    # > Enum('butt', 'round', 'square')
+    major_tick_line_cap = NULL,
+    # The text font style of the major tick labels.
+    # > Enum('normal', 'italic', 'bold')
+    major_label_text_font_style = NULL,
+    # The text color values for the title text.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    title_text_color = NULL,
+    # The line width of the minor ticks.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    minor_tick_line_width = NULL,
+    # The line dash of the major ticks.
+    # > DashPattern
+    major_tick_line_dash = NULL,
+    # The distance (in pixels) that major ticks should extend out of the main
+    # plot area.
+    # > Int
+    minor_tick_out = NULL,
+    # The text align of the major tick labels.
+    # > Enum('left', 'right', 'center')
+    major_label_text_align = NULL,
+    # The line color for the color bar border outline.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    border_line_color = NULL,
+    # The width (in pixels) that the color scale should occupy.
+    # > Either(Auto, Int)
+    width = NULL,
+    # The line join of the minor ticks.
+    # > Enum('miter', 'round', 'bevel')
+    minor_tick_line_join = NULL,
+    # The line color of the minor ticks.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    minor_tick_line_color = NULL,
+    # The fill color for the color bar background style.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    background_fill_color = NULL,
+    # Whether the color bar should be oriented vertically or horizontally.
+    # > Enum('horizontal', 'vertical')
+    orientation = NULL,
+    # The text alpha values for the title text.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    title_text_alpha = NULL,
+    # The distance (in pixels) that major ticks should extend into the main
+    # plot area.
+    # > Int
+    major_tick_in = NULL,
+    # The line alpha of the major ticks.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    major_tick_line_alpha = NULL,
+    # The text font size of the major tick labels.
+    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    major_label_text_font_size = NULL,
+    # The text color of the major tick labels.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    major_label_text_color = NULL,
+    # The text baseline values for the title text.
+    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
+    title_text_baseline = NULL,
+    # The height (in pixels) that the color scale should occupy.
+    # > Either(Auto, Int)
+    height = NULL,
+    # The line join of the major ticks.
+    # > Enum('miter', 'round', 'bevel')
+    major_tick_line_join = NULL,
+    # The distance (in pixels) that major ticks should extend out of the main
+    # plot area.
+    # > Int
+    major_tick_out = NULL,
+    # The text align values for the title text.
+    # > Enum('left', 'right', 'center')
+    title_text_align = NULL,
+    # The text font of the major tick labels.
+    # > String
+    major_label_text_font = NULL,
+    # The line cap for the color bar border outline.
+    # > Enum('butt', 'round', 'square')
+    border_line_cap = NULL,
+    # Amount of margin (in pixels) around the outside of the color bar.
+    # > Int
+    margin = NULL,
+    # The line dash offset for the color bar border outline.
+    # > Int
+    border_line_dash_offset = NULL,
+    # The line dash for the color bar border outline.
+    # > DashPattern
+    border_line_dash = NULL,
+    # The line alpha of the minor ticks.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    minor_tick_line_alpha = NULL,
+    # The line dash offset of the major ticks.
+    # > Int
+    major_tick_line_dash_offset = NULL,
+    # The text font values for the title text.
+    # > String
+    title_text_font = NULL,
+    # The distance (in pixels) to separate the tick labels from the color
+    # bar.
+    # > Int
+    label_standoff = NULL,
+    # The line width for the color scale bar outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    bar_line_width = NULL,
+    # The text baseline of the major tick labels.
+    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
+    major_label_text_baseline = NULL,
+    # The line width of the major ticks.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    major_tick_line_width = NULL,
+    # The line dash offset for the color scale bar outline.
+    # > Int
+    bar_line_dash_offset = NULL,
+    # The line color for the color scale bar outline.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    bar_line_color = NULL,
+    # The text font size values for the title text.
+    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
+    title_text_font_size = NULL,
+    # The line color of the major ticks.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    major_tick_line_color = NULL,
+    # A continuous color mapper containing a color palette to render.
+    #
+    # .. warning:: If the `low` and `high` attributes of the ColorMapper
+    # aren't set, ticks and tick labels won't be rendered. Additionally, if a
+    # LogTicker is passed to the `ticker` argument and either or both of the
+    # logarithms of `low` and `high` values of the color_mapper are
+    # non-numeric (i.e. `low=0`), the tick and tick labels won't be rendered.
+    # > Instance(ContinuousColorMapper)
+    color_mapper = NULL,
+    # The location where the color bar should draw itself. It's either one of
+    # ``bokeh.core.enums.LegendLocation``'s enumerated values, or a ``(x,
+    # y)`` tuple indicating an absolute location absolute location in screen
+    # coordinates (pixels from the bottom-left corner).
+    #
+    # .. warning:: If the color bar is placed in a side panel, the location
+    # will likely have to be set to `(0,0)`.
+    # > Either(Enum('top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right'), Tuple(Float, Float))
+    location = NULL,
+    # The line dash offset of the minor ticks.
+    # > Int
+    minor_tick_line_dash_offset = NULL,
+    # The line join for the color bar border outline.
+    # > Enum('miter', 'round', 'bevel')
+    border_line_join = NULL,
+    # The line join for the color scale bar outline.
+    # > Enum('miter', 'round', 'bevel')
+    bar_line_join = NULL,
+    # Amount of padding (in pixels) between the color scale and color bar
+    # border.
+    # > Int
+    padding = NULL,
+    # The line dash for the color scale bar outline.
+    # > DashPattern
+    bar_line_dash = NULL,
+    # The fill alpha for the color bar background style.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    background_fill_alpha = NULL,
+    # The text alpha of the major tick labels.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    major_label_text_alpha = NULL,
+    # The text font style values for the title text.
+    # > Enum('normal', 'italic', 'bold')
+    title_text_font_style = NULL
+  )
+)
+
+# The TMSTileSource contains tile config info and provides urls for tiles
+# based on a templated url e.g.
+# ``http://your.tms.server.host/{Z}/{X}/{Y}.png``.  The defining feature
+# of TMS is the tile-origin in located at the bottom-left.
+#
+# The TMSTileSource can also be helpful in implementing tile renderers
+# for custom tile sets, including non-spatial datasets.
+TMSTileSource <- R6::R6Class("TMSTileSource",
+  inherit = MercatorTileSource,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      max_zoom = 30L, subscribed_events = list(), tags = list(),
+      extra_url_vars = structure(list(), .Names = character(0)),
+      attribution = "", initial_resolution = 156543.033928041,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      wrap_around = TRUE, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), min_zoom = 0L, url = "", tile_size = 256L,
+      y_origin_offset = 20037508.34, x_origin_offset = 20037508.34, id = NULL
+    ) {
+      super$initialize(max_zoom = max_zoom,
+        subscribed_events = subscribed_events, tags = tags,
+        extra_url_vars = extra_url_vars, attribution = attribution,
+        initial_resolution = initial_resolution,
+        js_property_callbacks = js_property_callbacks,
+        wrap_around = wrap_around, name = name,
+        js_event_callbacks = js_event_callbacks, min_zoom = min_zoom,
+        url = url, tile_size = tile_size, y_origin_offset = y_origin_offset,
+        x_origin_offset = x_origin_offset, id = id)
+      types <- bk_prop_types[["TMSTileSource"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render an open-body arrow head.
+OpenHead <- R6::R6Class("OpenHead",
+  inherit = ArrowHead,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, size = 25L, line_dash = list(), plot = NULL,
+      level = "annotation", line_dash_offset = 0L, visible = TRUE,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, line_alpha = 1, line_cap = "butt", line_color = "black",
+      id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["OpenHead"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The line join values for the arrow head outline.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the arrow head outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The size, in pixels, of the arrow head.
+    # > Float
+    size = NULL,
+    # The line dash values for the arrow head outline.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the arrow head outline.
+    # > Int
+    line_dash_offset = NULL,
+    # The line alpha values for the arrow head outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The line cap values for the arrow head outline.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the arrow head outline.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# The ``WMTSTileSource`` behaves much like ``TMSTileSource`` but has its
+# tile-origin in the top-left.
+#
+# This is the most common used tile source for web mapping applications.
+# Such companies as Google, MapQuest, Stamen, Esri, and OpenStreetMap
+# provide service which use the WMTS specification e.g.
+# ``http://c.tile.openstreetmap.org/{Z}/{X}/{Y}.png``.
+WMTSTileSource <- R6::R6Class("WMTSTileSource",
+  inherit = MercatorTileSource,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      max_zoom = 30L, subscribed_events = list(), tags = list(),
+      extra_url_vars = structure(list(), .Names = character(0)),
+      attribution = "", initial_resolution = 156543.033928041,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      wrap_around = TRUE, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), min_zoom = 0L, url = "", tile_size = 256L,
+      y_origin_offset = 20037508.34, x_origin_offset = 20037508.34, id = NULL
+    ) {
+      super$initialize(max_zoom = max_zoom,
+        subscribed_events = subscribed_events, tags = tags,
+        extra_url_vars = extra_url_vars, attribution = attribution,
+        initial_resolution = initial_resolution,
+        js_property_callbacks = js_property_callbacks,
+        wrap_around = wrap_around, name = name,
+        js_event_callbacks = js_event_callbacks, min_zoom = min_zoom,
+        url = url, tile_size = tile_size, y_origin_offset = y_origin_offset,
+        x_origin_offset = x_origin_offset, id = id)
+      types <- bk_prop_types[["WMTSTileSource"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
   )
 )
 
@@ -881,19 +10002,18 @@ DatetimeTickFormatter <- R6::R6Class("DatetimeTickFormatter",
   public = list(
     specified_args = NULL,
     initialize = function(
-      days = list("%m/%d", "%a%d"), seconds = list("%Ss"),
-      hours = list("%Hh", "%H:%M"), name = NULL, hourmin = list("%H:%M"),
-      minutes = list(":%M", "%Mm"), months = list("%m/%Y", "%b%y"),
-      milliseconds = list("%3Nms", "%S.%3Ns"), microseconds = list("%fus"),
-      years = list("%Y"), tags = list(),
+      seconds = list("%Ss"), days = list("%m/%d", "%a%d"),
+      milliseconds = list("%3Nms", "%S.%3Ns"), years = list("%Y"),
+      tags = list(), subscribed_events = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      minsec = list(":%M:%S"), subscribed_events = list(), id = NULL
+      minutes = list(":%M", "%Mm"), minsec = list(":%M:%S"),
+      microseconds = list("%fus"), js_event_callbacks = structure(list(),
+      .Names = character(0)), name = NULL, hours = list("%Hh", "%H:%M"),
+      hourmin = list("%H:%M"), months = list("%m/%Y", "%b%y"), id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
       types <- bk_prop_types[["DatetimeTickFormatter"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -902,18 +10022,49 @@ DatetimeTickFormatter <- R6::R6Class("DatetimeTickFormatter",
     }
   ),
   private = list(
-    # Formats for displaying datetime values in the ``days`` range.
-    #
-    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
-    # for a list of all supported formats.
-    # > List(String)
-    days = NULL,
     # Formats for displaying datetime values in the ``seconds`` range.
     #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
     seconds = NULL,
+    # Formats for displaying datetime values in the ``days`` range.
+    #
+    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
+    # for a list of all supported formats.
+    # > List(String)
+    days = NULL,
+    # Formats for displaying datetime values in the ``milliseconds`` range.
+    #
+    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
+    # for a list of all supported formats.
+    # > List(String)
+    milliseconds = NULL,
+    # Formats for displaying datetime values in the ``years`` range.
+    #
+    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
+    # for a list of all supported formats.
+    # > List(String)
+    years = NULL,
+    # Formats for displaying datetime values in the ``minutes`` range.
+    #
+    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
+    # for a list of all supported formats.
+    # > List(String)
+    minutes = NULL,
+    # Formats for displaying datetime values in the ``minsec`` (for combined
+    # minutes and seconds) range.
+    #
+    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
+    # for a list of all supported formats.
+    # > List(String)
+    minsec = NULL,
+    # Formats for displaying datetime values in the ``microseconds`` range.
+    #
+    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
+    # for a list of all supported formats.
+    # > List(String)
+    microseconds = NULL,
     # Formats for displaying datetime values in the ``hours`` range.
     #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
@@ -927,258 +10078,12 @@ DatetimeTickFormatter <- R6::R6Class("DatetimeTickFormatter",
     # for a list of all supported formats.
     # > List(String)
     hourmin = NULL,
-    # Formats for displaying datetime values in the ``minutes`` range.
-    #
-    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
-    # for a list of all supported formats.
-    # > List(String)
-    minutes = NULL,
     # Formats for displaying datetime values in the ``months`` range.
     #
     # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
     # for a list of all supported formats.
     # > List(String)
-    months = NULL,
-    # Formats for displaying datetime values in the ``milliseconds`` range.
-    #
-    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
-    # for a list of all supported formats.
-    # > List(String)
-    milliseconds = NULL,
-    # Formats for displaying datetime values in the ``microseconds`` range.
-    #
-    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
-    # for a list of all supported formats.
-    # > List(String)
-    microseconds = NULL,
-    # Formats for displaying datetime values in the ``years`` range.
-    #
-    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
-    # for a list of all supported formats.
-    # > List(String)
-    years = NULL,
-    # Formats for displaying datetime values in the ``minsec`` (for combined
-    # minutes and seconds) range.
-    #
-    # See the :class:`~bokeh.models.formatters.DatetimeTickFormatter` help
-    # for a list of all supported formats.
-    # > List(String)
-    minsec = NULL
-  )
-)
-
-# Generate ticks spaced apart by specific, even multiples of months.
-MonthsTicker <- R6::R6Class("MonthsTicker",
-  inherit = SingleIntervalTicker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      num_minor_ticks = 5L, name = NULL, months = list(), tags = list(),
-      desired_num_ticks = 6L, js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), interval = NULL, subscribed_events = list(),
-      id = NULL
-    ) {
-      super$initialize(num_minor_ticks = num_minor_ticks, name = name,
-        tags = tags, desired_num_ticks = desired_num_ticks,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, interval = interval,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["MonthsTicker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The intervals of months to use.
-    # > Seq(Int)
     months = NULL
-  )
-)
-
-# A base class that defines common properties for all button types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-AbstractButton <- R6::R6Class("AbstractButton",
-  inherit = Widget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback = NULL, name = NULL, label = "Button", disabled = FALSE,
-      sizing_mode = "fixed", width = NULL, height = NULL, tags = list(),
-      button_type = "default", js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), icon = NULL,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["AbstractButton"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A callback to run in the browser whenever the button is activated.
-    # > Instance(Callback)
-    callback = NULL,
-    # The text label for the button to display.
-    # > String
-    label = NULL,
-    # A style for the button, signifying it's role.
-    # > Enum('default', 'primary', 'success', 'warning', 'danger', 'link')
-    button_type = NULL,
-    # An optional image appearing to the left of button's text.
-    # > Instance(AbstractIcon)
-    icon = NULL
-  )
-)
-
-# Render a filled area band along a dimension.
-Band <- R6::R6Class("Band",
-  inherit = Annotation,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      lower_units = "data", name = NULL, x_range_name = "default",
-      upper_units = "data", fill_alpha = 0.4, level = "annotation",
-      line_color = "#cccccc", plot = NULL, subscribed_events = list(),
-      fill_color = "#fff9ba", source = NULL, tags = list(), line_alpha = 0.3,
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      visible = TRUE, line_width = 1L, line_dash = list(),
-      line_dash_offset = 0L, dimension = "height", line_join = "miter",
-      upper = NULL, base = NULL, y_range_name = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      base_units = "data", line_cap = "butt", lower = NULL, id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["Band"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    #
-    # > Enum('screen', 'data')
-    lower_units = NULL,
-    # A particular (named) x-range to use for computing screen locations when
-    # rendering annotations on the plot. If unset, use the default x-range.
-    # > String
-    x_range_name = NULL,
-    #
-    # > Enum('screen', 'data')
-    upper_units = NULL,
-    # The fill alpha values for the band.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line color values for the band.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The fill color values for the band.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # Local data source to use when rendering annotations on the plot.
-    # > Instance(DataSource)
-    source = NULL,
-    # The line alpha values for the band.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line width values for the band.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the band.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the band.
-    # > Int
-    line_dash_offset = NULL,
-    # The direction of the band.
-    # > Enum('width', 'height')
-    dimension = NULL,
-    # The line join values for the band.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The coordinations of the upper portion of the filled area band.
-    # > DistanceSpec(units_default='data')
-    upper = NULL,
-    # The orthogonal coordinates of the upper and lower values.
-    # > DistanceSpec(units_default='data')
-    base = NULL,
-    # A particular (named) y-range to use for computing screen locations when
-    # rendering annotations on the plot. If unset, use the default y-range.
-    # > String
-    y_range_name = NULL,
-    #
-    # > Enum('screen', 'data')
-    base_units = NULL,
-    # The line cap values for the band.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The coordinates of the lower portion of the filled area band.
-    # > DistanceSpec(units_default='data')
-    lower = NULL
-  )
-)
-
-# Base class for continuous color mapper types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-ContinuousColorMapper <- R6::R6Class("ContinuousColorMapper",
-  inherit = ColorMapper,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, high = NULL, palette = NULL, low = NULL, tags = list(),
-      high_color = NULL, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), nan_color = "gray", subscribed_events = list(),
-      low_color = NULL, id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks,
-        nan_color = nan_color, palette = palette, tags = tags,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["ContinuousColorMapper"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The maximum value of the range to map into the palette. Values above
-    # this are clamped to ``high``.
-    # > Float
-    high = NULL,
-    # The minimum value of the range to map into the palette. Values below
-    # this are clamped to ``low``.
-    # > Float
-    low = NULL,
-    # Color to be used if data is lower than ``high`` value. If None, values
-    # lower than ``high`` are mapped to the last color in the palette.
-    # > Color
-    high_color = NULL,
-    # Color to be used if data is lower than ``low`` value. If None, values
-    # lower than ``low`` are mapped to the first color in the palette.
-    # > Color
-    low_color = NULL
   )
 )
 
@@ -1188,20 +10093,20 @@ Span <- R6::R6Class("Span",
   public = list(
     specified_args = NULL,
     initialize = function(
-      visible = TRUE, name = NULL, line_width = 1L, x_range_name = "default",
-      level = "annotation", render_mode = "canvas", line_dash = list(),
-      line_color = "black", line_dash_offset = 0L, dimension = "width",
-      line_join = "miter", location_units = "data", plot = NULL,
-      line_alpha = 1, y_range_name = "default",
+      location_units = "data", subscribed_events = list(),
+      render_mode = "canvas", line_join = "miter", tags = list(),
+      line_width = 1L, js_property_callbacks = structure(list(), .Names =
+      character(0)), dimension = "width", line_dash = list(), plot = NULL,
+      level = "annotation", line_dash_offset = 0L, location = NULL,
+      y_range_name = "default", visible = TRUE, line_alpha = 1,
       js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), line_cap = "butt", location = NULL,
-      tags = list(), id = NULL
+      name = NULL, x_range_name = "default", line_cap = "butt",
+      line_color = "black", id = NULL
     ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
       types <- bk_prop_types[["Span"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -1210,13 +10115,10 @@ Span <- R6::R6Class("Span",
     }
   ),
   private = list(
-    # The line width values for the span.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # A particular (named) x-range to use for computing screen locations when
-    # rendering annotations on the plot. If unset, use the default x-range.
-    # > String
-    x_range_name = NULL,
+    # The unit type for the location attribute. Interpreted as "data space"
+    # units by default.
+    # > Enum('screen', 'data')
+    location_units = NULL,
     # Specifies whether the span is rendered as a canvas element or as an css
     # element overlaid on the canvas. The default mode is "canvas".
     #
@@ -1224,216 +10126,109 @@ Span <- R6::R6Class("Span",
     # supported if the render_mode is set to "css"
     # > Enum('canvas', 'css')
     render_mode = NULL,
-    # The line dash values for the span.
-    # > DashPattern
-    line_dash = NULL,
-    # The line color values for the span.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line dash offset values for the span.
-    # > Int
-    line_dash_offset = NULL,
-    # The direction of the span.
-    # > Enum('width', 'height')
-    dimension = NULL,
     # The line join values for the span.
     # > Enum('miter', 'round', 'bevel')
     line_join = NULL,
-    # The unit type for the location attribute. Interpreted as "data space"
-    # units by default.
-    # > Enum('screen', 'data')
-    location_units = NULL,
-    # The line alpha values for the span.
+    # The line width values for the span.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
+    line_width = NULL,
+    # The direction of the span.
+    # > Enum('width', 'height')
+    dimension = NULL,
+    # The line dash values for the span.
+    # > DashPattern
+    line_dash = NULL,
+    # The line dash offset values for the span.
+    # > Int
+    line_dash_offset = NULL,
+    # The location of the span, along ``dimension``.
+    # > Float
+    location = NULL,
     # A particular (named) y-range to use for computing screen locations when
     # rendering annotations on the plot. If unset, use the default y-range.
     # > String
     y_range_name = NULL,
+    # The line alpha values for the span.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # A particular (named) x-range to use for computing screen locations when
+    # rendering annotations on the plot. If unset, use the default x-range.
+    # > String
+    x_range_name = NULL,
     # The line cap values for the span.
     # > Enum('butt', 'round', 'square')
     line_cap = NULL,
-    # The location of the span, along ``dimension``.
-    # > Float
-    location = NULL
+    # The line color values for the span.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
   )
 )
 
-# Render circle markers with a '+' cross through the center.
+# A block (paragraph) of text.
+#
+# This Bokeh model corresponds to an HTML ``<p>`` element.
 #
 # Example -------
 #
-# .. bokeh-plot:: ../tests/glyphs/CircleCross.py :source-position: below
-CircleCross <- R6::R6Class("CircleCross",
+# .. bokeh-plot::
+# ../sphinx/source/docs/user_guide/examples/interaction_paragraph.py
+# :source-position: below
+Paragraph <- R6::R6Class("Paragraph",
+  inherit = Markup,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, sizing_mode = "fixed", text = "", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, text = text, id = id)
+      types <- bk_prop_types[["Paragraph"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render square markers with a '+' cross through the center.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/SquareCross.py :source-position: below
+SquareCross <- R6::R6Class("SquareCross",
   inherit = Marker,
   public = list(
     specified_args = NULL,
     initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), line_join = "miter", tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["CircleCross"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-#
-LinearScale <- R6::R6Class("LinearScale",
-  inherit = Scale,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
       js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
     ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["LinearScale"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render a single patch.
-#
-# The ``Patch`` glyph is different from most other glyphs in that the
-# vector of values only produces one glyph on the Plot.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Patch.py :source-position: below
-Patch <- R6::R6Class("Patch",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, line_width = 1L, fill_alpha = 1, line_dash = list(),
-      line_dash_offset = 0L, y = NULL, line_join = "miter",
-      fill_color = "gray", line_color = "black", subscribed_events = list(),
-      line_alpha = 1, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), tags = list(), line_cap = "butt", x = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Patch"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The line width values for the patch.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The fill alpha values for the patch.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line dash values for the patch.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the patch.
-    # > Int
-    line_dash_offset = NULL,
-    # The y-coordinates for the points of the patch.
-    #
-    # .. note:: A patch may comprise multiple polygons. In this case the
-    # y-coordinates for each polygon should be separated by NaN values in the
-    # sequence.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The line join values for the patch.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The fill color values for the patch.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line color values for the patch.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line alpha values for the patch.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line cap values for the patch.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates for the points of the patch.
-    #
-    # .. note:: A patch may comprise multiple polygons. In this case the
-    # x-coordinates for each polygon should be separated by NaN values in the
-    # sequence.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
-  )
-)
-
-# Maps names of columns to sequences or arrays.
-#
-# If the ColumnDataSource initializer is called with a single argument
-# that is a dict or pandas.DataFrame, that argument is used as the value
-# for the "data" attribute. For example::
-#
-# ColumnDataSource(mydict) # same as ColumnDataSource(data=mydict)
-# ColumnDataSource(df) # same as ColumnDataSource(data=df)
-#
-# .. note:: There is an implicit assumption that all the columns in a a
-# given ColumnDataSource have the same length.
-ColumnDataSource <- R6::R6Class("ColumnDataSource",
-  inherit = ColumnarDataSource,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      callback = NULL, name = NULL, selected = structure(list(`2d` =
-      structure(list(indices = structure(list(), .Names =
-      character(0))), .Names = "indices"), `1d` =
-      structure(list(indices = list()), .Names = "indices"), `0d` =
-      structure(list(glyph = NULL, indices = list()), .Names =
-      c("glyph", "indices"))), .Names = c("2d", "1d", "0d")),
-      tags = list(), column_names = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      data = structure(list(), .Names = character(0)),
-      subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(callback = callback, name = name, selected = selected,
-        tags = tags, column_names = column_names,
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
         js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["ColumnDataSource"]]
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["SquareCross"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -1441,85 +10236,350 @@ ColumnDataSource <- R6::R6Class("ColumnDataSource",
     }
   ),
   private = list(
-    # Mapping of column names to sequences of data. The data can be, e.g,
-    # Python lists or tuples, NumPy arrays, etc.
-    # > ColumnData(String, Seq(Any))
-    data = NULL
+
   )
 )
 
-# A base class for data source types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-DataSource <- R6::R6Class("DataSource",
+# Apply a custom defined transform to data.
+CustomJSTransform <- R6::R6Class("CustomJSTransform",
+  inherit = Transform,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), func = "", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      args = structure(list(), .Names = character(0)), name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      v_func = "", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["CustomJSTransform"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A snippet of JavaScript code to transform a single value. The variable
+    # ``x`` will contain the untransformed value and can be expected to be
+    # present in the function namespace at render time. The snippet will be
+    # into the body of a function and therefore requires a return statement.
+    #
+    # Example:
+    #
+    # .. code-block:: javascript
+    #
+    # func = ''' return Math.floor(x) + 0.5 '''
+    # > String
+    func = NULL,
+    # A mapping of names to Bokeh plot objects. These objects are made
+    # available to the callback code snippet as the values of named
+    # parameters to the callback.
+    # > Dict(String, Instance(Model))
+    args = NULL,
+    # A snippet of JavaScript code to transform an array of values. The
+    # variable ``xs`` will contain the untransformed array and can be
+    # expected to be present in the function namespace at render time. The
+    # snippet will be into the body of a function and therefore requires a
+    # return statement.
+    #
+    # Example:
+    #
+    # .. code-block:: javascript
+    #
+    # v_func = ''' new_xs = new Array(xs.length) for(i = 0; i < xs.length;
+    # i++) { new_xs[i] = xs[i] + 0.5 } return new_xs '''
+    #
+    # .. warning:: The vectorized function, ``v_func``, must return an array
+    # of the same length as the input ``xs`` array.
+    # > String
+    v_func = NULL
+  )
+)
+
+# Model representing a plot, containing glyphs, guides, annotations.
+Plot <- R6::R6Class("Plot",
+  inherit = LayoutDOM,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      min_border_right = NULL, outline_line_join = "miter", left = list(),
+      outline_line_alpha = 1, js_property_callbacks = structure(list(),
+      .Names = character(0)), lod_interval = 300L, min_border_top = NULL,
+      hidpi = TRUE, toolbar_sticky = TRUE, output_backend = "canvas",
+      extra_x_ranges = structure(list(), .Names = character(0)),
+      border_fill_alpha = 1, outline_line_color = "#e5e5e5", title = NULL,
+      h_symmetry = TRUE, inner_height = NULL, sizing_mode = "fixed",
+      x_scale = NULL, below = list(), outline_line_dash_offset = 0L,
+      outline_line_dash = list(), outline_line_width = 1L,
+      plot_height = 600L, layout_width = NULL, lod_factor = 10L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      width = NULL, border_fill_color = "#ffffff", css_classes = NULL,
+      background_fill_color = "#ffffff", tool_events = NULL,
+      subscribed_events = list(), tags = list(), layout_height = NULL,
+      height = NULL, min_border = 5L, lod_timeout = 500L, name = NULL,
+      right = list(), min_border_left = NULL,
+      extra_y_ranges = structure(list(), .Names = character(0)),
+      disabled = FALSE, lod_threshold = 2000L, min_border_bottom = NULL,
+      x_range = NULL, renderers = list(), title_location = "above",
+      plot_width = 600L, y_scale = NULL, inner_width = NULL,
+      outline_line_cap = "butt", toolbar_location = "right", above = list(),
+      y_range = NULL, toolbar = NULL, background_fill_alpha = 1,
+      v_symmetry = FALSE, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Plot"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Minimum size in pixels of the padding region to the right of the
+    # central plot region.
+    #
+    # .. note:: This is a *minimum*. The padding region may expand as needed
+    # to accommodate titles or axes, etc.
+    # > Int
+    min_border_right = NULL,
+    # The line join for the plot border outline.
+    # > Enum('miter', 'round', 'bevel')
+    outline_line_join = NULL,
+    # A list of renderers to occupy the area to the left of the plot.
+    # > List(Instance(Renderer))
+    left = NULL,
+    # The line alpha for the plot border outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    outline_line_alpha = NULL,
+    # Interval (in ms) during which an interactive tool event will enable
+    # level-of-detail downsampling.
+    # > Int
+    lod_interval = NULL,
+    # Minimum size in pixels of the padding region above the top of the
+    # central plot region.
+    #
+    # .. note:: This is a *minimum*. The padding region may expand as needed
+    # to accommodate titles or axes, etc.
+    # > Int
+    min_border_top = NULL,
+    # Whether to use HiDPI mode when available.
+    # > Bool
+    hidpi = NULL,
+    # Stick the toolbar to the edge of the plot. Default: True. If False, the
+    # toolbar will be outside of the axes, titles etc.
+    # > Bool
+    toolbar_sticky = NULL,
+    # Specify the output backend for the plot area. Default is HTML5 Canvas.
+    #
+    # .. note:: When set to ``webgl``, glyphs without a WebGL rendering
+    # implementation will fall back to rendering onto 2D canvas.
+    # > Enum('canvas', 'svg', 'webgl')
+    output_backend = NULL,
+    # Additional named ranges to make available for mapping x-coordinates.
+    #
+    # This is useful for adding additional axes.
+    # > Dict(String, Instance(Range))
+    extra_x_ranges = NULL,
+    # The fill alpha for the plot border style.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    border_fill_alpha = NULL,
+    # The line color for the plot border outline.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    outline_line_color = NULL,
+    # A title for the plot. Can be a text string or a Title annotation.
+    # > Instance(Title)
+    title = NULL,
+    # Whether the total horizontal padding on both sides of the plot will be
+    # made equal (the left or right padding amount, whichever is larger).
+    # > Bool
+    h_symmetry = NULL,
+    # This is the exact height of the plotting canvas, i.e. the height of the
+    # actual plot, without toolbars etc. Note this is computed in a web
+    # browser, so this property will work only in backends capable of
+    # bidirectional communication (server, notebook).
+    #
+    # .. note:: This is an experimental feature and the API may change in
+    # near future.
+    # > Int
+    inner_height = NULL,
+    # What kind of scale to use to convert x-coordinates in data space into
+    # x-coordinates in screen space.
+    # > Instance(Scale)
+    x_scale = NULL,
+    # A list of renderers to occupy the area below of the plot.
+    # > List(Instance(Renderer))
+    below = NULL,
+    # The line dash offset for the plot border outline.
+    # > Int
+    outline_line_dash_offset = NULL,
+    # The line dash for the plot border outline.
+    # > DashPattern
+    outline_line_dash = NULL,
+    # The line width for the plot border outline.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    outline_line_width = NULL,
+    # Total height of the entire plot (including any axes, titles, border
+    # padding, etc.)
+    #
+    # .. note:: This corresponds directly to the height of the HTML canvas
+    # that will be used.
+    # > Int
+    plot_height = NULL,
+    # This is the exact width of the layout, i.e. the height of the actual
+    # plot, with toolbars etc. Note this is computed in a web browser, so
+    # this property will work only in backends capable of bidirectional
+    # communication (server, notebook).
+    #
+    # .. note:: This is an experimental feature and the API may change in
+    # near future.
+    # > Int
+    layout_width = NULL,
+    # Decimation factor to use when applying level-of-detail decimation.
+    # > Int
+    lod_factor = NULL,
+    # The fill color for the plot border style.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    border_fill_color = NULL,
+    # The fill color for the plot background style.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    background_fill_color = NULL,
+    # A ToolEvents object to share and report tool events.
+    # > Instance(ToolEvents)
+    tool_events = NULL,
+    # This is the exact height of the layout, i.e. the height of the actual
+    # plot, with toolbars etc. Note this is computed in a web browser, so
+    # this property will work only in backends capable of bidirectional
+    # communication (server, notebook).
+    #
+    # .. note:: This is an experimental feature and the API may change in
+    # near future.
+    # > Int
+    layout_height = NULL,
+    # A convenience property to set all all the ``min_border_X`` properties
+    # to the same value. If an individual border property is explicitly set,
+    # it will override ``min_border``.
+    # > Int
+    min_border = NULL,
+    # Timeout (in ms) for checking whether interactive tool events are still
+    # occurring. Once level-of-detail mode is enabled, a check is made every
+    # ``lod_timeout`` ms. If no interactive tool events have happened,
+    # level-of-detail mode is disabled.
+    # > Int
+    lod_timeout = NULL,
+    # A list of renderers to occupy the area to the right of the plot.
+    # > List(Instance(Renderer))
+    right = NULL,
+    # Minimum size in pixels of the padding region to the left of the central
+    # plot region.
+    #
+    # .. note:: This is a *minimum*. The padding region may expand as needed
+    # to accommodate titles or axes, etc.
+    # > Int
+    min_border_left = NULL,
+    # Additional named ranges to make available for mapping y-coordinates.
+    #
+    # This is useful for adding additional axes.
+    # > Dict(String, Instance(Range))
+    extra_y_ranges = NULL,
+    # A number of data points, above which level-of-detail downsampling may
+    # be performed by glyph renderers. Set to ``None`` to disable any
+    # level-of-detail downsampling.
+    # > Int
+    lod_threshold = NULL,
+    # Minimum size in pixels of the padding region below the bottom of the
+    # central plot region.
+    #
+    # .. note:: This is a *minimum*. The padding region may expand as needed
+    # to accommodate titles or axes, etc.
+    # > Int
+    min_border_bottom = NULL,
+    # The (default) data range of the horizontal dimension of the plot.
+    # > Instance(Range)
+    x_range = NULL,
+    # A list of all renderers for this plot, including guides and annotations
+    # in addition to glyphs and markers.
+    #
+    # This property can be manipulated by hand, but the ``add_glyph`` and
+    # ``add_layout`` methods are recommended to help make sure all necessary
+    # setup is performed.
+    # > List(Instance(Renderer))
+    renderers = NULL,
+    # Where the title will be located. Titles on the left or right side will
+    # be rotated.
+    # > Enum('above', 'below', 'left', 'right')
+    title_location = NULL,
+    # Total width of the entire plot (including any axes, titles, border
+    # padding, etc.)
+    #
+    # .. note:: This corresponds directly to the width of the HTML canvas
+    # that will be used.
+    # > Int
+    plot_width = NULL,
+    # What kind of scale to use to convert y-coordinates in data space into
+    # y-coordinates in screen space.
+    # > Instance(Scale)
+    y_scale = NULL,
+    # This is the exact width of the plotting canvas, i.e. the width of the
+    # actual plot, without toolbars etc. Note this is computed in a web
+    # browser, so this property will work only in backends capable of
+    # bidirectional communication (server, notebook).
+    #
+    # .. note:: This is an experimental feature and the API may change in
+    # near future.
+    # > Int
+    inner_width = NULL,
+    # The line cap for the plot border outline.
+    # > Enum('butt', 'round', 'square')
+    outline_line_cap = NULL,
+    # Where the toolbar will be located. If set to None, no toolbar will be
+    # attached to the plot.
+    # > Enum('above', 'below', 'left', 'right')
+    toolbar_location = NULL,
+    # A list of renderers to occupy the area above of the plot.
+    # > List(Instance(Renderer))
+    above = NULL,
+    # The (default) data range of the vertical dimension of the plot.
+    # > Instance(Range)
+    y_range = NULL,
+    # The toolbar associated with this plot which holds all the tools.
+    #
+    # The toolbar is automatically created with the plot.
+    # > Instance(Toolbar)
+    toolbar = NULL,
+    # The fill alpha for the plot background style.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    background_fill_alpha = NULL,
+    # Whether the total vertical padding on both sides of the plot will be
+    # made equal (the top or bottom padding amount, whichever is larger).
+    # > Bool
+    v_symmetry = NULL
+  )
+)
+
+# A base class for all image source types.
+ImageSource <- R6::R6Class("ImageSource",
   inherit = Model,
   public = list(
     specified_args = NULL,
     initialize = function(
-      callback = NULL, js_property_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, js_event_callbacks = structure(list(),
-      .Names = character(0)), selected = structure(list(`2d` =
-      structure(list(indices = structure(list(), .Names =
-      character(0))), .Names = "indices"), `1d` =
-      structure(list(indices = list()), .Names = "indices"), `0d` =
-      structure(list(glyph = NULL, indices = list()), .Names =
-      c("glyph", "indices"))), .Names = c("2d", "1d", "0d")),
-      tags = list(), subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["DataSource"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A callback to run in the browser whenever the selection is changed.
-    # > Instance(Callback)
-    callback = NULL,
-    # A dict to indicate selected indices on different dimensions on this
-    # DataSource. Keys are:
-    #
-    # .. code-block:: python
-    #
-    # # selection information for line and patch glyphs '0d' : { # the glyph
-    # that was selected 'glyph': None
-    #
-    # # array with the [smallest] index of the segment of the line that was
-    # hit 'indices': [] }
-    #
-    # # selection for most (point-like) glyphs, except lines and patches
-    # '1d': { # indices of the points included in the selection indices: [] }
-    #
-    # # selection information for multiline and patches glyphs '2d': { #
-    # mapping of indices of the multiglyph to array of glyph indices that
-    # were hit # e.g. {3: [5, 6], 4: [5]} indices: {} }
-    # > Dict(String, Dict(String, Any))
-    selected = NULL
-  )
-)
-
-# Calendar-based date cell editor.
-DateEditor <- R6::R6Class("DateEditor",
-  inherit = CellEditor,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
       js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
+      extra_url_vars = structure(list(), .Names = character(0)),
+      subscribed_events = list(), tags = list(), url = "",
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["DateEditor"]]
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["ImageSource"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -1527,100 +10587,46 @@ DateEditor <- R6::R6Class("DateEditor",
     }
   ),
   private = list(
-
+    # A dictionary that maps url variable template keys to values.  These
+    # variables are useful for parts of tile urls which do not change from
+    # tile to tile (e.g. server host name, or layer name).
+    # > Dict(String, Any)
+    extra_url_vars = NULL,
+    # tile service url (example:
+    # http://c.tile.openstreetmap.org/{Z}/{X}/{Y}.png)
+    # > String
+    url = NULL
   )
 )
 
-# The TMSTileSource contains tile config info and provides urls for tiles
-# based on a templated url e.g.
-# ``http://your.tms.server.host/{Z}/{X}/{Y}.png``.  The defining feature
-# of TMS is the tile-origin in located at the bottom-left.
+# Render diamond markers with a '+' cross through the center.
 #
-# The TMSTileSource can also be helpful in implementing tile renderers
-# for custom tile sets, including non-spatial datasets.
-TMSTileSource <- R6::R6Class("TMSTileSource",
-  inherit = MercatorTileSource,
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/DiamondCross.py :source-position: below
+DiamondCross <- R6::R6Class("DiamondCross",
+  inherit = Marker,
   public = list(
     specified_args = NULL,
     initialize = function(
-      y_origin_offset = 20037508.34, max_zoom = 30L,
-      extra_url_vars = structure(list(), .Names = character(0)),
-      name = NULL, attribution = "", wrap_around = TRUE,
-      x_origin_offset = 20037508.34, subscribed_events = list(),
-      tags = list(), min_zoom = 0L, js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), url = "", tile_size = 256L,
-      initial_resolution = 156543.033928041, id = NULL
-    ) {
-      super$initialize(y_origin_offset = y_origin_offset,
-        max_zoom = max_zoom, extra_url_vars = extra_url_vars, name = name,
-        attribution = attribution, wrap_around = wrap_around,
-        x_origin_offset = x_origin_offset,
-        subscribed_events = subscribed_events, tags = tags,
-        min_zoom = min_zoom, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, url = url,
-        tile_size = tile_size, initial_resolution = initial_resolution,
-        id = id)
-      types <- bk_prop_types[["TMSTileSource"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# A base class for tools that respond to tap/click events.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Tap <- R6::R6Class("Tap",
-  inherit = Tool,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
+      subscribed_events = list(), line_join = "miter", tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
     ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["Tap"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Generate ticks spaced apart by specific, even multiples of days.
-DaysTicker <- R6::R6Class("DaysTicker",
-  inherit = SingleIntervalTicker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      days = list(), num_minor_ticks = 5L, name = NULL, tags = list(),
-      desired_num_ticks = 6L, js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), interval = NULL, subscribed_events = list(),
-      id = NULL
-    ) {
-      super$initialize(num_minor_ticks = num_minor_ticks, name = name,
-        tags = tags, desired_num_ticks = desired_num_ticks,
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
         js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, interval = interval,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["DaysTicker"]]
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["DiamondCross"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -1628,9 +10634,7 @@ DaysTicker <- R6::R6Class("DaysTicker",
     }
   ),
   private = list(
-    # The intervals of days to use.
-    # > Seq(Int)
-    days = NULL
+
   )
 )
 
@@ -1640,15 +10644,14 @@ IntEditor <- R6::R6Class("IntEditor",
   public = list(
     specified_args = NULL,
     initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), step = 1L, tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
-      step = 1L, js_event_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
+      name = NULL, id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
       types <- bk_prop_types[["IntEditor"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -1663,255 +10666,26 @@ IntEditor <- R6::R6Class("IntEditor",
   )
 )
 
-# Date cell formatter.
-DateFormatter <- R6::R6Class("DateFormatter",
-  inherit = CellFormatter,
+# *toolbar icon*: |resize_icon|
+#
+# The resize tool allows the user to left-drag a mouse or drag a finger
+# to resize the entire plot area on the screen.
+#
+# .. |resize_icon| image:: /_images/icons/Resize.png :height: 18pt
+ResizeTool <- R6::R6Class("ResizeTool",
+  inherit = Drag,
   public = list(
     specified_args = NULL,
     initialize = function(
-      format = "yy M d", js_property_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), tags = list(),
-      id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["DateFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The date format can be combinations of the following:
-    #
-    # d day of month (no leading zero)
-    #
-    # dd day of month (two digit)
-    #
-    # o day of year (no leading zeros)
-    #
-    # oo day of year (three digit)
-    #
-    # D day name short
-    #
-    # DD day name long
-    #
-    # m month of year (no leading zero)
-    #
-    # mm month of year (two digit)
-    #
-    # M month name short
-    #
-    # MM month name long
-    #
-    # y year (two digit)
-    #
-    # yy year (four digit)
-    #
-    # @ Unix timestamp (ms since 01/01/1970)
-    #
-    # !  Windows ticks (100ns since 01/01/0001)
-    #
-    # "..."  literal text
-    #
-    # '' single quote
-    # > Either(Enum('ATOM', 'W3C', 'RFC-3339', 'ISO-8601', 'COOKIE', 'RFC-822', 'RFC-850', 'RFC-1036', 'RFC-1123', 'RFC-2822', 'RSS', 'TICKS', 'TIMESTAMP'), String)
-    format = NULL
-  )
-)
-
-# Render multiple text labels as annotations.
-#
-# ``LabelSet`` will render multiple text labels at given ``x`` and ``y``
-# coordinates, which can be in either screen (pixel) space, or data (axis
-# range) space. In this case (as opposed to the single ``Label`` model),
-# ``x`` and ``y`` can also be the name of a column from a
-# :class:`~bokeh.models.sources.ColumnDataSource`, in which case the
-# labels will be "vectorized" using coordinate values from the specified
-# columns.
-#
-# The label can also be configured with a screen space offset from ``x``
-# and ``y``, by using the ``x_offset`` and ``y_offset`` properties. These
-# offsets may be vectorized by giving the name of a data source column.
-#
-# Additionally, the label can be rotated with the ``angle`` property
-# (which may also be a column name.)
-#
-# There are also standard text, fill, and line properties to control the
-# appearance of the text, its background, as well as the rectangular
-# bounding box border.
-#
-# The data source is provided by setting the ``source`` property.
-LabelSet <- R6::R6Class("LabelSet",
-  inherit = TextAnnotation,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      text_color = "#444444", border_line_dash = list(),
-      background_fill_color = NULL, name = NULL, y_offset = 0L,
-      x_range_name = "default", level = "annotation", x_units = "data",
-      border_line_join = "miter", subscribed_events = list(), tags = list(),
-      source = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), text_baseline = "bottom", angle = 0L,
-      text_align = "left", border_line_color = NULL, visible = TRUE,
-      border_line_dash_offset = 0L, text_font_style = "normal",
-      render_mode = "canvas", border_line_cap = "butt", y = NULL,
-      text_font_size = list(value = "12pt"), text_alpha = 1,
-      angle_units = "rad", y_units = "data", text_font = "helvetica",
-      x_offset = 0L, y_range_name = "default", background_fill_alpha = 1,
-      text = "text", border_line_width = 1L,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, x = NULL, border_line_alpha = 1, id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["LabelSet"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The text color values for the text.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    text_color = NULL,
-    # The line dash values for the text bounding box.
-    # > DashPattern
-    border_line_dash = NULL,
-    # The fill color values for the text bounding box.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    background_fill_color = NULL,
-    # Offset values to apply to the y-coordinates.
-    #
-    # This is useful, for instance, if it is desired to "float" text a fixed
-    # distance in screen units from a given data position.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y_offset = NULL,
-    # A particular (named) x-range to use for computing screen locations when
-    # rendering annotations on the plot. If unset, use the default x-range.
-    # > String
-    x_range_name = NULL,
-    # The unit type for the xs attribute. Interpreted as "data space" units
-    # by default.
-    # > Enum('screen', 'data')
-    x_units = NULL,
-    # The line join values for the text bounding box.
-    # > Enum('miter', 'round', 'bevel')
-    border_line_join = NULL,
-    # Local data source to use when rendering annotations on the plot.
-    # > Instance(DataSource)
-    source = NULL,
-    # The text baseline values for the text.
-    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
-    text_baseline = NULL,
-    # The angles to rotate the text, as measured from the horizontal.
-    #
-    # .. warning:: The center of rotation for canvas and css render_modes is
-    # different.  For `render_mode="canvas"` the label is rotated from the
-    # top-left corner of the annotation, while for `render_mode="css"` the
-    # annotation is rotated around it's center.
-    # > AngleSpec(units_default='rad')
-    angle = NULL,
-    # The text align values for the text.
-    # > Enum('left', 'right', 'center')
-    text_align = NULL,
-    # The line color values for the text bounding box.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    border_line_color = NULL,
-    # The line dash offset values for the text bounding box.
-    # > Int
-    border_line_dash_offset = NULL,
-    # The text font style values for the text.
-    # > Enum('normal', 'italic', 'bold')
-    text_font_style = NULL,
-    # Specifies whether the text is rendered as a canvas element or as an css
-    # element overlaid on the canvas. The default mode is "canvas".
-    #
-    # .. note:: The CSS labels won't be present in the output using the
-    # "save" tool.
-    #
-    # .. warning:: Not all visual styling properties are supported if the
-    # render_mode is set to "css". The border_line_dash property isn't fully
-    # supported and border_line_dash_offset isn't supported at all. Setting
-    # text_alpha will modify the opacity of the entire background box and
-    # border in addition to the text. Finally, clipping Label annotations
-    # inside of the plot area isn't supported in "css" mode.
-    # > Enum('canvas', 'css')
-    render_mode = NULL,
-    # The line cap values for the text bounding box.
-    # > Enum('butt', 'round', 'square')
-    border_line_cap = NULL,
-    # The y-coordinates to locate the text anchors.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The text font size values for the text.
-    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    text_font_size = NULL,
-    # The text alpha values for the text.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    text_alpha = NULL,
-    #
-    # > Enum('deg', 'rad')
-    angle_units = NULL,
-    # The unit type for the ys attribute. Interpreted as "data space" units
-    # by default.
-    # > Enum('screen', 'data')
-    y_units = NULL,
-    # The text font values for the text.
-    # > String
-    text_font = NULL,
-    # Offset values to apply to the x-coordinates.
-    #
-    # This is useful, for instance, if it is desired to "float" text a fixed
-    # distance in screen units from a given data position.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x_offset = NULL,
-    # A particular (named) y-range to use for computing screen locations when
-    # rendering annotations on the plot. If unset, use the default y-range.
-    # > String
-    y_range_name = NULL,
-    # The fill alpha values for the text bounding box.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    background_fill_alpha = NULL,
-    # The text values to render.
-    # > StringSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    text = NULL,
-    # The line width values for the text bounding box.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    border_line_width = NULL,
-    # The x-coordinates to locate the text anchors.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL,
-    # The line alpha values for the text bounding box.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    border_line_alpha = NULL
-  )
-)
-
-#
-DynamicImageRenderer <- R6::R6Class("DynamicImageRenderer",
-  inherit = DataRenderer,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      render_parents = TRUE, visible = TRUE, name = NULL, level = "underlay",
-      tags = list(), image_source = NULL,
-      js_property_callbacks = structure(list(), .Names = character(0)),
       js_event_callbacks = structure(list(), .Names = character(0)),
-      alpha = 1, subscribed_events = list(), id = NULL
+      subscribed_events = list(), name = NULL, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      plot = NULL, id = NULL
     ) {
-      super$initialize(visible = visible,
-        js_property_callbacks = js_property_callbacks, name = name,
-        js_event_callbacks = js_event_callbacks, level = level,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["DynamicImageRenderer"]]
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["ResizeTool"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -1919,43 +10693,30 @@ DynamicImageRenderer <- R6::R6Class("DynamicImageRenderer",
     }
   ),
   private = list(
-    # Flag enable/disable drawing of parent tiles while waiting for new tiles
-    # to arrive. Default value is True.
-    # > Bool
-    render_parents = NULL,
-    # Image source to use when rendering on the plot.
-    # > Instance(ImageSource)
-    image_source = NULL,
-    # tile opacity 0.0 - 1.0
-    # > Float
-    alpha = NULL
+
   )
 )
 
-# Render rectangles.
+# *toolbar icon*: |wheel_pan_icon|
 #
-# Example -------
+# The wheel pan tool allows the user to pan the plot along the configured
+# dimension using the scroll wheel.
 #
-# .. bokeh-plot:: ../tests/glyphs/Rect.py :source-position: below
-Rect <- R6::R6Class("Rect",
-  inherit = Glyph,
+# .. |wheel_pan_icon| image:: /_images/icons/WheelPan.png :height: 18pt
+WheelPanTool <- R6::R6Class("WheelPanTool",
+  inherit = Scroll,
   public = list(
     specified_args = NULL,
     initialize = function(
-      name = NULL, dilate = FALSE, fill_alpha = 1, line_color = "black",
-      width = NULL, subscribed_events = list(), fill_color = "gray",
-      tags = list(), line_alpha = 1, js_event_callbacks = structure(list(),
-      .Names = character(0)), angle = 0, line_width = 1L, line_dash = list(),
-      line_dash_offset = 0L, y = NULL, height = NULL, angle_units = "rad",
-      line_join = "miter", js_property_callbacks = structure(list(), .Names
-      = character(0)), width_units = "data", height_units = "data",
-      line_cap = "butt", x = NULL, id = NULL
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      dimension = "width", plot = NULL, id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Rect"]]
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["WheelPanTool"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -1963,64 +10724,81 @@ Rect <- R6::R6Class("Rect",
     }
   ),
   private = list(
-    # Whether to always round fractional pixel locations in such a way as to
-    # make the rectangles bigger.
-    #
-    # This setting may be useful if pixel rounding errors are causing
-    # rectangles to have a gap between them, when they should appear flush.
+    # Which dimension the wheel pan tool is constrained to act in. By default
+    # the wheel pan tool will pan the plot along the x-axis.
+    # > Enum('width', 'height')
+    dimension = NULL
+  )
+)
+
+# Two dimensional grid for visualisation and editing large amounts of
+# data.
+DataTable <- R6::R6Class("DataTable",
+  inherit = TableWidget,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      fit_columns = TRUE, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = 400L, scroll_to_selection = TRUE, selectable = TRUE,
+      sortable = TRUE, name = NULL, row_headers = TRUE,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      disabled = FALSE, columns = list(), source = NULL, editable = FALSE,
+      width = NULL, css_classes = NULL, sizing_mode = "fixed",
+      reorderable = TRUE, id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, source = source,
+        css_classes = css_classes, sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["DataTable"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # Whether columns should be fit to the available width. This results in
+    # no horizontal scrollbar showing up, but data can get unreadable if
+    # there is no enough space available. If set to ``True``, columns' width
+    # is understood as maximum width.
     # > Bool
-    dilate = NULL,
-    # The fill alpha values for the rectangles.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line color values for the rectangles.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The overall widths of the rectangles.
-    # > DistanceSpec(units_default='data')
-    width = NULL,
-    # The fill color values for the rectangles.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line alpha values for the rectangles.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The angles to rotate the rectangles, as measured from the horizontal.
-    # > AngleSpec(units_default='rad')
-    angle = NULL,
-    # The line width values for the rectangles.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the rectangles.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the rectangles.
-    # > Int
-    line_dash_offset = NULL,
-    # The y-coordinates of the centers of the rectangles.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The overall heights of the rectangles.
-    # > DistanceSpec(units_default='data')
-    height = NULL,
-    #
-    # > Enum('deg', 'rad')
-    angle_units = NULL,
-    # The line join values for the rectangles.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    #
-    # > Enum('screen', 'data')
-    width_units = NULL,
-    #
-    # > Enum('screen', 'data')
-    height_units = NULL,
-    # The line cap values for the rectangles.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates of the centers of the rectangles.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
+    fit_columns = NULL,
+    # Whenever a selection is made on the data source, scroll the selected
+    # rows into the table's viewport if none of the selected rows are already
+    # in the viewport.
+    # > Bool
+    scroll_to_selection = NULL,
+    # Whether a table's rows can be selected or not. Using ``checkbox`` is
+    # equivalent to ``True``, but makes selection visible through a checkbox
+    # for each row, instead of highlighting rows. Multiple selection is
+    # allowed and can be achieved by either clicking multiple checkboxes (if
+    # enabled) or using Shift + click on rows.
+    # > Either(Bool, Enum('checkbox'))
+    selectable = NULL,
+    # Allows to sort table's contents. By default natural order is preserved.
+    # To sort a column, click on it's header. Clicking one more time changes
+    # sort direction. Use Ctrl + click to return to natural order. Use Shift
+    # + click to sort multiple columns simultaneously.
+    # > Bool
+    sortable = NULL,
+    # Enable or disable row headers, i.e. the index column.
+    # > Bool
+    row_headers = NULL,
+    # The list of child column widgets.
+    # > List(Instance(TableColumn))
+    columns = NULL,
+    # Allows to edit table's contents. Needs cell editors to be configured on
+    # columns that are required to be editable.
+    # > Bool
+    editable = NULL,
+    # Allows the reordering of a tables's columns. To reorder a column, click
+    # and drag a table's header to the desired location in the table.  The
+    # columns on either side will remain in their previous order.
+    # > Bool
+    reorderable = NULL
   )
 )
 
@@ -2030,16 +10808,17 @@ SingleIntervalTicker <- R6::R6Class("SingleIntervalTicker",
   public = list(
     specified_args = NULL,
     initialize = function(
-      num_minor_ticks = 5L, name = NULL, tags = list(), desired_num_ticks = 6L,
+      interval = NULL, subscribed_events = list(), tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
+      num_minor_ticks = 5L, name = NULL,
       js_event_callbacks = structure(list(), .Names = character(0)),
-      interval = NULL, subscribed_events = list(), id = NULL
+      desired_num_ticks = 6L, id = NULL
     ) {
-      super$initialize(desired_num_ticks = desired_num_ticks,
-        num_minor_ticks = num_minor_ticks,
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, tags = tags,
         js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, name = name,
-        subscribed_events = subscribed_events, tags = tags, id = id)
+        desired_num_ticks = desired_num_ticks,
+        num_minor_ticks = num_minor_ticks, name = name, id = id)
       types <- bk_prop_types[["SingleIntervalTicker"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -2054,26 +10833,69 @@ SingleIntervalTicker <- R6::R6Class("SingleIntervalTicker",
   )
 )
 
-# Base class for arrow heads.
+# Display tick values that are formatted by a user-defined function.
+FuncTickFormatter <- R6::R6Class("FuncTickFormatter",
+  inherit = TickFormatter,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      args = structure(list(), .Names = character(0)), code = "", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["FuncTickFormatter"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # A mapping of names to Bokeh plot objects. These objects are made
+    # available to the formatter code snippet as the values of named
+    # parameters to the callback.
+    # > Dict(String, Instance(Model))
+    args = NULL,
+    # A snippet of JavaScript code that reformats a single tick to the
+    # desired format. The variable ``tick`` will contain the unformatted tick
+    # value and can be expected to be present in the code snippet namespace
+    # at render time.
+    #
+    # Example:
+    #
+    # .. code-block:: javascript
+    #
+    # code = ''' return Math.floor(tick) + " + " + (tick % 1).toFixed(2) '''
+    # > String
+    code = NULL
+  )
+)
+
+# Base class for text annotation models such as labels and titles.
 #
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
-ArrowHead <- R6::R6Class("ArrowHead",
+TextAnnotation <- R6::R6Class("TextAnnotation",
   inherit = Annotation,
   public = list(
     specified_args = NULL,
     initialize = function(
-      visible = TRUE, name = NULL, level = "annotation", tags = list(),
+      subscribed_events = list(), tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
+      level = "annotation", plot = NULL, name = NULL,
       js_event_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, subscribed_events = list(), id = NULL
+      visible = TRUE, id = NULL
     ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["ArrowHead"]]
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, level = level,
+        plot = plot, name = name, js_event_callbacks = js_event_callbacks,
+        visible = visible, id = id)
+      types <- bk_prop_types[["TextAnnotation"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -2113,15 +10935,14 @@ HTMLTemplateFormatter <- R6::R6Class("HTMLTemplateFormatter",
   public = list(
     specified_args = NULL,
     initialize = function(
-      template = "<%= value %>", js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL,
       js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), tags = list(), id = NULL
+      subscribed_events = list(), tags = list(), template = "<%= value %>",
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
       types <- bk_prop_types[["HTMLTemplateFormatter"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -2136,26 +10957,21 @@ HTMLTemplateFormatter <- R6::R6Class("HTMLTemplateFormatter",
   )
 )
 
-# Single-select widget.
-Select <- R6::R6Class("Select",
-  inherit = InputWidget,
+# Open a URL in a new tab or window (browser dependent).
+OpenURL <- R6::R6Class("OpenURL",
+  inherit = Callback,
   public = list(
     specified_args = NULL,
     initialize = function(
-      callback = NULL, name = NULL, title = "", sizing_mode = "fixed",
-      width = NULL, height = NULL, subscribed_events = list(), tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
       js_event_callbacks = structure(list(), .Names = character(0)),
-      options = list(), value = "", disabled = FALSE, css_classes = NULL,
-      id = NULL
+      subscribed_events = list(), tags = list(), url = "http://",
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, id = NULL
     ) {
-      super$initialize(name = name, title = title, sizing_mode = sizing_mode,
-        width = width, height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Select"]]
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["OpenURL"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -2163,42 +10979,33 @@ Select <- R6::R6Class("Select",
     }
   ),
   private = list(
-    # A callback to run in the browser whenever the current Select dropdown
-    # value changes.
-    # > Instance(Callback)
-    callback = NULL,
-    # Available selection options. Options may be provided either as a list
-    # of possible string values, or as a list of tuples, each of the form
-    # ``(value, label)``. In the latter case, the visible widget text for
-    # each value will be corresponding given label.
-    # > List(Either(String, Tuple(String, String)))
-    options = NULL,
-    # Initial or selected value.
+    # The URL to direct the web browser to. This can be a template string,
+    # which will be formatted with data from the data source.
     # > String
-    value = NULL
+    url = NULL
   )
 )
 
-# A base class for all data range types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-DataRange <- R6::R6Class("DataRange",
-  inherit = Range,
+# A group of radio boxes rendered as toggle buttons.
+RadioButtonGroup <- R6::R6Class("RadioButtonGroup",
+  inherit = ButtonGroup,
   public = list(
     specified_args = NULL,
     initialize = function(
-      callback = NULL, name = NULL, names = list(), tags = list(),
+      subscribed_events = list(), tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, button_type = "default", name = NULL,
+      active = NULL, disabled = FALSE, width = NULL,
       js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), renderers = list(), id = NULL
+      css_classes = NULL, labels = list(), sizing_mode = "fixed", id = NULL
     ) {
-      super$initialize(callback = callback,
-        js_property_callbacks = js_property_callbacks, name = name,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["DataRange"]]
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        callback = callback, button_type = button_type, name = name,
+        js_event_callbacks = js_event_callbacks, disabled = disabled,
+        width = width, css_classes = css_classes, labels = labels,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["RadioButtonGroup"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -2206,41 +11013,42 @@ DataRange <- R6::R6Class("DataRange",
     }
   ),
   private = list(
-    # A list of names to query for. If set, only renderers that have a
-    # matching value for their ``name`` attribute will be used for
-    # autoranging.
-    # > List(String)
-    names = NULL,
-    # An explicit list of renderers to autorange against. If unset, defaults
-    # to all renderers on a plot.
-    # > List(Instance(Renderer))
-    renderers = NULL
+    # The index of the selected radio box, or ``None`` if nothing is
+    # selected.
+    # > Int
+    active = NULL
   )
 )
 
-# A fixed, closed range [start, end] in a continuous scalar dimension.
+# Render upside-down triangle markers.
 #
-# In addition to supplying ``start`` and ``end`` keyword arguments to the
-# ``Range1d`` initializer, you can also instantiate with the convenience
-# syntax::
+# Example -------
 #
-# Range(0, 10) # equivalent to Range(start=0, end=10)
-Range1d <- R6::R6Class("Range1d",
-  inherit = Range,
+# .. bokeh-plot:: ../tests/glyphs/InvertedTriangle.py :source-position:
+# below
+InvertedTriangle <- R6::R6Class("InvertedTriangle",
+  inherit = Marker,
   public = list(
     specified_args = NULL,
     initialize = function(
-      callback = NULL, name = NULL, max_interval = NULL, bounds = NULL, end = 1L,
-      start = 0L, tags = list(), min_interval = NULL,
+      subscribed_events = list(), line_join = "miter", tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", size = 4L, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L,
       js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), id = NULL
+      fill_color = "gray", line_alpha = 1, x = NULL, angle = 0, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
     ) {
-      super$initialize(callback = callback,
-        js_property_callbacks = js_property_callbacks, name = name,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["Range1d"]]
+      super$initialize(subscribed_events = subscribed_events,
+        line_join = line_join, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        line_width = line_width, angle_units = angle_units, size = size,
+        line_dash = line_dash, y = y, name = name,
+        line_dash_offset = line_dash_offset,
+        js_event_callbacks = js_event_callbacks, fill_color = fill_color,
+        line_alpha = line_alpha, x = x, angle = angle, fill_alpha = fill_alpha,
+        line_cap = line_cap, line_color = line_color, id = id)
+      types <- bk_prop_types[["InvertedTriangle"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -2248,67 +11056,273 @@ Range1d <- R6::R6Class("Range1d",
     }
   ),
   private = list(
-    # The level that the range is allowed to zoom out, expressed as the
-    # maximum visible interval. Can be a timedelta. Note that ``bounds`` can
-    # impose an implicit constraint on the maximum interval as well.
-    # > Either(Float, TimeDelta, Int)
-    max_interval = NULL,
-    # The bounds that the range is allowed to go to - typically used to
-    # prevent the user from panning/zooming/etc away from the data.
-    #
-    # If set to ``'auto'``, the bounds will be computed to the start and end
-    # of the Range.
-    #
-    # Bounds are provided as a tuple of ``(min, max)`` so regardless of
-    # whether your range is increasing or decreasing, the first item should
-    # be the minimum value of the range and the second item should be the
-    # maximum. Setting min > max will result in a ``ValueError``.
-    #
-    # By default, bounds are ``None`` and your plot to pan/zoom as far as you
-    # want. If you only want to constrain one end of the plot, you can set
-    # min or max to None.
-    #
-    # Examples:
-    #
-    # Range1d(0, 1, bounds='auto') # Auto-bounded to 0 and 1 (Default
-    # behavior) Range1d(start=0, end=1, bounds=(0, None)) # Maximum is
-    # unbounded, minimum bounded to 0
-    # > MinMaxBounds(Auto, Tuple(Float, Float), Tuple(Datetime, Datetime))
-    bounds = NULL,
-    # The end of the range.
-    # > Either(Float, Datetime, Int)
-    end = NULL,
-    # The start of the range.
-    # > Either(Float, Datetime, Int)
-    start = NULL,
-    # The level that the range is allowed to zoom in, expressed as the
-    # minimum visible interval. If set to ``None`` (default), the minimum
-    # interval is not bound. Can be a timedelta.
-    # > Either(Float, TimeDelta, Int)
-    min_interval = NULL
+
   )
 )
 
-# A base class for all interactive tool types.
+# Abstract base class for Row and Column. Do not use directly.
 #
 # .. note:: This is an abstract base class used to help organize the
 # hierarchy of Bokeh model types. **It is not useful to instantiate on
 # its own.**
-Tool <- R6::R6Class("Tool",
-  inherit = Model,
+Box <- R6::R6Class("Box",
+  inherit = LayoutDOM,
   public = list(
     specified_args = NULL,
     initialize = function(
+      subscribed_events = list(), tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(), tags = list(),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, children = list(), sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Box"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The list of children, which can be other components including plots,
+    # rows, columns, and widgets.
+    # > List(Instance(LayoutDOM))
+    children = NULL
+  )
+)
+
+# Render horizontal bars, given a center coordinate, ``height`` and
+# (``left``, ``right``) coordinates.
+#
+# Example -------
+#
+# .. bokeh-plot:: ../tests/glyphs/HBar.py :source-position: below
+HBar <- R6::R6Class("HBar",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      left = 0L, subscribed_events = list(), line_join = "miter",
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), line_width = 1L, height = NULL, line_dash = list(),
+      y = NULL, right = NULL, line_dash_offset = 0L,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, fill_color = "gray", line_alpha = 1, fill_alpha = 1,
+      line_cap = "butt", line_color = "black", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["HBar"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # The x-coordinates of the left edges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    left = NULL,
+    # The line join values for the horizontal bars.
+    # > Enum('miter', 'round', 'bevel')
+    line_join = NULL,
+    # The line width values for the horizontal bars.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    # The heights of the vertical bars.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    height = NULL,
+    # The line dash values for the horizontal bars.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-coordinates of the centers of the horizontal bars.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The x-coordinates of the right edges.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    right = NULL,
+    # The line dash offset values for the horizontal bars.
+    # > Int
+    line_dash_offset = NULL,
+    # The fill color values for the horizontal bars.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the horizontal bars.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_alpha = NULL,
+    # The fill alpha values for the horizontal bars.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    fill_alpha = NULL,
+    # The line cap values for the horizontal bars.
+    # > Enum('butt', 'round', 'square')
+    line_cap = NULL,
+    # The line color values for the horizontal bars.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL
+  )
+)
+
+# Generate ticks on a log scale.
+LogTicker <- R6::R6Class("LogTicker",
+  inherit = AdaptiveTicker,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      base = 10, subscribed_events = list(), mantissas = list(1L, 5L),
+      tags = list(), js_property_callbacks = structure(list(), .Names =
+      character(0)), num_minor_ticks = 5L, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      min_interval = 0, max_interval = NULL, desired_num_ticks = 6L, id = NULL
+    ) {
+      super$initialize(base = base, subscribed_events = subscribed_events,
+        mantissas = mantissas, tags = tags,
+        js_property_callbacks = js_property_callbacks,
+        num_minor_ticks = num_minor_ticks, name = name,
+        js_event_callbacks = js_event_callbacks,
+        min_interval = min_interval, max_interval = max_interval,
+        desired_num_ticks = desired_num_ticks, id = id)
+      types <- bk_prop_types[["LogTicker"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Lay out child components in a single vertical row.
+#
+# Children can be specified as positional arguments, as a single argument
+# that is a sequence, or using the ``children`` keyword argument.
+Column <- R6::R6Class("Column",
+  inherit = Box,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), disabled = FALSE, width = NULL,
+      css_classes = NULL, children = list(), sizing_mode = "fixed", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        name = name, js_event_callbacks = js_event_callbacks,
+        disabled = disabled, width = width, css_classes = css_classes,
+        children = children, sizing_mode = sizing_mode, id = id)
+      types <- bk_prop_types[["Column"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+# Render images given as scalar data together with a color mapper.
+#
+# In addition to the defined model properties, ``Image`` also can accept
+# a keyword argument ``palette`` in place of an explicit
+# ``color_mapper``.  The value should be a list of colors, or the name of
+# one of the built-in palettes in ``bokeh.palettes``. This palette will
+# be used to automatically construct a ``ColorMapper`` model for the
+# ``color_mapper`` property.
+#
+# If both ``palette`` and ``color_mapper`` are passed, a ``ValueError``
+# exception will be raised. If neither is passed, then the ``Greys9``
+# palette will be used as a default.
+Image <- R6::R6Class("Image",
+  inherit = Glyph,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      dw_units = "data", dh = NULL, dw = NULL, tags = list(),
+      subscribed_events = list(), js_property_callbacks = structure(list(),
+      .Names = character(0)), image = NULL, color_mapper = NULL, y = NULL,
+      dilate = FALSE, js_event_callbacks = structure(list(), .Names =
+      character(0)), name = NULL, x = NULL, dh_units = "data", id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Image"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    #
+    # > Enum('screen', 'data')
+    dw_units = NULL,
+    # The height of the plot region that the image will occupy.
+    #
+    # .. note:: This is not the number of pixels that an image is tall.  That
+    # number is fixed by the image itself.
+    # > DistanceSpec(units_default='data')
+    dh = NULL,
+    # The widths of the plot regions that the images will occupy.
+    #
+    # .. note:: This is not the number of pixels that an image is wide.  That
+    # number is fixed by the image itself.
+    # > DistanceSpec(units_default='data')
+    dw = NULL,
+    # The arrays of scalar data for the images to be colormapped.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    image = NULL,
+    # A ``ColorMapper`` to use to map the scalar data from ``image`` into
+    # RGBA values for display.
+    #
+    # .. note:: The color mapping step happens on the client.
+    # > Instance(ColorMapper)
+    color_mapper = NULL,
+    # The y-coordinates to locate the image anchors.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # Whether to always round fractional pixel locations in such a way as to
+    # make the images bigger.
+    #
+    # This setting may be useful if pixel rounding errors are causing images
+    # to have a gap between them, when they should appear flush.
+    # > Bool
+    dilate = NULL,
+    # The x-coordinates to locate the image anchors.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    #
+    # > Enum('screen', 'data')
+    dh_units = NULL
+  )
+)
+
+#
+LogScale <- R6::R6Class("LogScale",
+  inherit = Scale,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      tags = list(), subscribed_events = list(), name = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
       id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Tool"]]
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["LogScale"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -2316,9 +11330,7 @@ Tool <- R6::R6Class("Tool",
     }
   ),
   private = list(
-    # The Plot that this tool will act on.
-    # > Instance(Plot)
-    plot = NULL
+
   )
 )
 
@@ -2329,15 +11341,13 @@ CustomJS <- R6::R6Class("CustomJS",
     specified_args = NULL,
     initialize = function(
       js_event_callbacks = structure(list(), .Names = character(0)),
-      args = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
-      code = "", name = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
+      args = structure(list(), .Names = character(0)), code = "", id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
       types <- bk_prop_types[["CustomJS"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -2366,6608 +11376,6 @@ CustomJS <- R6::R6Class("CustomJS",
   )
 )
 
-# Apply a custom defined transform to data.
-CustomJSTransform <- R6::R6Class("CustomJSTransform",
-  inherit = Transform,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      args = structure(list(), .Names = character(0)), name = NULL,
-      v_func = "", tags = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), func = "", subscribed_events = list(),
-      id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["CustomJSTransform"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A mapping of names to Bokeh plot objects. These objects are made
-    # available to the callback code snippet as the values of named
-    # parameters to the callback.
-    # > Dict(String, Instance(Model))
-    args = NULL,
-    # A snippet of JavaScript code to transform an array of values. The
-    # variable ``xs`` will contain the untransformed array and can be
-    # expected to be present in the function namespace at render time. The
-    # snippet will be into the body of a function and therefore requires a
-    # return statement.
-    #
-    # Example:
-    #
-    # .. code-block:: javascript
-    #
-    # v_func = ''' new_xs = new Array(xs.length) for(i = 0; i < xs.length;
-    # i++) { new_xs[i] = xs[i] + 0.5 } return new_xs '''
-    #
-    # .. warning:: The vectorized function, ``v_func``, must return an array
-    # of the same length as the input ``xs`` array.
-    # > String
-    v_func = NULL,
-    # A snippet of JavaScript code to transform a single value. The variable
-    # ``x`` will contain the untransformed value and can be expected to be
-    # present in the function namespace at render time. The snippet will be
-    # into the body of a function and therefore requires a return statement.
-    #
-    # Example:
-    #
-    # .. code-block:: javascript
-    #
-    # func = ''' return Math.floor(x) + 0.5 '''
-    # > String
-    func = NULL
-  )
-)
-
-# Select cell editor.
-SelectEditor <- R6::R6Class("SelectEditor",
-  inherit = CellEditor,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), options = list(), subscribed_events = list(),
-      tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["SelectEditor"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The list of options to select from.
-    # > List(String)
-    options = NULL
-  )
-)
-
-# A base class for Mercator tile services (e.g.``WMTSTileSource``).
-MercatorTileSource <- R6::R6Class("MercatorTileSource",
-  inherit = TileSource,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      y_origin_offset = 20037508.34, max_zoom = 30L,
-      extra_url_vars = structure(list(), .Names = character(0)),
-      name = NULL, attribution = "", wrap_around = TRUE,
-      x_origin_offset = 20037508.34, subscribed_events = list(),
-      tags = list(), min_zoom = 0L, js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), url = "", tile_size = 256L,
-      initial_resolution = 156543.033928041, id = NULL
-    ) {
-      super$initialize(y_origin_offset = y_origin_offset,
-        max_zoom = max_zoom, extra_url_vars = extra_url_vars, name = name,
-        attribution = attribution, initial_resolution = initial_resolution,
-        x_origin_offset = x_origin_offset,
-        subscribed_events = subscribed_events, tags = tags,
-        min_zoom = min_zoom, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, tile_size = tile_size,
-        url = url, id = id)
-      types <- bk_prop_types[["MercatorTileSource"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Enables continuous horizontal panning by wrapping the x-axis based on
-    # bounds of map.
-    #
-    # ..note:: Axis coordinates are not wrapped. To toggle axis label
-    # visibility, use ``plot.axis.visible = False``.
-    # > Bool
-    wrap_around = NULL
-  )
-)
-
-# Render an arrow as an annotation.
-Arrow <- R6::R6Class("Arrow",
-  inherit = Annotation,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, end_units = "data", x_range_name = "default",
-      level = "annotation", line_color = "black", plot = NULL,
-      subscribed_events = list(), source = NULL, y_end = NULL, tags = list(),
-      line_alpha = 1, js_event_callbacks = structure(list(), .Names =
-      character(0)), visible = TRUE, line_width = 1L, end = NULL,
-      line_dash = list(), start_units = "data", start = NULL, y_start = NULL,
-      line_join = "miter", line_dash_offset = 0L, x_start = NULL,
-      y_range_name = "default", js_property_callbacks = structure(list(),
-      .Names = character(0)), line_cap = "butt", x_end = NULL, id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["Arrow"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The unit type for the end_x and end_y attributes. Interpreted as "data
-    # space" units by default.
-    # > Enum('screen', 'data')
-    end_units = NULL,
-    # A particular (named) x-range to use for computing screen locations when
-    # rendering annotations on the plot. If unset, use the default x-range.
-    # > String
-    x_range_name = NULL,
-    # The line color values for the arrow body.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # Local data source to use when rendering annotations on the plot.
-    # > Instance(DataSource)
-    source = NULL,
-    # The y-coordinates to locate the end of the arrows.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y_end = NULL,
-    # The line alpha values for the arrow body.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line width values for the arrow body.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # Instance of ArrowHead.
-    # > Instance(ArrowHead)
-    end = NULL,
-    # The line dash values for the arrow body.
-    # > DashPattern
-    line_dash = NULL,
-    # The unit type for the start_x and start_y attributes. Interpreted as
-    # "data space" units by default.
-    # > Enum('screen', 'data')
-    start_units = NULL,
-    # Instance of ArrowHead.
-    # > Instance(ArrowHead)
-    start = NULL,
-    # The y-coordinates to locate the start of the arrows.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y_start = NULL,
-    # The line join values for the arrow body.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The line dash offset values for the arrow body.
-    # > Int
-    line_dash_offset = NULL,
-    # The x-coordinates to locate the start of the arrows.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x_start = NULL,
-    # A particular (named) y-range to use for computing screen locations when
-    # rendering annotations on the plot. If unset, use the default y-range.
-    # > String
-    y_range_name = NULL,
-    # The line cap values for the arrow body.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates to locate the end of the arrows.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x_end = NULL
-  )
-)
-
-# Base class for glyphs that are simple markers with line and fill
-# properties, located at an (x, y) location with a specified size.
-#
-# .. note:: For simplicity, all markers have both line and fill
-# properties declared, however some markers (`Asterisk`, `Cross`, `X`)
-# only draw lines. For these markers, the fill values are simply ignored.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Marker <- R6::R6Class("Marker",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Marker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The size (diameter) values for the markers in screen space units.
-    # > ScreenDistanceSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    size = NULL,
-    # The line width values for the markers.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The fill alpha values for the markers.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line dash values for the markers.
-    # > DashPattern
-    line_dash = NULL,
-    # The line color values for the markers.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line dash offset values for the markers.
-    # > Int
-    line_dash_offset = NULL,
-    # The y-axis coordinates for the center of the markers.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The fill color values for the markers.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line join values for the markers.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    #
-    # > Enum('deg', 'rad')
-    angle_units = NULL,
-    # The line alpha values for the markers.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The angles to rotate the markers.
-    # > AngleSpec(units_default='rad')
-    angle = NULL,
-    # The line cap values for the markers.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-axis coordinates for the center of the markers.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
-  )
-)
-
-# Lay out child components in a single vertical row.
-#
-# Children can be specified as positional arguments, as a single argument
-# that is a sequence, or using the ``children`` keyword argument.
-Column <- R6::R6Class("Column",
-  inherit = Box,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), children = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), disabled = FALSE, css_classes = NULL,
-      id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags, children = children,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Column"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Boolean (check mark) cell formatter.
-BooleanFormatter <- R6::R6Class("BooleanFormatter",
-  inherit = CellFormatter,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), icon = "check",
-      tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["BooleanFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The icon visualizing the check mark.
-    # > Enum('check', 'check-circle', 'check-circle-o', 'check-square', 'check-square-o')
-    icon = NULL
-  )
-)
-
-# A base class for all guide renderer types. ``GuideRenderer`` is not
-# generally useful to instantiate on its own.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-GuideRenderer <- R6::R6Class("GuideRenderer",
-  inherit = Renderer,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      visible = TRUE, name = NULL, level = "overlay", tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(visible = visible,
-        js_property_callbacks = js_property_callbacks, name = name,
-        js_event_callbacks = js_event_callbacks, level = level,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["GuideRenderer"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The plot to which this guide renderer is attached.
-    # > Instance(Plot)
-    plot = NULL
-  )
-)
-
-#
-CategoricalScale <- R6::R6Class("CategoricalScale",
-  inherit = LinearScale,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["CategoricalScale"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# A group of radio boxes.
-RadioGroup <- R6::R6Class("RadioGroup",
-  inherit = Group,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      inline = FALSE, callback = NULL, name = NULL, sizing_mode = "fixed",
-      width = NULL, height = NULL, tags = list(), labels = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      active = NULL, subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(inline = inline, callback = callback, name = name,
-        sizing_mode = sizing_mode, width = width, height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, labels = labels,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["RadioGroup"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The index of the selected radio box, or ``None`` if nothing is
-    # selected.
-    # > Int
-    active = NULL
-  )
-)
-
-# A base class for all ticker types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Ticker <- R6::R6Class("Ticker",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Ticker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# *toolbar icon*: |wheel_pan_icon|
-#
-# The wheel pan tool allows the user to pan the plot along the configured
-# dimension using the scroll wheel.
-#
-# .. |wheel_pan_icon| image:: /_images/icons/WheelPan.png :height: 18pt
-WheelPanTool <- R6::R6Class("WheelPanTool",
-  inherit = Scroll,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      dimension = "width", js_property_callbacks = structure(list(), .Names
-      = character(0)), name = NULL, js_event_callbacks = structure(list(),
-      .Names = character(0)), plot = NULL, subscribed_events = list(),
-      tags = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["WheelPanTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Which dimension the wheel pan tool is constrained to act in. By default
-    # the wheel pan tool will pan the plot along the x-axis.
-    # > Enum('width', 'height')
-    dimension = NULL
-  )
-)
-
-# Spinner-based time cell editor.
-TimeEditor <- R6::R6Class("TimeEditor",
-  inherit = CellEditor,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["TimeEditor"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render text.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Text.py :source-position: below
-Text <- R6::R6Class("Text",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      text_color = "#444444", tags = list(), name = NULL, y_offset = 0L,
-      text_font_style = "normal", subscribed_events = list(), y = NULL,
-      text_font_size = list(value = "12pt"), angle_units = "rad",
-      text_alpha = 1, x_offset = 0L, text = "text", text_font = "helvetica",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      text_baseline = "bottom", angle = 0L, x = NULL, text_align = "left",
-      id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Text"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The text color values for the text.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    text_color = NULL,
-    # Offset values to apply to the y-coordinates.
-    #
-    # This is useful, for instance, if it is desired to "float" text a fixed
-    # distance in screen units from a given data position.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y_offset = NULL,
-    # The text font style values for the text.
-    # > Enum('normal', 'italic', 'bold')
-    text_font_style = NULL,
-    # The y-coordinates to locate the text anchors.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The text font size values for the text.
-    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    text_font_size = NULL,
-    #
-    # > Enum('deg', 'rad')
-    angle_units = NULL,
-    # The text alpha values for the text.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    text_alpha = NULL,
-    # Offset values to apply to the x-coordinates.
-    #
-    # This is useful, for instance, if it is desired to "float" text a fixed
-    # distance in screen units from a given data position.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x_offset = NULL,
-    # The text values to render.
-    # > StringSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    text = NULL,
-    # The text font values for the text.
-    # > String
-    text_font = NULL,
-    # The text baseline values for the text.
-    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
-    text_baseline = NULL,
-    # The angles to rotate the text, as measured from the horizontal.
-    # > AngleSpec(units_default='rad')
-    angle = NULL,
-    # The x-coordinates to locate the text anchors.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL,
-    # The text align values for the text.
-    # > Enum('left', 'right', 'center')
-    text_align = NULL
-  )
-)
-
-# Render a single title box as an annotation.
-Title <- R6::R6Class("Title",
-  inherit = TextAnnotation,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      text_color = "#444444", offset = 0L, border_line_dash = list(),
-      background_fill_color = NULL, align = "left", name = NULL,
-      level = "annotation", border_line_join = "miter", tags = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      border_line_color = NULL, visible = TRUE, border_line_dash_offset = 0L,
-      render_mode = "canvas", border_line_cap = "butt",
-      text_font_style = "bold", text_font_size = list(value = "10pt"),
-      text_font = "helvetica", text_alpha = 1, text = NULL,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      background_fill_alpha = 1, border_line_width = 1L, plot = NULL,
-      subscribed_events = list(), border_line_alpha = 1, id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["Title"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A color to use to fill text with.
-    #
-    # Acceptable values are:
-    #
-    # - any of the 147 named `CSS colors`_, e.g ``'green'``, ``'indigo'`` -
-    # an RGB(A) hex value, e.g., ``'#FF0000'``, ``'#44444444'`` - a 3-tuple
-    # of integers (r,g,b) between 0 and 255 - a 4-tuple of (r,g,b,a) where
-    # r,g,b are integers between 0..255 and a is between 0..1
-    #
-    # .. _CSS colors: http://www.w3schools.com/cssref/css_colornames.asp
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    text_color = NULL,
-    # Offset the text by a number of pixels (can be positive or negative).
-    # Shifts the text in different directions based on the location of the
-    # title:
-    #
-    # * above: shifts title right * right: shifts title down * below: shifts
-    # title right * left: shifts title up
-    # > Float
-    offset = NULL,
-    # The line dash values for the text bounding box.
-    # > DashPattern
-    border_line_dash = NULL,
-    # The fill color values for the text bounding box.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    background_fill_color = NULL,
-    # Location to align the title text.
-    # > Enum('left', 'right', 'center')
-    align = NULL,
-    # The line join values for the text bounding box.
-    # > Enum('miter', 'round', 'bevel')
-    border_line_join = NULL,
-    # The line color values for the text bounding box.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    border_line_color = NULL,
-    # The line dash offset values for the text bounding box.
-    # > Int
-    border_line_dash_offset = NULL,
-    # Specifies whether the text is rendered as a canvas element or as an css
-    # element overlaid on the canvas. The default mode is "canvas".
-    #
-    # .. note:: The CSS labels won't be present in the output using the
-    # "save" tool.
-    #
-    # .. warning:: Not all visual styling properties are supported if the
-    # render_mode is set to "css". The border_line_dash property isn't fully
-    # supported and border_line_dash_offset isn't supported at all. Setting
-    # text_alpha will modify the opacity of the entire background box and
-    # border in addition to the text. Finally, clipping Label annotations
-    # inside of the plot area isn't supported in "css" mode.
-    # > Enum('canvas', 'css')
-    render_mode = NULL,
-    # The line cap values for the text bounding box.
-    # > Enum('butt', 'round', 'square')
-    border_line_cap = NULL,
-    # A style to use for rendering text.
-    #
-    # Acceptable values are:
-    #
-    # - ``'normal'`` normal text - ``'italic'`` *italic text* - ``'bold'``
-    # **bold text**
-    # > Enum('normal', 'italic', 'bold')
-    text_font_style = NULL,
-    #
-    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    text_font_size = NULL,
-    # Name of a font to use for rendering text, e.g., ``'times'``,
-    # ``'helvetica'``.
-    # > String
-    text_font = NULL,
-    # An alpha value to use to fill text with.
-    #
-    # Acceptable values are floating point numbers between 0 (transparent)
-    # and 1 (opaque).
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    text_alpha = NULL,
-    # The text value to render.
-    # > String
-    text = NULL,
-    # The fill alpha values for the text bounding box.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    background_fill_alpha = NULL,
-    # The line width values for the text bounding box.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    border_line_width = NULL,
-    # The line alpha values for the text bounding box.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    border_line_alpha = NULL
-  )
-)
-
-# An LinearAxis that picks nice numbers for tick locations on a datetime
-# scale. Configured with a ``DatetimeTickFormatter`` by default.
-DatetimeAxis <- R6::R6Class("DatetimeAxis",
-  inherit = LinearAxis,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      axis_line_cap = "butt", major_label_standoff = 5L, name = NULL,
-      major_label_text_baseline = "alphabetic", major_label_text_alpha = 1,
-      level = "overlay", major_label_overrides = structure(list(), .Names =
-      character(0)), axis_label_text_font_style = "italic",
-      major_label_text_color = "#444444",
-      axis_label_text_font_size = list(value = "10pt"),
-      major_tick_out = 6L, axis_line_width = 1L, major_tick_line_alpha = 1,
-      axis_label_text_baseline = "bottom", axis_line_alpha = 1,
-      axis_label_standoff = 5L, major_label_text_font_style = "normal",
-      minor_tick_line_cap = "butt", axis_label_text_align = "left",
-      major_tick_line_cap = "butt", y_range_name = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      major_label_text_font_size = list(value = "8pt"),
-      axis_label_text_color = "#444444", minor_tick_line_dash = list(),
-      subscribed_events = list(), minor_tick_out = 4L, formatter = NULL,
-      major_tick_line_join = "miter", minor_tick_line_dash_offset = 0L,
-      minor_tick_line_join = "miter", axis_line_join = "miter",
-      minor_tick_in = 0L, bounds = "auto", x_range_name = "default",
-      tags = list(), major_label_text_font = "helvetica",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      major_label_orientation = "horizontal", axis_label_text_alpha = 1,
-      ticker = NULL, minor_tick_line_width = 1L, visible = TRUE,
-      minor_tick_line_color = "black", major_tick_line_dash = list(),
-      major_tick_line_dash_offset = 0L, major_tick_in = 2L,
-      axis_line_dash_offset = 0L, axis_line_color = "black", axis_label = "",
-      axis_line_dash = list(), minor_tick_line_alpha = 1,
-      axis_label_text_font = "helvetica", major_tick_line_color = "black",
-      major_tick_line_width = 1L, plot = NULL,
-      major_label_text_align = "center", id = NULL
-    ) {
-      super$initialize(axis_line_cap = axis_line_cap,
-        major_label_standoff = major_label_standoff, name = name,
-        major_label_text_baseline = major_label_text_baseline,
-        major_label_text_alpha = major_label_text_alpha, level = level,
-        major_label_overrides = major_label_overrides,
-        axis_label_text_font_style = axis_label_text_font_style,
-        major_label_text_color = major_label_text_color,
-        axis_label_text_font_size = axis_label_text_font_size,
-        major_tick_out = major_tick_out, axis_line_width = axis_line_width,
-        major_tick_line_alpha = major_tick_line_alpha,
-        axis_label_text_baseline = axis_label_text_baseline,
-        axis_line_alpha = axis_line_alpha,
-        axis_label_standoff = axis_label_standoff,
-        major_label_text_font_style = major_label_text_font_style,
-        minor_tick_line_cap = minor_tick_line_cap,
-        axis_label_text_align = axis_label_text_align,
-        major_tick_line_cap = major_tick_line_cap,
-        y_range_name = y_range_name,
-        js_property_callbacks = js_property_callbacks,
-        major_label_text_font_size = major_label_text_font_size,
-        axis_label_text_color = axis_label_text_color,
-        minor_tick_line_dash = minor_tick_line_dash,
-        subscribed_events = subscribed_events,
-        minor_tick_out = minor_tick_out, formatter = formatter,
-        major_tick_line_join = major_tick_line_join,
-        minor_tick_line_dash_offset = minor_tick_line_dash_offset,
-        minor_tick_line_join = minor_tick_line_join,
-        axis_line_join = axis_line_join, minor_tick_in = minor_tick_in,
-        bounds = bounds, x_range_name = x_range_name, tags = tags,
-        major_label_text_font = major_label_text_font,
-        js_event_callbacks = js_event_callbacks,
-        major_label_orientation = major_label_orientation,
-        axis_label_text_alpha = axis_label_text_alpha, ticker = ticker,
-        minor_tick_line_width = minor_tick_line_width, visible = visible,
-        minor_tick_line_color = minor_tick_line_color,
-        major_tick_line_dash = major_tick_line_dash,
-        major_tick_line_dash_offset = major_tick_line_dash_offset,
-        major_tick_in = major_tick_in,
-        axis_line_dash_offset = axis_line_dash_offset,
-        axis_line_color = axis_line_color, axis_label = axis_label,
-        axis_line_dash = axis_line_dash,
-        minor_tick_line_alpha = minor_tick_line_alpha,
-        axis_label_text_font = axis_label_text_font,
-        major_tick_line_color = major_tick_line_color,
-        major_tick_line_width = major_tick_line_width, plot = plot,
-        major_label_text_align = major_label_text_align, id = id)
-      types <- bk_prop_types[["DatetimeAxis"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Generate ticks on a linear scale.
-#
-# .. note:: This class may be renamed to ``LinearTicker`` in the future.
-BasicTicker <- R6::R6Class("BasicTicker",
-  inherit = AdaptiveTicker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      num_minor_ticks = 5L, name = NULL, max_interval = NULL, tags = list(),
-      min_interval = 0, mantissas = list(1L, 2L, 5L), desired_num_ticks = 6L,
-      base = 10, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(num_minor_ticks = num_minor_ticks, name = name,
-        max_interval = max_interval, tags = tags,
-        min_interval = min_interval, mantissas = mantissas,
-        desired_num_ticks = desired_num_ticks, base = base,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["BasicTicker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render square markers with a '+' cross through the center.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/SquareCross.py :source-position: below
-SquareCross <- R6::R6Class("SquareCross",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["SquareCross"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-#
-TileRenderer <- R6::R6Class("TileRenderer",
-  inherit = DataRenderer,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      render_parents = TRUE, visible = TRUE, name = NULL, tile_source = NULL,
-      x_range_name = "default", level = "underlay", tags = list(),
-      y_range_name = "default", js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), alpha = 1, subscribed_events = list(),
-      id = NULL
-    ) {
-      super$initialize(visible = visible,
-        js_property_callbacks = js_property_callbacks, name = name,
-        js_event_callbacks = js_event_callbacks, level = level,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["TileRenderer"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Flag enable/disable drawing of parent tiles while waiting for new tiles
-    # to arrive. Default value is True.
-    # > Bool
-    render_parents = NULL,
-    # Local data source to use when rendering glyphs on the plot.
-    # > Instance(TileSource)
-    tile_source = NULL,
-    # A particular (named) x-range to use for computing screen locations when
-    # rendering glyphs on the plot. If unset, use the default x-range.
-    # > String
-    x_range_name = NULL,
-    # A particular (named) y-range to use for computing screen locations when
-    # rendering glyphs on the plot. If unset, use the default y-range.
-    # > String
-    y_range_name = NULL,
-    # tile opacity 0.0 - 1.0
-    # > Float
-    alpha = NULL
-  )
-)
-
-# A base class that defines common properties for all axis types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Axis <- R6::R6Class("Axis",
-  inherit = GuideRenderer,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      axis_line_cap = "butt", major_label_standoff = 5L, name = NULL,
-      major_label_text_baseline = "alphabetic", major_label_text_alpha = 1,
-      level = "overlay", major_label_overrides = structure(list(), .Names =
-      character(0)), axis_label_text_font_style = "italic",
-      major_label_text_color = "#444444",
-      axis_label_text_font_size = list(value = "10pt"),
-      major_tick_out = 6L, axis_line_width = 1L, major_tick_line_alpha = 1,
-      axis_label_text_baseline = "bottom", axis_line_alpha = 1,
-      axis_label_standoff = 5L, major_label_text_font_style = "normal",
-      minor_tick_line_cap = "butt", axis_label_text_align = "left",
-      major_tick_line_cap = "butt", y_range_name = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      major_label_text_font_size = list(value = "8pt"),
-      axis_label_text_color = "#444444", minor_tick_line_dash = list(),
-      subscribed_events = list(), minor_tick_out = 4L, formatter = NULL,
-      major_tick_line_join = "miter", minor_tick_line_dash_offset = 0L,
-      minor_tick_line_join = "miter", axis_line_join = "miter",
-      minor_tick_in = 0L, bounds = "auto", x_range_name = "default",
-      tags = list(), major_label_text_font = "helvetica",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      major_label_orientation = "horizontal", axis_label_text_alpha = 1,
-      ticker = NULL, minor_tick_line_width = 1L, visible = TRUE,
-      minor_tick_line_color = "black", major_tick_line_dash = list(),
-      major_tick_line_dash_offset = 0L, major_tick_in = 2L,
-      axis_line_dash_offset = 0L, axis_line_color = "black", axis_label = "",
-      axis_line_dash = list(), minor_tick_line_alpha = 1,
-      axis_label_text_font = "helvetica", major_tick_line_color = "black",
-      major_tick_line_width = 1L, plot = NULL,
-      major_label_text_align = "center", id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["Axis"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The line cap of the axis line.
-    # > Enum('butt', 'round', 'square')
-    axis_line_cap = NULL,
-    # The distance in pixels that the major tick labels should be offset from
-    # the associated ticks.
-    # > Int
-    major_label_standoff = NULL,
-    # The text baseline of the major tick labels.
-    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
-    major_label_text_baseline = NULL,
-    # The text alpha of the major tick labels.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    major_label_text_alpha = NULL,
-    # Provide explicit tick label values for specific tick locations that
-    # override normal formatting.
-    # > Dict(Either(Float, String), String)
-    major_label_overrides = NULL,
-    # The text font style of the axis label.
-    # > Enum('normal', 'italic', 'bold')
-    axis_label_text_font_style = NULL,
-    # The text color of the major tick labels.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    major_label_text_color = NULL,
-    # The text font size of the axis label.
-    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    axis_label_text_font_size = NULL,
-    # The distance in pixels that major ticks should extend out of the main
-    # plot area.
-    # > Int
-    major_tick_out = NULL,
-    # The line width of the axis line.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    axis_line_width = NULL,
-    # The line alpha of the major ticks.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    major_tick_line_alpha = NULL,
-    # The text baseline of the axis label.
-    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
-    axis_label_text_baseline = NULL,
-    # The line alpha of the axis line.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    axis_line_alpha = NULL,
-    # The distance in pixels that the axis labels should be offset from the
-    # tick labels.
-    # > Int
-    axis_label_standoff = NULL,
-    # The text font style of the major tick labels.
-    # > Enum('normal', 'italic', 'bold')
-    major_label_text_font_style = NULL,
-    # The line cap of the minor ticks.
-    # > Enum('butt', 'round', 'square')
-    minor_tick_line_cap = NULL,
-    # The text align of the axis label.
-    # > Enum('left', 'right', 'center')
-    axis_label_text_align = NULL,
-    # The line cap of the major ticks.
-    # > Enum('butt', 'round', 'square')
-    major_tick_line_cap = NULL,
-    # A particular (named) y-range to use for computing screen locations when
-    # rendering an axis on the plot. If unset, use the default y-range.
-    # > String
-    y_range_name = NULL,
-    # The text font size of the major tick labels.
-    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    major_label_text_font_size = NULL,
-    # The text color of the axis label.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    axis_label_text_color = NULL,
-    # The line dash of the minor ticks.
-    # > DashPattern
-    minor_tick_line_dash = NULL,
-    # The distance in pixels that major ticks should extend out of the main
-    # plot area.
-    # > Int
-    minor_tick_out = NULL,
-    # A TickFormatter to use for formatting the visual appearance of ticks.
-    # > Instance(TickFormatter)
-    formatter = NULL,
-    # The line join of the major ticks.
-    # > Enum('miter', 'round', 'bevel')
-    major_tick_line_join = NULL,
-    # The line dash offset of the minor ticks.
-    # > Int
-    minor_tick_line_dash_offset = NULL,
-    # The line join of the minor ticks.
-    # > Enum('miter', 'round', 'bevel')
-    minor_tick_line_join = NULL,
-    # The line join of the axis line.
-    # > Enum('miter', 'round', 'bevel')
-    axis_line_join = NULL,
-    # The distance in pixels that minor ticks should extend into the main
-    # plot area.
-    # > Int
-    minor_tick_in = NULL,
-    # Bounds for the rendered axis. If unset, the axis will span the entire
-    # plot in the given dimension.
-    # > Either(Auto, Tuple(Float, Float), Tuple(Datetime, Datetime))
-    bounds = NULL,
-    # A particular (named) x-range to use for computing screen locations when
-    # rendering an axis on the plot. If unset, use the default x-range.
-    # > String
-    x_range_name = NULL,
-    # The text font of the major tick labels.
-    # > String
-    major_label_text_font = NULL,
-    # What direction the major label text should be oriented. If a number is
-    # supplied, the angle of the text is measured from horizontal.
-    # > Either(Enum('horizontal', 'vertical'), Float)
-    major_label_orientation = NULL,
-    # The text alpha of the axis label.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    axis_label_text_alpha = NULL,
-    # A Ticker to use for computing locations of axis components.
-    #
-    # The property may also be passed a sequence of floating point numbers as
-    # a shorthand for creating and configuring a ``FixedTicker``, e.g. the
-    # following code
-    #
-    # .. code-block:: python
-    #
-    # from bokeh.plotting import figure
-    #
-    # p = figure() p.xaxis.ticker = [10, 20, 37.4]
-    #
-    # is equivalent to:
-    #
-    # .. code-block:: python
-    #
-    # from bokeh.plotting import figure from bokeh.models.tickers import
-    # FixedTicker
-    #
-    # p = figure() p.xaxis.ticker = FixedTicker(ticks=[10, 20, 37.4])
-    # > Instance(Ticker)
-    ticker = NULL,
-    # The line width of the minor ticks.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    minor_tick_line_width = NULL,
-    # The line color of the minor ticks.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    minor_tick_line_color = NULL,
-    # The line dash of the major ticks.
-    # > DashPattern
-    major_tick_line_dash = NULL,
-    # The line dash offset of the major ticks.
-    # > Int
-    major_tick_line_dash_offset = NULL,
-    # The distance in pixels that major ticks should extend into the main
-    # plot area.
-    # > Int
-    major_tick_in = NULL,
-    # The line dash offset of the axis line.
-    # > Int
-    axis_line_dash_offset = NULL,
-    # The line color of the axis line.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    axis_line_color = NULL,
-    # A text label for the axis, displayed parallel to the axis rule.
-    #
-    # .. note:: LaTeX notation is not currently supported; please see
-    # :bokeh-issue:`647` to track progress or contribute.
-    # > String
-    axis_label = NULL,
-    # The line dash of the axis line.
-    # > DashPattern
-    axis_line_dash = NULL,
-    # The line alpha of the minor ticks.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    minor_tick_line_alpha = NULL,
-    # The text font of the axis label.
-    # > String
-    axis_label_text_font = NULL,
-    # The line color of the major ticks.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    major_tick_line_color = NULL,
-    # The line width of the major ticks.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    major_tick_line_width = NULL,
-    # The text align of the major tick labels.
-    # > Enum('left', 'right', 'center')
-    major_label_text_align = NULL
-  )
-)
-
-# A base class for tools that perform "inspections", e.g. ``HoverTool``.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Inspection <- R6::R6Class("Inspection",
-  inherit = Tool,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), toggleable = TRUE, plot = NULL,
-      subscribed_events = list(), tags = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["Inspection"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Whether an on/off toggle button should appear in the toolbar for this
-    # inpection tool. If ``False``, the viewers of a plot will not be able to
-    # toggle the inspector on or off using the toolbar.
-    # > Bool
-    toggleable = NULL
-  )
-)
-
-# Render axis-aligned quads.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Quad.py :source-position: below
-Quad <- R6::R6Class("Quad",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      bottom = NULL, left = NULL, name = NULL, top = NULL, line_width = 1L,
-      fill_alpha = 1, line_dash = list(), line_dash_offset = 0L,
-      line_color = "black", line_join = "miter", fill_color = "gray",
-      tags = list(), line_alpha = 1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      right = NULL, line_cap = "butt", subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Quad"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The y-coordinates of the bottom edges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    bottom = NULL,
-    # The x-coordinates of the left edges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    left = NULL,
-    # The y-coordinates of the top edges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    top = NULL,
-    # The line width values for the quads.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The fill alpha values for the quads.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line dash values for the quads.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the quads.
-    # > Int
-    line_dash_offset = NULL,
-    # The line color values for the quads.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line join values for the quads.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The fill color values for the quads.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line alpha values for the quads.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The x-coordinates of the right edges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    right = NULL,
-    # The line cap values for the quads.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL
-  )
-)
-
-# Lay out child components in a single horizontal row.
-#
-# Children can be specified as positional arguments, as a single argument
-# that is a sequence, or using the ``children`` keyword argument.
-Row <- R6::R6Class("Row",
-  inherit = Box,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), children = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), disabled = FALSE, css_classes = NULL,
-      id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags, children = children,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Row"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# *toolbar icon*: |poly_select_icon|
-#
-# The polygon selection tool allows users to make selections on a Plot by
-# indicating a polygonal region with mouse clicks. single clicks (or
-# taps) add successive points to the definition of the polygon, and a
-# double click (or tap) indicates the selection region is ready.
-#
-# See :ref:`userguide_styling_selected_unselected_glyphs` for information
-# on styling selected and unselected glyphs.
-#
-# .. note:: Selections can be comprised of multiple regions, even those
-# made by different selection tools. Hold down the <<shift>> key while
-# making a selection to append the new selection to any previous
-# selection that might exist.
-#
-# .. |poly_select_icon| image:: /_images/icons/PolygonSelect.png :height:
-# 18pt
-PolySelectTool <- R6::R6Class("PolySelectTool",
-  inherit = Tap,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, names = list(), subscribed_events = list(), tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, overlay = NULL, renderers = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["PolySelectTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A list of names to query for. If set, only renderers that have a
-    # matching value for their ``name`` attribute will be used.
-    # > List(String)
-    names = NULL,
-    # A shaded annotation drawn to indicate the selection region.
-    # > Instance(PolyAnnotation)
-    overlay = NULL,
-    # An explicit list of renderers to hit test again. If unset, defaults to
-    # all renderers on a plot.
-    # > List(Instance(Renderer))
-    renderers = NULL
-  )
-)
-
-# A base class for data source types, which can be mapped onto a columnar
-# format.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-ColumnarDataSource <- R6::R6Class("ColumnarDataSource",
-  inherit = DataSource,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback = NULL, name = NULL, selected = structure(list(`2d` =
-      structure(list(indices = structure(list(), .Names =
-      character(0))), .Names = "indices"), `1d` =
-      structure(list(indices = list()), .Names = "indices"), `0d` =
-      structure(list(glyph = NULL, indices = list()), .Names =
-      c("glyph", "indices"))), .Names = c("2d", "1d", "0d")),
-      tags = list(), column_names = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(callback = callback,
-        js_property_callbacks = js_property_callbacks, name = name,
-        js_event_callbacks = js_event_callbacks, selected = selected,
-        tags = tags, subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["ColumnarDataSource"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # An list of names for all the columns in this DataSource.
-    # > List(String)
-    column_names = NULL
-  )
-)
-
-# *toolbar icon*: |crosshair_icon|
-#
-# The crosshair tool is a passive inspector tool. It is generally on at
-# all times, but can be configured in the inspector's menu associated
-# with the *toolbar icon* shown above.
-#
-# The crosshair tool draws a crosshair annotation over the plot, centered
-# on the current mouse position. The crosshair tool may be configured to
-# draw across only one dimension by setting the ``dimension`` property to
-# only ``width`` or ``height``.
-#
-# .. |crosshair_icon| image:: /_images/icons/Crosshair.png :height: 18pt
-CrosshairTool <- R6::R6Class("CrosshairTool",
-  inherit = Inspection,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, toggleable = TRUE, line_width = 1L, line_color = "black",
-      tags = list(), line_alpha = 1, dimensions = "both",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks,
-        toggleable = toggleable, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["CrosshairTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Stroke width in units of pixels.
-    # > Float
-    line_width = NULL,
-    # A color to use to stroke paths with.
-    #
-    # Acceptable values are:
-    #
-    # - any of the 147 named `CSS colors`_, e.g ``'green'``, ``'indigo'`` -
-    # an RGB(A) hex value, e.g., ``'#FF0000'``, ``'#44444444'`` - a 3-tuple
-    # of integers (r,g,b) between 0 and 255 - a 4-tuple of (r,g,b,a) where
-    # r,g,b are integers between 0..255 and a is between 0..1
-    #
-    # .. _CSS colors: http://www.w3schools.com/cssref/css_colornames.asp
-    # > Color
-    line_color = NULL,
-    # An alpha value to use to stroke paths with.
-    #
-    # Acceptable values are floating point numbers between 0 (transparent)
-    # and 1 (opaque).
-    # > Float
-    line_alpha = NULL,
-    # Which dimensions the crosshair tool is to track. By default, both a
-    # vertical and horizontal line will be drawn. If only "width" is
-    # supplied, only a horizontal line will be drawn. If only "height" is
-    # supplied, only a vertical line will be drawn.
-    # > Enum('width', 'height', 'both')
-    dimensions = NULL
-  )
-)
-
-# Render diamond markers with a '+' cross through the center.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/DiamondCross.py :source-position: below
-DiamondCross <- R6::R6Class("DiamondCross",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["DiamondCross"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render a 'X' cross markers.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/X.py :source-position: below
-X <- R6::R6Class("X",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["X"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Display tick values from continuous ranges as powers of some base.
-#
-# Most often useful in conjunction with a ``LogTicker``.
-LogTickFormatter <- R6::R6Class("LogTickFormatter",
-  inherit = TickFormatter,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      ticker = NULL, js_property_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), tags = list(),
-      id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["LogTickFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The corresponding ``LogTicker``, used to determine the correct base to
-    # use. If unset, the formatter will use base 10 as a default.
-    # > Instance(Ticker)
-    ticker = NULL
-  )
-)
-
-# Open a URL in a new tab or window (browser dependent).
-OpenURL <- R6::R6Class("OpenURL",
-  inherit = Callback,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), url = "http://",
-      tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["OpenURL"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The URL to direct the web browser to. This can be a template string,
-    # which will be formatted with data from the data source.
-    # > String
-    url = NULL
-  )
-)
-
-# Render segments.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Segment.py :source-position: below
-Segment <- R6::R6Class("Segment",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      y1 = NULL, line_cap = "butt", name = NULL, line_width = 1L,
-      line_dash = list(), line_dash_offset = 0L, line_color = "black",
-      line_join = "miter", tags = list(), line_alpha = 1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      x1 = NULL, y0 = NULL, subscribed_events = list(), x0 = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Segment"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The y-coordinates of the ending points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y1 = NULL,
-    # The line cap values for the segments.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The line width values for the segments.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the segments.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the segments.
-    # > Int
-    line_dash_offset = NULL,
-    # The line color values for the segments.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line join values for the segments.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The line alpha values for the segments.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The x-coordinates of the ending points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x1 = NULL,
-    # The y-coordinates of the starting points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y0 = NULL,
-    # The x-coordinates of the starting points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x0 = NULL
-  )
-)
-
-# Render a square marker, optionally rotated.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Square.py :source-position: below
-Square <- R6::R6Class("Square",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["Square"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render rays.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Ray.py :source-position: below
-Ray <- R6::R6Class("Ray",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, line_width = 1L, length_units = "data", length = NULL,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, line_join = "miter", angle_units = "rad",
-      subscribed_events = list(), line_alpha = 1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      tags = list(), angle = NULL, line_cap = "butt", x = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Ray"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The line width values for the rays.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    #
-    # > Enum('screen', 'data')
-    length_units = NULL,
-    # The length to extend the ray. Note that this ``length`` defaults to
-    # screen units.
-    # > DistanceSpec(units_default='data')
-    length = NULL,
-    # The line dash values for the rays.
-    # > DashPattern
-    line_dash = NULL,
-    # The line color values for the rays.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line dash offset values for the rays.
-    # > Int
-    line_dash_offset = NULL,
-    # The y-coordinates to start the rays.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The line join values for the rays.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    #
-    # > Enum('deg', 'rad')
-    angle_units = NULL,
-    # The line alpha values for the rays.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The angles in radians to extend the rays, as measured from the
-    # horizontal.
-    # > AngleSpec(units_default='rad')
-    angle = NULL,
-    # The line cap values for the rays.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates to start the rays.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
-  )
-)
-
-# Render ovals.
-#
-# This glyph renders ovals using Bézier curves, which are similar, but
-# not identical to ellipses. In particular, widths equal to heights will
-# not render circles. Use the ``Ellipse`` glyph for that.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Oval.py :source-position: below
-Oval <- R6::R6Class("Oval",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, fill_alpha = 1, line_color = "black", width = NULL,
-      subscribed_events = list(), fill_color = "gray", tags = list(),
-      line_alpha = 1, js_event_callbacks = structure(list(), .Names =
-      character(0)), angle = 0, line_width = 1L, line_dash = list(),
-      line_dash_offset = 0L, y = NULL, height = NULL, line_join = "miter",
-      angle_units = "rad", js_property_callbacks = structure(list(), .Names
-      = character(0)), width_units = "data", height_units = "data",
-      line_cap = "butt", x = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Oval"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The fill alpha values for the ovals.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line color values for the ovals.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The overall widths of each oval.
-    # > DistanceSpec(units_default='data')
-    width = NULL,
-    # The fill color values for the ovals.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line alpha values for the ovals.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The angle the ovals are rotated from horizontal. [rad]
-    # > AngleSpec(units_default='rad')
-    angle = NULL,
-    # The line width values for the ovals.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the ovals.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the ovals.
-    # > Int
-    line_dash_offset = NULL,
-    # The y-coordinates of the centers of the ovals.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The overall height of each oval.
-    # > DistanceSpec(units_default='data')
-    height = NULL,
-    # The line join values for the ovals.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    #
-    # > Enum('deg', 'rad')
-    angle_units = NULL,
-    #
-    # > Enum('screen', 'data')
-    width_units = NULL,
-    #
-    # > Enum('screen', 'data')
-    height_units = NULL,
-    # The line cap values for the ovals.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates of the centers of the ovals.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
-  )
-)
-
-# Single-line input widget with auto-completion.
-AutocompleteInput <- R6::R6Class("AutocompleteInput",
-  inherit = TextInput,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      placeholder = "", callback = NULL, name = NULL, title = "",
-      sizing_mode = "fixed", width = NULL, height = NULL,
-      subscribed_events = list(), tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      completions = list(), value = "", disabled = FALSE, css_classes = NULL,
-      id = NULL
-    ) {
-      super$initialize(placeholder = placeholder, callback = callback,
-        name = name, title = title, sizing_mode = sizing_mode, width = width,
-        height = height, subscribed_events = subscribed_events, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, value = value,
-        disabled = disabled, css_classes = css_classes, id = id)
-      types <- bk_prop_types[["AutocompleteInput"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A list of completion strings. This will be used to guide the user upon
-    # typing the beginning of a desired value.
-    # > List(String)
-    completions = NULL
-  )
-)
-
-# Slider-based number selection widget.
-Slider <- R6::R6Class("Slider",
-  inherit = InputWidget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback_policy = "throttle", callback = NULL, step = 0.1, name = NULL,
-      orientation = "horizontal", title = "", end = 1L, sizing_mode = "fixed",
-      start = 0L, height = NULL, width = NULL, subscribed_events = list(),
-      tags = list(), callback_throttle = 200L,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      value = 0.5, disabled = FALSE, css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, title = title, sizing_mode = sizing_mode,
-        width = width, height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Slider"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # When the callback is initiated. This parameter can take on only one of
-    # three options:
-    #
-    # * "continuous": the callback will be executed immediately for each
-    # movement of the slider * "throttle": the callback will be executed at
-    # most every ``callback_throttle`` milliseconds.  * "mouseup": the
-    # callback will be executed only once when the slider is released.
-    #
-    # The "mouseup" policy is intended for scenarios in which the callback is
-    # expensive in time.
-    # > Enum('continuous', 'throttle', 'mouseup')
-    callback_policy = NULL,
-    # A callback to run in the browser whenever the current Slider value
-    # changes.
-    # > Instance(Callback)
-    callback = NULL,
-    # The step between consecutive values.
-    # > Float
-    step = NULL,
-    # Orient the slider either horizontally (default) or vertically.
-    # > Enum('horizontal', 'vertical')
-    orientation = NULL,
-    # The maximum allowable value.
-    # > Float
-    end = NULL,
-    # The minimum allowable value.
-    # > Float
-    start = NULL,
-    # Number of microseconds to pause between callback calls as the slider is
-    # moved.
-    # > Float
-    callback_throttle = NULL,
-    # Initial or selected value.
-    # > Float
-    value = NULL
-  )
-)
-
-# An axis that picks evenly spaced tick locations for a collection of
-# categories/factors.
-CategoricalAxis <- R6::R6Class("CategoricalAxis",
-  inherit = Axis,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      axis_line_cap = "butt", major_label_standoff = 5L, name = NULL,
-      major_label_text_baseline = "alphabetic", major_label_text_alpha = 1,
-      level = "overlay", major_label_overrides = structure(list(), .Names =
-      character(0)), axis_label_text_font_style = "italic",
-      major_label_text_color = "#444444",
-      axis_label_text_font_size = list(value = "10pt"),
-      major_tick_out = 6L, axis_line_width = 1L, major_tick_line_alpha = 1,
-      axis_label_text_baseline = "bottom", axis_line_alpha = 1,
-      axis_label_standoff = 5L, major_label_text_font_style = "normal",
-      minor_tick_line_cap = "butt", axis_label_text_align = "left",
-      major_tick_line_cap = "butt", y_range_name = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      major_label_text_font_size = list(value = "8pt"),
-      axis_label_text_color = "#444444", minor_tick_line_dash = list(),
-      subscribed_events = list(), minor_tick_out = 4L, formatter = NULL,
-      major_tick_line_join = "miter", minor_tick_line_dash_offset = 0L,
-      minor_tick_line_join = "miter", axis_line_join = "miter",
-      minor_tick_in = 0L, bounds = "auto", x_range_name = "default",
-      tags = list(), major_label_text_font = "helvetica",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      major_label_orientation = "horizontal", axis_label_text_alpha = 1,
-      ticker = NULL, minor_tick_line_width = 1L, visible = TRUE,
-      minor_tick_line_color = "black", major_tick_line_dash = list(),
-      major_tick_line_dash_offset = 0L, major_tick_in = 2L,
-      axis_line_dash_offset = 0L, axis_line_color = "black", axis_label = "",
-      axis_line_dash = list(), minor_tick_line_alpha = 1,
-      axis_label_text_font = "helvetica", major_tick_line_color = "black",
-      major_tick_line_width = 1L, plot = NULL,
-      major_label_text_align = "center", id = NULL
-    ) {
-      super$initialize(axis_line_cap = axis_line_cap,
-        major_label_standoff = major_label_standoff, name = name,
-        major_label_text_baseline = major_label_text_baseline,
-        major_label_text_alpha = major_label_text_alpha, level = level,
-        major_label_overrides = major_label_overrides,
-        axis_label_text_font_style = axis_label_text_font_style,
-        major_label_text_color = major_label_text_color,
-        axis_label_text_font_size = axis_label_text_font_size,
-        major_tick_out = major_tick_out, axis_line_width = axis_line_width,
-        major_tick_line_alpha = major_tick_line_alpha,
-        axis_label_text_baseline = axis_label_text_baseline,
-        axis_line_alpha = axis_line_alpha,
-        axis_label_standoff = axis_label_standoff,
-        major_label_text_font_style = major_label_text_font_style,
-        minor_tick_line_cap = minor_tick_line_cap,
-        axis_label_text_align = axis_label_text_align,
-        major_tick_line_cap = major_tick_line_cap,
-        y_range_name = y_range_name,
-        js_property_callbacks = js_property_callbacks,
-        major_label_text_font_size = major_label_text_font_size,
-        axis_label_text_color = axis_label_text_color,
-        minor_tick_line_dash = minor_tick_line_dash,
-        subscribed_events = subscribed_events,
-        minor_tick_out = minor_tick_out, formatter = formatter,
-        major_tick_line_join = major_tick_line_join,
-        minor_tick_line_dash_offset = minor_tick_line_dash_offset,
-        minor_tick_line_join = minor_tick_line_join,
-        axis_line_join = axis_line_join, minor_tick_in = minor_tick_in,
-        bounds = bounds, x_range_name = x_range_name, tags = tags,
-        major_label_text_font = major_label_text_font,
-        js_event_callbacks = js_event_callbacks,
-        major_label_orientation = major_label_orientation,
-        axis_label_text_alpha = axis_label_text_alpha, ticker = ticker,
-        minor_tick_line_width = minor_tick_line_width, visible = visible,
-        minor_tick_line_color = minor_tick_line_color,
-        major_tick_line_dash = major_tick_line_dash,
-        major_tick_line_dash_offset = major_tick_line_dash_offset,
-        major_tick_in = major_tick_in,
-        axis_line_dash_offset = axis_line_dash_offset,
-        axis_line_color = axis_line_color, axis_label = axis_label,
-        axis_line_dash = axis_line_dash,
-        minor_tick_line_alpha = minor_tick_line_alpha,
-        axis_label_text_font = axis_label_text_font,
-        major_tick_line_color = major_tick_line_color,
-        major_tick_line_width = major_tick_line_width, plot = plot,
-        major_label_text_align = major_label_text_align, id = id)
-      types <- bk_prop_types[["CategoricalAxis"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Map numbers in a range [*low*, *high*] linearly into a sequence of
-# colors (a palette).
-#
-# For example, if the range is [0, 99] and the palette is ``['red',
-# 'green', 'blue']``, the values would be mapped as follows::
-#
-# x < 0 : 'red' # values < low are clamped 0 >= x < 33 : 'red' 33 >= x <
-# 66 : 'green' 66 >= x < 99 : 'blue' 99 >= x : 'blue' # values > high are
-# clamped
-LinearColorMapper <- R6::R6Class("LinearColorMapper",
-  inherit = ContinuousColorMapper,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, high = NULL, palette = NULL, low = NULL, tags = list(),
-      high_color = NULL, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), nan_color = "gray", subscribed_events = list(),
-      low_color = NULL, id = NULL
-    ) {
-      super$initialize(name = name, high = high, palette = palette, low = low,
-        tags = tags, high_color = high_color,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, nan_color = nan_color,
-        subscribed_events = subscribed_events, low_color = low_color,
-        id = id)
-      types <- bk_prop_types[["LinearColorMapper"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# TickFormatter for values in WebMercator units.
-#
-# Some map plot types internally use WebMercator to describe coordinates,
-# plot bounds, etc. These units are not very human-friendly. This tick
-# formatter will convert WebMercator units into Latitude and Longitude
-# for display on axes.
-MercatorTickFormatter <- R6::R6Class("MercatorTickFormatter",
-  inherit = BasicTickFormatter,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      use_scientific = TRUE, power_limit_low = -3L, name = NULL,
-      precision = "auto", dimension = NULL, power_limit_high = 5L,
-      tags = list(), js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(use_scientific = use_scientific,
-        power_limit_low = power_limit_low, name = name,
-        precision = precision, tags = tags,
-        power_limit_high = power_limit_high,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["MercatorTickFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Specify whether to format ticks for Latitude or Longitude.
-    #
-    # Projected coordinates are not separable, computing Latitude and
-    # Longitude tick labels from Web Mercator requires considering
-    # coordinates from both dimensions together. Use this property to specify
-    # which result should be used for display.
-    #
-    # Typically, if the formatter is for an x-axis, then dimension should be
-    # ``"lon"`` and if the formatter is for a y-axis, then the dimension
-    # should be `"lat"``.
-    #
-    # In order to prevent hard to debug errors, there is no default value for
-    # dimension. Using an un-configured MercatorTickFormatter will result in
-    # a validation error and a JavaScript console error.
-    # > Enum('lat', 'lon')
-    dimension = NULL
-  )
-)
-
-# Base class for ``Scale`` models that represent an invertible
-# computation to be carried out on the client-side.
-#
-# JavaScript implementations should implement the following methods:
-#
-# .. code-block: coffeescript
-#
-# compute: (x) -> # compute the transform of a single value
-#
-# v_compute: (xs) -> # compute the transform of an array of values
-#
-# invert: (xprime) -> # compute the inverse transform of a single value
-#
-# v_invert: (xprimes) -> # compute the inverse transform of an array of
-# values
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Scale <- R6::R6Class("Scale",
-  inherit = Transform,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Scale"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render several patches.
-#
-# The data for the ``Patches`` glyph is different in that the vector of
-# values is not a vector of scalars. Rather, it is a "list of lists".
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Patches.py :source-position: below
-Patches <- R6::R6Class("Patches",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, line_width = 1L, xs = NULL, ys = NULL, fill_alpha = 1,
-      line_dash = list(), line_dash_offset = 0L, line_color = "black",
-      line_join = "miter", fill_color = "gray", tags = list(), line_alpha = 1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      line_cap = "butt", subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Patches"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The line width values for the patches.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The x-coordinates for all the patches, given as a "list of lists".
-    #
-    # .. note:: Individual patches may comprise multiple polygons. In this
-    # case the x-coordinates for each polygon should be separated by NaN
-    # values in the sublists.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    xs = NULL,
-    # The y-coordinates for all the patches, given as a "list of lists".
-    #
-    # .. note:: Individual patches may comprise multiple polygons. In this
-    # case the y-coordinates for each polygon should be separated by NaN
-    # values in the sublists.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    ys = NULL,
-    # The fill alpha values for the patches.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line dash values for the patches.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the patches.
-    # > Int
-    line_dash_offset = NULL,
-    # The line color values for the patches.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line join values for the patches.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The fill color values for the patches.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line alpha values for the patches.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line cap values for the patches.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL
-  )
-)
-
-# Render triangle markers.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Triangle.py :source-position: below
-Triangle <- R6::R6Class("Triangle",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["Triangle"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Compute a step-wise interpolation between the points provided through
-# the ``x``, ``y``, and ``data`` parameters.
-StepInterpolator <- R6::R6Class("StepInterpolator",
-  inherit = Interpolator,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      mode = "after", name = NULL, subscribed_events = list(), y = NULL,
-      tags = list(), clip = TRUE, js_property_callbacks = structure(list(),
-      .Names = character(0)), data = NULL, x = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        name = name, subscribed_events = subscribed_events, y = y, tags = tags,
-        clip = clip, js_property_callbacks = js_property_callbacks,
-        data = data, x = x, id = id)
-      types <- bk_prop_types[["StepInterpolator"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Adjust the behavior of the returned value in relation to the control
-    # points.  The parameter can assume one of three values:
-    #
-    # * ``after`` (default): Assume the y-value associated with the nearest
-    # x-value which is less than or equal to the point to transform.  *
-    # ``before``: Assume the y-value associated with the nearest x-value
-    # which is greater than the point to transform.  * ``center``: Assume the
-    # y-value associated with the nearest x-value to the point to transform.
-    # > Enum('before', 'after', 'center')
-    mode = NULL
-  )
-)
-
-# Slider-based date range selection widget.
-DateRangeSlider <- R6::R6Class("DateRangeSlider",
-  inherit = InputWidget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      enabled = TRUE, callback = NULL, step = structure(list(), .Names =
-      character(0)), arrows = TRUE, title = "", name = NULL, bounds = NULL,
-      disabled = FALSE, sizing_mode = "fixed", width = NULL, height = NULL,
-      subscribed_events = list(), tags = list(), wheel_mode = NULL,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      range = NULL, value = NULL, value_labels = "show", css_classes = NULL,
-      id = NULL
-    ) {
-      super$initialize(name = name, title = title, sizing_mode = sizing_mode,
-        width = width, height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["DateRangeSlider"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Enable or disable this widget.
-    # > Bool
-    enabled = NULL,
-    # A callback to run in the browser whenever either slider's value
-    # changes.
-    # > Instance(Callback)
-    callback = NULL,
-    # The step between consecutive dates.
-    # > RelativeDelta
-    step = NULL,
-    # Whether to show clickable arrows on both ends of the slider.
-    # > Bool
-    arrows = NULL,
-    # The earliest and latest allowable dates.
-    # > Tuple(Date, Date)
-    bounds = NULL,
-    # Whether mouse zoom should scroll or zoom selected range (or do
-    # nothing).
-    # > Enum('scroll', 'zoom')
-    wheel_mode = NULL,
-    # [TDB]
-    # > Tuple(RelativeDelta, RelativeDelta)
-    range = NULL,
-    # The initial or selected date range.
-    # > Tuple(Date, Date)
-    value = NULL,
-    # Show or hide value labels on both sides of the slider.
-    # > Enum('show', 'hide', 'change')
-    value_labels = NULL
-  )
-)
-
-# Render diamond markers.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Diamond.py :source-position: below
-Diamond <- R6::R6Class("Diamond",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["Diamond"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Tick formatter based on a human-readable format string.
-NumeralTickFormatter <- R6::R6Class("NumeralTickFormatter",
-  inherit = TickFormatter,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      language = "en", name = NULL, tags = list(), format = "0,0",
-      rounding = "round", js_property_callbacks = structure(list(), .Names
-      = character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["NumeralTickFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The language to use for formatting language-specific features (e.g.
-    # thousands separator).
-    # > Enum('be-nl', 'chs', 'cs', 'da-dk', 'de-ch', 'de', 'en', 'en-gb', 'es-ES', 'es', 'et', 'fi', 'fr-CA', 'fr-ch', 'fr', 'hu', 'it', 'ja', 'nl-nl', 'pl', 'pt-br', 'pt-pt', 'ru', 'ru-UA', 'sk', 'th', 'tr', 'uk-UA')
-    language = NULL,
-    # The number format, as defined in the following tables:
-    #
-    # **NUMBERS**:
-    #
-    # ============ ============== =============== Number Format String
-    # ============ ============== =============== 10000 '0,0.0000'
-    # 10,000.0000 10000.23 '0,0' 10,000 10000.23 '+0,0' +10,000 -10000
-    # '0,0.0' -10,000.0 10000.1234 '0.000' 10000.123 10000.1234 '0[.]00000'
-    # 10000.12340 -10000 '(0,0.0000)' (10,000.0000) -0.23 '.00' -.23 -0.23
-    # '(.00)' (.23) 0.23 '0.00000' 0.23000 0.23 '0.0[0000]' 0.23 1230974
-    # '0.0a' 1.2m 1460 '0 a' 1 k -104000 '0a' -104k 1 '0o' 1st 52 '0o' 52nd
-    # 23 '0o' 23rd 100 '0o' 100th ============ ============== ===============
-    #
-    # **CURRENCY**:
-    #
-    # =========== =============== ============= Number Format String
-    # =========== =============== ============= 1000.234 '$0,0.00' $1,000.23
-    # 1000.2 '0,0[.]00 $' 1,000.20 $ 1001 '$ 0,0[.]00' $ 1,001 -1000.234
-    # '($0,0)' ($1,000) -1000.234 '$0.00' -$1000.23 1230974 '($ 0.00 a)' $
-    # 1.23 m =========== =============== =============
-    #
-    # **BYTES**:
-    #
-    # =============== =========== ============ Number Format String
-    # =============== =========== ============ 100 '0b' 100B 2048 '0 b' 2 KB
-    # 7884486213 '0.0b' 7.3GB 3467479682787 '0.000 b' 3.154 TB
-    # =============== =========== ============
-    #
-    # **PERCENTAGES**:
-    #
-    # ============= ============= =========== Number Format String
-    # ============= ============= =========== 1 '0%' 100% 0.974878234
-    # '0.000%' 97.488% -0.43 '0 %' -43 % 0.43 '(0.000 %)' 43.000 %
-    # ============= ============= ===========
-    #
-    # **TIME**:
-    #
-    # ============ ============== ============ Number Format String
-    # ============ ============== ============ 25 '00:00:00' 0:00:25 238
-    # '00:00:00' 0:03:58 63846 '00:00:00' 17:44:06 ============
-    # ============== ============
-    #
-    # For the complete specification, see http://numbrojs.com/format.html
-    # > String
-    format = NULL,
-    # Rounding functions (round, floor, ceil) and their synonyms (nearest,
-    # rounddown, roundup).
-    # > Enum('round', 'nearest', 'floor', 'rounddown', 'ceil', 'roundup')
-    rounding = NULL
-  )
-)
-
-# Render a whisker along a dimension.
-Whisker <- R6::R6Class("Whisker",
-  inherit = Annotation,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      lower_units = "data", name = NULL, upper_head = NULL,
-      x_range_name = "default", upper_units = "data", level = "underlay",
-      line_color = "black", plot = NULL, subscribed_events = list(),
-      source = NULL, tags = list(), line_alpha = 1,
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      lower_head = NULL, visible = TRUE, line_width = 1L, line_dash = list(),
-      line_dash_offset = 0L, dimension = "height", line_join = "miter",
-      upper = NULL, base = NULL, y_range_name = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      base_units = "data", line_cap = "butt", lower = NULL, id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["Whisker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    #
-    # > Enum('screen', 'data')
-    lower_units = NULL,
-    # Instance of ArrowHead.
-    # > Instance(ArrowHead)
-    upper_head = NULL,
-    # A particular (named) x-range to use for computing screen locations when
-    # rendering annotations on the plot. If unset, use the default x-range.
-    # > String
-    x_range_name = NULL,
-    #
-    # > Enum('screen', 'data')
-    upper_units = NULL,
-    # The line color values for the whisker body.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # Local data source to use when rendering annotations on the plot.
-    # > Instance(DataSource)
-    source = NULL,
-    # The line alpha values for the whisker body.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # Instance of ArrowHead.
-    # > Instance(ArrowHead)
-    lower_head = NULL,
-    # The line width values for the whisker body.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the whisker body.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the whisker body.
-    # > Int
-    line_dash_offset = NULL,
-    # The direction of the band.
-    # > Enum('width', 'height')
-    dimension = NULL,
-    # The line join values for the whisker body.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The coordinations of the upper end of the whiskers.
-    # > DistanceSpec(units_default='data')
-    upper = NULL,
-    # The orthogonal coordinates of the upper and lower values.
-    # > DistanceSpec(units_default='data')
-    base = NULL,
-    # A particular (named) y-range to use for computing screen locations when
-    # rendering annotations on the plot. If unset, use the default y-range.
-    # > String
-    y_range_name = NULL,
-    #
-    # > Enum('screen', 'data')
-    base_units = NULL,
-    # The line cap values for the whisker body.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The coordinates of the lower end of the whiskers.
-    # > DistanceSpec(units_default='data')
-    lower = NULL
-  )
-)
-
-# A block (div) of text.
-#
-# This Bokeh model corresponds to an HTML ``<div>`` element.
-#
-# Example -------
-#
-# .. bokeh-plot::
-# ../sphinx/source/docs/user_guide/examples/interaction_div.py
-# :source-position: below
-Div <- R6::R6Class("Div",
-  inherit = Markup,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), text = "", js_property_callbacks = structure(list(),
-      .Names = character(0)), render_as_text = FALSE,
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), disabled = FALSE, css_classes = NULL,
-      id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags, text = text,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Div"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Whether the contents should be rendered as raw text or as interpreted
-    # HTML.  The default value is ``False``, meaning contents are rendered as
-    # HTML.
-    # > Bool
-    render_as_text = NULL
-  )
-)
-
-# Generate nice lat/lon ticks form underlying WebMercator coordinates.
-MercatorTicker <- R6::R6Class("MercatorTicker",
-  inherit = BasicTicker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      num_minor_ticks = 5L, name = NULL, max_interval = NULL, tags = list(),
-      dimension = NULL, min_interval = 0, mantissas = list(1L, 2L, 5L),
-      desired_num_ticks = 6L, base = 10,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(num_minor_ticks = num_minor_ticks, name = name,
-        max_interval = max_interval, tags = tags,
-        min_interval = min_interval, mantissas = mantissas,
-        desired_num_ticks = desired_num_ticks, base = base,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["MercatorTicker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Specify whether to generate ticks for Latitude or Longitude.
-    #
-    # Projected coordinates are not separable, computing Latitude and
-    # Longitude tick locations from Web Mercator requires considering
-    # coordinates from both dimensions together. Use this property to specify
-    # which result should be returned.
-    #
-    # Typically, if the ticker is for an x-axis, then dimension should be
-    # ``"lon"`` and if the ticker is for a y-axis, then the dimension should
-    # be `"lat"``.
-    #
-    # In order to prevent hard to debug errors, there is no default value for
-    # dimension. Using an un-configured MercatorTicker will result in a
-    # validation error and a JavaScript console error.
-    # > Enum('lat', 'lon')
-    dimension = NULL
-  )
-)
-
-# Render square markers with an 'X' cross through the center.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/SquareX.py :source-position: below
-SquareX <- R6::R6Class("SquareX",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["SquareX"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render a vee-style arrow head.
-VeeHead <- R6::R6Class("VeeHead",
-  inherit = ArrowHead,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 25L, visible = TRUE, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), level = "annotation", line_dash_offset = 0L,
-      line_color = "black", line_join = "miter", fill_color = "black",
-      plot = NULL, tags = list(), line_alpha = 1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      line_cap = "butt", subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["VeeHead"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The size, in pixels, of the arrow head.
-    # > Float
-    size = NULL,
-    # The line width values for the arrow head outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The fill alpha values for the arrow head interior.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line dash values for the arrow head outline.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the arrow head outline.
-    # > Int
-    line_dash_offset = NULL,
-    # The line color values for the arrow head outline.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line join values for the arrow head outline.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The fill color values for the arrow head interior.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line alpha values for the arrow head outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line cap values for the arrow head outline.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL
-  )
-)
-
-# Compute a linear interpolation between the control points provided
-# through the ``x``, ``y``, and ``data`` parameters.
-LinearInterpolator <- R6::R6Class("LinearInterpolator",
-  inherit = Interpolator,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, subscribed_events = list(), y = NULL, tags = list(),
-      clip = TRUE, js_property_callbacks = structure(list(), .Names =
-      character(0)), data = NULL, x = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        name = name, subscribed_events = subscribed_events, y = y, tags = tags,
-        clip = clip, js_property_callbacks = js_property_callbacks,
-        data = data, x = x, id = id)
-      types <- bk_prop_types[["LinearInterpolator"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Base class for all annotation models.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Annotation <- R6::R6Class("Annotation",
-  inherit = Renderer,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      visible = TRUE, name = NULL, level = "annotation", tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(visible = visible,
-        js_property_callbacks = js_property_callbacks, name = name,
-        js_event_callbacks = js_event_callbacks, level = level,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["Annotation"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The plot to which this annotation is attached.
-    # > Instance(Plot)
-    plot = NULL
-  )
-)
-
-# Render a tooltip.
-#
-# .. note:: This model is currently managed by BokehJS and is not useful
-# directly from python.
-Tooltip <- R6::R6Class("Tooltip",
-  inherit = Annotation,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      visible = TRUE, name = NULL, level = "overlay", tags = list(),
-      attachment = "horizontal", show_arrow = TRUE,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, subscribed_events = list(), inner_only = TRUE, id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["Tooltip"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Whether the tooltip should display to the left or right off the cursor
-    # position or above or below it, or if it should be automatically placed
-    # in the horizontal or vertical dimension.
-    # > Enum('horizontal', 'vertical', 'left', 'right', 'above', 'below')
-    attachment = NULL,
-    # Whether tooltip's arrow should be showed.
-    # > Bool
-    show_arrow = NULL,
-    # Whether to display outside a central plot frame area.
-    # > Bool
-    inner_only = NULL
-  )
-)
-
-#
-LegendItem <- R6::R6Class("LegendItem",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), label = NULL, subscribed_events = list(), tags = list(),
-      renderers = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["LegendItem"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A label for this legend. Can be a string, or a column of a
-    # ColumnDataSource. If ``label`` is a field, then it must be in the
-    # renderers' data_source.
-    # > StringSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    label = NULL,
-    # A list of the glyph renderers to draw in the legend. If ``label`` is a
-    # field, then all data_sources of renderers must be the same.
-    # > List(Instance(GlyphRenderer))
-    renderers = NULL
-  )
-)
-
-# An abstract base class for icon widgets.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-AbstractIcon <- R6::R6Class("AbstractIcon",
-  inherit = Widget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["AbstractIcon"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-#
-LogScale <- R6::R6Class("LogScale",
-  inherit = Scale,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["LogScale"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# A panel widget with navigation tabs.
-#
-# Example -------
-#
-# .. bokeh-plot::
-# ../sphinx/source/docs/user_guide/examples/interaction_tab_panes.py
-# :source-position: below
-Tabs <- R6::R6Class("Tabs",
-  inherit = Widget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      tabs = list(), callback = NULL, name = NULL, sizing_mode = "fixed",
-      width = NULL, height = NULL, tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      active = 0L, subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Tabs"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The list of child panel widgets.
-    # > List(Instance(Panel))
-    tabs = NULL,
-    # A callback to run in the browser whenever the button is activated.
-    # > Instance(Callback)
-    callback = NULL,
-    # The index of the active tab.
-    # > Int
-    active = NULL
-  )
-)
-
-# *toolbar icon*: |box_select_icon|
-#
-# The box selection tool allows users to make selections on a Plot by
-# indicating a rectangular region by dragging the mouse or a finger over
-# the plot region. The end of the drag event indicates the selection
-# region is ready.
-#
-# See :ref:`userguide_styling_selected_unselected_glyphs` for information
-# on styling selected and unselected glyphs.
-#
-# .. |box_select_icon| image:: /_images/icons/BoxSelect.png :height: 18pt
-BoxSelectTool <- R6::R6Class("BoxSelectTool",
-  inherit = Drag,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback = NULL, name = NULL, names = list(),
-      select_every_mousemove = FALSE, subscribed_events = list(),
-      tags = list(), js_property_callbacks = structure(list(), .Names =
-      character(0)), dimensions = "both",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, overlay = NULL, renderers = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["BoxSelectTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A callback to run in the browser on completion of drawing a selection
-    # box.  The cb_data parameter that is available to the Callback code will
-    # contain one BoxSelectTool-specific field:
-    #
-    # :geometry: object containing the coordinates of the selection box
-    # > Instance(Callback)
-    callback = NULL,
-    # A list of names to query for. If set, only renderers that have a
-    # matching value for their ``name`` attribute will be used.
-    # > List(String)
-    names = NULL,
-    # Whether a selection computation should happen on every mouse event, or
-    # only once, when the selection region is completed. Default: False
-    # > Bool
-    select_every_mousemove = NULL,
-    # Which dimensions the box selection is to be free in. By default, users
-    # may freely draw selections boxes with any dimensions. If only "width"
-    # is supplied, the box will be constrained to span the entire vertical
-    # space of the plot, only the horizontal dimension can be controlled. If
-    # only "height" is supplied, the box will be constrained to span the
-    # entire horizontal space of the plot, and the vertical dimension can be
-    # controlled.
-    # > Enum('width', 'height', 'both')
-    dimensions = NULL,
-    # A shaded annotation drawn to indicate the selection region.
-    # > Instance(BoxAnnotation)
-    overlay = NULL,
-    # An explicit list of renderers to hit test again. If unset, defaults to
-    # all renderers on a plot.
-    # > List(Instance(Renderer))
-    renderers = NULL
-  )
-)
-
-# Render informational legends for a plot.
-Legend <- R6::R6Class("Legend",
-  inherit = Annotation,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      border_line_dash = list(), glyph_height = 20L, glyph_width = 20L,
-      label_text_font_style = "normal", label_text_align = "left",
-      margin = 10L, background_fill_color = "#ffffff", name = NULL,
-      level = "annotation", click_policy = "none",
-      border_line_join = "miter", plot = NULL, spacing = 3L,
-      label_text_color = "#444444", label_text_font_size = list(value =
-      "10pt"), subscribed_events = list(), tags = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      label_text_alpha = 1, border_line_color = "#e5e5e5", items = list(),
-      visible = TRUE, inactive_fill_alpha = 0.9,
-      label_text_font = "helvetica", orientation = "vertical", padding = 10L,
-      border_line_dash_offset = 0L, label_text_baseline = "middle",
-      label_height = 20L, border_line_cap = "butt", label_standoff = 5L,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      background_fill_alpha = 0.95, border_line_width = 1L,
-      label_width = 20L, location = "top_right",
-      inactive_fill_color = "white", border_line_alpha = 0.5, id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["Legend"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The line dash for the legend border outline.
-    # > DashPattern
-    border_line_dash = NULL,
-    # The height (in pixels) that the rendered legend glyph should occupy.
-    # > Int
-    glyph_height = NULL,
-    # The width (in pixels) that the rendered legend glyph should occupy.
-    # > Int
-    glyph_width = NULL,
-    # The text font style for the legend labels.
-    # > Enum('normal', 'italic', 'bold')
-    label_text_font_style = NULL,
-    # The text align for the legend labels.
-    # > Enum('left', 'right', 'center')
-    label_text_align = NULL,
-    # Amount of margin around the legend.
-    # > Int
-    margin = NULL,
-    # The fill color for the legend background style.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    background_fill_color = NULL,
-    # Defines what happens when a lengend's item is clicked.
-    # > Enum('none', 'hide', 'mute')
-    click_policy = NULL,
-    # The line join for the legend border outline.
-    # > Enum('miter', 'round', 'bevel')
-    border_line_join = NULL,
-    # Amount of spacing (in pixles) between legend entries.
-    # > Int
-    spacing = NULL,
-    # The text color for the legend labels.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    label_text_color = NULL,
-    # The text font size for the legend labels.
-    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    label_text_font_size = NULL,
-    # The text alpha for the legend labels.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    label_text_alpha = NULL,
-    # The line color for the legend border outline.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    border_line_color = NULL,
-    # A list of :class:`~bokeh.model.annotations.LegendItem` instances to be
-    # rendered in the legend.
-    #
-    # This can be specified explicitly, for instance:
-    #
-    # .. code-block:: python
-    #
-    # legend = Legend(items=[ LegendItem(label="sin(x)" , renderers=[r0,
-    # r1]), LegendItem(label="2*sin(x)" , renderers=[r2]),
-    # LegendItem(label="3*sin(x)" , renderers=[r3, r4]) ])
-    #
-    # But as a convenience, can also be given more compactly as a list of
-    # tuples:
-    #
-    # .. code-block:: python
-    #
-    # legend = Legend(items=[ ("sin(x)" , [r0, r1]), ("2*sin(x)" , [r2]),
-    # ("3*sin(x)" , [r3, r4]) ])
-    #
-    # where each tuple is of the form: *(label, renderers)*.
-    # > List(Instance(LegendItem))
-    items = NULL,
-    # The fill alpha for the legend background style when inactive.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    inactive_fill_alpha = NULL,
-    # The text font for the legend labels.
-    # > String
-    label_text_font = NULL,
-    # Whether the legend entries should be placed vertically or horizontally
-    # when they are drawn.
-    # > Enum('horizontal', 'vertical')
-    orientation = NULL,
-    # Amount of padding around the contents of the legend.
-    # > Int
-    padding = NULL,
-    # The line dash offset for the legend border outline.
-    # > Int
-    border_line_dash_offset = NULL,
-    # The text baseline for the legend labels.
-    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
-    label_text_baseline = NULL,
-    # The minimum height (in pixels) of the area that legend labels should
-    # occupy.
-    # > Int
-    label_height = NULL,
-    # The line cap for the legend border outline.
-    # > Enum('butt', 'round', 'square')
-    border_line_cap = NULL,
-    # The distance (in pixels) to separate the label from its associated
-    # glyph.
-    # > Int
-    label_standoff = NULL,
-    # The fill alpha for the legend background style.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    background_fill_alpha = NULL,
-    # The line width for the legend border outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    border_line_width = NULL,
-    # The minimum width (in pixels) of the area that legend labels should
-    # occupy.
-    # > Int
-    label_width = NULL,
-    # The location where the legend should draw itself. It's either one of
-    # ``bokeh.core.enums.LegendLocation``'s enumerated values, or a ``(x,
-    # y)`` tuple indicating an absolute location absolute location in screen
-    # coordinates (pixels from the bottom-left corner).
-    # > Either(Enum('top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right'), Tuple(Float, Float))
-    location = NULL,
-    # The fill color for the legend background style when inactive.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    inactive_fill_color = NULL,
-    # The line alpha for the legend border outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    border_line_alpha = NULL
-  )
-)
-
-# Abstract base class for input widgets.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-InputWidget <- R6::R6Class("InputWidget",
-  inherit = Widget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, title = "", sizing_mode = "fixed", width = NULL,
-      height = NULL, tags = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["InputWidget"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Widget's label.
-    # > String
-    title = NULL
-  )
-)
-
-# Map categories to colors. Values that are passed to this mapper that
-# aren't in factors will be assigned the nan_color.
-CategoricalColorMapper <- R6::R6Class("CategoricalColorMapper",
-  inherit = ColorMapper,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, palette = NULL, tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      factors = NULL, nan_color = "gray", subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks,
-        nan_color = nan_color, palette = palette, tags = tags,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["CategoricalColorMapper"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A sequence of factors / categories that map to the color palette.
-    # > Either(Seq(String), Seq(Int), Seq(Float), Seq(Datetime), Seq(Date))
-    factors = NULL
-  )
-)
-
-# A base class for all interactive widget types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Widget <- R6::R6Class("Widget",
-  inherit = LayoutDOM,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Widget"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render parabolas.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Quadratic.py :source-position: below
-Quadratic <- R6::R6Class("Quadratic",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      cy = NULL, cx = NULL, y1 = NULL, line_cap = "butt", name = NULL,
-      line_width = 1L, line_dash = list(), line_color = "black",
-      line_dash_offset = 0L, line_join = "miter", tags = list(),
-      line_alpha = 1, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), x1 = NULL, y0 = NULL, subscribed_events = list(),
-      x0 = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Quadratic"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The y-coordinates of the control points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    cy = NULL,
-    # The x-coordinates of the control points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    cx = NULL,
-    # The y-coordinates of the ending points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y1 = NULL,
-    # The line cap values for the parabolas.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The line width values for the parabolas.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the parabolas.
-    # > DashPattern
-    line_dash = NULL,
-    # The line color values for the parabolas.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line dash offset values for the parabolas.
-    # > Int
-    line_dash_offset = NULL,
-    # The line join values for the parabolas.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The line alpha values for the parabolas.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The x-coordinates of the ending points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x1 = NULL,
-    # The y-coordinates of the starting points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y0 = NULL,
-    # The x-coordinates of the starting points.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x0 = NULL
-  )
-)
-
-# Multi-line string cell editor.
-TextEditor <- R6::R6Class("TextEditor",
-  inherit = CellEditor,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["TextEditor"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render a single line.
-#
-# The ``Line`` glyph is different from most other glyphs in that the
-# vector of values only produces one glyph on the Plot.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Line.py :source-position: below
-Line <- R6::R6Class("Line",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, line_width = 1L, line_dash = list(), line_dash_offset = 0L,
-      y = NULL, line_join = "miter", line_color = "black",
-      subscribed_events = list(), tags = list(), line_alpha = 1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      line_cap = "butt", x = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Line"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The line width values for the line.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the line.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the line.
-    # > Int
-    line_dash_offset = NULL,
-    # The y-coordinates for the points of the line.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The line join values for the line.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The line color values for the line.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line alpha values for the line.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line cap values for the line.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates for the points of the line.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
-  )
-)
-
-# A range in a categorical dimension.
-#
-# In addition to supplying ``factors`` keyword argument to the
-# ``FactorRange`` initializer, you can also instantiate with the
-# convenience syntax::
-#
-# FactorRange("foo", "bar") # equivalent to FactorRange(factors=["foo",
-# "bar"])
-#
-# .. note:: ``FactorRange`` may be renamed to ``CategoricalRange`` in the
-# future.
-FactorRange <- R6::R6Class("FactorRange",
-  inherit = Range,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      offset = 0L, callback = NULL, name = NULL, max_interval = NULL,
-      bounds = NULL, tags = list(), min_interval = NULL,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      factors = list(), subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(callback = callback,
-        js_property_callbacks = js_property_callbacks, name = name,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["FactorRange"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # An offset to the (synthetic) range (default: 0)
-    #
-    # .. note:: The primary usage of this is to support compatibility and
-    # integration with other plotting systems, and will not generally of
-    # interest to most users.
-    # > Float
-    offset = NULL,
-    # The level that the range is allowed to zoom out, expressed as the
-    # maximum number of visible categories. Note that ``bounds`` can impose
-    # an implicit constraint on the maximum interval as well.
-    # > Int
-    max_interval = NULL,
-    # The bounds that the range is allowed to go to - typically used to
-    # prevent the user from panning/zooming/etc away from the data.
-    #
-    # Unlike Range1d and DataRange1d, factors do not have an order and so a
-    # min and max cannot be proved in the same way. bounds accepts a list of
-    # factors, that constrain the displayed factors.
-    #
-    # By default, bounds are ``None``, allows unlimited panning or zooming.
-    #
-    # If ``bounds='auto'``, bounds will be the same as factors and the plot
-    # will not be able to pan or zoom beyond the first and last factors.
-    #
-    # If you provide a list, then only the factors that are in that list will
-    # be displayed on the plot and the plot will not pan or zoom outside the
-    # first and last items in the shortened factors list. Note the order of
-    # factors is the defining order for your plot.
-    #
-    # Values of bounds that are not in factors are acceptable and will simply
-    # have no impact on the plot.
-    #
-    # Examples:
-    #
-    # Auto behavior:
-    #
-    # .. code-block:: python
-    #
-    # x_range = FactorRange( factors=["apples", "dogs", "peaches", "bananas",
-    # "pigs"], bounds='auto' )
-    #
-    # The plot will display all the factors and you will not be able to pan
-    # left of apples or right of pigs.
-    #
-    # Constraining behavior:
-    #
-    # .. code-block:: python
-    #
-    # x_range = FactorRange( factors=["apples", "dogs", "peaches", "bananas",
-    # "pigs"], bounds=["apples", "bananas", "peaches"] )
-    #
-    # Only the factors ``["apples", "peaches", "bananas"]`` (in that order)
-    # will appear in the plot, and the plot will not pan left of ``"apples"``
-    # or right of ``"bananas"``.
-    # > Either(Auto, List(String), List(Int))
-    bounds = NULL,
-    # The level that the range is allowed to zoom in, expressed as the
-    # minimum number of visible categories. If set to ``None`` (default), the
-    # minimum interval is not bound.
-    # > Int
-    min_interval = NULL,
-    # A list of string or integer factors (categories) to comprise this
-    # categorical range.
-    # > Either(List(String), List(Int))
-    factors = NULL
-  )
-)
-
-# Render images given as scalar data together with a color mapper.
-#
-# In addition to the defined model properties, ``Image`` also can accept
-# a keyword argument ``palette`` in place of an explicit
-# ``color_mapper``.  The value should be a list of colors, or the name of
-# one of the built-in palettes in ``bokeh.palettes``. This palette will
-# be used to automatically construct a ``ColorMapper`` model for the
-# ``color_mapper`` property.
-#
-# If both ``palette`` and ``color_mapper`` are passed, a ``ValueError``
-# exception will be raised. If neither is passed, then the ``Greys9``
-# palette will be used as a default.
-Image <- R6::R6Class("Image",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      dh = NULL, name = NULL, dilate = FALSE, x = NULL,
-      subscribed_events = list(), y = NULL, dh_units = "data",
-      dw_units = "data", tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      image = NULL, color_mapper = NULL, dw = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Image"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The height of the plot region that the image will occupy.
-    #
-    # .. note:: This is not the number of pixels that an image is tall.  That
-    # number is fixed by the image itself.
-    # > DistanceSpec(units_default='data')
-    dh = NULL,
-    # Whether to always round fractional pixel locations in such a way as to
-    # make the images bigger.
-    #
-    # This setting may be useful if pixel rounding errors are causing images
-    # to have a gap between them, when they should appear flush.
-    # > Bool
-    dilate = NULL,
-    # The x-coordinates to locate the image anchors.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL,
-    # The y-coordinates to locate the image anchors.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    #
-    # > Enum('screen', 'data')
-    dh_units = NULL,
-    #
-    # > Enum('screen', 'data')
-    dw_units = NULL,
-    # The arrays of scalar data for the images to be colormapped.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    image = NULL,
-    # A ``ColorMapper`` to use to map the scalar data from ``image`` into
-    # RGBA values for display.
-    #
-    # .. note:: The color mapping step happens on the client.
-    # > Instance(ColorMapper)
-    color_mapper = NULL,
-    # The widths of the plot regions that the images will occupy.
-    #
-    # .. note:: This is not the number of pixels that an image is wide.  That
-    # number is fixed by the image itself.
-    # > DistanceSpec(units_default='data')
-    dw = NULL
-  )
-)
-
-# Render an open-body arrow head.
-OpenHead <- R6::R6Class("OpenHead",
-  inherit = ArrowHead,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 25L, visible = TRUE, name = NULL, line_width = 1L,
-      level = "annotation", line_dash = list(), line_dash_offset = 0L,
-      line_color = "black", line_join = "miter", plot = NULL, tags = list(),
-      line_alpha = 1, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), line_cap = "butt", subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["OpenHead"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The size, in pixels, of the arrow head.
-    # > Float
-    size = NULL,
-    # The line width values for the arrow head outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the arrow head outline.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the arrow head outline.
-    # > Int
-    line_dash_offset = NULL,
-    # The line color values for the arrow head outline.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line join values for the arrow head outline.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The line alpha values for the arrow head outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line cap values for the arrow head outline.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL
-  )
-)
-
-# Display tick values from categorical ranges as string values.
-CategoricalTickFormatter <- R6::R6Class("CategoricalTickFormatter",
-  inherit = TickFormatter,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["CategoricalTickFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# *toolbar icon*: |wheel_zoom_icon|
-#
-# The wheel zoom tool will zoom the plot in and out, centered on the
-# current mouse location.
-#
-# The wheel zoom tool also activates the border regions of a Plot for
-# "single axis" zooming. For instance, zooming in the vertical border or
-# axis will effect a zoom in the vertical direction only, with the
-# horizontal dimension kept fixed.
-#
-# .. |wheel_zoom_icon| image:: /_images/icons/WheelZoom.png :height: 18pt
-WheelZoomTool <- R6::R6Class("WheelZoomTool",
-  inherit = Scroll,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      dimensions = "both", js_event_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, plot = NULL, subscribed_events = list(),
-      tags = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["WheelZoomTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Which dimensions the wheel zoom tool is constrained to act in. By
-    # default the wheel zoom tool will zoom in any dimension, but can be
-    # configured to only zoom horizontally across the width of the plot, or
-    # vertically across the height of the plot.
-    # > Enum('width', 'height', 'both')
-    dimensions = NULL
-  )
-)
-
-# Two dimensional grid for visualisation and editing large amounts of
-# data.
-DataTable <- R6::R6Class("DataTable",
-  inherit = TableWidget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      fit_columns = TRUE, reorderable = TRUE, name = NULL, row_headers = TRUE,
-      sortable = TRUE, scroll_to_selection = TRUE, sizing_mode = "fixed",
-      width = NULL, columns = list(), height = 400L, source = NULL,
-      css_classes = NULL, tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      selectable = TRUE, subscribed_events = list(), disabled = FALSE,
-      editable = FALSE, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags, source = source,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["DataTable"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Whether columns should be fit to the available width. This results in
-    # no horizontal scrollbar showing up, but data can get unreadable if
-    # there is no enough space available. If set to ``True``, columns' width
-    # is understood as maximum width.
-    # > Bool
-    fit_columns = NULL,
-    # Allows the reordering of a tables's columns. To reorder a column, click
-    # and drag a table's header to the desired location in the table.  The
-    # columns on either side will remain in their previous order.
-    # > Bool
-    reorderable = NULL,
-    # Enable or disable row headers, i.e. the index column.
-    # > Bool
-    row_headers = NULL,
-    # Allows to sort table's contents. By default natural order is preserved.
-    # To sort a column, click on it's header. Clicking one more time changes
-    # sort direction. Use Ctrl + click to return to natural order. Use Shift
-    # + click to sort multiple columns simultaneously.
-    # > Bool
-    sortable = NULL,
-    # Whenever a selection is made on the data source, scroll the selected
-    # rows into the table's viewport if none of the selected rows are already
-    # in the viewport.
-    # > Bool
-    scroll_to_selection = NULL,
-    # The list of child column widgets.
-    # > List(Instance(TableColumn))
-    columns = NULL,
-    # Whether a table's rows can be selected or not. Using ``checkbox`` is
-    # equivalent to ``True``, but makes selection visible through a checkbox
-    # for each row, instead of highlighting rows. Multiple selection is
-    # allowed and can be achieved by either clicking multiple checkboxes (if
-    # enabled) or using Shift + click on rows.
-    # > Either(Bool, Enum('checkbox'))
-    selectable = NULL,
-    # Allows to edit table's contents. Needs cell editors to be configured on
-    # columns that are required to be editable.
-    # > Bool
-    editable = NULL
-  )
-)
-
-# Render a closed-body arrow head.
-NormalHead <- R6::R6Class("NormalHead",
-  inherit = ArrowHead,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 25L, visible = TRUE, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), level = "annotation", line_dash_offset = 0L,
-      line_color = "black", line_join = "miter", fill_color = "black",
-      plot = NULL, tags = list(), line_alpha = 1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      line_cap = "butt", subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["NormalHead"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The size, in pixels, of the arrow head.
-    # > Float
-    size = NULL,
-    # The line width values for the arrow head outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The fill alpha values for the arrow head interior.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line dash values for the arrow head outline.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the arrow head outline.
-    # > Int
-    line_dash_offset = NULL,
-    # The line color values for the arrow head outline.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line join values for the arrow head outline.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The fill color values for the arrow head interior.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line alpha values for the arrow head outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line cap values for the arrow head outline.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL
-  )
-)
-
-# Display horizontal or vertical grid lines at locations given by a
-# supplied ``Ticker``.
-Grid <- R6::R6Class("Grid",
-  inherit = GuideRenderer,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, minor_grid_line_dash = list(), grid_line_alpha = 1,
-      minor_grid_line_dash_offset = 0L, x_range_name = "default",
-      minor_grid_line_width = 1L, bounds = "auto",
-      grid_line_dash_offset = 0L, level = "underlay", tags = list(),
-      minor_grid_line_color = NULL, grid_line_width = 1L,
-      minor_grid_line_join = "miter", band_fill_color = NULL,
-      grid_line_dash = list(), js_event_callbacks = structure(list(),
-      .Names = character(0)), ticker = NULL, visible = TRUE,
-      minor_grid_line_alpha = 1, band_fill_alpha = 0L, dimension = 0L,
-      grid_line_cap = "butt", grid_line_join = "miter",
-      y_range_name = "default", grid_line_color = "#e5e5e5",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, subscribed_events = list(), minor_grid_line_cap = "butt",
-      id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["Grid"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The line dash of the minor Grid lines.
-    # > DashPattern
-    minor_grid_line_dash = NULL,
-    # The line alpha of the Grid lines.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    grid_line_alpha = NULL,
-    # The line dash offset of the minor Grid lines.
-    # > Int
-    minor_grid_line_dash_offset = NULL,
-    # A particular (named) x-range to use for computing screen locations when
-    # rendering a grid on the plot. If unset, use the default x-range.
-    # > String
-    x_range_name = NULL,
-    # The line width of the minor Grid lines.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    minor_grid_line_width = NULL,
-    # Bounds for the rendered grid lines. If unset, the grid lines will span
-    # the entire plot in the given dimension.
-    # > Either(Auto, Tuple(Float, Float))
-    bounds = NULL,
-    # The line dash offset of the Grid lines.
-    # > Int
-    grid_line_dash_offset = NULL,
-    # The line color of the minor Grid lines.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    minor_grid_line_color = NULL,
-    # The line width of the Grid lines.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    grid_line_width = NULL,
-    # The line join of the minor Grid lines.
-    # > Enum('miter', 'round', 'bevel')
-    minor_grid_line_join = NULL,
-    # The fill color of alternating bands between Grid lines.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    band_fill_color = NULL,
-    # The line dash of the Grid lines.
-    # > DashPattern
-    grid_line_dash = NULL,
-    # The Ticker to use for computing locations for the Grid lines.
-    # > Instance(Ticker)
-    ticker = NULL,
-    # The line alpha of the minor Grid lines.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    minor_grid_line_alpha = NULL,
-    # The fill alpha of alternating bands between Grid lines.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    band_fill_alpha = NULL,
-    # Which dimension the Axis Grid lines will intersect. The x-axis is
-    # dimension 0 (vertical Grid lines) and the y-axis is dimension 1
-    # (horizontal Grid lines).
-    # > Int
-    dimension = NULL,
-    # The line cap of the Grid lines.
-    # > Enum('butt', 'round', 'square')
-    grid_line_cap = NULL,
-    # The line join of the Grid lines.
-    # > Enum('miter', 'round', 'bevel')
-    grid_line_join = NULL,
-    # A particular (named) y-range to use for computing screen locations when
-    # rendering a grid on the plot. If unset, use the default y-range.
-    # > String
-    y_range_name = NULL,
-    # The line color of the Grid lines.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    grid_line_color = NULL,
-    # The line cap of the minor Grid lines.
-    # > Enum('butt', 'round', 'square')
-    minor_grid_line_cap = NULL
-  )
-)
-
-# Render '+' cross markers.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Cross.py :source-position: below
-Cross <- R6::R6Class("Cross",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["Cross"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Generate ticks at fixed, explicitly supplied locations.
-#
-# .. note:: The ``desired_num_ticks`` property is ignored by this Ticker.
-FixedTicker <- R6::R6Class("FixedTicker",
-  inherit = ContinuousTicker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      num_minor_ticks = 5L, name = NULL, tags = list(), desired_num_ticks = 6L,
-      ticks = list(), js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(desired_num_ticks = desired_num_ticks,
-        num_minor_ticks = num_minor_ticks,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, name = name,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["FixedTicker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # List of tick locations.
-    # > Seq(Float)
-    ticks = NULL
-  )
-)
-
-# Display tick values from continuous ranges as "basic numbers", using
-# scientific notation when appropriate by default.
-BasicTickFormatter <- R6::R6Class("BasicTickFormatter",
-  inherit = TickFormatter,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      use_scientific = TRUE, power_limit_low = -3L, name = NULL,
-      precision = "auto", tags = list(), power_limit_high = 5L,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["BasicTickFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Whether to ever display scientific notation. If ``True``, then when to
-    # use scientific notation is controlled by ``power_limit_low`` and
-    # ``power_limit_high``.
-    # > Bool
-    use_scientific = NULL,
-    # Limit the use of scientific notation to when::
-    #
-    # log(x) <= power_limit_low
-    # > Int
-    power_limit_low = NULL,
-    # How many digits of precision to display in tick labels.
-    # > Either(Auto, Int)
-    precision = NULL,
-    # Limit the use of scientific notation to when::
-    #
-    # log(x) >= power_limit_high
-    # > Int
-    power_limit_high = NULL
-  )
-)
-
-# An abstract base class for renderer types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Renderer <- R6::R6Class("Renderer",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      visible = TRUE, js_property_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, js_event_callbacks = structure(list(),
-      .Names = character(0)), level = "image", subscribed_events = list(),
-      tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Renderer"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Is the renderer visible.
-    # > Bool
-    visible = NULL,
-    # Specifies the level in which to paint this renderer.
-    # > Enum('image', 'underlay', 'glyph', 'annotation', 'overlay')
-    level = NULL
-  )
-)
-
-# A click button.
-Button <- R6::R6Class("Button",
-  inherit = AbstractButton,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      clicks = 0L, callback = NULL, name = NULL, label = "Button",
-      disabled = FALSE, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), button_type = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), icon = NULL, css_classes = NULL, id = NULL
-    ) {
-      super$initialize(callback = callback, name = name, label = label,
-        disabled = disabled, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags, button_type = button_type,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, icon = icon,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Button"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A private property used to trigger ``on_click`` event handler.
-    # > Int
-    clicks = NULL
-  )
-)
-
-#
-AjaxDataSource <- R6::R6Class("AjaxDataSource",
-  inherit = RemoteSource,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      max_size = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), polling_interval = NULL, method = "POST",
-      mode = "replace", if_modified = FALSE, http_headers = structure(list(),
-      .Names = character(0)), callback = NULL, name = NULL,
-      selected = structure(list(`2d` = structure(list(indices =
-      structure(list(), .Names = character(0))), .Names = "indices"),
-      `1d` = structure(list(indices = list()), .Names = "indices"),
-      `0d` = structure(list(glyph = NULL, indices = list()), .Names =
-      c("glyph", "indices"))), .Names = c("2d", "1d", "0d")),
-      content_type = "application/json", tags = list(),
-      column_names = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), data = structure(list(), .Names =
-      character(0)), data_url = NULL, subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        polling_interval = polling_interval, callback = callback,
-        name = name, selected = selected, tags = tags,
-        column_names = column_names,
-        js_property_callbacks = js_property_callbacks, data = data,
-        data_url = data_url, subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["AjaxDataSource"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Maximum size of the data array being kept after each pull requests.
-    # Larger than that size, the data will be right shifted.
-    # > Int
-    max_size = NULL,
-    # http method - GET or POST
-    # > Enum('POST', 'GET')
-    method = NULL,
-    # Whether to append new data to existing data (up to ``max_size``), or to
-    # replace existing data entirely.
-    # > Enum('replace', 'append')
-    mode = NULL,
-    # Whether to include an ``If-Modified-Since`` header in AJAX requests to
-    # the server. If this header is supported by the server, then only new
-    # data since the last request will be returned.
-    # > Bool
-    if_modified = NULL,
-    # HTTP headers to set for the Ajax request.
-    # > Dict(String, String)
-    http_headers = NULL,
-    # Set the "contentType" parameter for the Ajax request.
-    # > String
-    content_type = NULL
-  )
-)
-
-# Generate nice ticks across different date and time scales.
-DatetimeTicker <- R6::R6Class("DatetimeTicker",
-  inherit = CompositeTicker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      tickers = list("{\"id\": \"8b691c4d-db25-4c4b-926e-a8eff15dda16\",
-      \"max_interval\": 500.0, \"num_minor_ticks\": 0}", "{\"base\":
-      60, \"id\": \"5fc8eeff-e998-46ff-b432-9f5c72456efd\",
-      \"mantissas\": [1, 2, 5, 10, 15, 20, 30], \"max_interval\":
-      1800000.0, \"min_interval\": 1000.0, \"num_minor_ticks\": 0}",
-      "{\"base\": 24, \"id\": \"4ff8c5a0-bc35-4f85-b997-a529ea3141f3\",
-      \"mantissas\": [1, 2, 4, 6, 8, 12], \"max_interval\": 43200000.0,
-      \"min_interval\": 3600000.0, \"num_minor_ticks\": 0}",
-      "{\"days\": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-      16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
-      \"id\": \"b983b1b0-5bfd-41ac-93ab-c048d29592cc\"}", "{\"days\":
-      [1, 4, 7, 10, 13, 16, 19, 22, 25, 28], \"id\":
-      \"a2c03239-7a62-4fbb-b23c-55012cc5780c\"}", "{\"days\": [1, 8,
-      15, 22], \"id\": \"ff2fa2fe-c5bf-428f-a215-a77ab8c152c1\"}",
-      "{\"days\": [1, 15], \"id\":
-      \"cde45143-7b44-4056-ba87-0256d93479ad\"}", "{\"id\":
-      \"cc1e376a-a883-4c02-bf11-c3db106fb57e\", \"months\": [0, 1, 2,
-      3, 4, 5, 6, 7, 8, 9, 10, 11]}", "{\"id\":
-      \"536b7f0f-4dd5-40cf-b501-f19e67f3a71c\", \"months\": [0, 2, 4,
-      6, 8, 10]}", "{\"id\": \"a04d8cf7-9984-4e07-8254-6570c86b0f33\",
-      \"months\": [0, 4, 8]}", "{\"id\":
-      \"8e66eee5-d2ad-4ca5-9d09-c0c6e5ca6424\", \"months\": [0, 6]}",
-      "{\"id\": \"1bb13f5c-6038-4f3c-ba67-c08b05631647\"}"),
-      num_minor_ticks = 0L, name = NULL, tags = list(), desired_num_ticks = 6L,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(tickers = tickers,
-        num_minor_ticks = num_minor_ticks, name = name, tags = tags,
-        desired_num_ticks = desired_num_ticks,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["DatetimeTicker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render several lines.
-#
-# The data for the ``MultiLine`` glyph is different in that the vector of
-# values is not a vector of scalars. Rather, it is a "list of lists".
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/MultiLine.py :source-position: below
-MultiLine <- R6::R6Class("MultiLine",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, line_width = 1L, xs = NULL, ys = NULL, line_dash = list(),
-      line_dash_offset = 0L, line_color = "black", line_join = "miter",
-      tags = list(), line_alpha = 1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      line_cap = "butt", subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["MultiLine"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The line width values for the lines.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The x-coordinates for all the lines, given as a "list of lists".
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    xs = NULL,
-    # The y-coordinates for all the lines, given as a "list of lists".
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    ys = NULL,
-    # The line dash values for the lines.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the lines.
-    # > Int
-    line_dash_offset = NULL,
-    # The line color values for the lines.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line join values for the lines.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The line alpha values for the lines.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line cap values for the lines.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL
-  )
-)
-
-# Base class for interpolator transforms.
-#
-# Interpolators return the value of a function which has been evaluated
-# between specified (x, y) pairs of data.  As an example, if two control
-# point pairs were provided to the interpolator, a linear interpolaction
-# at a specific value of 'x' would result in the value of 'y' which
-# existed on the line conneting the two control points.
-#
-# The control point pairs for the interpolators can be specified through
-# either
-#
-# * A literal sequence of values:
-#
-# .. code-block: python
-#
-# interp = Interpolator(x=[1, 2, 3, 4, 5], y=[2, 5, 10, 12, 16])
-#
-# * or a pair of columns defined in a `ColumnDataSource` object:
-#
-# .. code-block: python
-#
-# interp = Interpolator(x="year", y="earnings", data=jewlery_prices))
-#
-# This is the base class and is not intended to end use.  Please see the
-# documentation for the final derived classes (Jitter,
-# LineraInterpolator, StepInterpolator) for mor information on their
-# specific methods of interpolation.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Interpolator <- R6::R6Class("Interpolator",
-  inherit = Transform,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, subscribed_events = list(), y = NULL, tags = list(),
-      clip = TRUE, js_property_callbacks = structure(list(), .Names =
-      character(0)), data = NULL, x = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Interpolator"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Dependant coordinate denoting the value of a point at a location.
-    # > Either(String, Seq(Float))
-    y = NULL,
-    # Determine if the interpolation should clip the result to include only
-    # values inside its predefined range.  If this is set to False, it will
-    # return the most value of the closest point.
-    # > Bool
-    clip = NULL,
-    # Data which defines the source for the named columns if a string is
-    # passed to either the ``x`` or ``y`` parameters.
-    # > Instance(ColumnarDataSource)
-    data = NULL,
-    # Independant coordiante denoting the location of a point.
-    # > Either(String, Seq(Float))
-    x = NULL
-  )
-)
-
-# Generate ticks spaced apart even numbers of years.
-YearsTicker <- R6::R6Class("YearsTicker",
-  inherit = SingleIntervalTicker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      num_minor_ticks = 5L, name = NULL, tags = list(), desired_num_ticks = 6L,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      interval = NULL, subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(num_minor_ticks = num_minor_ticks, name = name,
-        tags = tags, desired_num_ticks = desired_num_ticks,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, interval = interval,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["YearsTicker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Display tick values that are formatted by a user-defined function.
-FuncTickFormatter <- R6::R6Class("FuncTickFormatter",
-  inherit = TickFormatter,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      args = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      code = "", name = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["FuncTickFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A mapping of names to Bokeh plot objects. These objects are made
-    # available to the formatter code snippet as the values of named
-    # parameters to the callback.
-    # > Dict(String, Instance(Model))
-    args = NULL,
-    # A snippet of JavaScript code that reformats a single tick to the
-    # desired format. The variable ``tick`` will contain the unformatted tick
-    # value and can be expected to be present in the code snippet namespace
-    # at render time.
-    #
-    # Example:
-    #
-    # .. code-block:: javascript
-    #
-    # code = ''' return Math.floor(tick) + " + " + (tick % 1).toFixed(2) '''
-    # > String
-    code = NULL
-  )
-)
-
-# *toolbar icon*: |zoom_in_icon|
-#
-# The zoom-in tool allows users to click a button to zoom in by a fixed
-# amount.
-#
-# .. |zoom_in_icon| image:: /_images/icons/ZoomIn.png :height: 18pt
-ZoomInTool <- R6::R6Class("ZoomInTool",
-  inherit = Action,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, tags = list(), factor = 0.1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      dimensions = "both", js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["ZoomInTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Percentage to zoom for each click of the zoom-in tool.
-    # > Percent
-    factor = NULL,
-    # Which dimensions the zoom-in tool is constrained to act in. By default
-    # the zoom-in zoom tool will zoom in any dimension, but can be configured
-    # to only zoom horizontally across the width of the plot, or vertically
-    # across the height of the plot.
-    # > Enum('width', 'height', 'both')
-    dimensions = NULL
-  )
-)
-
-# A base class for all numeric, non-categorical axes types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-ContinuousAxis <- R6::R6Class("ContinuousAxis",
-  inherit = Axis,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      axis_line_cap = "butt", major_label_standoff = 5L, name = NULL,
-      major_label_text_baseline = "alphabetic", major_label_text_alpha = 1,
-      level = "overlay", major_label_overrides = structure(list(), .Names =
-      character(0)), axis_label_text_font_style = "italic",
-      major_label_text_color = "#444444",
-      axis_label_text_font_size = list(value = "10pt"),
-      major_tick_out = 6L, axis_line_width = 1L, major_tick_line_alpha = 1,
-      axis_label_text_baseline = "bottom", axis_line_alpha = 1,
-      axis_label_standoff = 5L, major_label_text_font_style = "normal",
-      minor_tick_line_cap = "butt", axis_label_text_align = "left",
-      major_tick_line_cap = "butt", y_range_name = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      major_label_text_font_size = list(value = "8pt"),
-      axis_label_text_color = "#444444", minor_tick_line_dash = list(),
-      subscribed_events = list(), minor_tick_out = 4L, formatter = NULL,
-      major_tick_line_join = "miter", minor_tick_line_dash_offset = 0L,
-      minor_tick_line_join = "miter", axis_line_join = "miter",
-      minor_tick_in = 0L, bounds = "auto", x_range_name = "default",
-      tags = list(), major_label_text_font = "helvetica",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      major_label_orientation = "horizontal", axis_label_text_alpha = 1,
-      ticker = NULL, minor_tick_line_width = 1L, visible = TRUE,
-      minor_tick_line_color = "black", major_tick_line_dash = list(),
-      major_tick_line_dash_offset = 0L, major_tick_in = 2L,
-      axis_line_dash_offset = 0L, axis_line_color = "black", axis_label = "",
-      axis_line_dash = list(), minor_tick_line_alpha = 1,
-      axis_label_text_font = "helvetica", major_tick_line_color = "black",
-      major_tick_line_width = 1L, plot = NULL,
-      major_label_text_align = "center", id = NULL
-    ) {
-      super$initialize(axis_line_cap = axis_line_cap,
-        major_label_standoff = major_label_standoff, name = name,
-        major_label_text_baseline = major_label_text_baseline,
-        major_label_text_alpha = major_label_text_alpha, level = level,
-        major_label_overrides = major_label_overrides,
-        axis_label_text_font_style = axis_label_text_font_style,
-        major_label_text_color = major_label_text_color,
-        axis_label_text_font_size = axis_label_text_font_size,
-        major_tick_out = major_tick_out, axis_line_width = axis_line_width,
-        major_tick_line_alpha = major_tick_line_alpha,
-        axis_label_text_baseline = axis_label_text_baseline,
-        axis_line_alpha = axis_line_alpha,
-        axis_label_standoff = axis_label_standoff,
-        major_label_text_font_style = major_label_text_font_style,
-        minor_tick_line_cap = minor_tick_line_cap,
-        axis_label_text_align = axis_label_text_align,
-        major_tick_line_cap = major_tick_line_cap,
-        y_range_name = y_range_name,
-        js_property_callbacks = js_property_callbacks,
-        major_label_text_font_size = major_label_text_font_size,
-        axis_label_text_color = axis_label_text_color,
-        minor_tick_line_dash = minor_tick_line_dash,
-        subscribed_events = subscribed_events,
-        minor_tick_out = minor_tick_out, formatter = formatter,
-        major_tick_line_join = major_tick_line_join,
-        minor_tick_line_dash_offset = minor_tick_line_dash_offset,
-        minor_tick_line_join = minor_tick_line_join,
-        axis_line_join = axis_line_join, minor_tick_in = minor_tick_in,
-        bounds = bounds, x_range_name = x_range_name, tags = tags,
-        major_label_text_font = major_label_text_font,
-        js_event_callbacks = js_event_callbacks,
-        major_label_orientation = major_label_orientation,
-        axis_label_text_alpha = axis_label_text_alpha, ticker = ticker,
-        minor_tick_line_width = minor_tick_line_width, visible = visible,
-        minor_tick_line_color = minor_tick_line_color,
-        major_tick_line_dash = major_tick_line_dash,
-        major_tick_line_dash_offset = major_tick_line_dash_offset,
-        major_tick_in = major_tick_in,
-        axis_line_dash_offset = axis_line_dash_offset,
-        axis_line_color = axis_line_color, axis_label = axis_label,
-        axis_line_dash = axis_line_dash,
-        minor_tick_line_alpha = minor_tick_line_alpha,
-        axis_label_text_font = axis_label_text_font,
-        major_tick_line_color = major_tick_line_color,
-        major_tick_line_width = major_tick_line_width, plot = plot,
-        major_label_text_align = major_label_text_align, id = id)
-      types <- bk_prop_types[["ContinuousAxis"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render a single text label as an annotation.
-#
-# ``Label`` will render a single text label at given ``x`` and ``y``
-# coordinates, which can be in either screen (pixel) space, or data (axis
-# range) space.
-#
-# The label can also be configured with a screen space offset from ``x``
-# and ``y``, by using the ``x_offset`` and ``y_offset`` properties.
-#
-# Additionally, the label can be rotated with the ``angle`` property.
-#
-# There are also standard text, fill, and line properties to control the
-# appearance of the text, its background, as well as the rectangular
-# bounding box border.
-Label <- R6::R6Class("Label",
-  inherit = TextAnnotation,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      text_color = "#444444", border_line_dash = list(),
-      background_fill_color = NULL, name = NULL, y_offset = 0L,
-      x_range_name = "default", level = "annotation", x_units = "data",
-      border_line_join = "miter", subscribed_events = list(), tags = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      text_baseline = "bottom", angle = 0L, text_align = "left",
-      border_line_color = NULL, visible = TRUE, border_line_dash_offset = 0L,
-      text_font_style = "normal", render_mode = "canvas",
-      border_line_cap = "butt", y = NULL, text_font_size = list(value =
-      "12pt"), text_alpha = 1, text_font = "helvetica", y_units = "data",
-      angle_units = "rad", x_offset = 0L, y_range_name = "default",
-      background_fill_alpha = 1, text = NULL, border_line_width = 1L,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, x = NULL, border_line_alpha = 1, id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["Label"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The text color values for the text.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    text_color = NULL,
-    # The line dash values for the text bounding box.
-    # > DashPattern
-    border_line_dash = NULL,
-    # The fill color values for the text bounding box.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    background_fill_color = NULL,
-    # Offset value to apply to the y-coordinate.
-    #
-    # This is useful, for instance, if it is desired to "float" text a fixed
-    # distance in screen units from a given data position.
-    # > Float
-    y_offset = NULL,
-    # A particular (named) x-range to use for computing screen location when
-    # rendering an annotation on the plot. If unset, use the default x-range.
-    # > String
-    x_range_name = NULL,
-    # The unit type for the x attribute. Interpreted as "data space" units by
-    # default.
-    # > Enum('screen', 'data')
-    x_units = NULL,
-    # The line join values for the text bounding box.
-    # > Enum('miter', 'round', 'bevel')
-    border_line_join = NULL,
-    # The text baseline values for the text.
-    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
-    text_baseline = NULL,
-    # The angle to rotate the text, as measured from the horizontal.
-    #
-    # .. warning:: The center of rotation for canvas and css render_modes is
-    # different.  For `render_mode="canvas"` the label is rotated from the
-    # top-left corner of the annotation, while for `render_mode="css"` the
-    # annotation is rotated around it's center.
-    # > Angle
-    angle = NULL,
-    # The text align values for the text.
-    # > Enum('left', 'right', 'center')
-    text_align = NULL,
-    # The line color values for the text bounding box.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    border_line_color = NULL,
-    # The line dash offset values for the text bounding box.
-    # > Int
-    border_line_dash_offset = NULL,
-    # The text font style values for the text.
-    # > Enum('normal', 'italic', 'bold')
-    text_font_style = NULL,
-    # Specifies whether the text is rendered as a canvas element or as an css
-    # element overlaid on the canvas. The default mode is "canvas".
-    #
-    # .. note:: The CSS labels won't be present in the output using the
-    # "save" tool.
-    #
-    # .. warning:: Not all visual styling properties are supported if the
-    # render_mode is set to "css". The border_line_dash property isn't fully
-    # supported and border_line_dash_offset isn't supported at all. Setting
-    # text_alpha will modify the opacity of the entire background box and
-    # border in addition to the text. Finally, clipping Label annotations
-    # inside of the plot area isn't supported in "css" mode.
-    # > Enum('canvas', 'css')
-    render_mode = NULL,
-    # The line cap values for the text bounding box.
-    # > Enum('butt', 'round', 'square')
-    border_line_cap = NULL,
-    # The y-coordinate in screen coordinates to locate the text anchors.
-    #
-    # Datetime values are also accepted, but note that they are immediately
-    # converted to milliseconds-since-epoch.
-    # > Float
-    y = NULL,
-    # The text font size values for the text.
-    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    text_font_size = NULL,
-    # The text alpha values for the text.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    text_alpha = NULL,
-    # The text font values for the text.
-    # > String
-    text_font = NULL,
-    # The unit type for the y attribute. Interpreted as "data space" units by
-    # default.
-    # > Enum('screen', 'data')
-    y_units = NULL,
-    # Acceptable values for units are ``"rad"`` and ``"deg"``
-    # > Enum('deg', 'rad')
-    angle_units = NULL,
-    # Offset value to apply to the x-coordinate.
-    #
-    # This is useful, for instance, if it is desired to "float" text a fixed
-    # distance in screen units from a given data position.
-    # > Float
-    x_offset = NULL,
-    # A particular (named) y-range to use for computing screen location when
-    # rendering an annotation on the plot. If unset, use the default y-range.
-    # > String
-    y_range_name = NULL,
-    # The fill alpha values for the text bounding box.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    background_fill_alpha = NULL,
-    # The text value to render.
-    # > String
-    text = NULL,
-    # The line width values for the text bounding box.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    border_line_width = NULL,
-    # The x-coordinate in screen coordinates to locate the text anchors.
-    #
-    # Datetime values are also accepted, but note that they are immediately
-    # converted to milliseconds-since-epoch.
-    # > Float
-    x = NULL,
-    # The line alpha values for the text bounding box.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    border_line_alpha = NULL
-  )
-)
-
-# Abstract base class for map options' models.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-MapOptions <- R6::R6Class("MapOptions",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, lng = NULL, tags = list(), lat = NULL, zoom = 12L,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["MapOptions"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The longitude where the map should be centered.
-    # > Float
-    lng = NULL,
-    # The latitude where the map should be centered.
-    # > Float
-    lat = NULL,
-    # The initial zoom level to use when displaying the map.
-    # > Int
-    zoom = NULL
-  )
-)
-
-# A layoutable toolbar that can accept the tools of multiple plots, and
-# can merge the tools into a single button for convenience.
-ToolbarBox <- R6::R6Class("ToolbarBox",
-  inherit = Box,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, toolbar_location = "right", sizing_mode = "fixed",
-      width = NULL, height = NULL, subscribed_events = list(), tags = list(),
-      children = list(), js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), logo = "normal", merge_tools = TRUE, tools = list(),
-      disabled = FALSE, css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags, children = children,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["ToolbarBox"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Should the toolbar be presented as if it was stuck to the `above`,
-    # `right`, `left`, `below` edge of a plot. Default is `right`.
-    # > Enum('above', 'below', 'left', 'right')
-    toolbar_location = NULL,
-    # What version of the Bokeh logo to display on the toolbar. If set to
-    # None, no logo will be displayed.
-    # > Enum('normal', 'grey')
-    logo = NULL,
-    # Merge all the tools together so there is one tool to control all the
-    # plots.
-    # > Bool
-    merge_tools = NULL,
-    # A list of tools to add to the plot.
-    # > List(Instance(Tool))
-    tools = NULL
-  )
-)
-
-# Single-line input widget.
-TextInput <- R6::R6Class("TextInput",
-  inherit = InputWidget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      placeholder = "", callback = NULL, name = NULL, title = "",
-      sizing_mode = "fixed", width = NULL, height = NULL,
-      subscribed_events = list(), tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      value = "", disabled = FALSE, css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, title = title, sizing_mode = sizing_mode,
-        width = width, height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["TextInput"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Placeholder for empty input field
-    # > String
-    placeholder = NULL,
-    # A callback to run in the browser whenever the user unfocuses the
-    # TextInput widget by hitting Enter or clicking outside of the text box
-    # area.
-    # > Instance(Callback)
-    callback = NULL,
-    # Initial or entered text value.
-    # > String
-    value = NULL
-  )
-)
-
-# A base class for tools that respond to drag events.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Drag <- R6::R6Class("Drag",
-  inherit = Tool,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["Drag"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render upside-down triangle markers.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/InvertedTriangle.py :source-position:
-# below
-InvertedTriangle <- R6::R6Class("InvertedTriangle",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["InvertedTriangle"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# A base class for all image source types.
-ImageSource <- R6::R6Class("ImageSource",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      extra_url_vars = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), url = "", tags = list(),
-      id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["ImageSource"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A dictionary that maps url variable template keys to values.  These
-    # variables are useful for parts of tile urls which do not change from
-    # tile to tile (e.g. server host name, or layer name).
-    # > Dict(String, Any)
-    extra_url_vars = NULL,
-    # tile service url (example:
-    # http://c.tile.openstreetmap.org/{Z}/{X}/{Y}.png)
-    # > String
-    url = NULL
-  )
-)
-
-# Base class for Bokeh models that represent HTML markup elements.
-#
-# Markups include e.g., ``<div>``, ``<p>``, and ``<pre>``.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Markup <- R6::R6Class("Markup",
-  inherit = Widget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), text = "", js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Markup"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The contents of the widget.
-    # > String
-    text = NULL
-  )
-)
-
-# Render arcs.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Arc.py :source-position: below
-Arc <- R6::R6Class("Arc",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      start_angle = NULL, name = NULL, end_angle_units = "rad",
-      line_color = "black", subscribed_events = list(), radius = NULL,
-      tags = list(), line_alpha = 1, radius_units = "data",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      end_angle = NULL, start_angle_units = "rad", direction = "anticlock",
-      line_width = 1L, line_dash = list(), line_dash_offset = 0L, y = NULL,
-      line_join = "miter", js_property_callbacks = structure(list(), .Names
-      = character(0)), line_cap = "butt", x = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Arc"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The angles to start the arcs, as measured from the horizontal.
-    # > AngleSpec(units_default='rad')
-    start_angle = NULL,
-    #
-    # > Enum('deg', 'rad')
-    end_angle_units = NULL,
-    # The line color values for the arcs.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # Radius of the arc.
-    # > DistanceSpec(units_default='data')
-    radius = NULL,
-    # The line alpha values for the arcs.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    #
-    # > Enum('screen', 'data')
-    radius_units = NULL,
-    # The angles to end the arcs, as measured from the horizontal.
-    # > AngleSpec(units_default='rad')
-    end_angle = NULL,
-    #
-    # > Enum('deg', 'rad')
-    start_angle_units = NULL,
-    # Which direction to stroke between the start and end angles.
-    # > Enum('clock', 'anticlock')
-    direction = NULL,
-    # The line width values for the arcs.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the arcs.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the arcs.
-    # > Int
-    line_dash_offset = NULL,
-    # The y-coordinates of the center of the arcs.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The line join values for the arcs.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The line cap values for the arcs.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates of the center of the arcs.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
-  )
-)
-
-# *toolbar icon*: |box_zoom_icon|
-#
-# The box zoom tool allows users to define a rectangular region of a Plot
-# to zoom to by dragging he mouse or a finger over the plot region. The
-# end of the drag event indicates the selection region is ready.
-#
-# .. |box_zoom_icon| image:: /_images/icons/BoxZoom.png :height: 18pt
-BoxZoomTool <- R6::R6Class("BoxZoomTool",
-  inherit = Drag,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, overlay = NULL, subscribed_events = list(), tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      dimensions = "both", js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, match_aspect = FALSE, id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["BoxZoomTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A shaded annotation drawn to indicate the selection region.
-    # > Instance(BoxAnnotation)
-    overlay = NULL,
-    # Which dimensions the zoom box is to be free in. By default, users may
-    # freely draw zoom boxes with any dimensions. If only "width" is
-    # supplied, the box will be constrained to span the entire vertical space
-    # of the plot, only the horizontal dimension can be controlled. If only
-    # "height" is supplied, the box will be constrained to span the entire
-    # horizontal space of the plot, and the vertical dimension can be
-    # controlled.
-    # > Enum('width', 'height', 'both')
-    dimensions = NULL,
-    # Whether the box zoom region should be restricted to have the same
-    # aspect ratio as the plot region.
-    #
-    # .. note:: If the tool is restricted to one dimension, this value has no
-    # effect.
-    # > Bool
-    match_aspect = NULL
-  )
-)
-
-#
-GeoJSONDataSource <- R6::R6Class("GeoJSONDataSource",
-  inherit = ColumnarDataSource,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback = NULL, name = NULL, selected = structure(list(`2d` =
-      structure(list(indices = structure(list(), .Names =
-      character(0))), .Names = "indices"), `1d` =
-      structure(list(indices = list()), .Names = "indices"), `0d` =
-      structure(list(glyph = NULL, indices = list()), .Names =
-      c("glyph", "indices"))), .Names = c("2d", "1d", "0d")),
-      tags = list(), column_names = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      geojson = NULL, subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(callback = callback, name = name, selected = selected,
-        tags = tags, column_names = column_names,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["GeoJSONDataSource"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # GeoJSON that contains features for plotting. Currently
-    # GeoJSONDataSource can only process a FeatureCollection or
-    # GeometryCollection.
-    # > JSON
-    geojson = NULL
-  )
-)
-
-#
-GlyphRenderer <- R6::R6Class("GlyphRenderer",
-  inherit = DataRenderer,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      muted = FALSE, glyph = NULL, visible = TRUE, name = NULL,
-      data_source = NULL, nonselection_glyph = "auto",
-      x_range_name = "default", muted_glyph = NULL, hover_glyph = NULL,
-      level = "glyph", tags = list(), selection_glyph = "auto",
-      y_range_name = "default", js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(visible = visible,
-        js_property_callbacks = js_property_callbacks, name = name,
-        js_event_callbacks = js_event_callbacks, level = level,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["GlyphRenderer"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    #
-    # > Bool
-    muted = NULL,
-    # The glyph to render, in conjunction with the supplied data source and
-    # ranges.
-    # > Instance(Glyph)
-    glyph = NULL,
-    # Local data source to use when rendering glyphs on the plot.
-    # > Instance(DataSource)
-    data_source = NULL,
-    # An optional glyph used for explicitly non-selected points (i.e.,
-    # non-selected when there are other points that are selected, but not
-    # when no points at all are selected.)
-    #
-    # If set to "auto" then a glyph with a low alpha value (0.1) will be used
-    # for non-selected points.
-    # > Either(Auto, Instance(Glyph))
-    nonselection_glyph = NULL,
-    # A particular (named) x-range to use for computing screen locations when
-    # rendering glyphs on the plot. If unset, use the default x-range.
-    # > String
-    x_range_name = NULL,
-    #
-    # > Instance(Glyph)
-    muted_glyph = NULL,
-    # An optional glyph used for inspected points, e.g., those that are being
-    # hovered over by a HoverTool.
-    # > Instance(Glyph)
-    hover_glyph = NULL,
-    # An optional glyph used for selected points.
-    #
-    # If set to "auto" then the standard glyph will be used for selected
-    # points.
-    # > Either(Auto, Instance(Glyph))
-    selection_glyph = NULL,
-    # A particular (named) y-range to use for computing screen locations when
-    # rendering glyphs on the plot. If unset, use the default -range.
-    # > String
-    y_range_name = NULL
-  )
-)
-
-# *toolbar icon*: |pan_icon|
-#
-# The pan tool allows the user to pan a Plot by left-dragging a mouse, or
-# on touch devices by dragging a finger or stylus, across the plot
-# region.
-#
-# The pan tool also activates the border regions of a Plot for "single
-# axis" panning. For instance, dragging in the vertical border or axis
-# will effect a pan in the vertical direction only, with the horizontal
-# dimension kept fixed.
-#
-# .. |pan_icon| image:: /_images/icons/Pan.png :height: 18pt
-PanTool <- R6::R6Class("PanTool",
-  inherit = Drag,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      dimensions = "both", js_event_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, plot = NULL, subscribed_events = list(),
-      tags = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["PanTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Which dimensions the pan tool is constrained to act in. By default the
-    # pan tool will pan in any dimension, but can be configured to only pan
-    # horizontally across the width of the plot, or vertically across the
-    # height of the plot.
-    # > Enum('width', 'height', 'both')
-    dimensions = NULL
-  )
-)
-
-# Multi-select widget.
-MultiSelect <- R6::R6Class("MultiSelect",
-  inherit = InputWidget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback = NULL, size = 4L, name = NULL, title = "", sizing_mode = "fixed",
-      width = NULL, height = NULL, subscribed_events = list(), tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      options = list(), value = list(), disabled = FALSE, css_classes = NULL,
-      id = NULL
-    ) {
-      super$initialize(name = name, title = title, sizing_mode = sizing_mode,
-        width = width, height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["MultiSelect"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A callback to run in the browser whenever the current selection value
-    # changes.
-    # > Instance(Callback)
-    callback = NULL,
-    # The number of visible options in the dropdown list. (This uses the
-    # ``select`` HTML element's ``size`` attribute. Some browsers might not
-    # show less than 3 options.)
-    # > Int
-    size = NULL,
-    # Available selection options. Options may be provided either as a list
-    # of possible string values, or as a list of tuples, each of the form
-    # ``(value, label)``. In the latter case, the visible widget text for
-    # each value will be corresponding given label.
-    # > List(Either(String, Tuple(String, String)))
-    options = NULL,
-    # Initial or selected values.
-    # > List(String)
-    value = NULL
-  )
-)
-
-# Model representing a plot, containing glyphs, guides, annotations.
-Plot <- R6::R6Class("Plot",
-  inherit = LayoutDOM,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      title_location = "above", extra_y_ranges = structure(list(), .Names =
-      character(0)), left = list(), min_border_top = NULL,
-      background_fill_color = "#ffffff", name = NULL,
-      border_fill_color = "#ffffff", x_range = NULL, inner_height = NULL,
-      right = list(), border_fill_alpha = 1, plot_height = 600L,
-      tool_events = NULL, toolbar_location = "right", plot_width = 600L,
-      above = list(), x_scale = NULL, min_border_bottom = NULL,
-      background_fill_alpha = 1, js_property_callbacks = structure(list(),
-      .Names = character(0)), toolbar_sticky = TRUE,
-      min_border_left = NULL, subscribed_events = list(), disabled = FALSE,
-      renderers = list(), below = list(), min_border_right = NULL,
-      outline_line_alpha = 1, title = NULL, y_range = NULL,
-      extra_x_ranges = structure(list(), .Names = character(0)),
-      width = NULL, lod_factor = 10L, tags = list(), outline_line_cap = "butt",
-      min_border = 5L, lod_timeout = 500L, outline_line_join = "miter",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      lod_threshold = 2000L, css_classes = NULL, output_backend = "canvas",
-      outline_line_dash = list(), toolbar = NULL, h_symmetry = TRUE,
-      y_scale = NULL, outline_line_width = 1L, layout_height = NULL,
-      sizing_mode = "fixed", height = NULL, lod_interval = 300L,
-      inner_width = NULL, hidpi = TRUE, layout_width = NULL,
-      outline_line_color = "#e5e5e5", v_symmetry = FALSE,
-      outline_line_dash_offset = 0L, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Plot"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Where the title will be located. Titles on the left or right side will
-    # be rotated.
-    # > Enum('above', 'below', 'left', 'right')
-    title_location = NULL,
-    # Additional named ranges to make available for mapping y-coordinates.
-    #
-    # This is useful for adding additional axes.
-    # > Dict(String, Instance(Range))
-    extra_y_ranges = NULL,
-    # A list of renderers to occupy the area to the left of the plot.
-    # > List(Instance(Renderer))
-    left = NULL,
-    # Minimum size in pixels of the padding region above the top of the
-    # central plot region.
-    #
-    # .. note:: This is a *minimum*. The padding region may expand as needed
-    # to accommodate titles or axes, etc.
-    # > Int
-    min_border_top = NULL,
-    # The fill color for the plot background style.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    background_fill_color = NULL,
-    # The fill color for the plot border style.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    border_fill_color = NULL,
-    # The (default) data range of the horizontal dimension of the plot.
-    # > Instance(Range)
-    x_range = NULL,
-    # This is the exact height of the plotting canvas, i.e. the height of the
-    # actual plot, without toolbars etc. Note this is computed in a web
-    # browser, so this property will work only in backends capable of
-    # bidirectional communication (server, notebook).
-    #
-    # .. note:: This is an experimental feature and the API may change in
-    # near future.
-    # > Int
-    inner_height = NULL,
-    # A list of renderers to occupy the area to the right of the plot.
-    # > List(Instance(Renderer))
-    right = NULL,
-    # The fill alpha for the plot border style.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    border_fill_alpha = NULL,
-    # Total height of the entire plot (including any axes, titles, border
-    # padding, etc.)
-    #
-    # .. note:: This corresponds directly to the height of the HTML canvas
-    # that will be used.
-    # > Int
-    plot_height = NULL,
-    # A ToolEvents object to share and report tool events.
-    # > Instance(ToolEvents)
-    tool_events = NULL,
-    # Where the toolbar will be located. If set to None, no toolbar will be
-    # attached to the plot.
-    # > Enum('above', 'below', 'left', 'right')
-    toolbar_location = NULL,
-    # Total width of the entire plot (including any axes, titles, border
-    # padding, etc.)
-    #
-    # .. note:: This corresponds directly to the width of the HTML canvas
-    # that will be used.
-    # > Int
-    plot_width = NULL,
-    # A list of renderers to occupy the area above of the plot.
-    # > List(Instance(Renderer))
-    above = NULL,
-    # What kind of scale to use to convert x-coordinates in data space into
-    # x-coordinates in screen space.
-    # > Instance(Scale)
-    x_scale = NULL,
-    # Minimum size in pixels of the padding region below the bottom of the
-    # central plot region.
-    #
-    # .. note:: This is a *minimum*. The padding region may expand as needed
-    # to accommodate titles or axes, etc.
-    # > Int
-    min_border_bottom = NULL,
-    # The fill alpha for the plot background style.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    background_fill_alpha = NULL,
-    # Stick the toolbar to the edge of the plot. Default: True. If False, the
-    # toolbar will be outside of the axes, titles etc.
-    # > Bool
-    toolbar_sticky = NULL,
-    # Minimum size in pixels of the padding region to the left of the central
-    # plot region.
-    #
-    # .. note:: This is a *minimum*. The padding region may expand as needed
-    # to accommodate titles or axes, etc.
-    # > Int
-    min_border_left = NULL,
-    # A list of all renderers for this plot, including guides and annotations
-    # in addition to glyphs and markers.
-    #
-    # This property can be manipulated by hand, but the ``add_glyph`` and
-    # ``add_layout`` methods are recommended to help make sure all necessary
-    # setup is performed.
-    # > List(Instance(Renderer))
-    renderers = NULL,
-    # A list of renderers to occupy the area below of the plot.
-    # > List(Instance(Renderer))
-    below = NULL,
-    # Minimum size in pixels of the padding region to the right of the
-    # central plot region.
-    #
-    # .. note:: This is a *minimum*. The padding region may expand as needed
-    # to accommodate titles or axes, etc.
-    # > Int
-    min_border_right = NULL,
-    # The line alpha for the plot border outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    outline_line_alpha = NULL,
-    # A title for the plot. Can be a text string or a Title annotation.
-    # > Instance(Title)
-    title = NULL,
-    # The (default) data range of the vertical dimension of the plot.
-    # > Instance(Range)
-    y_range = NULL,
-    # Additional named ranges to make available for mapping x-coordinates.
-    #
-    # This is useful for adding additional axes.
-    # > Dict(String, Instance(Range))
-    extra_x_ranges = NULL,
-    # Decimation factor to use when applying level-of-detail decimation.
-    # > Int
-    lod_factor = NULL,
-    # The line cap for the plot border outline.
-    # > Enum('butt', 'round', 'square')
-    outline_line_cap = NULL,
-    # A convenience property to set all all the ``min_border_X`` properties
-    # to the same value. If an individual border property is explicitly set,
-    # it will override ``min_border``.
-    # > Int
-    min_border = NULL,
-    # Timeout (in ms) for checking whether interactive tool events are still
-    # occurring. Once level-of-detail mode is enabled, a check is made every
-    # ``lod_timeout`` ms. If no interactive tool events have happened,
-    # level-of-detail mode is disabled.
-    # > Int
-    lod_timeout = NULL,
-    # The line join for the plot border outline.
-    # > Enum('miter', 'round', 'bevel')
-    outline_line_join = NULL,
-    # A number of data points, above which level-of-detail downsampling may
-    # be performed by glyph renderers. Set to ``None`` to disable any
-    # level-of-detail downsampling.
-    # > Int
-    lod_threshold = NULL,
-    # Specify the output backend for the plot area. Default is HTML5 Canvas.
-    #
-    # .. note:: When set to ``webgl``, glyphs without a WebGL rendering
-    # implementation will fall back to rendering onto 2D canvas.
-    # > Enum('canvas', 'svg', 'webgl')
-    output_backend = NULL,
-    # The line dash for the plot border outline.
-    # > DashPattern
-    outline_line_dash = NULL,
-    # The toolbar associated with this plot which holds all the tools.
-    #
-    # The toolbar is automatically created with the plot.
-    # > Instance(Toolbar)
-    toolbar = NULL,
-    # Whether the total horizontal padding on both sides of the plot will be
-    # made equal (the left or right padding amount, whichever is larger).
-    # > Bool
-    h_symmetry = NULL,
-    # What kind of scale to use to convert y-coordinates in data space into
-    # y-coordinates in screen space.
-    # > Instance(Scale)
-    y_scale = NULL,
-    # The line width for the plot border outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    outline_line_width = NULL,
-    # This is the exact height of the layout, i.e. the height of the actual
-    # plot, with toolbars etc. Note this is computed in a web browser, so
-    # this property will work only in backends capable of bidirectional
-    # communication (server, notebook).
-    #
-    # .. note:: This is an experimental feature and the API may change in
-    # near future.
-    # > Int
-    layout_height = NULL,
-    # Interval (in ms) during which an interactive tool event will enable
-    # level-of-detail downsampling.
-    # > Int
-    lod_interval = NULL,
-    # This is the exact width of the plotting canvas, i.e. the width of the
-    # actual plot, without toolbars etc. Note this is computed in a web
-    # browser, so this property will work only in backends capable of
-    # bidirectional communication (server, notebook).
-    #
-    # .. note:: This is an experimental feature and the API may change in
-    # near future.
-    # > Int
-    inner_width = NULL,
-    # Whether to use HiDPI mode when available.
-    # > Bool
-    hidpi = NULL,
-    # This is the exact width of the layout, i.e. the height of the actual
-    # plot, with toolbars etc. Note this is computed in a web browser, so
-    # this property will work only in backends capable of bidirectional
-    # communication (server, notebook).
-    #
-    # .. note:: This is an experimental feature and the API may change in
-    # near future.
-    # > Int
-    layout_width = NULL,
-    # The line color for the plot border outline.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    outline_line_color = NULL,
-    # Whether the total vertical padding on both sides of the plot will be
-    # made equal (the top or bottom padding amount, whichever is larger).
-    # > Bool
-    v_symmetry = NULL,
-    # The line dash offset for the plot border outline.
-    # > Int
-    outline_line_dash_offset = NULL
-  )
-)
-
-# Abstract base class for Row and Column. Do not use directly.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Box <- R6::R6Class("Box",
-  inherit = LayoutDOM,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), children = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), disabled = FALSE, css_classes = NULL,
-      id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Box"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The list of children, which can be other components including plots,
-    # rows, columns, and widgets.
-    # > List(Instance(LayoutDOM))
-    children = NULL
-  )
-)
-
-# Base class for interactive callback.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Callback <- R6::R6Class("Callback",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Callback"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Base class for color mapper types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-ColorMapper <- R6::R6Class("ColorMapper",
-  inherit = Transform,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), nan_color = "gray", palette = NULL, tags = list(),
-      subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["ColorMapper"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Color to be used if data is NaN. Default: 'gray'
-    # > Color
-    nan_color = NULL,
-    # A sequence of colors to use as the target palette for mapping.
-    #
-    # This property can also be set as a ``String``, to the name of any of
-    # the palettes shown in :ref:`bokeh.palettes`.
-    # > Seq(Color)
-    palette = NULL
-  )
-)
-
-# A container for widgets that are part of a layout.
-WidgetBox <- R6::R6Class("WidgetBox",
-  inherit = LayoutDOM,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), children = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), disabled = FALSE, css_classes = NULL,
-      id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["WidgetBox"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The list of widgets to put in the layout box.
-    # > List(Instance(Widget))
-    children = NULL
-  )
-)
-
-# A single-widget container with title bar and controls.
-Panel <- R6::R6Class("Panel",
-  inherit = Widget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      child = NULL, name = NULL, title = "", sizing_mode = "fixed", width = NULL,
-      height = NULL, tags = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), closable = FALSE, subscribed_events = list(),
-      disabled = FALSE, css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Panel"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The child widget. If you need more children, use a layout widget, e.g.
-    # ``Row`` or ``Column``.
-    # > Instance(LayoutDOM)
-    child = NULL,
-    # An optional text title of the panel.
-    # > String
-    title = NULL,
-    # Whether this panel is closeable or not. If True, an "x" button will
-    # appear.
-    # > Bool
-    closable = NULL
-  )
-)
-
-# Basic string cell editor with auto-completion.
-StringEditor <- R6::R6Class("StringEditor",
-  inherit = CellEditor,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), completions = list(), subscribed_events = list(),
-      tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["StringEditor"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # An optional list of completion strings.
-    # > List(String)
-    completions = NULL
-  )
-)
-
-# ``IntEditor`` optimized for editing percentages.
-PercentEditor <- R6::R6Class("PercentEditor",
-  inherit = CellEditor,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["PercentEditor"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# A group of check boxes.
-CheckboxGroup <- R6::R6Class("CheckboxGroup",
-  inherit = Group,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      inline = FALSE, callback = NULL, name = NULL, sizing_mode = "fixed",
-      width = NULL, height = NULL, tags = list(), labels = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      active = list(), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(inline = inline, callback = callback, name = name,
-        sizing_mode = sizing_mode, width = width, height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, labels = labels,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["CheckboxGroup"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The list of indices of selected check boxes.
-    # > List(Int)
-    active = NULL
-  )
-)
-
-# The BBoxTileSource has the same default tile origin as the
-# WMTSTileSource but requested tiles use a ``{XMIN}``, ``{YMIN}``,
-# ``{XMAX}``, ``{YMAX}`` e.g.
-# ``http://your.custom.tile.service?bbox={XMIN},{YMIN},{XMAX},{YMAX}``.
-BBoxTileSource <- R6::R6Class("BBoxTileSource",
-  inherit = MercatorTileSource,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      use_latlon = FALSE, y_origin_offset = 20037508.34, max_zoom = 30L,
-      extra_url_vars = structure(list(), .Names = character(0)),
-      name = NULL, attribution = "", wrap_around = TRUE,
-      x_origin_offset = 20037508.34, subscribed_events = list(),
-      tags = list(), min_zoom = 0L, js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), url = "", tile_size = 256L,
-      initial_resolution = 156543.033928041, id = NULL
-    ) {
-      super$initialize(y_origin_offset = y_origin_offset,
-        max_zoom = max_zoom, extra_url_vars = extra_url_vars, name = name,
-        attribution = attribution, wrap_around = wrap_around,
-        x_origin_offset = x_origin_offset,
-        subscribed_events = subscribed_events, tags = tags,
-        min_zoom = min_zoom, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, url = url,
-        tile_size = tile_size, initial_resolution = initial_resolution,
-        id = id)
-      types <- bk_prop_types[["BBoxTileSource"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Flag which indicates option to output {XMIN},{YMIN},{XMAX},{YMAX} in
-    # meters or latitude and longitude.
-    # > Bool
-    use_latlon = NULL
-  )
-)
-
-# An auto-fitting range in a continuous scalar dimension.  The upper and
-# lower bounds are set to the min and max of the data.
-DataRange1d <- R6::R6Class("DataRange1d",
-  inherit = DataRange,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      follow_interval = NULL, flipped = FALSE, callback = NULL, name = NULL,
-      max_interval = NULL, names = list(), range_padding_units = "percent",
-      end = NULL, bounds = NULL, renderers = list(), start = NULL, tags = list(),
-      min_interval = NULL, js_property_callbacks = structure(list(), .Names
-      = character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), range_padding = 0.1, subscribed_events = list(),
-      default_span = 2, follow = NULL, id = NULL
-    ) {
-      super$initialize(callback = callback, name = name, names = names,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, renderers = renderers,
-        id = id)
-      types <- bk_prop_types[["DataRange1d"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # If ``follow`` is set to ``"start"`` or ``"end"`` then the range will
-    # always be constrained to that::
-    #
-    # abs(r.start - r.end) <= follow_interval
-    #
-    # is maintained.
-    # > Float
-    follow_interval = NULL,
-    # Whether the range should be "flipped" from its normal direction when
-    # auto-ranging.
-    # > Bool
-    flipped = NULL,
-    # The level that the range is allowed to zoom out, expressed as the
-    # maximum visible interval. Note that ``bounds`` can impose an implicit
-    # constraint on the maximum interval as well.
-    # > Float
-    max_interval = NULL,
-    # Whether the ``range_padding`` should be interpreted as a percentage, or
-    # as an absolute quantity. (default: ``"percent"``)
-    # > Enum('percent', 'absolute')
-    range_padding_units = NULL,
-    # An explicitly supplied range end. If provided, will override
-    # automatically computed end value.
-    # > Float
-    end = NULL,
-    # The bounds that the range is allowed to go to - typically used to
-    # prevent the user from panning/zooming/etc away from the data.
-    #
-    # By default, the bounds will be None, allowing your plot to pan/zoom as
-    # far as you want. If bounds are 'auto' they will be computed to be the
-    # same as the start and end of the DataRange1d.
-    #
-    # Bounds are provided as a tuple of ``(min, max)`` so regardless of
-    # whether your range is increasing or decreasing, the first item should
-    # be the minimum value of the range and the second item should be the
-    # maximum.  Setting ``min > max`` will result in a ``ValueError``.
-    #
-    # If you only want to constrain one end of the plot, you can set ``min``
-    # or ``max`` to ``None`` e.g. ``DataRange1d(bounds=(None, 12))``
-    # > MinMaxBounds(Auto, Tuple(Float, Float))
-    bounds = NULL,
-    # An explicitly supplied range start. If provided, will override
-    # automatically computed start value.
-    # > Float
-    start = NULL,
-    # The level that the range is allowed to zoom in, expressed as the
-    # minimum visible interval. If set to ``None`` (default), the minimum
-    # interval is not bound.
-    # > Float
-    min_interval = NULL,
-    # How much padding to add around the computed data bounds.
-    #
-    # When ``range_padding_units`` is set to ``"percent"``, the span of the
-    # range span is expanded to make the range ``range_padding`` percent
-    # larger.
-    #
-    # When ``range_padding_units`` is set to ``"absolute"``, the start and
-    # end of the range span are extended by the amount ``range_padding``.
-    # > Float
-    range_padding = NULL,
-    # A default width for the interval, in case ``start`` is equal to ``end``
-    # (if used with a log axis, default_span is in powers of 10).
-    # > Float
-    default_span = NULL,
-    # Configure the data to follow one or the other data extreme, with a
-    # maximum range size of ``follow_interval``.
-    #
-    # If set to ``"start"`` then the range will adjust so that ``start``
-    # always corresponds to the minimum data value (or maximum, if
-    # ``flipped`` is ``True``).
-    #
-    # If set to ``"end"`` then the range will adjust so that ``end`` always
-    # corresponds to the maximum data value (or minimum, if ``flipped`` is
-    # ``True``).
-    #
-    # If set to ``None`` (default), then auto-ranging does not follow, and
-    # the range will encompass both the minimum and maximum data values.
-    #
-    # ``follow`` cannot be used with bounds, and if set, bounds will be set
-    # to ``None``.
-    # > Enum('start', 'end')
-    follow = NULL
-  )
-)
-
-# A group of check boxes rendered as toggle buttons.
-CheckboxButtonGroup <- R6::R6Class("CheckboxButtonGroup",
-  inherit = ButtonGroup,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback = NULL, name = NULL, sizing_mode = "fixed", width = NULL,
-      height = NULL, tags = list(), button_type = "default", labels = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      active = list(), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(callback = callback, name = name,
-        sizing_mode = sizing_mode, width = width, height = height, tags = tags,
-        button_type = button_type,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, labels = labels,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["CheckboxButtonGroup"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The list of indices of selected check boxes.
-    # > List(Int)
-    active = NULL
-  )
-)
-
-# Options for GMapPlot objects.
-GMapOptions <- R6::R6Class("GMapOptions",
-  inherit = MapOptions,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      scale_control = FALSE, styles = NULL, name = NULL, lng = NULL,
-      tags = list(), lat = NULL, zoom = 12L, map_type = "roadmap",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(name = name, lng = lng, tags = tags, lat = lat,
-        zoom = zoom, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["GMapOptions"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Whether the Google map should display its distance scale control.
-    # > Bool
-    scale_control = NULL,
-    # A JSON array of `map styles`_ to use for the GMapPlot. Many example
-    # styles can `be found here`_.
-    #
-    # .. _map styles:
-    # https://developers.google.com/maps/documentation/javascript/reference#MapTypeStyle
-    # .. _be found here: https://snazzymaps.com
-    # > JSON
-    styles = NULL,
-    # The `map type`_ to use for the GMapPlot.
-    #
-    # .. _map type:
-    # https://developers.google.com/maps/documentation/javascript/reference#MapTypeId
-    # > Enum('satellite', 'roadmap', 'terrain', 'hybrid')
-    map_type = NULL
-  )
-)
-
-# Render ellipses.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Ellipse.py :source-position: below
-Ellipse <- R6::R6Class("Ellipse",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, fill_alpha = 1, line_color = "black", width = NULL,
-      subscribed_events = list(), fill_color = "gray", tags = list(),
-      line_alpha = 1, js_event_callbacks = structure(list(), .Names =
-      character(0)), angle = 0, line_width = 1L, line_dash = list(),
-      line_dash_offset = 0L, y = NULL, height = NULL, line_join = "miter",
-      angle_units = "rad", js_property_callbacks = structure(list(), .Names
-      = character(0)), width_units = "data", height_units = "data",
-      line_cap = "butt", x = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Ellipse"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The fill alpha values for the ovals.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line color values for the ovals.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The widths of each ellipse.
-    # > DistanceSpec(units_default='data')
-    width = NULL,
-    # The fill color values for the ovals.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line alpha values for the ovals.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The angle the ellipses are rotated from horizontal. [rad]
-    # > AngleSpec(units_default='rad')
-    angle = NULL,
-    # The line width values for the ovals.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the ovals.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the ovals.
-    # > Int
-    line_dash_offset = NULL,
-    # The y-coordinates of the centers of the ellipses.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The heights of each ellipse.
-    # > DistanceSpec(units_default='data')
-    height = NULL,
-    # The line join values for the ovals.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    #
-    # > Enum('deg', 'rad')
-    angle_units = NULL,
-    #
-    # > Enum('screen', 'data')
-    width_units = NULL,
-    #
-    # > Enum('screen', 'data')
-    height_units = NULL,
-    # The line cap values for the ovals.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates of the centers of the ellipses.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
-  )
-)
-
-# *toolbar icon*: |save_icon|
-#
-# The save tool is an action. When activated, the tool opens a download
-# dialog which allows to save an image reproduction of the plot in PNG
-# format. If automatic download is not support by a web browser, the tool
-# falls back to opening the generated image in a new tab or window. User
-# then can manually save it by right clicking on the image and choosing
-# "Save As" (or similar) menu item.
-#
-# .. |save_icon| image:: /_images/icons/Save.png :height: 18pt
-SaveTool <- R6::R6Class("SaveTool",
-  inherit = Action,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["SaveTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render annuli.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Annulus.py :source-position: below
-Annulus <- R6::R6Class("Annulus",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, line_width = 1L, fill_alpha = 1, line_dash = list(),
-      line_color = "black", y = NULL, line_join = "miter", fill_color = "gray",
-      inner_radius = NULL, line_dash_offset = 0L, line_alpha = 1,
-      outer_radius = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(),
-      outer_radius_units = "data", inner_radius_units = "data",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Annulus"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The line width values for the annuli.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The fill alpha values for the annuli.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line dash values for the annuli.
-    # > DashPattern
-    line_dash = NULL,
-    # The line color values for the annuli.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The y-coordinates of the center of the annuli.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The line join values for the annuli.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The fill color values for the annuli.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The inner radii of the annuli.
-    # > DistanceSpec(units_default='data')
-    inner_radius = NULL,
-    # The line dash offset values for the annuli.
-    # > Int
-    line_dash_offset = NULL,
-    # The line alpha values for the annuli.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The outer radii of the annuli.
-    # > DistanceSpec(units_default='data')
-    outer_radius = NULL,
-    #
-    # > Enum('screen', 'data')
-    outer_radius_units = NULL,
-    #
-    # > Enum('screen', 'data')
-    inner_radius_units = NULL,
-    # The line cap values for the annuli.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates of the center of the annuli.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
-  )
-)
-
-# Base class for text annotation models such as labels and titles.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-TextAnnotation <- R6::R6Class("TextAnnotation",
-  inherit = Annotation,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      visible = TRUE, name = NULL, level = "annotation", tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["TextAnnotation"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render circle markers.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Circle.py :source-position: below
-Circle <- R6::R6Class("Circle",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, fill_alpha = 1, line_color = "black",
-      subscribed_events = list(), radius = NULL, fill_color = "gray",
-      tags = list(), line_alpha = 1, radius_units = "data",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, radius_dimension = "x", line_width = 1L, line_dash = list(),
-      line_dash_offset = 0L, y = NULL, line_join = "miter",
-      angle_units = "rad", js_property_callbacks = structure(list(), .Names
-      = character(0)), line_cap = "butt", x = NULL, id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["Circle"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The radius values for circle markers (in "data space" units, by
-    # default).
-    #
-    # .. note:: Circle markers are slightly unusual in that they support
-    # specifying a radius in addition to a size. Only one of ``radius`` or
-    # ``size`` should be given.
-    #
-    # .. warning:: Note that ``Circle`` glyphs are always drawn as circles on
-    # the screen, even in cases where the data space aspect ratio is not 1-1.
-    # In all cases where radius values are specified, the "distance" for the
-    # radius is measured along the dimension specified by
-    # ``radius_dimension``. If the aspect ratio is very large or small, the
-    # drawn circles may appear much larger or smaller than expected. See
-    # :bokeh-issue:`626` for more information.
-    # > DistanceSpec(units_default='data')
-    radius = NULL,
-    #
-    # > Enum('screen', 'data')
-    radius_units = NULL,
-    # What dimension to measure circle radii along.
-    #
-    # When the data space aspect ratio is not 1-1, then the size of the drawn
-    # circles depends on what direction is used to measure the "distance" of
-    # the radius. This property allows that direction to be controlled.
-    # > Enum('x', 'y')
-    radius_dimension = NULL
-  )
-)
-
-# Abstract base class for data table (data grid) widgets.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-TableWidget <- R6::R6Class("TableWidget",
-  inherit = Widget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), source = NULL, js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["TableWidget"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The source of data for the widget.
-    # > Instance(DataSource)
-    source = NULL
-  )
-)
-
 # *toolbar icon*: |tap_select_icon|
 #
 # The tap selection tool allows the user to select at single points by
@@ -8987,15 +11395,15 @@ TapTool <- R6::R6Class("TapTool",
   public = list(
     specified_args = NULL,
     initialize = function(
-      behavior = "select", callback = NULL, name = NULL, names = list(),
-      tags = list(), js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(),
-      renderers = list(), id = NULL
+      subscribed_events = list(), renderers = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      callback = NULL, plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      names = list(), behavior = "select", id = NULL
     ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
       types <- bk_prop_types[["TapTool"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -9004,13 +11412,10 @@ TapTool <- R6::R6Class("TapTool",
     }
   ),
   private = list(
-    # This tool can be configured to either make selections or inspections on
-    # associated data sources. The difference is that selection changes
-    # propagate across bokeh and other components (e.g. selection glyph) will
-    # be notified. Inspecions don't act like this, so it's useful to
-    # configure `callback` when setting `behavior='inspect'`.
-    # > Enum('select', 'inspect')
-    behavior = NULL,
+    # An explicit list of renderers to hit test again. If unset, defaults to
+    # all renderers on a plot.
+    # > List(Instance(Renderer))
+    renderers = NULL,
     # A client-side action specification, like opening a URL, showing a
     # dialog box, etc. See :class:`~bokeh.models.actions.Action` for details.
     # > Instance(Callback)
@@ -9019,459 +11424,13 @@ TapTool <- R6::R6Class("TapTool",
     # matching value for their ``name`` attribute will be used.
     # > List(String)
     names = NULL,
-    # An explicit list of renderers to hit test again. If unset, defaults to
-    # all renderers on a plot.
-    # > List(Instance(Renderer))
-    renderers = NULL
-  )
-)
-
-# An axis that picks nice numbers for tick locations on a linear scale.
-# Configured with a ``BasicTickFormatter`` by default.
-LinearAxis <- R6::R6Class("LinearAxis",
-  inherit = ContinuousAxis,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      axis_line_cap = "butt", major_label_standoff = 5L, name = NULL,
-      major_label_text_baseline = "alphabetic", major_label_text_alpha = 1,
-      level = "overlay", major_label_overrides = structure(list(), .Names =
-      character(0)), axis_label_text_font_style = "italic",
-      major_label_text_color = "#444444",
-      axis_label_text_font_size = list(value = "10pt"),
-      major_tick_out = 6L, axis_line_width = 1L, major_tick_line_alpha = 1,
-      axis_label_text_baseline = "bottom", axis_line_alpha = 1,
-      axis_label_standoff = 5L, major_label_text_font_style = "normal",
-      minor_tick_line_cap = "butt", axis_label_text_align = "left",
-      major_tick_line_cap = "butt", y_range_name = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      major_label_text_font_size = list(value = "8pt"),
-      axis_label_text_color = "#444444", minor_tick_line_dash = list(),
-      subscribed_events = list(), minor_tick_out = 4L, formatter = NULL,
-      major_tick_line_join = "miter", minor_tick_line_dash_offset = 0L,
-      minor_tick_line_join = "miter", axis_line_join = "miter",
-      minor_tick_in = 0L, bounds = "auto", x_range_name = "default",
-      tags = list(), major_label_text_font = "helvetica",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      major_label_orientation = "horizontal", axis_label_text_alpha = 1,
-      ticker = NULL, minor_tick_line_width = 1L, visible = TRUE,
-      minor_tick_line_color = "black", major_tick_line_dash = list(),
-      major_tick_line_dash_offset = 0L, major_tick_in = 2L,
-      axis_line_dash_offset = 0L, axis_line_color = "black", axis_label = "",
-      axis_line_dash = list(), minor_tick_line_alpha = 1,
-      axis_label_text_font = "helvetica", major_tick_line_color = "black",
-      major_tick_line_width = 1L, plot = NULL,
-      major_label_text_align = "center", id = NULL
-    ) {
-      super$initialize(axis_line_cap = axis_line_cap,
-        major_label_standoff = major_label_standoff, name = name,
-        major_label_text_baseline = major_label_text_baseline,
-        major_label_text_alpha = major_label_text_alpha, level = level,
-        major_label_overrides = major_label_overrides,
-        axis_label_text_font_style = axis_label_text_font_style,
-        major_label_text_color = major_label_text_color,
-        axis_label_text_font_size = axis_label_text_font_size,
-        major_tick_out = major_tick_out, axis_line_width = axis_line_width,
-        major_tick_line_alpha = major_tick_line_alpha,
-        axis_label_text_baseline = axis_label_text_baseline,
-        axis_line_alpha = axis_line_alpha,
-        axis_label_standoff = axis_label_standoff,
-        major_label_text_font_style = major_label_text_font_style,
-        minor_tick_line_cap = minor_tick_line_cap,
-        axis_label_text_align = axis_label_text_align,
-        major_tick_line_cap = major_tick_line_cap,
-        y_range_name = y_range_name,
-        js_property_callbacks = js_property_callbacks,
-        major_label_text_font_size = major_label_text_font_size,
-        axis_label_text_color = axis_label_text_color,
-        minor_tick_line_dash = minor_tick_line_dash,
-        subscribed_events = subscribed_events,
-        minor_tick_out = minor_tick_out, formatter = formatter,
-        major_tick_line_join = major_tick_line_join,
-        minor_tick_line_dash_offset = minor_tick_line_dash_offset,
-        minor_tick_line_join = minor_tick_line_join,
-        axis_line_join = axis_line_join, minor_tick_in = minor_tick_in,
-        bounds = bounds, x_range_name = x_range_name, tags = tags,
-        major_label_text_font = major_label_text_font,
-        js_event_callbacks = js_event_callbacks,
-        major_label_orientation = major_label_orientation,
-        axis_label_text_alpha = axis_label_text_alpha, ticker = ticker,
-        minor_tick_line_width = minor_tick_line_width, visible = visible,
-        minor_tick_line_color = minor_tick_line_color,
-        major_tick_line_dash = major_tick_line_dash,
-        major_tick_line_dash_offset = major_tick_line_dash_offset,
-        major_tick_in = major_tick_in,
-        axis_line_dash_offset = axis_line_dash_offset,
-        axis_line_color = axis_line_color, axis_label = axis_label,
-        axis_line_dash = axis_line_dash,
-        minor_tick_line_alpha = minor_tick_line_alpha,
-        axis_label_text_font = axis_label_text_font,
-        major_tick_line_color = major_tick_line_color,
-        major_tick_line_width = major_tick_line_width, plot = plot,
-        major_label_text_align = major_label_text_align, id = id)
-      types <- bk_prop_types[["LinearAxis"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# A Bokeh Plot with a `Google Map`_ displayed underneath.
-#
-# Data placed on this plot should be specified in decimal lat long
-# coordinates e.g. 37.123, -122.404.  It will be automatically converted
-# into the web mercator projection to display properly over google maps
-# tiles.
-#
-# .. _Google Map: https://www.google.com/maps/
-GMapPlot <- R6::R6Class("GMapPlot",
-  inherit = MapPlot,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      title_location = "above", extra_y_ranges = structure(list(), .Names =
-      character(0)), left = list(), min_border_top = NULL,
-      background_fill_color = "#ffffff", name = NULL,
-      border_fill_color = "#ffffff", x_range = NULL, inner_height = NULL,
-      right = list(), border_fill_alpha = 1, plot_height = 600L,
-      tool_events = NULL, toolbar_location = "right", plot_width = 600L,
-      api_key = NULL, above = list(), x_scale = NULL, min_border_bottom = NULL,
-      background_fill_alpha = 1, map_options = NULL,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      toolbar_sticky = TRUE, min_border_left = NULL,
-      subscribed_events = list(), disabled = FALSE, renderers = list(),
-      below = list(), min_border_right = NULL, outline_line_alpha = 1,
-      title = NULL, y_range = NULL, extra_x_ranges = structure(list(), .Names
-      = character(0)), width = NULL, lod_factor = 10L, tags = list(),
-      outline_line_cap = "butt", min_border = 5L, lod_timeout = 500L,
-      outline_line_join = "miter", js_event_callbacks = structure(list(),
-      .Names = character(0)), lod_threshold = 2000L, css_classes = NULL,
-      output_backend = "canvas", outline_line_dash = list(), toolbar = NULL,
-      h_symmetry = TRUE, y_scale = NULL, outline_line_width = 1L,
-      layout_height = NULL, sizing_mode = "fixed", height = NULL,
-      lod_interval = 300L, inner_width = NULL, hidpi = TRUE,
-      layout_width = NULL, outline_line_color = "#e5e5e5",
-      v_symmetry = FALSE, outline_line_dash_offset = 0L, id = NULL
-    ) {
-      super$initialize(title_location = title_location,
-        extra_y_ranges = extra_y_ranges, left = left,
-        min_border_top = min_border_top,
-        background_fill_color = background_fill_color, name = name,
-        border_fill_color = border_fill_color, x_range = x_range,
-        inner_height = inner_height, right = right,
-        border_fill_alpha = border_fill_alpha, plot_height = plot_height,
-        tool_events = tool_events, toolbar_location = toolbar_location,
-        plot_width = plot_width, above = above, x_scale = x_scale,
-        min_border_bottom = min_border_bottom,
-        background_fill_alpha = background_fill_alpha,
-        js_property_callbacks = js_property_callbacks,
-        toolbar_sticky = toolbar_sticky, min_border_left = min_border_left,
-        subscribed_events = subscribed_events, disabled = disabled,
-        renderers = renderers, below = below,
-        min_border_right = min_border_right,
-        outline_line_alpha = outline_line_alpha, title = title,
-        y_range = y_range, extra_x_ranges = extra_x_ranges, width = width,
-        lod_factor = lod_factor, tags = tags,
-        outline_line_cap = outline_line_cap, min_border = min_border,
-        lod_timeout = lod_timeout, outline_line_join = outline_line_join,
-        js_event_callbacks = js_event_callbacks,
-        lod_threshold = lod_threshold, css_classes = css_classes,
-        output_backend = output_backend,
-        outline_line_dash = outline_line_dash, toolbar = toolbar,
-        h_symmetry = h_symmetry, y_scale = y_scale,
-        outline_line_width = outline_line_width,
-        layout_height = layout_height, sizing_mode = sizing_mode,
-        height = height, lod_interval = lod_interval,
-        inner_width = inner_width, hidpi = hidpi,
-        layout_width = layout_width,
-        outline_line_color = outline_line_color, v_symmetry = v_symmetry,
-        outline_line_dash_offset = outline_line_dash_offset, id = id)
-      types <- bk_prop_types[["GMapPlot"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Google Maps API requires an API key. See
-    # https://developers.google.com/maps/documentation/javascript/get-api-key
-    # for more information on how to obtain your own.
-    # > String
-    api_key = NULL,
-    # Options for displaying the plot.
-    # > Instance(GMapOptions)
-    map_options = NULL
-  )
-)
-
-# Calendar-based date picker widget.
-DatePicker <- R6::R6Class("DatePicker",
-  inherit = InputWidget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      max_date = NULL, callback = NULL, name = NULL, title = "", min_date = NULL,
-      sizing_mode = "fixed", width = NULL, height = NULL,
-      subscribed_events = list(), tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      value = "2017-07-21", disabled = FALSE, css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, title = title, sizing_mode = sizing_mode,
-        width = width, height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["DatePicker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Optional latest allowable date.
-    # > Date
-    max_date = NULL,
-    # A callback to run in the browser whenever the current date value
-    # changes.
-    # > Instance(Callback)
-    callback = NULL,
-    # Optional earliest allowable date.
-    # > Date
-    min_date = NULL,
-    # The initial or picked date.
-    # > Date
-    value = NULL
-  )
-)
-
-# A group of radio boxes rendered as toggle buttons.
-RadioButtonGroup <- R6::R6Class("RadioButtonGroup",
-  inherit = ButtonGroup,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback = NULL, name = NULL, sizing_mode = "fixed", width = NULL,
-      height = NULL, tags = list(), button_type = "default", labels = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      active = NULL, subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(callback = callback, name = name,
-        sizing_mode = sizing_mode, width = width, height = height, tags = tags,
-        button_type = button_type,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, labels = labels,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["RadioButtonGroup"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The index of the selected radio box, or ``None`` if nothing is
-    # selected.
-    # > Int
-    active = NULL
-  )
-)
-
-# A class for reporting tools geometries from BokehJS.
-#
-# .. warning:: This class will be superceded by a new general events
-# system in the near future.
-ToolEvents <- R6::R6Class("ToolEvents",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), geometries = list(), subscribed_events = list(),
-      tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["ToolEvents"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    #
-    # > List(Dict(String, Any))
-    geometries = NULL
-  )
-)
-
-# An abstract base class for layout components.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-LayoutDOM <- R6::R6Class("LayoutDOM",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["LayoutDOM"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # How the item being displayed should size itself. Possible values are
-    # ``"fixed"``, ``"scale_width"``, ``"scale_height"``, ``"scale_both"``,
-    # and ``"stretch_both"``.
-    #
-    # ``"stretch_both"`` elements are completely responsive (independently in
-    # width and height) and will resize to occupy all available space, even
-    # if this changes the aspect ratio of the element.  This is sometimes
-    # called outside-in, and is a typical behavior for desktop applications.
-    #
-    # ``"fixed"`` elements are not responsive. They will retain their
-    # original width and height regardless of any subsequent browser window
-    # resize events.
-    #
-    # ``"scale_width"`` elements will responsively resize to fit to the width
-    # available, *while maintaining the original aspect ratio*. This is a
-    # typical behavior for modern websites. For a ``Plot``, the aspect ratio
-    # ``plot_width/plot_height`` is maintained.
-    #
-    # ``"scale_height"`` elements will responsively resize to fit to the
-    # height available, *while maintaining the original aspect ratio*. For a
-    # ``Plot``, the aspect ratio ``plot_width/plot_height`` is maintained. A
-    # plot with ``"scale_height"`` mode needs to be wrapped in a ``Row`` or
-    # ``Column`` to be responsive.
-    #
-    # ``"scale_both"`` elements will responsively resize to for both the
-    # width and height available, *while maintaining the original aspect
-    # ratio*.
-    # > Enum('stretch_both', 'scale_width', 'scale_height', 'scale_both', 'fixed')
-    sizing_mode = NULL,
-    # An optional width for the component (in pixels).
-    # > Int
-    width = NULL,
-    # An optional height for the component (in pixels).
-    # > Int
-    height = NULL,
-    # Whether the widget will be disabled when rendered. If ``True``, the
-    # widget will be greyed-out, and not respond to UI events.
-    # > Bool
-    disabled = NULL,
-    # A list of css class names to add to this DOM element. Note: the class
-    # names are simply added as-is, no other guarantees are provided.
-    # > Seq(String)
-    css_classes = NULL
-  )
-)
-
-# Map numbers in a range [*low*, *high*] into a sequence of colors (a
-# palette) on a natural logarithm scale.
-#
-# For example, if the range is [0, 25] and the palette is ``['red',
-# 'green', 'blue']``, the values would be mapped as follows::
-#
-# x < 0 : 'red' # values < low are clamped 0 >= x < 2.72 : 'red' # math.e
-# ** 1 2.72 >= x < 7.39 : 'green' # math.e ** 2 7.39 >= x < 20.09 :
-# 'blue' # math.e ** 3 20.09 >= x : 'blue' # values > high are clamped
-#
-# .. warning:: The LogColorMapper only works for images with scalar
-# values that are non-negative.
-LogColorMapper <- R6::R6Class("LogColorMapper",
-  inherit = ContinuousColorMapper,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, high = NULL, palette = NULL, low = NULL, tags = list(),
-      high_color = NULL, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), nan_color = "gray", subscribed_events = list(),
-      low_color = NULL, id = NULL
-    ) {
-      super$initialize(name = name, high = high, palette = palette, low = low,
-        tags = tags, high_color = high_color,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, nan_color = nan_color,
-        subscribed_events = subscribed_events, low_color = low_color,
-        id = id)
-      types <- bk_prop_types[["LogColorMapper"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Abstract base class for all kinds of groups.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-AbstractGroup <- R6::R6Class("AbstractGroup",
-  inherit = Widget,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback = NULL, name = NULL, sizing_mode = "fixed", width = NULL,
-      height = NULL, tags = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), labels = list(), subscribed_events = list(),
-      disabled = FALSE, css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["AbstractGroup"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A callback to run in the browser whenever a button group is
-    # manipulated.
-    # > Instance(Callback)
-    callback = NULL,
-    # List of text labels contained in this group.
-    # > List(String)
-    labels = NULL
+    # This tool can be configured to either make selections or inspections on
+    # associated data sources. The difference is that selection changes
+    # propagate across bokeh and other components (e.g. selection glyph) will
+    # be notified. Inspecions don't act like this, so it's useful to
+    # configure `callback` when setting `behavior='inspect'`.
+    # > Enum('select', 'inspect')
+    behavior = NULL
   )
 )
 
@@ -9485,14 +11444,14 @@ UndoTool <- R6::R6Class("UndoTool",
   public = list(
     specified_args = NULL,
     initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
+      plot = NULL, id = NULL
     ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
       types <- bk_prop_types[["UndoTool"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -9505,33 +11464,27 @@ UndoTool <- R6::R6Class("UndoTool",
   )
 )
 
-# A block (paragraph) of pre-formatted text.
-#
-# This Bokeh model corresponds to an HTML ``<pre>`` element.
-#
-# Example -------
-#
-# .. bokeh-plot::
-# ../sphinx/source/docs/user_guide/examples/interaction_pretext.py
-# :source-position: below
-PreText <- R6::R6Class("PreText",
-  inherit = Paragraph,
+# Single-line input widget with auto-completion.
+AutocompleteInput <- R6::R6Class("AutocompleteInput",
+  inherit = TextInput,
   public = list(
     specified_args = NULL,
     initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), text = "", js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
+      subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      height = NULL, callback = NULL, name = NULL, placeholder = "",
+      disabled = FALSE, width = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), completions = list(), value = "",
+      css_classes = NULL, title = "", sizing_mode = "fixed", id = NULL
     ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags, text = text,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["PreText"]]
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        js_property_callbacks = js_property_callbacks, height = height,
+        callback = callback, name = name, placeholder = placeholder,
+        disabled = disabled, width = width,
+        js_event_callbacks = js_event_callbacks, value = value,
+        css_classes = css_classes, title = title, sizing_mode = sizing_mode,
+        id = id)
+      types <- bk_prop_types[["AutocompleteInput"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -9539,140 +11492,30 @@ PreText <- R6::R6Class("PreText",
     }
   ),
   private = list(
-
+    # A list of completion strings. This will be used to guide the user upon
+    # typing the beginning of a desired value.
+    # > List(String)
+    completions = NULL
   )
 )
 
-# Range-slider based range selection widget
-RangeSlider <- R6::R6Class("RangeSlider",
-  inherit = InputWidget,
+# Display tick values from continuous ranges as "basic numbers", using
+# scientific notation when appropriate by default.
+BasicTickFormatter <- R6::R6Class("BasicTickFormatter",
+  inherit = TickFormatter,
   public = list(
     specified_args = NULL,
     initialize = function(
-      callback_policy = "throttle", callback = NULL, step = 0.1, name = NULL,
-      orientation = "horizontal", title = "", end = 1L, sizing_mode = "fixed",
-      start = 0L, height = NULL, width = NULL, tags = list(),
-      callback_throttle = 200L, js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), range = list(0.1, 0.9),
-      subscribed_events = list(), disabled = FALSE, css_classes = NULL,
-      id = NULL
-    ) {
-      super$initialize(name = name, title = title, sizing_mode = sizing_mode,
-        width = width, height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["RangeSlider"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # When the callback is initiated. This parameter can take on only one of
-    # three options:
-    #
-    # * "continuous": the callback will be executed immediately for each
-    # movement of the slider * "throttle": the callback will be executed at
-    # most every ``callback_throttle`` milliseconds.  * "mouseup": the
-    # callback will be executed only once when the slider is released.
-    #
-    # The "mouseup" policy is intended for scenarios in which the callback is
-    # expensive in time.
-    # > Enum('continuous', 'throttle', 'mouseup')
-    callback_policy = NULL,
-    # A callback to run in the browser whenever the current Slider value
-    # changes.
-    # > Instance(Callback)
-    callback = NULL,
-    # The step between consecutive values.
-    # > Float
-    step = NULL,
-    # Orient the slider either horizontally (default) or vertically.
-    # > Enum('horizontal', 'vertical')
-    orientation = NULL,
-    # The maximum allowable value.
-    # > Float
-    end = NULL,
-    # The minimum allowable value.
-    # > Float
-    start = NULL,
-    # Number of microseconds to pause between callback calls as the slider is
-    # moved.
-    # > Float
-    callback_throttle = NULL,
-    # Initial or selected range.
-    # > Tuple(Float, Float)
-    range = NULL
-  )
-)
-
-# Generate "nice" round ticks at any magnitude.
-#
-# Creates ticks that are "base" multiples of a set of given mantissas.
-# For example, with ``base=10`` and ``mantissas=[1, 2, 5]``, the ticker
-# will generate the sequence::
-#
-# ..., 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, ...
-AdaptiveTicker <- R6::R6Class("AdaptiveTicker",
-  inherit = ContinuousTicker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      num_minor_ticks = 5L, name = NULL, max_interval = NULL, tags = list(),
-      min_interval = 0, mantissas = list(1L, 2L, 5L), desired_num_ticks = 6L,
-      base = 10, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(desired_num_ticks = desired_num_ticks,
-        num_minor_ticks = num_minor_ticks,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, name = name,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["AdaptiveTicker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The largest allowable interval between two adjacent ticks.
-    #
-    # .. note:: To specify an unbounded interval, set to ``None``.
-    # > Float
-    max_interval = NULL,
-    # The smallest allowable interval between two adjacent ticks.
-    # > Float
-    min_interval = NULL,
-    # The acceptable list numbers to generate multiples of.
-    # > Seq(Float)
-    mantissas = NULL,
-    # The multiplier to use for scaling mantissas.
-    # > Float
-    base = NULL
-  )
-)
-
-# Generate ticks for categorical ranges.
-CategoricalTicker <- R6::R6Class("CategoricalTicker",
-  inherit = Ticker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
+      use_scientific = TRUE, subscribed_events = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, precision = "auto", power_limit_low = -3L,
       js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
+      power_limit_high = 5L, id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["CategoricalTicker"]]
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["BasicTickFormatter"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -9680,34 +11523,54 @@ CategoricalTicker <- R6::R6Class("CategoricalTicker",
     }
   ),
   private = list(
-
+    # Whether to ever display scientific notation. If ``True``, then when to
+    # use scientific notation is controlled by ``power_limit_low`` and
+    # ``power_limit_high``.
+    # > Bool
+    use_scientific = NULL,
+    # How many digits of precision to display in tick labels.
+    # > Either(Auto, Int)
+    precision = NULL,
+    # Limit the use of scientific notation to when::
+    #
+    # log(x) <= power_limit_low
+    # > Int
+    power_limit_low = NULL,
+    # Limit the use of scientific notation to when::
+    #
+    # log(x) >= power_limit_high
+    # > Int
+    power_limit_high = NULL
   )
 )
 
-# Render horizontal bars, given a center coordinate, ``height`` and
-# (``left``, ``right``) coordinates.
+# Render ovals.
+#
+# This glyph renders ovals using Bézier curves, which are similar, but
+# not identical to ellipses. In particular, widths equal to heights will
+# not render circles. Use the ``Ellipse`` glyph for that.
 #
 # Example -------
 #
-# .. bokeh-plot:: ../tests/glyphs/HBar.py :source-position: below
-HBar <- R6::R6Class("HBar",
+# .. bokeh-plot:: ../tests/glyphs/Oval.py :source-position: below
+Oval <- R6::R6Class("Oval",
   inherit = Glyph,
   public = list(
     specified_args = NULL,
     initialize = function(
-      left = 0L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", y = NULL, height = NULL,
-      line_join = "miter", fill_color = "gray", line_dash_offset = 0L,
-      line_alpha = 1, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), right = NULL, line_cap = "butt",
-      subscribed_events = list(), tags = list(), id = NULL
+      subscribed_events = list(), line_join = "miter", tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      line_width = 1L, angle_units = "rad", height = NULL, line_dash = list(),
+      y = NULL, name = NULL, line_dash_offset = 0L, fill_color = "gray",
+      line_alpha = 1, fill_alpha = 1, angle = 0, line_cap = "butt",
+      line_color = "black", width_units = "data",
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      width = NULL, x = NULL, height_units = "data", id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["HBar"]]
+        tags = tags, subscribed_events = subscribed_events, name = name,
+        js_property_callbacks = js_property_callbacks, id = id)
+      types <- bk_prop_types[["Oval"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -9715,45 +11578,146 @@ HBar <- R6::R6Class("HBar",
     }
   ),
   private = list(
-    # The x-coordinates of the left edges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    left = NULL,
-    # The line width values for the horizontal bars.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The fill alpha values for the horizontal bars.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line dash values for the horizontal bars.
-    # > DashPattern
-    line_dash = NULL,
-    # The line color values for the horizontal bars.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The y-coordinates of the centers of the horizontal bars.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The heights of the vertical bars.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    height = NULL,
-    # The line join values for the horizontal bars.
+    # The line join values for the ovals.
     # > Enum('miter', 'round', 'bevel')
     line_join = NULL,
-    # The fill color values for the horizontal bars.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line dash offset values for the horizontal bars.
+    # The line width values for the ovals.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    line_width = NULL,
+    #
+    # > Enum('deg', 'rad')
+    angle_units = NULL,
+    # The overall height of each oval.
+    # > DistanceSpec(units_default='data')
+    height = NULL,
+    # The line dash values for the ovals.
+    # > DashPattern
+    line_dash = NULL,
+    # The y-coordinates of the centers of the ovals.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    y = NULL,
+    # The line dash offset values for the ovals.
     # > Int
     line_dash_offset = NULL,
-    # The line alpha values for the horizontal bars.
+    # The fill color values for the ovals.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    fill_color = NULL,
+    # The line alpha values for the ovals.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
     line_alpha = NULL,
-    # The x-coordinates of the right edges.
+    # The fill alpha values for the ovals.
     # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    right = NULL,
-    # The line cap values for the horizontal bars.
+    fill_alpha = NULL,
+    # The angle the ovals are rotated from horizontal. [rad]
+    # > AngleSpec(units_default='rad')
+    angle = NULL,
+    # The line cap values for the ovals.
     # > Enum('butt', 'round', 'square')
-    line_cap = NULL
+    line_cap = NULL,
+    # The line color values for the ovals.
+    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
+    line_color = NULL,
+    #
+    # > Enum('screen', 'data')
+    width_units = NULL,
+    # The overall widths of each oval.
+    # > DistanceSpec(units_default='data')
+    width = NULL,
+    # The x-coordinates of the centers of the ovals.
+    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
+    x = NULL,
+    #
+    # > Enum('screen', 'data')
+    height_units = NULL
+  )
+)
+
+# *toolbar icon*: |redo_icon|
+#
+# Redo tool reverses the last action performed by undo tool.
+#
+# .. |redo_icon| image:: /_images/icons/Redo.png :height: 18pt
+RedoTool <- R6::R6Class("RedoTool",
+  inherit = Action,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      subscribed_events = list(), name = NULL, tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      plot = NULL, id = NULL
+    ) {
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
+      types <- bk_prop_types[["RedoTool"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+
+  )
+)
+
+#
+AjaxDataSource <- R6::R6Class("AjaxDataSource",
+  inherit = RemoteSource,
+  public = list(
+    specified_args = NULL,
+    initialize = function(
+      subscribed_events = list(), method = "POST", max_size = NULL,
+      column_names = list(), tags = list(), data_url = NULL, callback = NULL,
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      mode = "replace", data = structure(list(), .Names = character(0)),
+      polling_interval = NULL, selected = structure(list(`1d` =
+      structure(list(indices = list()), .Names = "indices"), `2d` =
+      structure(list(indices = structure(list(), .Names =
+      character(0))), .Names = "indices"), `0d` = structure(list(glyph
+      = NULL, indices = list()), .Names = c("glyph", "indices"))),
+      .Names = c("1d", "2d", "0d")),
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      name = NULL, http_headers = structure(list(), .Names = character(0)),
+      if_modified = FALSE, content_type = "application/json", id = NULL
+    ) {
+      super$initialize(subscribed_events = subscribed_events, tags = tags,
+        column_names = column_names,
+        js_property_callbacks = js_property_callbacks, data_url = data_url,
+        callback = callback, polling_interval = polling_interval,
+        data = data, selected = selected,
+        js_event_callbacks = js_event_callbacks, name = name, id = id)
+      types <- bk_prop_types[["AjaxDataSource"]]
+      for (nm in names(types)) {
+        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
+      }
+      self$specified_args <- get_specified_arg_names(match.call())
+    }
+  ),
+  private = list(
+    # http method - GET or POST
+    # > Enum('POST', 'GET')
+    method = NULL,
+    # Maximum size of the data array being kept after each pull requests.
+    # Larger than that size, the data will be right shifted.
+    # > Int
+    max_size = NULL,
+    # Whether to append new data to existing data (up to ``max_size``), or to
+    # replace existing data entirely.
+    # > Enum('replace', 'append')
+    mode = NULL,
+    # HTTP headers to set for the Ajax request.
+    # > Dict(String, String)
+    http_headers = NULL,
+    # Whether to include an ``If-Modified-Since`` header in AJAX requests to
+    # the server. If this header is supported by the server, then only new
+    # data since the last request will be returned.
+    # > Bool
+    if_modified = NULL,
+    # Set the "contentType" parameter for the Ajax request.
+    # > String
+    content_type = NULL
   )
 )
 
@@ -9796,21 +11760,21 @@ HoverTool <- R6::R6Class("HoverTool",
   public = list(
     specified_args = NULL,
     initialize = function(
-      callback = NULL, mode = "mouse", name = NULL, names = list(),
-      toggleable = TRUE, line_policy = "nearest",
-      tooltips = list(list("index", "$index"), list("data (x, y)", "($x,
-      $y)"), list("canvas (x, y)", "($sx, $sy)")),
-      subscribed_events = list(), tags = list(), show_arrow = TRUE,
-      attachment = "horizontal", formatters = structure(list(), .Names =
-      character(0)), js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), point_policy = "snap_to_data", plot = NULL,
-      anchor = "center", renderers = list(), id = NULL
+      subscribed_events = list(), renderers = list(), tags = list(),
+      js_property_callbacks = structure(list(), .Names = character(0)),
+      callback = NULL, show_arrow = TRUE, mode = "mouse",
+      point_policy = "snap_to_data", plot = NULL, name = NULL,
+      js_event_callbacks = structure(list(), .Names = character(0)),
+      line_policy = "nearest", names = list(), attachment = "horizontal",
+      toggleable = TRUE, tooltips = list(list("index", "$index"),
+      list("data (x, y)", "($x, $y)"), list("canvas (x, y)", "($sx,
+      $sy)")), anchor = "center", formatters = structure(list(), .Names =
+      character(0)), id = NULL
     ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks,
-        toggleable = toggleable, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
+      super$initialize(js_event_callbacks = js_event_callbacks,
+        subscribed_events = subscribed_events, name = name, tags = tags,
+        toggleable = toggleable,
+        js_property_callbacks = js_property_callbacks, plot = plot, id = id)
       types <- bk_prop_types[["HoverTool"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
@@ -9819,6 +11783,10 @@ HoverTool <- R6::R6Class("HoverTool",
     }
   ),
   private = list(
+    # An explicit list of renderers to hit test again. If unset, defaults to
+    # all renderers on a plot.
+    # > List(Instance(Renderer))
+    renderers = NULL,
     # A callback to run in the browser whenever the input's value changes.
     # The cb_data parameter that is available to the Callback code will
     # contain two HoverTool specific fields:
@@ -9827,20 +11795,32 @@ HoverTool <- R6::R6Class("HoverTool",
     # source :geometry: object containing the coordinates of the hover cursor
     # > Instance(Callback)
     callback = NULL,
+    # Whether tooltip's arrow should be showed.
+    # > Bool
+    show_arrow = NULL,
     # Whether to consider hover pointer as a point (x/y values), or a span on
     # h or v directions.
     # > Enum('mouse', 'hline', 'vline')
     mode = NULL,
-    # A list of names to query for. If set, only renderers that have a
-    # matching value for their ``name`` attribute will be used.
-    # > List(String)
-    names = NULL,
+    # Whether the tooltip position should snap to the "center" (or other
+    # anchor) position of the associated glyph, or always follow the current
+    # mouse cursor position.
+    # > Enum('snap_to_data', 'follow_mouse', 'none')
+    point_policy = NULL,
     # When showing tooltips for lines, designates whether the tooltip
     # position should be the "previous" or "next" points on the line, the
     # "nearest" point to the current mouse position, or "interpolate" along
     # the line to the current mouse position.
     # > Enum('prev', 'next', 'nearest', 'interp', 'none')
     line_policy = NULL,
+    # A list of names to query for. If set, only renderers that have a
+    # matching value for their ``name`` attribute will be used.
+    # > List(String)
+    names = NULL,
+    # Whether tooltip's arrow should appear in the horizontal or vertical
+    # dimension.
+    # > Enum('horizontal', 'vertical')
+    attachment = NULL,
     # The (name, field) pairs describing what the hover tool should display
     # when there is a hit.
     #
@@ -9896,13 +11876,11 @@ HoverTool <- R6::R6Class("HoverTool",
     # the visual presentation order is unspecified.
     # > Either(String, List(Tuple(String, String)))
     tooltips = NULL,
-    # Whether tooltip's arrow should be showed.
-    # > Bool
-    show_arrow = NULL,
-    # Whether tooltip's arrow should appear in the horizontal or vertical
-    # dimension.
-    # > Enum('horizontal', 'vertical')
-    attachment = NULL,
+    # If point policy is set to `"snap_to_data"`, `anchor` defines the
+    # attachment point of a tooltip. The default is to attach to the center
+    # of a glyph.
+    # > Enum('top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right')
+    anchor = NULL,
     # Specify the formatting scheme for data source columns, e.g.
     #
     # .. code-block:: python
@@ -9935,550 +11913,33 @@ HoverTool <- R6::R6Class("HoverTool",
     # |PrintfTickFormatter| replace::
     # :class:`~bokeh.models.formatters.PrintfTickFormatter`
     # > Dict(String, Enum('numeral', 'datetime', 'printf'))
-    formatters = NULL,
-    # Whether the tooltip position should snap to the "center" (or other
-    # anchor) position of the associated glyph, or always follow the current
-    # mouse cursor position.
-    # > Enum('snap_to_data', 'follow_mouse', 'none')
-    point_policy = NULL,
-    # If point policy is set to `"snap_to_data"`, `anchor` defines the
-    # attachment point of a tooltip. The default is to attach to the center
-    # of a glyph.
-    # > Enum('top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right')
-    anchor = NULL,
-    # An explicit list of renderers to hit test again. If unset, defaults to
-    # all renderers on a plot.
-    # > List(Instance(Renderer))
-    renderers = NULL
+    formatters = NULL
   )
 )
 
-# Render annular wedges.
+# A fixed, closed range [start, end] in a continuous scalar dimension.
 #
-# Example -------
+# In addition to supplying ``start`` and ``end`` keyword arguments to the
+# ``Range1d`` initializer, you can also instantiate with the convenience
+# syntax::
 #
-# .. bokeh-plot:: ../tests/glyphs/AnnularWedge.py :source-position: below
-AnnularWedge <- R6::R6Class("AnnularWedge",
-  inherit = Glyph,
+# Range(0, 10) # equivalent to Range(start=0, end=10)
+Range1d <- R6::R6Class("Range1d",
+  inherit = Range,
   public = list(
     specified_args = NULL,
     initialize = function(
-      start_angle = NULL, name = NULL, fill_alpha = 1, end_angle_units = "rad",
-      line_color = "black", subscribed_events = list(), tags = list(),
-      fill_color = "gray", inner_radius = NULL, line_alpha = 1,
-      outer_radius = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), outer_radius_units = "data",
-      inner_radius_units = "data", end_angle = NULL,
-      start_angle_units = "rad", direction = "anticlock", line_width = 1L,
-      line_dash = list(), line_dash_offset = 0L, y = NULL, line_join = "miter",
+      bounds = NULL, subscribed_events = list(), tags = list(),
       js_property_callbacks = structure(list(), .Names = character(0)),
-      line_cap = "butt", x = NULL, id = NULL
+      callback = NULL, name = NULL, js_event_callbacks = structure(list(),
+      .Names = character(0)), min_interval = NULL, end = 1L,
+      max_interval = NULL, start = 0L, id = NULL
     ) {
       super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["AnnularWedge"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The angles to start the annular wedges, as measured from the
-    # horizontal.
-    # > AngleSpec(units_default='rad')
-    start_angle = NULL,
-    # The fill alpha values for the annular wedges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    #
-    # > Enum('deg', 'rad')
-    end_angle_units = NULL,
-    # The line color values for the annular wedges.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The fill color values for the annular wedges.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The inner radii of the annular wedges.
-    # > DistanceSpec(units_default='data')
-    inner_radius = NULL,
-    # The line alpha values for the annular wedges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The outer radii of the annular wedges.
-    # > DistanceSpec(units_default='data')
-    outer_radius = NULL,
-    #
-    # > Enum('screen', 'data')
-    outer_radius_units = NULL,
-    #
-    # > Enum('screen', 'data')
-    inner_radius_units = NULL,
-    # The angles to end the annular wedges, as measured from the horizontal.
-    # > AngleSpec(units_default='rad')
-    end_angle = NULL,
-    #
-    # > Enum('deg', 'rad')
-    start_angle_units = NULL,
-    # Which direction to stroke between the start and end angles.
-    # > Enum('clock', 'anticlock')
-    direction = NULL,
-    # The line width values for the annular wedges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the annular wedges.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the annular wedges.
-    # > Int
-    line_dash_offset = NULL,
-    # The y-coordinates of the center of the annular wedges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The line join values for the annular wedges.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The line cap values for the annular wedges.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates of the center of the annular wedges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
-  )
-)
-
-# A base class for all tile source types.
-#
-# In general, tile sources are used as a required input for
-# ``TileRenderer``.
-TileSource <- R6::R6Class("TileSource",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      y_origin_offset = NULL, max_zoom = 30L,
-      extra_url_vars = structure(list(), .Names = character(0)),
-      name = NULL, attribution = "", initial_resolution = NULL,
-      x_origin_offset = NULL, subscribed_events = list(), tags = list(),
-      min_zoom = 0L, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), tile_size = 256L, url = "", id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["TileSource"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A y-offset in plot coordinates
-    # > Float
-    y_origin_offset = NULL,
-    # A maximum zoom level for the tile layer. This is the most zoomed-in
-    # level.
-    # > Int
-    max_zoom = NULL,
-    # A dictionary that maps url variable template keys to values.
-    #
-    # These variables are useful for parts of tile urls which do not change
-    # from tile to tile (e.g. server host name, or layer name).
-    # > Dict(String, Any)
-    extra_url_vars = NULL,
-    # Data provider attribution content. This can include HTML content.
-    # > String
-    attribution = NULL,
-    # Resolution (plot_units / pixels) of minimum zoom level of tileset
-    # projection. None to auto-compute.
-    # > Float
-    initial_resolution = NULL,
-    # An x-offset in plot coordinates
-    # > Float
-    x_origin_offset = NULL,
-    # A minimum zoom level for the tile layer. This is the most zoomed-out
-    # level.
-    # > Int
-    min_zoom = NULL,
-    # Tile size in pixels (e.g. 256)
-    # > Int
-    tile_size = NULL,
-    # Tile service url e.g., http://c.tile.openstreetmap.org/{Z}/{X}/{Y}.png
-    # > String
-    url = NULL
-  )
-)
-
-# A base class for all tick formatter types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-TickFormatter <- R6::R6Class("TickFormatter",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["TickFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# A container for space used to fill an empty spot in a row or column.
-Spacer <- R6::R6Class("Spacer",
-  inherit = LayoutDOM,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Spacer"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# An abstract base class for data renderer types (e.g. ``GlyphRenderer``,
-# ``TileRenderer``).
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-DataRenderer <- R6::R6Class("DataRenderer",
-  inherit = Renderer,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      visible = TRUE, js_property_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, js_event_callbacks = structure(list(),
-      .Names = character(0)), level = "image", subscribed_events = list(),
-      tags = list(), id = NULL
-    ) {
-      super$initialize(visible = visible,
-        js_property_callbacks = js_property_callbacks, name = name,
-        js_event_callbacks = js_event_callbacks, level = level,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["DataRenderer"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render vertical bars, given a center coordinate, width and (top,
-# bottom) coordinates.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/VBar.py :source-position: below
-VBar <- R6::R6Class("VBar",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      bottom = 0L, name = NULL, top = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_dash_offset = 0L, line_color = "black",
-      line_join = "miter", fill_color = "gray", width = NULL,
-      subscribed_events = list(), line_alpha = 1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      tags = list(), line_cap = "butt", x = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["VBar"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The y-coordinates of the bottom edges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    bottom = NULL,
-    # The y-coordinates of the top edges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    top = NULL,
-    # The line width values for the vertical bars.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The fill alpha values for the vertical bars.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The line dash values for the vertical bars.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the vertical bars.
-    # > Int
-    line_dash_offset = NULL,
-    # The line color values for the vertical bars.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line join values for the vertical bars.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The fill color values for the vertical bars.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The widths of the vertical bars.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    width = NULL,
-    # The line alpha values for the vertical bars.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line cap values for the vertical bars.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates of the centers of the vertical bars.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
-  )
-)
-
-# Render circle markers with an 'X' cross through the center.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/CircleX.py :source-position: below
-CircleX <- R6::R6Class("CircleX",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["CircleX"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# *toolbar icon*: |reset_icon|
-#
-# The reset tool is an action. When activated in the toolbar, the tool
-# resets the data bounds of the plot to their values when the plot was
-# initially created.
-#
-# Optionally, the reset tool also resets the plat canvas dimensions to
-# their original size
-#
-# .. |reset_icon| image:: /_images/icons/Reset.png :height: 18pt
-ResetTool <- R6::R6Class("ResetTool",
-  inherit = Action,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      reset_size = TRUE, js_property_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, js_event_callbacks = structure(list(),
-      .Names = character(0)), plot = NULL, subscribed_events = list(),
-      tags = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["ResetTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Whether activating the Reset tool should also reset the plot's canvas
-    # dimensions to their original size.
-    # > Bool
-    reset_size = NULL
-  )
-)
-
-# Render asterisk '*' markers.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Asterisk.py :source-position: below
-Asterisk <- R6::R6Class("Asterisk",
-  inherit = Marker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 4L, name = NULL, line_width = 1L, fill_alpha = 1,
-      line_dash = list(), line_color = "black", line_dash_offset = 0L,
-      y = NULL, fill_color = "gray", line_join = "miter", angle_units = "rad",
-      line_alpha = 1, subscribed_events = list(),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      angle = 0, line_cap = "butt", x = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(size = size, name = name, line_width = line_width,
-        fill_alpha = fill_alpha, line_dash = line_dash,
-        line_color = line_color, line_dash_offset = line_dash_offset, y = y,
-        fill_color = fill_color, line_join = line_join,
-        angle_units = angle_units, line_alpha = line_alpha,
-        subscribed_events = subscribed_events,
-        js_event_callbacks = js_event_callbacks,
-        js_property_callbacks = js_property_callbacks, angle = angle,
-        line_cap = line_cap, x = x, tags = tags, id = id)
-      types <- bk_prop_types[["Asterisk"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render a tee-style arrow head.
-TeeHead <- R6::R6Class("TeeHead",
-  inherit = ArrowHead,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      size = 25L, visible = TRUE, name = NULL, line_width = 1L,
-      level = "annotation", line_dash = list(), line_dash_offset = 0L,
-      line_color = "black", line_join = "miter", plot = NULL, tags = list(),
-      line_alpha = 1, js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), line_cap = "butt", subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["TeeHead"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The size, in pixels, of the arrow head.
-    # > Float
-    size = NULL,
-    # The line width values for the arrow head outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the arrow head outline.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the arrow head outline.
-    # > Int
-    line_dash_offset = NULL,
-    # The line color values for the arrow head outline.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The line join values for the arrow head outline.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The line alpha values for the arrow head outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line cap values for the arrow head outline.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL
-  )
-)
-
-# The ``WMTSTileSource`` behaves much like ``TMSTileSource`` but has its
-# tile-origin in the top-left.
-#
-# This is the most common used tile source for web mapping applications.
-# Such companies as Google, MapQuest, Stamen, Esri, and OpenStreetMap
-# provide service which use the WMTS specification e.g.
-# ``http://c.tile.openstreetmap.org/{Z}/{X}/{Y}.png``.
-WMTSTileSource <- R6::R6Class("WMTSTileSource",
-  inherit = MercatorTileSource,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      y_origin_offset = 20037508.34, max_zoom = 30L,
-      extra_url_vars = structure(list(), .Names = character(0)),
-      name = NULL, attribution = "", wrap_around = TRUE,
-      x_origin_offset = 20037508.34, subscribed_events = list(),
-      tags = list(), min_zoom = 0L, js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), url = "", tile_size = 256L,
-      initial_resolution = 156543.033928041, id = NULL
-    ) {
-      super$initialize(y_origin_offset = y_origin_offset,
-        max_zoom = max_zoom, extra_url_vars = extra_url_vars, name = name,
-        attribution = attribution, wrap_around = wrap_around,
-        x_origin_offset = x_origin_offset,
         subscribed_events = subscribed_events, tags = tags,
-        min_zoom = min_zoom, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, url = url,
-        tile_size = tile_size, initial_resolution = initial_resolution,
-        id = id)
-      types <- bk_prop_types[["WMTSTileSource"]]
+        js_property_callbacks = js_property_callbacks, callback = callback,
+        name = name, id = id)
+      types <- bk_prop_types[["Range1d"]]
       for (nm in names(types)) {
         private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
       }
@@ -10486,1561 +11947,44 @@ WMTSTileSource <- R6::R6Class("WMTSTileSource",
     }
   ),
   private = list(
-
-  )
-)
-
-# The QUADKEYTileSource has the same tile origin as the WMTSTileSource
-# but requests tiles using a `quadkey` argument instead of X, Y, Z e.g.
-# ``http://your.quadkey.tile.host/{Q}.png``
-QUADKEYTileSource <- R6::R6Class("QUADKEYTileSource",
-  inherit = MercatorTileSource,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      y_origin_offset = 20037508.34, max_zoom = 30L,
-      extra_url_vars = structure(list(), .Names = character(0)),
-      name = NULL, attribution = "", wrap_around = TRUE,
-      x_origin_offset = 20037508.34, subscribed_events = list(),
-      tags = list(), min_zoom = 0L, js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), url = "", tile_size = 256L,
-      initial_resolution = 156543.033928041, id = NULL
-    ) {
-      super$initialize(y_origin_offset = y_origin_offset,
-        max_zoom = max_zoom, extra_url_vars = extra_url_vars, name = name,
-        attribution = attribution, wrap_around = wrap_around,
-        x_origin_offset = x_origin_offset,
-        subscribed_events = subscribed_events, tags = tags,
-        min_zoom = min_zoom, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, url = url,
-        tile_size = tile_size, initial_resolution = initial_resolution,
-        id = id)
-      types <- bk_prop_types[["QUADKEYTileSource"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# A base class for non-categorical ticker types.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-ContinuousTicker <- R6::R6Class("ContinuousTicker",
-  inherit = Ticker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      desired_num_ticks = 6L, num_minor_ticks = 5L,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, subscribed_events = list(), tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["ContinuousTicker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A desired target number of major tick positions to generate across the
-    # plot range.
+    # The bounds that the range is allowed to go to - typically used to
+    # prevent the user from panning/zooming/etc away from the data.
     #
-    # .. note: This value is a suggestion, and ticker subclasses may ignore
-    # it entirely, or use it only as an ideal goal to approach as well as can
-    # be, in the context of a specific ticking strategy.
-    # > Int
-    desired_num_ticks = NULL,
-    # The number of minor tick positions to generate between adjacent major
-    # tick values.
-    # > Int
-    num_minor_ticks = NULL
-  )
-)
-
-# A base class for different toolbars.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-ToolbarBase <- R6::R6Class("ToolbarBase",
-  inherit = LayoutDOM,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = NULL, width = NULL, height = NULL,
-      subscribed_events = list(), tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      logo = "normal", tools = list(), disabled = FALSE, css_classes = NULL,
-      id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["ToolbarBase"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # What version of the Bokeh logo to display on the toolbar. If set to
-    # None, no logo will be displayed.
-    # > Enum('normal', 'grey')
-    logo = NULL,
-    # A list of tools to add to the plot.
-    # > List(Instance(Tool))
-    tools = NULL
-  )
-)
-
-# *toolbar icon*: |lasso_select_icon|
-#
-# The lasso selection tool allows users to make selections on a Plot by
-# indicating a free-drawn "lasso" region by dragging the mouse or a
-# finger over the plot region. The end of the drag event indicates the
-# selection region is ready.
-#
-# See :ref:`userguide_styling_selected_unselected_glyphs` for information
-# on styling selected and unselected glyphs.
-#
-# .. note:: Selections can be comprised of multiple regions, even those
-# made by different selection tools. Hold down the <<shift>> key while
-# making a selection to append the new selection to any previous
-# selection that might exist.
-#
-# .. |lasso_select_icon| image:: /_images/icons/LassoSelect.png :height:
-# 18pt
-LassoSelectTool <- R6::R6Class("LassoSelectTool",
-  inherit = Drag,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback = NULL, name = NULL, names = list(),
-      select_every_mousemove = TRUE, subscribed_events = list(),
-      tags = list(), js_property_callbacks = structure(list(), .Names =
-      character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, overlay = NULL, renderers = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["LassoSelectTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A callback to run in the browser on every selection of a lasso area.
-    # The cb_data parameter that is available to the Callback code will
-    # contain one LassoSelectTool-specific field:
+    # If set to ``'auto'``, the bounds will be computed to the start and end
+    # of the Range.
     #
-    # :geometry: object containing the coordinates of the lasso area
-    # > Instance(Callback)
-    callback = NULL,
-    # A list of names to query for. If set, only renderers that have a
-    # matching value for their ``name`` attribute will be used.
-    # > List(String)
-    names = NULL,
-    # Whether a selection computation should happen on every mouse event, or
-    # only once, when the selection region is completed. Default: True
-    # > Bool
-    select_every_mousemove = NULL,
-    # A shaded annotation drawn to indicate the selection region.
-    # > Instance(PolyAnnotation)
-    overlay = NULL,
-    # An explicit list of renderers to hit test again. If unset, defaults to
-    # all renderers on a plot.
-    # > List(Instance(Renderer))
-    renderers = NULL
-  )
-)
-
-# Combine different tickers at different scales.
-#
-# Uses the ``min_interval`` and ``max_interval`` interval attributes of
-# the tickers to select the appropriate ticker at different scales.
-CompositeTicker <- R6::R6Class("CompositeTicker",
-  inherit = ContinuousTicker,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      tickers = list(), num_minor_ticks = 5L, name = NULL, tags = list(),
-      desired_num_ticks = 6L, js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(desired_num_ticks = desired_num_ticks,
-        num_minor_ticks = num_minor_ticks,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, name = name,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["CompositeTicker"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A list of Ticker objects to combine at different scales in order to
-    # generate tick values. The supplied tickers should be in order.
-    # Specifically, if S comes before T, then it should be the case that::
+    # Bounds are provided as a tuple of ``(min, max)`` so regardless of
+    # whether your range is increasing or decreasing, the first item should
+    # be the minimum value of the range and the second item should be the
+    # maximum. Setting min > max will result in a ``ValueError``.
     #
-    # S.get_max_interval() < T.get_min_interval()
-    # > Seq(Instance(Ticker))
-    tickers = NULL
-  )
-)
-
-# Render images given as RGBA data.
-ImageRGBA <- R6::R6Class("ImageRGBA",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      cols = NULL, dh = NULL, name = NULL, dilate = FALSE, rows = NULL,
-      subscribed_events = list(), y = NULL, dh_units = "data",
-      dw_units = "data", tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      image = NULL, x = NULL, dw = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["ImageRGBA"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The numbers of columns in the images
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    cols = NULL,
-    # The height of the plot region that the image will occupy.
+    # By default, bounds are ``None`` and your plot to pan/zoom as far as you
+    # want. If you only want to constrain one end of the plot, you can set
+    # min or max to None.
     #
-    # .. note:: This is not the number of pixels that an image is tall.  That
-    # number is fixed by the image itself.
-    # > DistanceSpec(units_default='data')
-    dh = NULL,
-    # Whether to always round fractional pixel locations in such a way as to
-    # make the images bigger.
+    # Examples:
     #
-    # This setting may be useful if pixel rounding errors are causing images
-    # to have a gap between them, when they should appear flush.
-    # > Bool
-    dilate = NULL,
-    # The numbers of rows in the images
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    rows = NULL,
-    # The y-coordinates to locate the image anchors.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    #
-    # > Enum('screen', 'data')
-    dh_units = NULL,
-    #
-    # > Enum('screen', 'data')
-    dw_units = NULL,
-    # The arrays of RGBA data for the images.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    image = NULL,
-    # The x-coordinates to locate the image anchors.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL,
-    # The widths of the plot regions that the images will occupy.
-    #
-    # .. note:: This is not the number of pixels that an image is wide.  That
-    # number is fixed by the image itself.
-    # > DistanceSpec(units_default='data')
-    dw = NULL
-  )
-)
-
-# Number cell formatter.
-NumberFormatter <- R6::R6Class("NumberFormatter",
-  inherit = StringFormatter,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      text_color = NULL, language = "en", name = NULL,
-      subscribed_events = list(), tags = list(), font_style = "normal",
-      format = "0,0", rounding = "round",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      text_align = "left", id = NULL
-    ) {
-      super$initialize(text_color = text_color, name = name,
-        subscribed_events = subscribed_events, tags = tags,
-        font_style = font_style,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, text_align = text_align,
-        id = id)
-      types <- bk_prop_types[["NumberFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The language to use for formatting language-specific features (e.g.
-    # thousands separator).
-    # > Enum('be-nl', 'chs', 'cs', 'da-dk', 'de-ch', 'de', 'en', 'en-gb', 'es-ES', 'es', 'et', 'fi', 'fr-CA', 'fr-ch', 'fr', 'hu', 'it', 'ja', 'nl-nl', 'pl', 'pt-br', 'pt-pt', 'ru', 'ru-UA', 'sk', 'th', 'tr', 'uk-UA')
-    language = NULL,
-    # The number format, as defined in the following tables:
-    #
-    # **NUMBERS**:
-    #
-    # ============ ============== =============== Number Format String
-    # ============ ============== =============== 10000 '0,0.0000'
-    # 10,000.0000 10000.23 '0,0' 10,000 10000.23 '+0,0' +10,000 -10000
-    # '0,0.0' -10,000.0 10000.1234 '0.000' 10000.123 10000.1234 '0[.]00000'
-    # 10000.12340 -10000 '(0,0.0000)' (10,000.0000) -0.23 '.00' -.23 -0.23
-    # '(.00)' (.23) 0.23 '0.00000' 0.23000 0.23 '0.0[0000]' 0.23 1230974
-    # '0.0a' 1.2m 1460 '0 a' 1 k -104000 '0a' -104k 1 '0o' 1st 52 '0o' 52nd
-    # 23 '0o' 23rd 100 '0o' 100th ============ ============== ===============
-    #
-    # **CURRENCY**:
-    #
-    # =========== =============== ============= Number Format String
-    # =========== =============== ============= 1000.234 '$0,0.00' $1,000.23
-    # 1000.2 '0,0[.]00 $' 1,000.20 $ 1001 '$ 0,0[.]00' $ 1,001 -1000.234
-    # '($0,0)' ($1,000) -1000.234 '$0.00' -$1000.23 1230974 '($ 0.00 a)' $
-    # 1.23 m =========== =============== =============
-    #
-    # **BYTES**:
-    #
-    # =============== =========== ============ Number Format String
-    # =============== =========== ============ 100 '0b' 100B 2048 '0 b' 2 KB
-    # 7884486213 '0.0b' 7.3GB 3467479682787 '0.000 b' 3.154 TB
-    # =============== =========== ============
-    #
-    # **PERCENTAGES**:
-    #
-    # ============= ============= =========== Number Format String
-    # ============= ============= =========== 1 '0%' 100% 0.974878234
-    # '0.000%' 97.488% -0.43 '0 %' -43 % 0.43 '(0.000 %)' 43.000 %
-    # ============= ============= ===========
-    #
-    # **TIME**:
-    #
-    # ============ ============== ============ Number Format String
-    # ============ ============== ============ 25 '00:00:00' 0:00:25 238
-    # '00:00:00' 0:03:58 63846 '00:00:00' 17:44:06 ============
-    # ============== ============
-    #
-    # For the complete specification, see http://numbrojs.com/format.html
-    # > String
-    format = NULL,
-    # Rounding functions (round, floor, ceil) and their synonyms (nearest,
-    # rounddown, roundup).
-    # > Enum('round', 'nearest', 'floor', 'rounddown', 'ceil', 'roundup')
-    rounding = NULL
-  )
-)
-
-# Boolean value cell editor.
-CheckboxEditor <- R6::R6Class("CheckboxEditor",
-  inherit = CellEditor,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["CheckboxEditor"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Tick formatter based on a printf-style format string.
-PrintfTickFormatter <- R6::R6Class("PrintfTickFormatter",
-  inherit = TickFormatter,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      format = "%s", js_property_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), tags = list(),
-      id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["PrintfTickFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The number format, as defined as follows: the placeholder in the format
-    # string is marked by % and is followed by one or more of these elements,
-    # in this order:
-    #
-    # * An optional ``+`` sign Causes the result to be preceded with a plus
-    # or minus sign on numeric values. By default, only the ``-`` sign is
-    # used on negative numbers.
-    #
-    # * An optional padding specifier Specifies what (if any) character to
-    # use for padding. Possible values are 0 or any other character preceded
-    # by a ``'`` (single quote). The default is to pad with spaces.
-    #
-    # * An optional ``-`` sign Causes sprintf to left-align the result of
-    # this placeholder. The default is to right-align the result.
-    #
-    # * An optional number Specifies how many characters the result should
-    # have. If the value to be returned is shorter than this number, the
-    # result will be padded.
-    #
-    # * An optional precision modifier Consists of a ``.`` (dot) followed by
-    # a number, specifies how many digits should be displayed for floating
-    # point numbers. When used on a string, it causes the result to be
-    # truncated.
-    #
-    # * A type specifier Can be any of:
-    #
-    # - ``%`` --- yields a literal ``%`` character - ``b`` --- yields an
-    # integer as a binary number - ``c`` --- yields an integer as the
-    # character with that ASCII value - ``d`` or ``i`` --- yields an integer
-    # as a signed decimal number - ``e`` --- yields a float using scientific
-    # notation - ``u`` --- yields an integer as an unsigned decimal number -
-    # ``f`` --- yields a float as is - ``o`` --- yields an integer as an
-    # octal number - ``s`` --- yields a string as is - ``x`` --- yields an
-    # integer as a hexadecimal number (lower-case) - ``X`` --- yields an
-    # integer as a hexadecimal number (upper-case)
-    # > String
-    format = NULL
-  )
-)
-
-# Basic string cell formatter.
-StringFormatter <- R6::R6Class("StringFormatter",
-  inherit = CellFormatter,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      text_color = NULL, name = NULL, subscribed_events = list(),
-      tags = list(), font_style = "normal",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      text_align = "left", id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["StringFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # An optional text color. See :class:`bokeh.core.properties.Color` for
-    # details.
-    # > Color
-    text_color = NULL,
-    # An optional text font style, e.g. bold, italic.
-    # > Enum('normal', 'italic', 'bold')
-    font_style = NULL,
-    # An optional text align, i.e. left, center or right.
-    # > Enum('left', 'right', 'center')
-    text_align = NULL
-  )
-)
-
-# Render images loaded from given URLs.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/ImageURL.py :source-position: below
-ImageURL <- R6::R6Class("ImageURL",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      h = NULL, retry_attempts = 0L, name = NULL, retry_timeout = 0L,
-      dilate = FALSE, url = NULL, subscribed_events = list(), y = NULL,
-      global_alpha = 1, angle_units = "rad", tags = list(),
-      anchor = "top_left", js_property_callbacks = structure(list(), .Names
-      = character(0)), js_event_callbacks = structure(list(), .Names =
-      character(0)), angle = 0L, w_units = "data", x = NULL, w = NULL,
-      h_units = "data", id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["ImageURL"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The height of the plot region that the image will occupy in data space.
-    #
-    # The default value is ``None``, in which case the image will be
-    # displayed at its actual image size (regardless of the units specified
-    # here).
-    # > DistanceSpec(units_default='data')
-    h = NULL,
-    # Number of attempts to retry loading the images from the specified URL.
-    # Default is zero.
-    # > Int
-    retry_attempts = NULL,
-    # Timeout (in ms) between retry attempts to load the image from the
-    # specified URL. Default is zero ms.
-    # > Int
-    retry_timeout = NULL,
-    # Whether to always round fractional pixel locations in such a way as to
-    # make the images bigger.
-    #
-    # This setting may be useful if pixel rounding errors are causing images
-    # to have a gap between them, when they should appear flush.
-    # > Bool
-    dilate = NULL,
-    # The URLs to retrieve images from.
-    #
-    # .. note:: The actual retrieving and loading of the images happens on
-    # the client.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    url = NULL,
-    # The y-coordinates to locate the image anchors.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # An overall opacity that each image is rendered with (in addition to any
-    # inherent alpha values in the image itself).
-    # > Float
-    global_alpha = NULL,
-    #
-    # > Enum('deg', 'rad')
-    angle_units = NULL,
-    # What position of the image should be anchored at the `x`, `y`
-    # coordinates.
-    # > Enum('top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right')
-    anchor = NULL,
-    # The angles to rotate the images, as measured from the horizontal.
-    # > AngleSpec(units_default='rad')
-    angle = NULL,
-    #
-    # > Enum('screen', 'data')
-    w_units = NULL,
-    # The x-coordinates to locate the image anchors.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL,
-    # The height of the plot region that the image will occupy in data space.
-    #
-    # The default value is ``None``, in which case the image will be
-    # displayed at its actual image size (regardless of the units specified
-    # here).
-    # > DistanceSpec(units_default='data')
-    w = NULL,
-    #
-    # > Enum('screen', 'data')
-    h_units = NULL
-  )
-)
-
-# Render wedges.
-#
-# Example -------
-#
-# .. bokeh-plot:: ../tests/glyphs/Wedge.py :source-position: below
-Wedge <- R6::R6Class("Wedge",
-  inherit = Glyph,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      start_angle = NULL, name = NULL, fill_alpha = 1, end_angle_units = "rad",
-      line_color = "black", subscribed_events = list(), radius = NULL,
-      fill_color = "gray", tags = list(), line_alpha = 1,
-      radius_units = "data", js_event_callbacks = structure(list(), .Names
-      = character(0)), end_angle = NULL, start_angle_units = "rad",
-      direction = "anticlock", line_width = 1L, line_dash = list(),
-      line_dash_offset = 0L, y = NULL, line_join = "miter",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      line_cap = "butt", x = NULL, id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Wedge"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The angles to start the wedges, as measured from the horizontal.
-    # > AngleSpec(units_default='rad')
-    start_angle = NULL,
-    # The fill alpha values for the wedges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    #
-    # > Enum('deg', 'rad')
-    end_angle_units = NULL,
-    # The line color values for the wedges.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # Radii of the wedges.
-    # > DistanceSpec(units_default='data')
-    radius = NULL,
-    # The fill color values for the wedges.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line alpha values for the wedges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    #
-    # > Enum('screen', 'data')
-    radius_units = NULL,
-    # The angles to end the wedges, as measured from the horizontal.
-    # > AngleSpec(units_default='rad')
-    end_angle = NULL,
-    #
-    # > Enum('deg', 'rad')
-    start_angle_units = NULL,
-    # Which direction to stroke between the start and end angles.
-    # > Enum('clock', 'anticlock')
-    direction = NULL,
-    # The line width values for the wedges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The line dash values for the wedges.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the wedges.
-    # > Int
-    line_dash_offset = NULL,
-    # The y-coordinates of the points of the wedges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    y = NULL,
-    # The line join values for the wedges.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # The line cap values for the wedges.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The x-coordinates of the points of the wedges.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    x = NULL
-  )
-)
-
-# *toolbar icon*: |zoom_out_icon|
-#
-# The zoom-out tool allows users to click a button to zoom out by a fixed
-# amount.
-#
-# .. |zoom_out_icon| image:: /_images/icons/ZoomOut.png :height: 18pt
-ZoomOutTool <- R6::R6Class("ZoomOutTool",
-  inherit = Action,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, tags = list(), factor = 0.1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      dimensions = "both", js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["ZoomOutTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Percentage to zoom for each click of the zoom-in tool.
-    # > Percent
-    factor = NULL,
-    # Which dimensions the zoom-out tool is constrained to act in. By default
-    # the zoom-out tool will zoom in any dimension, but can be configured to
-    # only zoom horizontally across the width of the plot, or vertically
-    # across the height of the plot.
-    # > Enum('width', 'height', 'both')
-    dimensions = NULL
-  )
-)
-
-# Abstract base class for data table's cell formatters.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-CellFormatter <- R6::R6Class("CellFormatter",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["CellFormatter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Apply either a uniform or normally sampled random jitter to data.
-Jitter <- R6::R6Class("Jitter",
-  inherit = Transform,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, mean = 0L, width = 1L, tags = list(),
-      distribution = "uniform", js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["Jitter"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The central value for the random sample
-    # > Float
-    mean = NULL,
-    # The width (absolute for uniform distribution and sigma for the normal
-    # distribution) of the random sample.
-    # > Float
-    width = NULL,
-    # The random distribution upon which to pull the random scatter
-    # > Enum('uniform', 'normal')
-    distribution = NULL
-  )
-)
-
-# *toolbar icon*: |redo_icon|
-#
-# Redo tool reverses the last action performed by undo tool.
-#
-# .. |redo_icon| image:: /_images/icons/Redo.png :height: 18pt
-RedoTool <- R6::R6Class("RedoTool",
-  inherit = Action,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["RedoTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Abstract base class for data table's cell editors.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-CellEditor <- R6::R6Class("CellEditor",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      subscribed_events = list(), js_property_callbacks = structure(list(),
-      .Names = character(0)), name = NULL, tags = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["CellEditor"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Abstract base class for groups with items rendered as buttons.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-ButtonGroup <- R6::R6Class("ButtonGroup",
-  inherit = AbstractGroup,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback = NULL, name = NULL, sizing_mode = "fixed", width = NULL,
-      height = NULL, tags = list(), button_type = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      labels = list(), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(callback = callback, name = name,
-        sizing_mode = sizing_mode, width = width, height = height, tags = tags,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, labels = labels,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["ButtonGroup"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A style for the button, signifying it's role.
-    # > Enum('default', 'primary', 'success', 'warning', 'danger', 'link')
-    button_type = NULL
-  )
-)
-
-# Table column widget.
-TableColumn <- R6::R6Class("TableColumn",
-  inherit = Model,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      editor = NULL, formatter = NULL, field = NULL, name = NULL,
-      sortable = TRUE, title = NULL, width = 300L, tags = list(),
-      default_sort = "ascending", js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["TableColumn"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The cell editor for this column. By default, a simple string editor is
-    # used.
-    # > Instance(CellEditor)
-    editor = NULL,
-    # The cell formatter for this column. By default, a simple string
-    # formatter is used.
-    # > Instance(CellFormatter)
-    formatter = NULL,
-    # The name of the field mapping to a column in the data source.
-    # > String
-    field = NULL,
-    # Whether this column is sortable or not. Note that data table has to
-    # have sorting enabled to allow sorting in general.
-    # > Bool
-    sortable = NULL,
-    # The title of this column. If not set, column's data field is used
-    # instead.
-    # > String
-    title = NULL,
-    # The width or maximum width (depending on data table's configuration) in
-    # pixels of this column.
-    # > Int
-    width = NULL,
-    # The default sorting order. By default ``ascending`` order is used.
-    # > Enum('ascending', 'descending')
-    default_sort = NULL
-  )
-)
-
-# Spinner-based number cell editor.
-NumberEditor <- R6::R6Class("NumberEditor",
-  inherit = CellEditor,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      step = 0.01, js_event_callbacks = structure(list(), .Names =
-      character(0)), name = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
-    ) {
-      super$initialize(js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events,
-        js_property_callbacks = js_property_callbacks, name = name,
-        tags = tags, id = id)
-      types <- bk_prop_types[["NumberEditor"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The major step value.
-    # > Float
-    step = NULL
-  )
-)
-
-# *toolbar icon*: |resize_icon|
-#
-# The resize tool allows the user to left-drag a mouse or drag a finger
-# to resize the entire plot area on the screen.
-#
-# .. |resize_icon| image:: /_images/icons/Resize.png :height: 18pt
-ResizeTool <- R6::R6Class("ResizeTool",
-  inherit = Drag,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["ResizeTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# A button tool to provide a "help" link to users.
-#
-# The hover text can be customized through the ``help_tooltip`` attribute
-# and the redirect site overridden as well.
-HelpTool <- R6::R6Class("HelpTool",
-  inherit = Action,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL,
-      redirect = "http://bokeh.pydata.org/en/latest/docs/user_guide/tools.html#built-in-tools",
-      help_tooltip = "Click the question mark to learn more about Bokeh
-      plot tools.", tags = list(),
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["HelpTool"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # Site to be redirected through upon click.
-    # > String
-    redirect = NULL,
-    # Tooltip displayed when hovering over the help icon.
-    # > String
-    help_tooltip = NULL
-  )
-)
-
-# A two-state toggle button.
-Toggle <- R6::R6Class("Toggle",
-  inherit = AbstractButton,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      callback = NULL, name = NULL, label = "Toggle", disabled = FALSE,
-      sizing_mode = "fixed", width = NULL, height = NULL, tags = list(),
-      button_type = "default", js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), active = FALSE, subscribed_events = list(),
-      icon = NULL, css_classes = NULL, id = NULL
-    ) {
-      super$initialize(callback = callback, name = name, label = label,
-        disabled = disabled, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags, button_type = button_type,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, icon = icon,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Toggle"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The initial state of a button. Also used to trigger ``on_click`` event
-    # handler.
-    # > Bool
-    active = NULL
-  )
-)
-
-# Render a shaded polygonal region as an annotation.
-PolyAnnotation <- R6::R6Class("PolyAnnotation",
-  inherit = Annotation,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, x_range_name = "default", fill_alpha = 0.4, xs = list(),
-      level = "annotation", ys_units = "data", line_color = "#cccccc",
-      tags = list(), fill_color = "#fff9ba", line_alpha = 0.3,
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      visible = TRUE, line_cap = "butt", line_width = 1L, xs_units = "data",
-      ys = list(), line_dash = list(), line_dash_offset = 0L,
-      line_join = "miter", y_range_name = "default",
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      plot = NULL, subscribed_events = list(), id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["PolyAnnotation"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # A particular (named) x-range to use for computing screen locations when
-    # rendering box annotations on the plot. If unset, use the default
-    # x-range.
-    # > String
-    x_range_name = NULL,
-    # The fill alpha values for the polygon.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    fill_alpha = NULL,
-    # The x-coordinates of the region to draw.
-    # > Seq(Float)
-    xs = NULL,
-    # The unit type for the ys attribute. Interpreted as "data space" units
-    # by default.
-    # > Enum('screen', 'data')
-    ys_units = NULL,
-    # The line color values for the polygon.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    line_color = NULL,
-    # The fill color values for the polygon.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    fill_color = NULL,
-    # The line alpha values for the polygon.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_alpha = NULL,
-    # The line cap values for the polygon.
-    # > Enum('butt', 'round', 'square')
-    line_cap = NULL,
-    # The line width values for the polygon.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    line_width = NULL,
-    # The unit type for the xs attribute. Interpreted as "data space" units
-    # by default.
-    # > Enum('screen', 'data')
-    xs_units = NULL,
-    # The y-coordinates of the region to draw.
-    # > Seq(Float)
-    ys = NULL,
-    # The line dash values for the polygon.
-    # > DashPattern
-    line_dash = NULL,
-    # The line dash offset values for the polygon.
-    # > Int
-    line_dash_offset = NULL,
-    # The line join values for the polygon.
-    # > Enum('miter', 'round', 'bevel')
-    line_join = NULL,
-    # A particular (named) y-range to use for computing screen locations when
-    # rendering box annotations on the plot. If unset, use the default
-    # y-range.
-    # > String
-    y_range_name = NULL
-  )
-)
-
-# A base class for tools that are buttons in the toolbar.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-Action <- R6::R6Class("Action",
-  inherit = Tool,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      name = NULL, js_event_callbacks = structure(list(), .Names =
-      character(0)), plot = NULL, subscribed_events = list(), tags = list(),
-      id = NULL
-    ) {
-      super$initialize(js_property_callbacks = js_property_callbacks,
-        name = name, js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, tags = tags, id = id)
-      types <- bk_prop_types[["Action"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Render a color bar based on a color mapper.
-ColorBar <- R6::R6Class("ColorBar",
-  inherit = Annotation,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      border_line_dash = list(), background_fill_color = "#ffffff",
-      name = NULL, major_label_text_baseline = "middle",
-      major_label_text_alpha = 1, level = "annotation", scale_alpha = 1,
-      major_label_text_color = "#444444", major_tick_out = 0L,
-      color_mapper = NULL, major_tick_line_alpha = 1, bar_line_dash = list(),
-      orientation = "vertical", title_text_color = "#444444",
-      major_label_text_font_style = "normal", visible = TRUE,
-      label_standoff = 5L, title_text_alpha = 1,
-      title_text_font_size = list(value = "10pt"), bar_line_cap = "butt",
-      bar_line_alpha = 1, background_fill_alpha = 0.95,
-      title_text_align = "left", major_tick_line_cap = "butt",
-      major_label_text_font_size = list(value = "8pt"),
-      border_line_width = 1L, minor_tick_line_dash = list(),
-      minor_tick_line_cap = "butt", location = "top_right",
-      title_text_font_style = "italic", border_line_alpha = 1,
-      minor_tick_out = 0L, formatter = NULL, title_standoff = 2L,
-      bar_line_dash_offset = 0L, minor_tick_line_dash_offset = 0L,
-      minor_tick_line_join = "miter", major_tick_line_join = "miter",
-      margin = 30L, title = NULL, minor_tick_in = 0L,
-      border_line_join = "miter", width = "auto", subscribed_events = list(),
-      tags = list(), major_label_text_font = "helvetica",
-      bar_line_width = 1L, js_event_callbacks = structure(list(), .Names =
-      character(0)), border_line_color = NULL, ticker = NULL,
-      minor_tick_line_width = 1L, bar_line_join = "miter",
-      title_text_font = "helvetica", bar_line_color = NULL,
-      minor_tick_line_color = NULL, padding = 10L,
-      title_text_baseline = "bottom", major_tick_line_dash = list(),
-      major_tick_in = 5L, border_line_dash_offset = 0L,
-      major_tick_line_dash_offset = 0L, border_line_cap = "butt",
-      height = "auto", minor_tick_line_alpha = 1,
-      js_property_callbacks = structure(list(), .Names = character(0)),
-      major_tick_line_color = "#ffffff", major_tick_line_width = 1L,
-      plot = NULL, major_label_text_align = "center", id = NULL
-    ) {
-      super$initialize(visible = visible, name = name, level = level,
-        tags = tags, js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks, plot = plot,
-        subscribed_events = subscribed_events, id = id)
-      types <- bk_prop_types[["ColorBar"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-    # The line dash for the color bar border outline.
-    # > DashPattern
-    border_line_dash = NULL,
-    # The fill color for the color bar background style.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    background_fill_color = NULL,
-    # The text baseline of the major tick labels.
-    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
-    major_label_text_baseline = NULL,
-    # The text alpha of the major tick labels.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    major_label_text_alpha = NULL,
-    # The alpha with which to render the color scale.
-    # > Float
-    scale_alpha = NULL,
-    # The text color of the major tick labels.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    major_label_text_color = NULL,
-    # The distance (in pixels) that major ticks should extend out of the main
-    # plot area.
-    # > Int
-    major_tick_out = NULL,
-    # A continuous color mapper containing a color palette to render.
-    #
-    # .. warning:: If the `low` and `high` attributes of the ColorMapper
-    # aren't set, ticks and tick labels won't be rendered. Additionally, if a
-    # LogTicker is passed to the `ticker` argument and either or both of the
-    # logarithms of `low` and `high` values of the color_mapper are
-    # non-numeric (i.e. `low=0`), the tick and tick labels won't be rendered.
-    # > Instance(ContinuousColorMapper)
-    color_mapper = NULL,
-    # The line alpha of the major ticks.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    major_tick_line_alpha = NULL,
-    # The line dash for the color scale bar outline.
-    # > DashPattern
-    bar_line_dash = NULL,
-    # Whether the color bar should be oriented vertically or horizontally.
-    # > Enum('horizontal', 'vertical')
-    orientation = NULL,
-    # The text color values for the title text.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    title_text_color = NULL,
-    # The text font style of the major tick labels.
-    # > Enum('normal', 'italic', 'bold')
-    major_label_text_font_style = NULL,
-    # The distance (in pixels) to separate the tick labels from the color
-    # bar.
-    # > Int
-    label_standoff = NULL,
-    # The text alpha values for the title text.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    title_text_alpha = NULL,
-    # The text font size values for the title text.
-    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    title_text_font_size = NULL,
-    # The line cap for the color scale bar outline.
-    # > Enum('butt', 'round', 'square')
-    bar_line_cap = NULL,
-    # The line alpha for the color scale bar outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    bar_line_alpha = NULL,
-    # The fill alpha for the color bar background style.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    background_fill_alpha = NULL,
-    # The text align values for the title text.
-    # > Enum('left', 'right', 'center')
-    title_text_align = NULL,
-    # The line cap of the major ticks.
-    # > Enum('butt', 'round', 'square')
-    major_tick_line_cap = NULL,
-    # The text font size of the major tick labels.
-    # > FontSizeSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))
-    major_label_text_font_size = NULL,
-    # The line width for the color bar border outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    border_line_width = NULL,
-    # The line dash of the minor ticks.
-    # > DashPattern
-    minor_tick_line_dash = NULL,
-    # The line cap of the minor ticks.
-    # > Enum('butt', 'round', 'square')
-    minor_tick_line_cap = NULL,
-    # The location where the color bar should draw itself. It's either one of
-    # ``bokeh.core.enums.LegendLocation``'s enumerated values, or a ``(x,
-    # y)`` tuple indicating an absolute location absolute location in screen
-    # coordinates (pixels from the bottom-left corner).
-    #
-    # .. warning:: If the color bar is placed in a side panel, the location
-    # will likely have to be set to `(0,0)`.
-    # > Either(Enum('top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right'), Tuple(Float, Float))
-    location = NULL,
-    # The text font style values for the title text.
-    # > Enum('normal', 'italic', 'bold')
-    title_text_font_style = NULL,
-    # The line alpha for the color bar border outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    border_line_alpha = NULL,
-    # The distance (in pixels) that major ticks should extend out of the main
-    # plot area.
-    # > Int
-    minor_tick_out = NULL,
-    # A TickFormatter to use for formatting the visual appearance of ticks.
-    # > Instance(TickFormatter)
-    formatter = NULL,
-    # The distance (in pixels) to separate the title from the color bar.
-    # > Int
-    title_standoff = NULL,
-    # The line dash offset for the color scale bar outline.
-    # > Int
-    bar_line_dash_offset = NULL,
-    # The line dash offset of the minor ticks.
-    # > Int
-    minor_tick_line_dash_offset = NULL,
-    # The line join of the minor ticks.
-    # > Enum('miter', 'round', 'bevel')
-    minor_tick_line_join = NULL,
-    # The line join of the major ticks.
-    # > Enum('miter', 'round', 'bevel')
-    major_tick_line_join = NULL,
-    # Amount of margin (in pixels) around the outside of the color bar.
-    # > Int
-    margin = NULL,
-    # The title text to render.
-    # > String
-    title = NULL,
-    # The distance (in pixels) that minor ticks should extend into the main
-    # plot area.
-    # > Int
-    minor_tick_in = NULL,
-    # The line join for the color bar border outline.
-    # > Enum('miter', 'round', 'bevel')
-    border_line_join = NULL,
-    # The width (in pixels) that the color scale should occupy.
-    # > Either(Auto, Int)
-    width = NULL,
-    # The text font of the major tick labels.
-    # > String
-    major_label_text_font = NULL,
-    # The line width for the color scale bar outline.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    bar_line_width = NULL,
-    # The line color for the color bar border outline.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    border_line_color = NULL,
-    # A Ticker to use for computing locations of axis components.
-    # > Instance(Ticker)
-    ticker = NULL,
-    # The line width of the minor ticks.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    minor_tick_line_width = NULL,
-    # The line join for the color scale bar outline.
-    # > Enum('miter', 'round', 'bevel')
-    bar_line_join = NULL,
-    # The text font values for the title text.
-    # > String
-    title_text_font = NULL,
-    # The line color for the color scale bar outline.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    bar_line_color = NULL,
-    # The line color of the minor ticks.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    minor_tick_line_color = NULL,
-    # Amount of padding (in pixels) between the color scale and color bar
-    # border.
-    # > Int
-    padding = NULL,
-    # The text baseline values for the title text.
-    # > Enum('top', 'middle', 'bottom', 'alphabetic', 'hanging', 'ideographic')
-    title_text_baseline = NULL,
-    # The line dash of the major ticks.
-    # > DashPattern
-    major_tick_line_dash = NULL,
-    # The distance (in pixels) that major ticks should extend into the main
-    # plot area.
-    # > Int
-    major_tick_in = NULL,
-    # The line dash offset for the color bar border outline.
-    # > Int
-    border_line_dash_offset = NULL,
-    # The line dash offset of the major ticks.
-    # > Int
-    major_tick_line_dash_offset = NULL,
-    # The line cap for the color bar border outline.
-    # > Enum('butt', 'round', 'square')
-    border_line_cap = NULL,
-    # The height (in pixels) that the color scale should occupy.
-    # > Either(Auto, Int)
-    height = NULL,
-    # The line alpha of the minor ticks.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    minor_tick_line_alpha = NULL,
-    # The line color of the major ticks.
-    # > ColorSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Color)), Color)
-    major_tick_line_color = NULL,
-    # The line width of the major ticks.
-    # > NumberSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), Float)), Float)
-    major_tick_line_width = NULL,
-    # The text align of the major tick labels.
-    # > Enum('left', 'right', 'center')
-    major_label_text_align = NULL
-  )
-)
-
-# A block (paragraph) of text.
-#
-# This Bokeh model corresponds to an HTML ``<p>`` element.
-#
-# Example -------
-#
-# .. bokeh-plot::
-# ../sphinx/source/docs/user_guide/examples/interaction_paragraph.py
-# :source-position: below
-Paragraph <- R6::R6Class("Paragraph",
-  inherit = Markup,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      name = NULL, sizing_mode = "fixed", width = NULL, height = NULL,
-      tags = list(), text = "", js_property_callbacks = structure(list(),
-      .Names = character(0)), js_event_callbacks = structure(list(),
-      .Names = character(0)), subscribed_events = list(), disabled = FALSE,
-      css_classes = NULL, id = NULL
-    ) {
-      super$initialize(name = name, sizing_mode = sizing_mode, width = width,
-        height = height, tags = tags, text = text,
-        js_property_callbacks = js_property_callbacks,
-        js_event_callbacks = js_event_callbacks,
-        subscribed_events = subscribed_events, disabled = disabled,
-        css_classes = css_classes, id = id)
-      types <- bk_prop_types[["Paragraph"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
-  )
-)
-
-# Abstract base class for map plot models.
-#
-# .. note:: This is an abstract base class used to help organize the
-# hierarchy of Bokeh model types. **It is not useful to instantiate on
-# its own.**
-MapPlot <- R6::R6Class("MapPlot",
-  inherit = Plot,
-  public = list(
-    specified_args = NULL,
-    initialize = function(
-      title_location = "above", extra_y_ranges = structure(list(), .Names =
-      character(0)), left = list(), min_border_top = NULL,
-      background_fill_color = "#ffffff", name = NULL,
-      border_fill_color = "#ffffff", x_range = NULL, inner_height = NULL,
-      right = list(), border_fill_alpha = 1, plot_height = 600L,
-      tool_events = NULL, toolbar_location = "right", plot_width = 600L,
-      above = list(), x_scale = NULL, min_border_bottom = NULL,
-      background_fill_alpha = 1, js_property_callbacks = structure(list(),
-      .Names = character(0)), toolbar_sticky = TRUE,
-      min_border_left = NULL, subscribed_events = list(), disabled = FALSE,
-      renderers = list(), below = list(), min_border_right = NULL,
-      outline_line_alpha = 1, title = NULL, y_range = NULL,
-      extra_x_ranges = structure(list(), .Names = character(0)),
-      width = NULL, lod_factor = 10L, tags = list(), outline_line_cap = "butt",
-      min_border = 5L, lod_timeout = 500L, outline_line_join = "miter",
-      js_event_callbacks = structure(list(), .Names = character(0)),
-      lod_threshold = 2000L, css_classes = NULL, output_backend = "canvas",
-      outline_line_dash = list(), toolbar = NULL, h_symmetry = TRUE,
-      y_scale = NULL, outline_line_width = 1L, layout_height = NULL,
-      sizing_mode = "fixed", height = NULL, lod_interval = 300L,
-      inner_width = NULL, hidpi = TRUE, layout_width = NULL,
-      outline_line_color = "#e5e5e5", v_symmetry = FALSE,
-      outline_line_dash_offset = 0L, id = NULL
-    ) {
-      super$initialize(title_location = title_location,
-        extra_y_ranges = extra_y_ranges, left = left,
-        min_border_top = min_border_top,
-        background_fill_color = background_fill_color, name = name,
-        border_fill_color = border_fill_color, x_range = x_range,
-        inner_height = inner_height, right = right,
-        border_fill_alpha = border_fill_alpha, plot_height = plot_height,
-        tool_events = tool_events, toolbar_location = toolbar_location,
-        plot_width = plot_width, above = above, x_scale = x_scale,
-        min_border_bottom = min_border_bottom,
-        background_fill_alpha = background_fill_alpha,
-        js_property_callbacks = js_property_callbacks,
-        toolbar_sticky = toolbar_sticky, min_border_left = min_border_left,
-        subscribed_events = subscribed_events, disabled = disabled,
-        renderers = renderers, below = below,
-        min_border_right = min_border_right,
-        outline_line_alpha = outline_line_alpha, title = title,
-        y_range = y_range, extra_x_ranges = extra_x_ranges, width = width,
-        lod_factor = lod_factor, tags = tags,
-        outline_line_cap = outline_line_cap, min_border = min_border,
-        lod_timeout = lod_timeout, outline_line_join = outline_line_join,
-        js_event_callbacks = js_event_callbacks,
-        lod_threshold = lod_threshold, css_classes = css_classes,
-        output_backend = output_backend,
-        outline_line_dash = outline_line_dash, toolbar = toolbar,
-        h_symmetry = h_symmetry, y_scale = y_scale,
-        outline_line_width = outline_line_width,
-        layout_height = layout_height, sizing_mode = sizing_mode,
-        height = height, lod_interval = lod_interval,
-        inner_width = inner_width, hidpi = hidpi,
-        layout_width = layout_width,
-        outline_line_color = outline_line_color, v_symmetry = v_symmetry,
-        outline_line_dash_offset = outline_line_dash_offset, id = id)
-      types <- bk_prop_types[["MapPlot"]]
-      for (nm in names(types)) {
-        private[[nm]] <- validate(get(nm), types[[nm]]$type, nm)
-      }
-      self$specified_args <- get_specified_arg_names(match.call())
-    }
-  ),
-  private = list(
-
+    # Range1d(0, 1, bounds='auto') # Auto-bounded to 0 and 1 (Default
+    # behavior) Range1d(start=0, end=1, bounds=(0, None)) # Maximum is
+    # unbounded, minimum bounded to 0
+    # > MinMaxBounds(Auto, Tuple(Float, Float), Tuple(Datetime, Datetime))
+    bounds = NULL,
+    # The level that the range is allowed to zoom in, expressed as the
+    # minimum visible interval. If set to ``None`` (default), the minimum
+    # interval is not bound. Can be a timedelta.
+    # > Either(Float, TimeDelta, Int)
+    min_interval = NULL,
+    # The end of the range.
+    # > Either(Float, Datetime, Int)
+    end = NULL,
+    # The level that the range is allowed to zoom out, expressed as the
+    # maximum visible interval. Can be a timedelta. Note that ``bounds`` can
+    # impose an implicit constraint on the maximum interval as well.
+    # > Either(Float, TimeDelta, Int)
+    max_interval = NULL,
+    # The start of the range.
+    # > Either(Float, Datetime, Int)
+    start = NULL
   )
 )
 
