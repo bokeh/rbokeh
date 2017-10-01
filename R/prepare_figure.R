@@ -982,20 +982,20 @@ add_tools <- function(mods) {
   )
 
   bzt <- BoxZoomTool$new(
-    overlay = ba$get_instance(),
-    plot = mods$plot$get_instance()
+    overlay = ba$get_instance()
+    # plot = mods$plot$get_instance()
   )
 
   bst <- BoxSelectTool$new(
-    overlay = ba$get_instance(),
-    plot = mods$plot$get_instance()
+    overlay = ba$get_instance()
+    # plot = mods$plot$get_instance()
   )
 
-  rst <- ResetTool$new(plot = mods$plot$get_instance())
-  hlp <- HelpTool$new(plot = mods$plot$get_instance())
-  pnt <- PanTool$new(plot = mods$plot$get_instance())
-  wzt <- WheelZoomTool$new(plot = mods$plot$get_instance())
-  svt <- SaveTool$new(plot = mods$plot$get_instance())
+  rst <- ResetTool$new() # plot = mods$plot$get_instance()
+  hlp <- HelpTool$new() # plot = mods$plot$get_instance()
+  pnt <- PanTool$new() # plot = mods$plot$get_instance()
+  wzt <- WheelZoomTool$new() # plot = mods$plot$get_instance()
+  svt <- SaveTool$new() # plot = mods$plot$get_instance()
 
   mods$tools <- list(
     box_zoom = bzt,
@@ -1007,7 +1007,7 @@ add_tools <- function(mods) {
     save = svt
   )
 
-  te <- ToolEvents$new()
+  # te <- ToolEvents$new()
 
   tool_instances <- list(
     bzt$get_instance(),
@@ -1034,7 +1034,7 @@ add_tools <- function(mods) {
   )
 
   mods$box_zoom_ann <- ba
-  mods$tool_events <- te
+  # mods$tool_events <- te
   mods$toolbar <- tb
 
   mods
