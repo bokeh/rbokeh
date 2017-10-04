@@ -66,7 +66,7 @@ get_bk_props_recurse <- function(mod) {
 
 get_can_be_vector <- function(mod) {
   types <- get_bk_props_recurse(mod)
-  can_be_vector <- sapply(types, function(x) grepl("'field'|DistanceSpec|AngleSpec", x$type))
+  can_be_vector <- sapply(types, function(x) grepl("'field'|DistanceSpec|AngleSpec|NumberSpec", x$type))
   can_be_vector <- names(can_be_vector[can_be_vector])
   if (any(grepl("fill_color|line_color", can_be_vector)))
     can_be_vector <- c(can_be_vector, "color")
