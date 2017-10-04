@@ -752,457 +752,243 @@ ly_quadratic <- function(
 }
 
 
-
-
-# #' Add a "multi_line" layer to a Bokeh figure
-# #'
-# #' Draws multiple lines with the given lists of coordinates.
-# #' @param fig figure to modify
-# #' @param xs list of vectors of x coordinates
-# #' @param ys list of vectors of y coordinates
-# # template par-lineprops
-# # template par-lnamegroup
-# # template dots-line
-# #' @family layer functions
-# #' @export
-# ly_multi_line <- function(
-#   fig,
-#   xs, ys,
-#   color = "black", alpha = 1, width = 1, type = 1,
-#   lname = NULL, lgroup = NULL, visible = TRUE,
-#   ...
-# ) {
-
-#   validate_fig(fig, "ly_multi_line")
-
-#   args <- sub_names(fig, data = NULL,
-#     grab(
-#       xs, ys,
-#       color,
-#       alpha,
-#       width,
-#       type,
-#       # no legend?
-#       lname,
-#       lgroup,
-#       visible,
-#       dots = lazy_dots(...)
-#     )
-#   )
-#   args$params$glyph <- "line"
-
-#   if (missing(color) && !is.null(args$params$line_color)) {
-#     args$color <- NULL
-#   }
-
-#   ## see if any options won't be used and give a message
-#   # can't pass in color, alpha, width, or type
-#   good_names <- names(args$params)
-#   good_names <- good_names[! (good_names %in% c("color", "alpha", "width", "type"))]
-#   check_opts(args$params[good_names], "multi_line")
-
-#   args$params <- resolve_line_args(fig, args$params)
-
-#   axis_type_range <- get_glyph_axis_type_range(unlist(args$data$xs), unlist(args$data$ys))
-
-#   mc <- lapply(match.call(), deparse)
-
-#   make_glyph(
-#     fig, type = "multi_line",
-#     data = args$data, args = args$params,
-#     xname = args$info$x_name, yname = args$info$y_name,
-#     lname = args$info$lname, lgroup = args$info$lgroup,
-#     axis_type_range = axis_type_range,
-#     ly_call = mc
-#   )
-# }
-
-
-
-
-
-
-
-
-
-# #' Add a "contour" layer to a Bokeh figure
-# #'
-# #' Computes and draws contour lines.
-# #' @param fig figure to modify
-# #' @param z a matrix containing the values to compute contour lines for
-# #' @param x,y locations of grid lines at which the values in \code{image} are measured (see \code{\link[grDevices]{contourLines}})
-# #' @param nlevels,levels parameters sent to \code{\link[grDevices]{contourLines}})
-# # template par-lineprops
-# # template par-lnamegroup
-# # template dots-line
-# #' @example man-roxygen/ex-image.R
-# #' @family layer functions
-# #' @export
-# ly_contour <- function(
-#   fig, z,
-#   x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1, length.out = ncol(z)),
-#   nlevels = 10, levels = pretty(range(z, na.rm = TRUE), nlevels),
-#   color = "black", alpha = 1, width = 1, type = 1,
-#   lname = NULL, lgroup = NULL, visible = TRUE,
-#   ...
-# ) {
-
-#   validate_fig(fig, "ly_contour")
-#   ## see if any options won't be used and give a message
-
-#   args <- sub_names(fig, data = NULL,
-#     grab(
-#       color,
-#       alpha,
-#       width,
-#       type,
-#       lname,
-#       lgroup,
-#       visible,
-#       dots = lazy_dots(...),
-#       null_data = TRUE
-#     )
-#   )
-
-#   args$params <- resolve_line_args(fig, args$params)
-
-#   contr <- do.call(grDevices::contourLines,
-#     list(x = x, y = y, z = z, nlevels = nlevels, levels = levels))
-
-#   xs <- lapply(contr, "[[", 2)
-#   ys <- lapply(contr, "[[", 3)
-
-#   check_opts(args$params, "multi_line", formals = names(formals(ly_contour)))
-
-#   axis_type_range <- get_glyph_axis_type_range(x, y, assert_x = "numeric", assert_y = "numeric")
-
-#   mc <- lapply(match.call(), deparse)
-
-#   make_glyph(
-#     fig, type = "multi_line",
-#     lname = args$info$lname, lgroup = args$info$lgroup,
-#     xname = args$info$x_name, yname = args$info$y_name,
-#     data = list(xs = xs, ys = ys),
-#     args = args$params, axis_type_range = axis_type_range,
-#     ly_call = mc
-#   )
-# }
-
-
-
-
-
-
-
-# #' Add an "image" layer to a Bokeh figure
-# #'
-# #' Draws a grid of rectangles with colors corresponding to the values in \code{z}
-# #' @param fig figure to modify
-# #' @param z matrix or vector of image values
-# #' @param rows if \code{z} is a vector, how many rows should be used in treating it as a matrix
-# #' @param byrow if \code{z} is a vector, should it be turned into a matrix by row
-# #' @param x lower left x coordinates
-# #' @param y lower left y coordinates
-# #' @param dw image width distances
-# #' @param dh image height distances
-# #' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
-# #' @param dilate logical - whether to dilate pixel distance computations when drawing
-# # template par-lnamegroup
-# #' @example man-roxygen/ex-image.R
-# #' @family layer functions
-# #' @export
-# ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
-#   palette = "Spectral10", dilate = FALSE,
-#   lname = NULL, lgroup = NULL, visible = TRUE) {
-
-#   validate_fig(fig, "ly_image")
-#   ## see if any options won't be used and give a message
-#   # check_opts(list(...), "image")
-
-#   args <- sub_names(fig, data = NULL,
-#     grab(
-#       x,
-#       y,
-#       lname,
-#       lgroup,
-#       visible,
-#       dots = lazy_dots()
-#     )
-#   )
-
-#   axis_type_range <- get_glyph_axis_type_range(c(x, dw), c(y, dh),
-#     assert_x = "numeric", assert_y = "numeric")
-
-#   if (is.vector(z)) {
-#     z <- matrix(z, nrow = rows, byrow = byrow)
-#   } else if (is.matrix(z)) {
-#     z <- t(z)
-#   } else {
-#     stop("argument 'z' to ly_image must be a matrix or vector", call. = FALSE)
-#   }
-
-#   # really ugly nested if else
-#   # palette checker / transformer from layer_hexbin minus function
-#   #   plus added check for length 1
-#   if ( is.character(palette) && length(palette) == 1 ) {
-#     if (valid_color(palette)) {
-#       stop(
-#         "'palette' specified in ly_image is a single color; please supply a ",
-#         "vector of colors or name of a bokeh palette - see here: ",
-#         "http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
-#         call. = FALSE)
-#     } else {
-#       if (!palette %in% bk_gradient_palette_names){
-#         stop(
-#           "'palette' specified in ly_image is not a valid color name or palette - ",
-#           "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
-#           call. = FALSE)
-#       } else {
-#         palette <- bk_gradient_palettes[[palette]]
-#       }
-#     }
-#   } else if ( is.character(palette) && length(palette) > 1 ) {
-#     # check for valid colors in the palette
-#     if (!valid_color(palette)){
-#       stop(
-#         "'palette' specified in ly_image is not a valid color name or palette - ",
-#         "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
-#         call. = FALSE)
-#     }
-#   } else {
-#     stop(
-#       "'palette' specified in ly_image is not a valid color name or palette - ",
-#       "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
-#       call. = FALSE)
-#   }
-
-#   mc <- lapply(match.call(), deparse)
-
-#   make_glyph(fig, type = "image", lname = args$info$lname, lgroup = args$info$lgroup,
-#     data = list(image = list(z), palette = palette),
-#     args = list(x = x, y = y, dw = dw, dh = dh, dilate = dilate),
-#     axis_type_range = axis_type_range, ly_call = mc)
-# }
-
-
-
-
-
-
-# #' Add an "image_url" layer to a Bokeh figure
-# #'
-# #' Renders raster images from URLs at provided coordinates
-# #' @param fig figure to modify
-# #' @param x x coordinates
-# #' @param y y coordinates
-# #' @param data an optional data frame, providing the source for inputs x, y, and other properties
-# #' @param w,h values or field names of width and height of image
-# #' @param image_url values or field name of image URLs
-# #' @param dilate logical - whether to dilate pixel distance computations when drawing
-# #' @param anchor where the image is anchored to with respect to \code{x} and \code{y}
-# #' @param angle values or field name of the angle to rotate the image, in radians
-# # template par-lnamegroup
-# #' @family layer functions
-# #' @example man-roxygen/ex-image_url.R
-# #' @export
-# ly_image_url <- function(
-#   fig, x = 0, y = 0, data = figure_data(fig), w = 10, h = 10,
-#   image_url, dilate = TRUE, anchor = "top_left", angle = 0,
-#   lname = NULL, lgroup = NULL, visible = TRUE
-# ) {
-
-#   validate_fig(fig, "ly_image_url")
-
-#   anchor_opts <- c("top_left", "top_center", "top_right", "right_center",
-#     "bottom_right", "bottom_center", "bottom_left", "left_center", "center")
-#   if (! anchor %in% anchor_opts) {
-#     stop("anchor must be one of: ", paste(anchor_opts, collapse = ", "), call. = FALSE)
-#   }
-
-#   args <- sub_names(fig, data,
-#     grab(
-#       x,
-#       y,
-#       w,
-#       h,
-#       image_url,
-#       dilate,
-#       anchor,
-#       angle,
-#       lname,
-#       lgroup,
-#       visible,
-#       dots = lazy_dots()
-#     )
-#   )
-
-#   # TODO: this url is not a "url" - it is data, not a parameter
-#   args$params$url <- args$params$image_url
-#   args$params$image_url <- NULL
-
-#   if (missing(x)) {
-#     args$info$x_name <- "x"
-#   }
-#   if (missing(y)) {
-#     args$info$y_name <- "y"
-#   }
-
-#   # pull out values, as they are used a lot
-#   x <- args$data$x
-#   y <- args$data$y
-#   h <- args$params$h
-#   w <- args$params$w
-
-#   ## range stuff
-#   if (grepl("left", anchor)) {
-#     x2 <- max(x + w)
-#   } else if (grepl("right", anchor)) {
-#     x2 <- min(x - w)
-#   } else if (anchor %in% c("top_center", "bottom_center", "center")) {
-#     x2 <- range(c(x +  w / 2, x - w / 2))
-#   }
-#   if (grepl("top", anchor)) {
-#     y2 <- min(y - h)
-#   } else if (grepl("bottom", anchor)) {
-#     y2 <- max(y + h)
-#   } else if (anchor %in% c("left_center", "right_center", "center")) {
-#     y2 <- range(c(y + h / 2, y - h / 2))
-#   }
-#   # can this have "categorical" axes?
-#   axis_type_range <- get_glyph_axis_type_range(c(x, x2), c(y, y2))
-
-#   mc <- lapply(match.call(), deparse)
-
-#   make_glyph(
-#     fig, type = "image_URL",
-#     xname = args$info$x_name, yname = args$info$y_name,
-#     lname = args$info$lname, lgroup = args$info$lgroup,
-#     data = args$data, args = args$params,
-#     axis_type_range = axis_type_range, ly_call = mc
-#   )
-# }
-
-
-
-
-
-
-
-# #' Add a "polygons" layer to a Bokeh figure
-# #' @param fig figure to modify
-# #' @param xs vector or list of values or field name of polygon x coordinates - see details
-# #' @param ys vector or list of values or field name of polygon y coordinates - see details
-# #' @param group vector or field name of grouping variable - see details
-# #' @param data an optional data frame, providing the source for inputs xs, ys, group, and other glyph properties
-# #' @details \code{xs} and \code{ys} can be a list of vectors, each element for one polygon to be drawn, or can be vectors with the \code{group} argument specifying how to break them up into individual polygons.
-# # template par-coloralpha
-# # template par-hover
-# # template par-url
-# # template par-lnamegroup
-# # template dots-fillline
-# #' @family layer functions
-# #' @export
-# ly_polygons <- function(
-#   fig, xs, ys, group = NULL, data = figure_data(fig),
-#   color = NULL, alpha = 1,
-#   hover = NULL, url = NULL, # legend = NULL,
-#   lname = NULL, lgroup = NULL, visible = TRUE, ...
-# ) {
-
-#   validate_fig(fig, "ly_polygons")
-
-#   args <- sub_names(fig, data,
-#     grab(
-#       xs,
-#       ys,
-#       group,
-#       color,
-#       alpha,
-#       hover,
-#       url,
-#       lname,
-#       lgroup,
-#       visible,
-#       dots = lazy_dots(...)
-#     )
-#   )
-
-#   # pull out manually, as they are repeatedly customized
-#   xs <- args$data$xs
-#   ys <- args$data$ys
-#   group <- args$info$group
-
-#   if (missing(alpha)) {
-#     args$params$alpha <- NULL
-#   }
-
-#   # if color is not a valid color then we want to group on it too
-#   if (needs_map_fns[["color"]](args$params$color))
-#     group <- args$params$color
-
-#   if (!is.null(group)) {
-#     if (is.factor(group)) {
-#       group <- as.character(group)
-#     }
-#     idx <- unname(split(seq_along(group), group))
-#     xs <- lapply(idx, function(x) xs[x])
-#     ys <- lapply(idx, function(x) ys[x])
-
-#     # data for hover and url will only be one row for each group
-#     data <- data[sapply(idx, "[", 1), ]
-
-#     ns <- lapply(args$params, length)
-#     bad_ind <- which(!ns %in% c(0, 1, length(idx), length(group)))
-#     if (length(bad_ind) > 0) {
-#       message(
-#         "The following arguments do not have length the same as the number of groups ",
-#         "or the total number of observations for ly_polygons() and will be ignored: ",
-#         paste(names(args$params[bad_ind]), collapse = ", "))
-#       args$params[bad_ind] <- NULL
-#     }
-
-#     full_length <- which(ns == length(group))
-#     for (ii in full_length) {
-#       args$params[[ii]] <- sapply(idx, function(x) args$params[[ii]][x[1]])
-#     }
-#   }
-
-#   ## translate different x, y types to vectors
-#   if (is.atomic(xs) && !is.list(xs)) {
-#     xs <- list(xs)
-#   }
-
-#   if (is.atomic(ys) && !is.list(ys)) {
-#     ys <- list(ys)
-#   }
-
-#   if (!(is.list(xs) && is.list(ys))) {
-#     stop(
-#       "For ly_polygons, xs and ys must be lists or specified through a data frame ",
-#       "through 'data' argument.")
-#   }
-
-#   args$params <- resolve_color_alpha(args$params, has_line = TRUE, has_fill = TRUE,
-#     fig$x$spec$layers[[args$info$lgroup]], theme = fig$x$spec$theme)
-
-#   ## see if any options won't be used and give a message
-#   check_opts(args$params, "patches", formals = names(formals(ly_polygons)))
-
-#   if (is.null(args$params$fill_alpha)) {
-#     args$params$fill_alpha <- 0.5
-#   }
-
-#   axis_type_range <- get_glyph_axis_type_range(unlist(xs), unlist(ys))
-
-#   mc <- lapply(match.call(), deparse)
-
-#   make_glyph(
-#     fig, type = "patches", data = list(xs = unname(xs), ys = unname(ys)),
-#     args = args$params, axis_type_range = axis_type_range,
-#     xname = args$info$x_name, yname = args$info$y_name,
-#     lname = args$info$lname, lgroup = args$info$lgroup, hover = args$info$hover,
-#     url = args$info$url,
-#     ly_call = mc
-#   )
-# }
-
+#' Add a "multi_line" layer to a Bokeh figure
+#'
+#' Draws multiple lines with the given lists of coordinates.
+#' @param fig figure to modify
+#' @param xs list of vectors of x coordinates
+#' @param ys list of vectors of y coordinates
+# template par-lineprops
+# template par-lnamegroup
+# template dots-line
+#' @family layer functions
+#' @export
+ly_multi_line <- function(
+  fig,
+  xs = NULL, ys = NULL,
+  data = figure_data(fig),
+  type = 1, width = 1, color = NULL, alpha = NULL,
+  hover = NULL, legend = TRUE,
+  hov_color = NULL, hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL,
+  lgroup = NULL, lname = NULL,
+  ...
+) {
+
+  spec <- c(list(
+    xs = enquo(xs), ys = enquo(ys), color = enquo(color), alpha = enquo(alpha),
+    hov_color = enquo(hov_color), hov_alpha = enquo(hov_alpha),
+    ns_color = enquo(ns_color), ns_alpha = enquo(ns_alpha), hover = enquo(hover),
+    line_width = enquo(width), line_dash = enquo(type),
+    model = "MultiLine",
+    type = "glyph",
+    data = data,
+    legend = legend,
+    use_all_data = FALSE), # for now (TODO)
+    quos(...))
+
+  add_layer(fig, spec, lgroup, lname)
+}
+
+#' Add a "polygons" layer to a Bokeh figure
+#' @param fig figure to modify
+#' @param xs vector or list of values or field name of polygon x coordinates - see details
+#' @param ys vector or list of values or field name of polygon y coordinates - see details
+#' @param group vector or field name of grouping variable - see details
+#' @param data an optional data frame, providing the source for inputs xs, ys, group, and other glyph properties
+#' @details \code{xs} and \code{ys} can be a list of vectors, each element for one polygon to be drawn, or can be vectors with the \code{group} argument specifying how to break them up into individual polygons.
+# template par-coloralpha
+# template par-hover
+# template par-url
+# template par-lnamegroup
+# template dots-fillline
+#' @family layer functions
+#' @export
+ly_polygons <- function(
+  fig,
+  xs = NULL, ys = NULL,
+  data = figure_data(fig),
+  type = 1, width = 1, color = NULL, alpha = NULL,
+  hover = NULL, legend = TRUE,
+  hov_color = NULL, hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL,
+  lgroup = NULL, lname = NULL,
+  ...) {
+
+  spec <- c(list(
+    xs = enquo(xs), ys = enquo(ys), color = enquo(color), alpha = enquo(alpha),
+    hov_color = enquo(hov_color), hov_alpha = enquo(hov_alpha),
+    ns_color = enquo(ns_color), ns_alpha = enquo(ns_alpha), hover = enquo(hover),
+    line_width = enquo(width), line_dash = enquo(type),
+    model = "Patches",
+    type = "glyph",
+    data = data,
+    legend = legend,
+    use_all_data = FALSE), # for now (TODO)
+    quos(...))
+
+  add_layer(fig, spec, lgroup, lname)
+
+  # if (!is.null(group)) {
+  #   if (is.factor(group)) {
+  #     group <- as.character(group)
+  #   }
+  #   idx <- unname(split(seq_along(group), group))
+  #   xs <- lapply(idx, function(x) xs[x])
+  #   ys <- lapply(idx, function(x) ys[x])
+
+  #   # data for hover and url will only be one row for each group
+  #   data <- data[sapply(idx, "[", 1), ]
+
+  #   ns <- lapply(args$params, length)
+  #   bad_ind <- which(!ns %in% c(0, 1, length(idx), length(group)))
+  #   if (length(bad_ind) > 0) {
+  #     message(
+  #       "The following arguments do not have length the same as the number of groups ",
+  #       "or the total number of observations for ly_polygons() and will be ignored: ",
+  #       paste(names(args$params[bad_ind]), collapse = ", "))
+  #     args$params[bad_ind] <- NULL
+  #   }
+
+  #   full_length <- which(ns == length(group))
+  #   for (ii in full_length) {
+  #     args$params[[ii]] <- sapply(idx, function(x) args$params[[ii]][x[1]])
+  #   }
+  # }
+
+  # ## translate different x, y types to vectors
+  # if (is.atomic(xs) && !is.list(xs)) {
+  #   xs <- list(xs)
+  # }
+
+  # if (is.atomic(ys) && !is.list(ys)) {
+  #   ys <- list(ys)
+  # }
+
+  # if (!(is.list(xs) && is.list(ys))) {
+  #   stop(
+  #     "For ly_polygons, xs and ys must be lists or specified through a data frame ",
+  #     "through 'data' argument.")
+  # }
+}
+
+#' Add an "image" layer to a Bokeh figure
+#'
+#' Draws a grid of rectangles with colors corresponding to the values in \code{z}
+#' @param fig figure to modify
+#' @param z matrix or vector of image values
+#' @param rows if \code{z} is a vector, how many rows should be used in treating it as a matrix
+#' @param byrow if \code{z} is a vector, should it be turned into a matrix by row
+#' @param x lower left x coordinates
+#' @param y lower left y coordinates
+#' @param dw image width distances
+#' @param dh image height distances
+#' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
+#' @param dilate logical - whether to dilate pixel distance computations when drawing
+# template par-lnamegroup
+#' @example man-roxygen/ex-image.R
+#' @family layer functions
+#' @export
+ly_image <- function(
+  fig,
+  z,
+  rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
+  palette = "Spectral10", dilate = FALSE,
+  lname = NULL, lgroup = NULL,
+  ...
+  ) {
+
+  # TODO: is there hover behavior for this?
+
+  if (is.vector(z)) {
+    z <- matrix(z, nrow = rows, byrow = byrow)
+  } else if (is.matrix(z)) {
+    z <- t(z)
+  } else {
+    stop("argument 'z' to ly_image must be a matrix or vector", call. = FALSE)
+  }
+
+  spec <- c(list(
+    image = quo(z), x = x, y = y, dh = dh, dw = dw, dilate = dilate,
+    # color_mapper,
+    # dh_units, dw_units,
+    model = "Image",
+    type = "glyph",
+    data = NULL,
+    legend = NULL,
+    use_all_data = FALSE), # for now (TODO)
+    quos(...))
+
+  add_layer(fig, spec, lgroup, lname)
+
+
+  # # palette checker / transformer from layer_hexbin
+  # #   plus added check for length 1
+  # if ( is.character(palette) && length(palette) == 1 ) {
+  #   if (valid_color(palette)) {
+  #     stop(
+  #       "'palette' specified in ly_image is a single color; please supply a ",
+  #       "vector of colors or name of a bokeh palette - see here: ",
+  #       "http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+  #       call. = FALSE)
+  #   } else {
+  #     if (!palette %in% bk_gradient_palette_names){
+  #       stop(
+  #         "'palette' specified in ly_image is not a valid color name or palette - ",
+  #         "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+  #         call. = FALSE)
+  #     } else {
+  #       palette <- bk_gradient_palettes[[palette]]
+  #     }
+  #   }
+  # } else if ( is.character(palette) && length(palette) > 1 ) {
+  #   # check for valid colors in the palette
+  #   if (!valid_color(palette)){
+  #     stop(
+  #       "'palette' specified in ly_image is not a valid color name or palette - ",
+  #       "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+  #       call. = FALSE)
+  #   }
+  # } else {
+  #   stop(
+  #     "'palette' specified in ly_image is not a valid color name or palette - ",
+  #     "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+  #     call. = FALSE)
+  # }
+}
+
+
+#' Add an "image_url" layer to a Bokeh figure
+#'
+#' Renders raster images from URLs at provided coordinates
+#' @param fig figure to modify
+#' @param x x coordinates
+#' @param y y coordinates
+#' @param data an optional data frame, providing the source for inputs x, y, and other properties
+#' @param w,h values or field names of width and height of image
+#' @param image_url values or field name of image URLs
+#' @param dilate logical - whether to dilate pixel distance computations when drawing
+#' @param anchor where the image is anchored to with respect to \code{x} and \code{y}
+#' @param angle values or field name of the angle to rotate the image, in radians
+# template par-lnamegroup
+#' @family layer functions
+#' @example man-roxygen/ex-image_url.R
+#' @export
+ly_image_url <- function(
+  fig, x = NULL, y = NULL,
+  image_url,
+  w = 10, h = 10,
+  data = figure_data(fig),
+  dilate = TRUE, anchor = "top_left", angle = 0,
+  lgroup = NULL, lname = NULL, ...) {
+
+  spec <- c(list(
+    x = enquo(x), y = enquo(y), image_url = enquo(image_url),
+    w = enquo(w), h = enquo(h), dilate = dilate, andhor = anchor, angle = angle,
+    model = "ImageURL",
+    type = "glyph",
+    data = data,
+    legend = legend,
+    use_all_data = FALSE), # for now (TODO)
+    quos(...))
+
+  add_layer(fig, spec, lgroup, lname)
+}
