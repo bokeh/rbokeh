@@ -89,26 +89,35 @@ prepare_figure <- function(x) {
         attr(val, "spec") <- NULL
 
         # keep track of axis ranges and types
-        for (xy in c("x", "y")) {
-          nms_chk <- c("x", "xs", "x0", "left", "right")
-          if (xy == "y")
-            nms_chk <- c("y", "ys", "y0", "bottom", "top")
-          if (attr_nm %in% nms_chk) {
-            type <- get_glyph_axis_type(val, x$pars$axes$type[[xy]])
-            if (is.null(x$pars$axes$type[[xy]])) {
-              x$pars$axes$type[[xy]] <- type
-            } else {
-              if (x$pars$axes$type[[xy]] != type)
-                stop("Layer has incompatible x-axis type from previous layer.", call. = FALSE)
-            }
-            if (is.null(x$pars$axes$range[[xy]]))
-              x$pars$axes$range[[xy]] <- get_glyph_range(val,
-                prev_range = x$pars$axes$range[[xy]], axis_type = x$pars$axes$type[[xy]])
-            if (is.null(x$pars$axes$lab[[xy]])) {
-              lab_nm <- try(quo_name(ly[[attr_nm]]), silent = TRUE)
-              if (inherits(lab_nm, "try-error"))
-                lab_nm <- xy
-              x$pars$axes$lab[[xy]] <- lab_nm
+        if (attr_nm == "image") {
+          x$pars$axes$type$x <- "numeric"
+          x$pars$axes$type$y <- "numeric"
+          x$pars$axes$range$x <- c(ly$x, ly$dw)
+          x$pars$axes$range$y <- c(ly$y, ly$dh)
+          x$pars$axes$lab$x <- "x"
+          x$pars$axes$lab$y <- "y"
+        } else {
+          for (xy in c("x", "y")) {
+            nms_chk <- c("x", "xs", "x0", "left", "right")
+            if (xy == "y")
+              nms_chk <- c("y", "ys", "y0", "bottom", "top")
+            if (attr_nm %in% nms_chk) {
+              type <- get_glyph_axis_type(val, x$pars$axes$type[[xy]])
+              if (is.null(x$pars$axes$type[[xy]])) {
+                x$pars$axes$type[[xy]] <- type
+              } else {
+                if (x$pars$axes$type[[xy]] != type)
+                  stop("Layer has incompatible x-axis type from previous layer.", call. = FALSE)
+              }
+              if (is.null(x$pars$axes$range[[xy]]))
+                x$pars$axes$range[[xy]] <- get_glyph_range(val,
+                  prev_range = x$pars$axes$range[[xy]], axis_type = x$pars$axes$type[[xy]])
+              if (is.null(x$pars$axes$lab[[xy]])) {
+                lab_nm <- try(quo_name(ly[[attr_nm]]), silent = TRUE)
+                if (inherits(lab_nm, "try-error"))
+                  lab_nm <- xy
+                x$pars$axes$lab[[xy]] <- lab_nm
+              }
             }
           }
         }
@@ -131,6 +140,16 @@ prepare_figure <- function(x) {
             message("Attribute '", attr_nm, "' must be a scalar... ",
               "Only using first observation.")
           ly[[attr_nm]] <- list(value = val[1])
+        } else if (attr_nm %in% c("xs", "ys")) {
+          nm <- attr_nm
+          ly$data[[attr_nm]] <- I(val)
+          ly[[attr_nm]] <- list(field = nm)
+          cols_to_use <- unique(c(cols_to_use, nm))
+        } else if (attr_nm == "image") {
+          nm <- attr_nm
+          ly$data[[attr_nm]] <- I(list(val))
+          ly[[attr_nm]] <- list(field = nm)
+          cols_to_use <- unique(c(cols_to_use, nm))
         } else {
           # check to see if attrs are part of data
           # if they are, change the value to a field pointing to the column
@@ -159,8 +178,9 @@ prepare_figure <- function(x) {
           } else if (length(val) > 1) {
             nm <- paste0("col", length(ly$data) + 1, "___")
             ly$data[[nm]] <- val
-            if (!is.data.frame(ly$data))
+            if (!is.data.frame(ly$data)) {
               ly$data <- as.data.frame(ly$data)
+            }
             ly[[attr_nm]] <- list(field = sanitize(nm))
           }
 
@@ -301,7 +321,7 @@ prepare_figure <- function(x) {
         } else {
           pars$data <- cur_hov
         }
-        pars$plot <- x$mods$plot$get_instance()
+        # pars$plot <- x$mods$plot$get_instance()
         if (is.character(pars$callback) && length(pars$callback) == 1) {
           cur_ly$transforms$hover <- CustomJS$new(code = pars$callback)
           pars$callback <- cur_ly$transforms$hover$get_instance()
