@@ -125,7 +125,7 @@ get_next_layer_name <- function(obj) {
 get_glyph_axis_type <- function(a, prev_type = NULL, which = "x") {
   # this will surely get more complex...
   res <- NULL
-  if (is.character(a) || is.factor(a)) {
+  if (is.character(a) || is.factor(a) || inherits(a, "bk_cat")) {
     res <- "categorical"
   } else if (inherits(a, c("Date", "POSIXct"))) {
     res <- "datetime"
@@ -153,9 +153,20 @@ get_glyph_range <- function(vals, prev_range, axis_type = NULL) {
     range(c(vals, prev_range), na.rm = TRUE)
   } else {
     # gsub removes suffixes like ":0.6"
-    if (is.factor(vals))
+    if (is.factor(vals)) {
       vals <- levels(vals)
-    vals <- unique(gsub("(.*):(-*[0-9]*\\.*)*([0-9]+)*$", "\\1", vals))
+    } else if (inherits(vals, "bk_cat")) {
+      lvls <- attr(vals, "levels")
+      if (!is.null(lvls)) {
+        vals <- lvls
+      } else {
+        vals <- unique(sapply(vals, "[[", 1))
+      }
+    } else {
+      vals <- unique(vals)
+    }
+
+    # vals <- unique(gsub("(.*):(-*[0-9]*\\.*)*([0-9]+)*$", "\\1", vals))
     if (!is.null(prev_range)) {
       new_vals <- setdiff(vals, prev_range)
       if (length(new_vals) > 0) {
