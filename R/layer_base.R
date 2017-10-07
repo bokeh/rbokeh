@@ -965,24 +965,31 @@ ly_image <- function(
 #' @param data an optional data frame, providing the source for inputs x, y, and other properties
 #' @param w,h values or field names of width and height of image
 #' @param image_url values or field name of image URLs
-#' @param dilate logical - whether to dilate pixel distance computations when drawing
-#' @param anchor where the image is anchored to with respect to \code{x} and \code{y}
+#' @param dilate logical - Whether to always round fractional pixel locations in such a way as to make the images bigger. This setting may be useful if pixel rounding errors are causing images to have a gap between them, when they should appear flush.
+#' @param anchor Where the image is anchored to with respect to \code{x} and \code{y}. One of 'top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right'.
 #' @param angle values or field name of the angle to rotate the image, in radians
+#' @param global_alpha An overall opacity that each image is rendered with (in addition to any inherent alpha values in the image itself).
+#' @param retry_attempts Number of attempts to retry loading the images from the specified URL.
+#' @param retry_timeout Timeout (in ms) between retry attempts to load the image from the specified URL.
 # template par-lnamegroup
 #' @family layer functions
 #' @example man-roxygen/ex-image_url.R
 #' @export
 ly_image_url <- function(
   fig, x = NULL, y = NULL,
-  image_url,
+  url,
   w = 10, h = 10,
   data = figure_data(fig),
   dilate = TRUE, anchor = "top_left", angle = 0,
+  w_units = "screen", h_units = "screen", global_alpha = 1,
+  retry_attempts = 0, retry_timeout = 0,
   lgroup = NULL, lname = NULL, ...) {
 
   spec <- c(list(
-    x = enquo(x), y = enquo(y), image_url = enquo(image_url),
-    w = enquo(w), h = enquo(h), dilate = dilate, andhor = anchor, angle = angle,
+    x = enquo(x), y = enquo(y), url = enquo(url),
+    w = enquo(w), h = enquo(h), dilate = dilate, anchor = anchor, angle = angle,
+    global_alpha = global_alpha,
+    retry_attempts = retry_attempts, retry_timeout = retry_timeout,
     model = "ImageURL",
     type = "glyph",
     data = data,
