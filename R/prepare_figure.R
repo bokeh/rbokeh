@@ -139,7 +139,7 @@ prepare_figure <- function(x) {
           if (length(val) > 1)
             message("Attribute '", attr_nm, "' must be a scalar... ",
               "Only using first observation.")
-          ly[[attr_nm]] <- list(value = val[1])
+          ly[[attr_nm]] <- val[1] # list(value = val[1])
         } else if (attr_nm %in% c("xs", "ys")) {
           nm <- attr_nm
           ly$data[[attr_nm]] <- I(val)
@@ -438,7 +438,7 @@ prepare_figure <- function(x) {
       if (is.null(ly$fill_color))
         ly$fill_color <- ly$color
 
-      # resolve alpha -> line_alphg and fill_alpha
+      # resolve alpha -> line_alpha and fill_alpha
       if (is.null(ly$alpha))
         ly$alpha <- 1 # TODO: get this from theme?
       if (is.null(ly$line_alpha))
@@ -462,7 +462,7 @@ prepare_figure <- function(x) {
       if (is.null(ly$ns_fill_color))
         ly$ns_fill_color <- ly$ns_color
 
-      # resolve alpha -> line_alphg and fill_alpha
+      # resolve alpha -> line_alpha and fill_alpha
       if (is.null(ly$ns_alpha))
         ly$ns_alpha <- 0.75 # TODO: get this from theme?
       if (is.null(ly$ns_line_alpha))
@@ -518,7 +518,7 @@ prepare_figure <- function(x) {
       if (is.null(ly$sel_fill_color))
         ly$sel_fill_color <- ly$fill_color
 
-      # resolve alpha -> line_alphg and fill_alpha
+      # resolve alpha -> line_alpha and fill_alpha
       if (!is.null(ly$sel_alpha) && is.null(ly$sel_line_alpha))
         ly$sel_line_alpha <- ly$sel_alpha
       if (!is.null(ly$sel_alpha) && is.null(ly$sel_fill_alpha))
@@ -622,7 +622,7 @@ prepare_figure <- function(x) {
       if (is.null(ly$fill_color))
         ly$fill_color <- ly$color
 
-      # resolve alpha -> line_alphg and fill_alpha
+      # resolve alpha -> line_alpha and fill_alpha
       if (is.null(ly$alpha))
         ly$alpha <- 1 # TODO: get this from theme?
       if (is.null(ly$line_alpha))
@@ -685,7 +685,10 @@ prepare_figure <- function(x) {
   ## add necessary models to get a plot
   ##---------------------------------------------------------
 
-  x <- add_axes(x)
+  # ImageURL cannot set axis ranges automatically for some reason
+  # so we have to explicitly set the ranges
+  use_range <- ly$model == "ImageURL"
+  x <- add_axes(x, use_range = use_range)
   x$mods <- add_title(x$mods, x$pars$title)
   x$mods <- add_tools(x$mods)
   x$mods <- add_legend(x$mods)
@@ -858,10 +861,9 @@ js_transform_size_num <- function(spc) {
 #   paste0("l", max(val) + 1)
 # }
 
-add_axes <- function(x) {
+add_axes <- function(x, use_range = FALSE) {
   for (whch in names(x$pars$axes$args))
-    x <- add_axis(x, whch)
-
+    x <- add_axis(x, whch, use_range)
   x
 }
 
@@ -870,7 +872,7 @@ get_axis_type <- function(x, whch) {
   x$pars$axes$type[[xy]]
 }
 
-add_axis <- function(x, whch) {
+add_axis <- function(x, whch, use_range = FALSE) {
   type <- get_axis_type(x, whch)
   xy <- ifelse(whch %in% c("below", "above"), "x", "y")
   args <- x$pars$axes$args[[whch]]
@@ -892,8 +894,11 @@ add_axis <- function(x, whch) {
       args$range$start <- drng[1]
     if (is.null(args$range$end))
       args$range$end <- drng[2]
-    # rng <- do.call(DataRange1d$new, args$range)
+    if (use_range) {
+      rng <- do.call(DataRange1d$new, args$range)
+    } else {
       rng <- DataRange1d$new()
+    }
 
     if (x$pars$axes$log[[xy]]) {
       if (is.null(args$ticker$model))
