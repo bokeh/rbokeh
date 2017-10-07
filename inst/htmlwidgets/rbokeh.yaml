@@ -5,6 +5,7 @@ dependencies:
   script:
     - bokeh.min.js
     - bokeh-widgets.min.js
+    - bokeh-gl.min.js
   stylesheet:
     - bokeh.min.css
     - bokeh-widgets.min.css
