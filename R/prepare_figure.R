@@ -39,6 +39,7 @@ prepare_figure <- function(x) {
       #   the goal is for the data source to remain as unchanged as possible
       # - add mappers when necessary
       #   a attribute needs to be mapped if it refers to a column in the data
+
       quo_idx <- which(sapply(ly, rlang::is_quosure))
       vals <- lapply(names(quo_idx), function(attr_nm) {
         rlang::eval_tidy(ly[[attr_nm]], ly$data)
@@ -85,38 +86,46 @@ prepare_figure <- function(x) {
         spc <- attr(val, "spec")
         if (is.null(spc))
           spc <- list()
-          # spc <- list(units = "screen")
         attr(val, "spec") <- NULL
 
         # keep track of axis ranges and types
         if (attr_nm == "image") {
-          x$pars$axes$type$x <- "numeric"
-          x$pars$axes$type$y <- "numeric"
-          x$pars$axes$range$x <- c(ly$x, ly$dw)
-          x$pars$axes$range$y <- c(ly$y, ly$dh)
-          x$pars$axes$lab$x <- "x"
-          x$pars$axes$lab$y <- "y"
+          xtype <- get_glyph_axis_type(1, x$pars$ranges$x$type, "x")
+          ytype <- get_glyph_axis_type(1, x$pars$ranges$y$type, "y")
+
+          x$pars$ranges$x$type <- xtype
+          x$pars$ranges$y$type <- ytype
+
+          x$pars$ranges$x$lims_calc <- get_glyph_range(c(ly$x, ly$dw),
+            prev_range = x$pars$ranges$x$lims_calc, axis_type = xtype)
+          x$pars$ranges$y$lims_calc <- get_glyph_range(c(ly$y, ly$dh),
+            prev_range = x$pars$ranges$y$lims_calc, axis_type = ytype)
+
+          if (is.null(x$pars$gen$labs$x))
+            x$pars$gen$labs$x <- "x"
+          if (is.null(x$pars$gen$labs$y))
+            x$pars$gen$labs$y <- "y"
         } else {
           for (xy in c("x", "y")) {
             nms_chk <- c("x", "xs", "x0", "left", "right")
             if (xy == "y")
               nms_chk <- c("y", "ys", "y0", "bottom", "top")
             if (attr_nm %in% nms_chk) {
-              type <- get_glyph_axis_type(val, x$pars$axes$type[[xy]])
-              if (is.null(x$pars$axes$type[[xy]])) {
-                x$pars$axes$type[[xy]] <- type
+              type <- get_glyph_axis_type(val, x$pars$ranges[[xy]]$type, xy)
+              if (is.null(x$pars$ranges[[xy]]$type)) {
+                x$pars$ranges[[xy]]$type <- type
               } else {
-                if (x$pars$axes$type[[xy]] != type)
+                if (x$pars$ranges[[xy]]$type != type)
                   stop("Layer has incompatible x-axis type from previous layer.", call. = FALSE)
               }
-              if (is.null(x$pars$axes$range[[xy]]))
-                x$pars$axes$range[[xy]] <- get_glyph_range(val,
-                  prev_range = x$pars$axes$range[[xy]], axis_type = x$pars$axes$type[[xy]])
-              if (is.null(x$pars$axes$lab[[xy]])) {
+              if (is.null(x$pars$ranges[[xy]]$lims_calc))
+                x$pars$ranges[[xy]]$lims_calc <- get_glyph_range(val,
+                  prev_range = x$pars$ranges[[xy]]$lims_calc, axis_type = x$pars$ranges[[xy]]$type)
+              if (is.null(x$pars$gen$labs[[xy]])) {
                 lab_nm <- try(quo_name(ly[[attr_nm]]), silent = TRUE)
                 if (inherits(lab_nm, "try-error"))
                   lab_nm <- xy
-                x$pars$axes$lab[[xy]] <- lab_nm
+                x$pars$gen$labs[[xy]] <- lab_nm
               }
             }
           }
@@ -303,6 +312,13 @@ prepare_figure <- function(x) {
           }
           # do this at the end because names can change in the mappers
           cols_to_use <- unique(c(cols_to_use, nm))
+        }
+        if (!is.null(ly[[attr_nm]]) && !is.null(spc$units)) {
+          if (is.list(ly[[attr_nm]])) {
+            ly[[attr_nm]]$units <- spc$units
+          } else {
+            ly[[attr_nm]] <- list(value = ly[[attr_nm]], units = spc$units)
+          }
         }
       }
 
@@ -687,22 +703,35 @@ prepare_figure <- function(x) {
 
   # ImageURL cannot set axis ranges automatically for some reason
   # so we have to explicitly set the ranges
-  use_range <- ly$model == "ImageURL"
-  x <- add_axes(x, use_range = use_range)
+  use_computed_range <- FALSE
+  if ("Image" %in% sapply(x$layers, function(x) x$model))
+    use_computed_range <- TRUE
+
+  x <- add_ranges(x, use_computed_range)
+  x <- add_axes(x)
   x$mods <- add_title(x$mods, x$pars$title)
   x$mods <- add_tools(x$mods)
   x$mods <- add_legend(x$mods)
 
-  for (whch in names(x$pars$axes$args))
-    x$mods$plot$set_prop(whch, list(x$mods$axes[[whch]]$axis$get_instance()))
+  for (whch in names(x$pars$axes)) {
+    if (x$pars$axes[[whch]]$draw)
+      x$mods$plot$set_prop(whch, list(x$mods$axes[[whch]]$axis$get_instance()))
+  }
 
-  xrng <- x$mods$axes[c("below", "above")][[1]]$range$get_instance()
-  yrng <- x$mods$axes[c("left", "right")][[1]]$range$get_instance()
+  xrng <- x$mods$ranges$x$get_instance()
+  yrng <- x$mods$ranges$y$get_instance()
   x$mods$plot$set_prop("x_range", xrng)
   x$mods$plot$set_prop("y_range", yrng)
 
-  xscl <- x$mods$axes[c("below", "above")][[1]]$scale$get_instance()
-  yscl <- x$mods$axes[c("left", "right")][[1]]$scale$get_instance()
+  if (!is.null(x$mods$axes$above$scale))
+    xscl <- x$mods$axes$above$scale$get_instance()
+  if (!is.null(x$mods$axes$below$scale))
+    xscl <- x$mods$axes$below$scale$get_instance()
+  if (!is.null(x$mods$axes$right$scale))
+    yscl <- x$mods$axes$right$scale$get_instance()
+  if (!is.null(x$mods$axes$left$scale))
+    yscl <- x$mods$axes$left$scale$get_instance()
+
   x$mods$plot$set_prop("x_scale", xscl)
   x$mods$plot$set_prop("y_scale", yscl)
 
@@ -861,21 +890,75 @@ js_transform_size_num <- function(spc) {
 #   paste0("l", max(val) + 1)
 # }
 
-add_axes <- function(x, use_range = FALSE) {
-  for (whch in names(x$pars$axes$args))
-    x <- add_axis(x, whch, use_range)
+add_ranges <- function(x, use_computed_range = FALSE) {
+  for (whch in c("x", "y"))
+    x <- add_range(x, whch, use_computed_range)
   x
 }
 
-get_axis_type <- function(x, whch) {
-  xy <- ifelse(whch %in% c("below", "above"), "x", "y")
-  x$pars$axes$type[[xy]]
+add_range <- function(x, whch, use_computed_range = FALSE) {
+  type <- x$pars$ranges[[whch]]$type
+  args <- x$pars$ranges[[whch]]$args
+  lims_spec <- x$pars$gen$lims[[whch]]
+
+  if (type == "numeric") {
+    if (!is.null(lims_spec)) {
+      lims_spec <- lims_spec + c(-1, 1) * diff(lims_spec) * x$pars$gen_range_padding
+      args$start <- lims_spec[1]
+      args$end <- lims_spec[2]
+      ## it must be that range_padding only applies when limits aren't set explicitly
+      # args$range_padding <- x$pars$gen$range_padding
+      # args$range_padding_units <- "percent"
+    } else if (use_computed_range) {
+      drng <- x$pars$ranges[[whch]]$lims_calc
+      if (is.null(args$start))
+        args$start <- drng[1]
+      if (is.null(args$end))
+        args$end <- drng[2]
+      if (is.null(args$range_padding))
+        args$range_padding <- 0.07 # TODO: make 0.07 padding factor part of theme
+    }
+    rng <- do.call(DataRange1d$new, args)
+  } else if (type == "categorical") {
+    if (!is.null(lims_spec)) {
+      args$factors <- lims_spec
+    } else {
+      if (is.null(args$factors))
+        args$factors <- x$pars$ranges[[whch]]$lims_calc
+    }
+    rng <- do.call(FactorRange$new, args)
+  } else if (type == "datetime") {
+    if (!is.null(lims_spec)) {
+      args$start <- lims_spec[1]
+      args$end <- lims_spec[2]
+    } else if (use_computed_range) {
+      drng <- x$pars$ranges[[whch]]$lims_calc
+      if (is.null(args$start))
+        args$start <- drng[1]
+      if (is.null(args$end))
+        args$end <- drng[2]
+      if (is.null(args$range_padding))
+        args$range_padding <- 0.07 # TODO: make 0.07 padding factor part of theme
+    }
+    rng <- do.call(DataRange1d$new, args)
+  }
+
+  x$mods$ranges[[whch]] <- rng
+
+  x
 }
 
-add_axis <- function(x, whch, use_range = FALSE) {
-  type <- get_axis_type(x, whch)
+add_axes <- function(x) {
+  for (whch in names(x$pars$axes))
+    if (x$pars$axes[[whch]]$draw)
+      x <- add_axis(x, whch)
+  x
+}
+
+add_axis <- function(x, whch) {
   xy <- ifelse(whch %in% c("below", "above"), "x", "y")
-  args <- x$pars$axes$args[[whch]]
+  type <- x$pars$ranges[[xy]]$type
+  args <- x$pars$axes[[whch]]$args
 
   if (!is.list(args$grid))
     args$grid <- list(visible = FALSE)
@@ -885,22 +968,10 @@ add_axis <- function(x, whch, use_range = FALSE) {
   args$axis$plot <- x$mods$plot$get_instance()
   args$grid$dimension <- as.integer(whch %in% c("left", "right"))
   if (is.null(args$axis$axis_label))
-    args$axis$axis_label <- x$pars$axes$lab[[xy]]
+    args$axis$axis_label <- x$pars$axes[[whch]]$lab
 
   if (type == "numeric") {
-    drng <- x$pars$axes$range[[xy]]
-    drng <- drng + c(-1, 1) * 0.07 * diff(drng) #TODO: make 0.07 padding factor part of theme
-    if (is.null(args$range$start))
-      args$range$start <- drng[1]
-    if (is.null(args$range$end))
-      args$range$end <- drng[2]
-    if (use_range) {
-      rng <- do.call(DataRange1d$new, args$range)
-    } else {
-      rng <- DataRange1d$new()
-    }
-
-    if (x$pars$axes$log[[xy]]) {
+    if (x$pars$axes[[whch]]$log) {
       if (is.null(args$ticker$model))
         args$ticker$model <- "LogTicker"
       if (is.null(args$tickformatter$model))
@@ -925,9 +996,6 @@ add_axis <- function(x, whch, use_range = FALSE) {
     if (is.null(args$axis$model))
       args$axis$model <- "CategoricalAxis"
 
-    if (is.null(args$range$factors))
-      args$range$factors <- x$pars$axes$range[[xy]]
-    rng <- do.call(FactorRange$new, args$range)
     scl <- CategoricalScale$new()
   } else if (type == "datetime") {
     if (is.null(args$ticker$model))
@@ -936,14 +1004,6 @@ add_axis <- function(x, whch, use_range = FALSE) {
       args$tickformatter$model <- "DatetimeTickFormatter"
     if (is.null(args$axis$model))
       args$axis$model <- "DatetimeAxis"
-
-    drng <- x$pars$axes$range[[xy]]
-    drng <- drng + c(-1, 1) * 0.07 * diff(drng) #TODO: make 0.07 padding factor part of theme
-    if (is.null(args$range$start))
-      args$range$start <- drng[1]
-    if (is.null(args$range$end))
-      args$range$end <- drng[2]
-    rng <- do.call(DataRange1d$new, args$range)
 
     # what about MonthsTicker, DaysTicker, etc.?
     scl <- LinearScale$new()
@@ -964,6 +1024,8 @@ add_axis <- function(x, whch, use_range = FALSE) {
   args$axis$ticker <- tck$get_instance()
   ax_mod <- getFromNamespace(args$axis$model, "rbokeh")
   args$axis$model <- NULL
+  args$axis$axis_label <- x$pars$gen$labs[[xy]]
+
   axs <- do.call(ax_mod$new, args$axis)
 
   if (is.null(x$mods$axes))
@@ -974,7 +1036,6 @@ add_axis <- function(x, whch, use_range = FALSE) {
     grid = grd,
     tick_formatter = tf,
     axis = axs,
-    range = rng,
     scale = scl
   )
 

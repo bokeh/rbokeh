@@ -4,20 +4,40 @@ spec <- function(x, domain = NULL, range = NULL, transform = NULL, units = "scre
 
   # TODO: validate other arguments...
 
-  if (is.character(transform))
-    transform <- custom_js_transform(transform)
+  spc <- list()
+  if (!missing(domain))
+    spc$domain <- domain
 
-  if (!is.null(transform) && !inherits(transform, "custom_js_transform"))
-    stop("The 'transform' argument specified in spec() is invalid.", call. = FALSE)
+  if (!missing(range))
+    spc$range <- range
 
-  attr(x, "spec") <- list(
-    domain = domain,
-    range = range,
-    transform = transform,
-    units = units,
-    exponent = exponent,
-    log = log
-  )
+  if (!missing(transform)) {
+    if (is.character(transform))
+      transform <- custom_js_transform(transform)
+
+    if (!is.null(transform) && !inherits(transform, "custom_js_transform"))
+      stop("The 'transform' argument specified in spec() is invalid.", call. = FALSE)
+
+    spc$transform <- transform
+  }
+
+  if (!missing(units))
+    spc$units <- units
+
+  if (!missing(name))
+    spc$name <- name
+
+  if (!missing(exponent))
+    spc$exponent <- exponent
+
+  if (!missing(log))
+    spc$log <- log
+
+  if (!missing(unknown))
+    spc$unknown <- unknown
+
+  attr(x, "spec") <- spc
+
   x
 }
 

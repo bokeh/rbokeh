@@ -35,12 +35,12 @@ y_axis <- function(fig, label = NULL, position = "left", log = FALSE, draw = TRU
 
 update_axis <- function(fig, position, draw, args, which) {
   if ("log" %in% names(args) && args$log == TRUE)
-    fig$x$pars$axes$log[[which]] <- TRUE
+    fig$x$pars$axes[[position]]$log <- TRUE
 
   if ("label" %in% names(args))
-    fig$x$pars$axes$lab[[which]] <- args$label
+    fig$x$gen$labs[[which]] <- args$label
 
-  axis_type <- fig$x$pars$axes$type[[which]]
+  # axis_type <- fig$x$pars$ranges[[which]]$type
 
   # TODO: move this validation to when axes are built in prepare_figure
   # valid_mods <- list(
@@ -61,25 +61,26 @@ update_axis <- function(fig, position, draw, args, which) {
   #   message("The model '", cur_obj$model,"' is not compatible with the ", which,
   #     " axis which is of type '", axis_type, "... Ignoring this specification.")
 
-  if (draw) {
-    mod_nms <- c("ticker", "tickformatter", "axis", "grid")
-    for (nm in intersect(mod_nms, names(args))) {
-      cur_obj <- eval(args[[nm]])
-      if (cur_obj$clear) {
-        fig$x$pars$axes$args[[position]][[nm]] <- cur_obj
-      } else {
-        fig$x$pars$axes$args[[position]][[nm]] <-
-          modifyList(fig$x$pars$axes$args[[position]][[nm]], cur_obj)
-      }
-      fig$x$pars$axes$args[[position]][[nm]]$clear <- NULL
+  fig$x$pars$axes[[position]]$draw <- draw
+
+  # if (draw) {
+  mod_nms <- c("ticker", "tickformatter", "axis", "grid")
+  for (nm in intersect(mod_nms, names(args))) {
+    cur_obj <- eval(args[[nm]])
+    if (cur_obj$clear) {
+      fig$x$pars$axes[[position]]$args[[nm]] <- cur_obj
+    } else {
+      fig$x$pars$axes[[position]]$args[[nm]] <-
+        modifyList(fig$x$pars$axes[[position]]$args[[nm]], cur_obj)
     }
-  } else {
-    fig$x$pars$axes$args[[position]] <- NULL
+    fig$x$pars$axes[[position]]$args[[nm]]$clear <- NULL
   }
+  # } else {
+  #   fig$x$pars$axes[[position]]$args <- NULL
+  # }
 
   fig
 }
-
 
 ## tickers
 ##---------------------------------------------------------

@@ -999,3 +999,7 @@ ly_image_url <- function(
 
   add_layer(fig, spec, lgroup, lname)
 }
+
+ly_ellipse <- function() {
+
+}

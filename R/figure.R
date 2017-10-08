@@ -11,7 +11,7 @@ figure <- function(
   ylab = NULL,
   xlim = NULL,
   ylim = NULL,
-  padding_factor = 0.07,
+  range_padding = 0.07,
   xgrid = TRUE,
   ygrid = TRUE,
   legend_location = "top_right",
@@ -44,32 +44,85 @@ figure <- function(
         gen = list(
           logo = logo, tools = tools,
           xgrid = xgrid, ygrid = ygrid,
-          xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim,
-          padding_factor = padding_factor
+          labs = list(x = xlab, y = ylab),
+          lims = list(x = xlim, y = ylim),
+          range_padding = range_padding
         ),
         title = list(text = title),
         legend = list(legend_location = legend_location),
+        ranges = list(
+          x = list(
+            type = NULL,
+            lims_calc = NULL,
+            args = list()
+          ),
+          y = list(
+            type = NULL,
+            lims_calc = NULL,
+            args = list()
+          )
+        ),
         axes = list(
-          type = list(x = NULL, y = NULL),
-          log = list(x = FALSE, y = FALSE),
-          range = list(x = xlim, y = ylim),
-          lab = list(x = xlab, y = ylab),
-          args = list(
-            below = list(
+          below = list(
+            draw = TRUE,
+            log = FALSE,
+            args = list(
               ticker = list(),
               grid = if (xgrid) list() else NA,
               tickformatter = list(),
-              axis = list(),
-              range = list()
-            ),
-            left = list(
+              axis = list()
+            )
+          ),
+          left = list(
+            draw = TRUE,
+            log = FALSE,
+            args = list(
               ticker = list(),
               grid = if (ygrid) list() else NA,
               tickformatter = list(),
-              axis = list(),
-              range = list()
+              axis = list()
+            )
+          ),
+          above = list(
+            draw = FALSE,
+            log = FALSE,
+            args = list(
+              ticker = list(),
+              grid = if (xgrid) list() else NA,
+              tickformatter = list(),
+              axis = list()
+            )
+          ),
+          right = list(
+            draw = FALSE,
+            type = NULL,
+            log = FALSE,
+            args = list(
+              ticker = list(),
+              grid = if (ygrid) list() else NA,
+              tickformatter = list(),
+              axis = list()
             )
           )
+          # type = list(x = NULL, y = NULL),
+          # log = list(x = FALSE, y = FALSE),
+          # range = list(x = NULL, y = NULL),
+          # range_user = list(x = xlim, y = ylim),
+          # lab = list(x = xlab, y = ylab),
+          # args = list(
+          #   below = list(
+          #     ticker = list(),
+          #     grid = if (xgrid) list() else NA,
+          #     tickformatter = list(),
+          #     axis = list()
+          #   ),
+          #   left = list(
+          #     ticker = list(),
+          #     grid = if (ygrid) list() else NA,
+          #     tickformatter = list(),
+          #     axis = list()
+          #   )
+          # )
         )
       ),
       debug = FALSE,
