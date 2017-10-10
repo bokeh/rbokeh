@@ -66,7 +66,7 @@ update_axis <- function(fig, position, draw, args, which) {
   # if (draw) {
   mod_nms <- c("ticker", "tickformatter", "axis", "grid")
   for (nm in intersect(mod_nms, names(args))) {
-    cur_obj <- eval(args[[nm]])
+    cur_obj <- args[[nm]]
     if (cur_obj$clear) {
       fig$x$pars$axes[[position]]$args[[nm]] <- cur_obj
     } else {

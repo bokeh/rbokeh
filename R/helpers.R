@@ -38,15 +38,20 @@ jitter_cat <- function(x, factor = 0.5) {
 }
 
 # nms is an optional vector of names to subset results to
-get_specified_args <- function(nms = NULL) {
-  res <- as.list(match.call(
+get_specified_args <- function(nms = NULL, nnms = NULL) {
+
+  res <- rlang::lang_args(match.call(
     def = sys.function(-1),
     call = sys.call(-1)
-  ))[-1]
-  if (!is.null(nms) && is.character(nms))
-    res <- res[intersect(names(res), nms)]
+  ))
 
-  res
+  if (!is.null(nms) && is.character(nms)) {
+    res <- res[intersect(names(res), nms)]
+  } else if (!is.null(nnms) && is.character(nnms)) {
+    res <- res[setdiff(names(res), nnms)]
+  }
+
+  lapply(res, rlang::eval_tidy)
 }
 
 get_init_formals <- function(cls) {
