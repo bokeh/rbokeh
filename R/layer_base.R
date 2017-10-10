@@ -884,7 +884,7 @@ ly_polygons <- function(
 #' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
 #' @param dilate logical - whether to dilate pixel distance computations when drawing
 # template par-lnamegroup
-#' @example man-roxygen/ex-image.R
+# @example man-roxygen/ex-image.R
 #' @family layer functions
 #' @export
 ly_image <- function(
@@ -973,7 +973,7 @@ ly_image <- function(
 #' @param retry_timeout Timeout (in ms) between retry attempts to load the image from the specified URL.
 # template par-lnamegroup
 #' @family layer functions
-#' @example man-roxygen/ex-image_url.R
+# @example man-roxygen/ex-image_url.R
 #' @export
 ly_image_url <- function(
   fig, x = NULL, y = NULL,

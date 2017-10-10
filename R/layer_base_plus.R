@@ -67,7 +67,7 @@ ly_curve <- function(
 # template par-lineprops
 # template par-lnamegroup
 # template dots-line
-#' @example man-roxygen/ex-image.R
+# @example man-roxygen/ex-image.R
 #' @family layer functions
 #' @export
 ly_contour <- function(
@@ -107,7 +107,7 @@ ly_contour <- function(
 # template par-legend
 # template par-lnamegroup
 # template dots-line
-#' @example man-roxygen/ex-lines.R
+# @example man-roxygen/ex-lines.R
 #' @examples
 #' # abline with mixed axes for h and v
 #' figure() %>%

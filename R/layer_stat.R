@@ -422,7 +422,7 @@ ly_boxplot <- function(
 #' This function expects one of either x or y to be categorical and the other to be numeric or NULL.  The numeric variable is summed for each categorical variable and bars are plotted.  If no numeric variable is supplied, the unique values of the categorical variable will be tabulated.  Within each categorical variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each categorical variable level, stacking the bars.  The "dodge" choice will plot the bars for each level of the categorical variable side by side.
 #'
 #' @family layer functions
-#' @example man-roxygen/ex-bar.R
+# @example man-roxygen/ex-bar.R
 #' @export
 ly_bar <- function(
   fig, x = NULL, y = NULL, data = figure_data(fig),
