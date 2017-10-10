@@ -106,25 +106,6 @@ figure <- function(
               axis = list()
             )
           )
-          # type = list(x = NULL, y = NULL),
-          # log = list(x = FALSE, y = FALSE),
-          # range = list(x = NULL, y = NULL),
-          # range_user = list(x = xlim, y = ylim),
-          # lab = list(x = xlab, y = ylab),
-          # args = list(
-          #   below = list(
-          #     ticker = list(),
-          #     grid = if (xgrid) list() else NA,
-          #     tickformatter = list(),
-          #     axis = list()
-          #   ),
-          #   left = list(
-          #     ticker = list(),
-          #     grid = if (ygrid) list() else NA,
-          #     tickformatter = list(),
-          #     axis = list()
-          #   )
-          # )
         )
       ),
       debug = FALSE,
