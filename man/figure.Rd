@@ -6,7 +6,7 @@
 \usage{
 figure(data = NULL, width = 600, height = 600, title = NULL,
   xlab = NULL, ylab = NULL, xlim = NULL, ylim = NULL,
-  padding_factor = 0.07, xgrid = TRUE, ygrid = TRUE,
+  range_padding = 0.07, xgrid = TRUE, ygrid = TRUE,
   legend_location = "top_right", tools = c("pan", "wheel_zoom", "box_zoom",
   "reset", "save", "help"), logo = NULL, theme = getOption("bokeh_theme"),
   toolbar_location = "above", h_symmetry = TRUE, v_symmetry = FALSE,
