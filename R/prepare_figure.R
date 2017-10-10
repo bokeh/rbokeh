@@ -82,6 +82,7 @@ prepare_figure <- function(fig) {
       ## loop over each attribute and construct appropriate models
       for (attr_nm in names(vals)) {
         val <- vals[[attr_nm]]
+        nm <- NULL
 
         # if this value was specified using spec(), extract that info
         spc <- attr(val, "spec")
@@ -311,6 +312,7 @@ prepare_figure <- function(fig) {
               }
             }
           }
+
           # do this at the end because names can change in the mappers
           cols_to_use <- unique(c(cols_to_use, nm))
         }
@@ -702,6 +704,20 @@ prepare_figure <- function(fig) {
   ## add necessary models to get a plot
   ##---------------------------------------------------------
 
+  ## tiles
+  if (!is.null(x$pars$tiles)) {
+    # TODO: allow WMTSTileSource to vary based on x$pars$tiles$type
+    ts_mod <- do.call(WMTSTileSource$new, x$pars$tiles$args_tile)
+    tr_args <- x$pars$tiles$args_rend
+    tr_args$tile_source <- ts_mod$get_instance()
+    tr_mod <- do.call(TileRenderer$new, tr_args)
+    x$mods$tiles <- list(tiles = ts_mod, renderer = tr_mod)
+
+    # we want to force ranges for maps
+    x$pars$ranges$x$type <- "map"
+    x$pars$ranges$y$type <- "map"
+  }
+
   # ImageURL cannot set axis ranges automatically for some reason
   # so we have to explicitly set the ranges
   use_computed_range <- FALSE
@@ -718,15 +734,11 @@ prepare_figure <- function(fig) {
   }
   x$mods <- add_legend(x$mods)
 
+  ## axes
   for (whch in names(x$pars$axes)) {
     if (x$pars$axes[[whch]]$draw)
       x$mods$plot$set_prop(whch, list(x$mods$axes[[whch]]$axis$get_instance()))
   }
-
-  xrng <- x$mods$ranges$x$get_instance()
-  yrng <- x$mods$ranges$y$get_instance()
-  x$mods$plot$set_prop("x_range", xrng)
-  x$mods$plot$set_prop("y_range", yrng)
 
   if (!is.null(x$mods$axes$above$scale))
     xscl <- x$mods$axes$above$scale$get_instance()
@@ -739,6 +751,12 @@ prepare_figure <- function(fig) {
 
   x$mods$plot$set_prop("x_scale", xscl)
   x$mods$plot$set_prop("y_scale", yscl)
+
+  ## ranges
+  xrng <- x$mods$ranges$x$get_instance()
+  yrng <- x$mods$ranges$y$get_instance()
+  x$mods$plot$set_prop("x_range", xrng)
+  x$mods$plot$set_prop("y_range", yrng)
 
   x$mods$plot$set_prop("renderers", get_renderers(x$mods))
   if (!is.null(x$mods$title))
@@ -904,6 +922,12 @@ add_ranges <- function(x, use_computed_range = FALSE) {
 }
 
 add_range <- function(x, whch, use_computed_range = FALSE) {
+
+  if (is.null(x$pars$ranges[[whch]]$type)) {
+    x$mods$ranges[[whch]] <- Range1d$new()
+    return(x)
+  }
+
   type <- x$pars$ranges[[whch]]$type
   args <- x$pars$ranges[[whch]]$args
   lims_spec <- x$pars$ranges[[whch]]$lims_spec
@@ -922,7 +946,14 @@ add_range <- function(x, whch, use_computed_range = FALSE) {
     args$callback <- x$mods$transforms$xrange$get_instance()
   }
 
-  if (type == "numeric") {
+  if (type == "map") {
+    lims <- lims_spec
+    if (is.null(lims))
+      lims <- x$pars$ranges[[whch]]$lims_calc
+    if (is.null(lims))
+      lims <- c(-20000000, 20000000)
+    rng <- Range1d$new(start = lims[1], end = lims[2])
+  } else if (type == "numeric") {
     if (!is.null(lims_spec)) {
       lims_spec <- lims_spec + c(-1, 1) * diff(lims_spec) * x$pars$gen$range_padding[[whch]]
       args$start <- lims_spec[1]
@@ -991,8 +1022,8 @@ add_axis <- function(x, whch) {
   if (is.null(args$axis$axis_label))
     args$axis$axis_label <- x$pars$axes[[whch]]$lab
 
-  if (type == "numeric") {
-    if (x$pars$axes[[whch]]$log) {
+  if (is.null(type) || type == "numeric" || type == "map") {
+    if (x$pars$axes[[whch]]$log && type != "map") {
       if (is.null(args$ticker$model))
         args$ticker$model <- "LogTicker"
       if (is.null(args$tickformatter$model))
@@ -1224,6 +1255,9 @@ get_renderers <- function(mods) {
 
   if (!is.null(mods$color_bar$cb))
     res[[length(res) + 1]] <- mods$color_bar$cb$get_instance()
+
+  if (!is.null(mods$tiles$renderer))
+    res[[length(res) + 1]] <- mods$tiles$renderer$get_instance()
 
   res
 }
