@@ -1,4 +1,5 @@
-prepare_figure <- function(x) {
+prepare_figure <- function(fig) {
+  x <- fig$x
 
   if (is.null(x$theme))
     x$theme <- bk_default_theme()
@@ -710,7 +711,11 @@ prepare_figure <- function(x) {
   x <- add_ranges(x, use_computed_range)
   x <- add_axes(x)
   x$mods <- add_title(x$mods, x$pars$title)
-  x$mods <- add_tools(x$mods)
+  if (length(x$pars$tools) > 0) {
+    x$mods <- add_tools(x$mods, x$pars$tools, x$pars$gen$logo)
+  } else {
+    x$mods$plot$set_prop("toolbar_location", NULL)
+  }
   x$mods <- add_legend(x$mods)
 
   for (whch in names(x$pars$axes)) {
@@ -743,7 +748,9 @@ prepare_figure <- function(x) {
   if (!is.null(x$mods$toolbar))
     x$mods$plot$set_prop("toolbar", x$mods$toolbar$get_instance())
 
-  x$mods
+  fig$x <- x
+
+  fig
 }
 
 ## js mapper transforms
@@ -899,15 +906,29 @@ add_ranges <- function(x, use_computed_range = FALSE) {
 add_range <- function(x, whch, use_computed_range = FALSE) {
   type <- x$pars$ranges[[whch]]$type
   args <- x$pars$ranges[[whch]]$args
-  lims_spec <- x$pars$gen$lims[[whch]]
+  lims_spec <- x$pars$ranges[[whch]]$lims_spec
+
+  if (type == "categorical") {
+    valid_nms <- get_init_formals(FactorRange)
+  } else {
+    valid_nms <- get_init_formals(DataRange1d)
+  }
+
+  # TODO: message if args were specified that aren't used
+  args <- args[intersect(valid_nms, names(args))]
+
+  if (!is.null(args$callback) && is.character(args$callback) && length(args$callback) == 1) {
+    x$mods$transforms$xrange <- CustomJS$new(code = args$callback)
+    args$callback <- x$mods$transforms$xrange$get_instance()
+  }
 
   if (type == "numeric") {
     if (!is.null(lims_spec)) {
-      lims_spec <- lims_spec + c(-1, 1) * diff(lims_spec) * x$pars$gen_range_padding
+      lims_spec <- lims_spec + c(-1, 1) * diff(lims_spec) * x$pars$gen$range_padding[[whch]]
       args$start <- lims_spec[1]
       args$end <- lims_spec[2]
       ## it must be that range_padding only applies when limits aren't set explicitly
-      # args$range_padding <- x$pars$gen$range_padding
+      # args$range_padding <- x$pars$gen$range_padding[[whch]]
       # args$range_padding_units <- "percent"
     } else if (use_computed_range) {
       drng <- x$pars$ranges[[whch]]$lims_calc
@@ -1051,58 +1072,87 @@ add_title <- function(mods, args, title = NULL) {
   mods
 }
 
-add_tools <- function(mods) {
-  ba <- BoxAnnotation$new(
-    bottom_units = "screen",
+add_tools <- function(mods, args, logo) {
+
+  has_overlay <- c("box_select", "lasso_select", "poly_select", "box_zoom")
+
+  # TODO: move this to themes
+  overlay_default <- list(
     fill_alpha = 0.5,
     fill_color = "lightgrey",
-    left_units = "screen",
-    level = "overlay",
     line_alpha = 1,
     line_color = "black",
     line_dash = c(4, 4),
-    line_width = 2,
-    render_mode = "css",
+    line_width = 2
+  )
+
+  overlay_fixed <- list(
+    xs_units = "screen",
+    ys_units = "screen",
+    bottom_units = "screen",
+    left_units = "screen",
     right_units = "screen",
-    top_units = "screen"
+    top_units = "screen",
+    level = "overlay",
+    render_mode = "css"
   )
 
-  bzt <- BoxZoomTool$new(
-    overlay = ba$get_instance()
-    # plot = mods$plot$get_instance()
-  )
+  underscore2camel <- function(x) {
+    x <- gsub("^([a-zA-Z])", "\\U\\1", x, perl = TRUE)
+    gsub("_([a-zA-Z])", "\\U\\1", x, perl = TRUE)
+  }
 
-  bst <- BoxSelectTool$new(
-    overlay = ba$get_instance()
-    # plot = mods$plot$get_instance()
-  )
+  mods$tools <- list()
+  for (nm in names(args)) {
+    cur <- args[[nm]]
+    if (is.null(cur$mod))
+      cur$mod <- list()
+    if (is.null(cur$overlay))
+      cur$overlay <- list()
 
-  rst <- ResetTool$new() # plot = mods$plot$get_instance()
-  hlp <- HelpTool$new() # plot = mods$plot$get_instance()
-  pnt <- PanTool$new() # plot = mods$plot$get_instance()
-  wzt <- WheelZoomTool$new() # plot = mods$plot$get_instance()
-  svt <- SaveTool$new() # plot = mods$plot$get_instance()
+    if (!is.null(cur$mod$callback) && is.character(cur$mod$callback) &&
+      length(cur$mod$callback) == 1) {
+      if (is.null(mods$transforms))
+        mods$transforms <- list()
+      mods$transforms[[nm]] <- CustomJS$new(code = cur$mod$callback)
+      cur$mod$callback <- mods$transforms[[nm]]$get_instance()
+    }
 
-  mods$tools <- list(
-    box_zoom = bzt,
-    box_select = bst,
-    reset = rst,
-    help = hlp,
-    pan = pnt,
-    wheel_zoom = wzt,
-    save = svt
-  )
+    mod_nm <- paste0(underscore2camel(nm), "Tool")
+    cur_model <- utils::getFromNamespace(mod_nm, "rbokeh")
+    mod <- do.call(cur_model$new, cur$mod)
 
-  # te <- ToolEvents$new()
+    res <- list(mod = mod)
 
-  tool_instances <- list(
-    bzt$get_instance(),
-    bst$get_instance(),
-    rst$get_instance(),
-    hlp$get_instance(),
-    pnt$get_instance(),
-    wzt$get_instance(),
-    svt$get_instance())
+    if (nm %in% has_overlay) {
+      for (par_nm in names(overlay_default)) {
+        if (is.null(cur$overlay[[par_nm]]))
+          cur$overlay[[par_nm]] <- overlay_default[[par_nm]]
+      }
+      for (par_nm in names(overlay_fixed))
+        cur$overlay[[par_nm]] <- overlay_fixed[[par_nm]]
+
+      over_mod_nm <- "BoxAnnotation"
+      if (nm %in% c("lasso_select", "poly_select"))
+        over_mod_nm <- "PolyAnnotation"
+      over_mod <- utils::getFromNamespace(over_mod_nm, "rbokeh")
+      ov_arg_nm <- get_init_formals(over_mod)
+      to_use <- intersect(ov_arg_nm, names(cur$overlay))
+      ovr <- do.call(over_mod$new, cur$overlay[to_use])
+
+      mod$set_prop("overlay", ovr$get_instance())
+
+      res$ovr <- ovr
+    }
+
+    mods$tools[[length(mods$tools) + 1]] <- res
+  }
+
+  names(mods$tools) <- names(args)
+
+  tool_instances <- unname(lapply(mods$tools, function(x) {
+    x$mod$get_instance()
+  }))
 
   # add any hover instances to the list
   hov_instances <- unname(lapply(mods$layers, function(x) {
@@ -1112,14 +1162,17 @@ add_tools <- function(mods) {
   hov_instances <- hov_instances[!sapply(hov_instances, is.null)]
   tool_instances <- c(tool_instances, hov_instances)
 
+  if (is.logical(logo) && !logo)
+    logo <- NULL
+
   tb <- Toolbar$new(
     active_drag = "auto",
     active_scroll = "auto",
     active_tap = "auto",
-    tools = tool_instances
+    tools = tool_instances,
+    logo = logo
   )
 
-  mods$box_zoom_ann <- ba
   # mods$tool_events <- te
   mods$toolbar <- tb
 
@@ -1160,6 +1213,11 @@ get_renderers <- function(mods) {
 
   if (!is.null(mods$legend))
     res[[length(res) + 1]] <- mods$legend$get_instance()
+
+  for (tl in mods$tools) {
+    if (length(tl$ovr) > 0)
+      res[[length(res) + 1]] <- tl$ovr$get_instance()
+  }
 
   if (!is.null(mods$box_zoom_ann))
     res[[length(res) + 1]] <- mods$box_zoom_ann$get_instance()

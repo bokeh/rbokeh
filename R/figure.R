@@ -35,6 +35,7 @@ figure <- function(
     lod_threshold = lod_threshold, lod_timeout = lod_timeout
     # output_backend = output_backend
   )
+
   obj <- htmlwidgets::createWidget(
     name = "rbokeh",
     x = list(
@@ -43,22 +44,23 @@ figure <- function(
       pars = list(
         gen = list(
           logo = logo, tools = tools,
-          xgrid = xgrid, ygrid = ygrid,
           labs = list(x = xlab, y = ylab),
-          lims = list(x = xlim, y = ylim),
-          range_padding = range_padding
+          range_padding = list(x = range_padding, y = range_padding)
         ),
         title = list(text = title),
         legend = list(legend_location = legend_location),
+        tools = structure(lapply(tools, function(x) list()), names = tools),
         ranges = list(
           x = list(
             type = NULL,
-            lims_calc = NULL,
+            lims_infer = NULL,
+            lims_spec = xlim,
             args = list()
           ),
           y = list(
             type = NULL,
-            lims_calc = NULL,
+            lims_infer = NULL,
+            lims_spec = ylim,
             args = list()
           )
         ),
@@ -209,16 +211,16 @@ figure_data <- function(fig) {
 
 rbokeh_prerender <- function(obj, keep_aux = FALSE) {
 
-  mods <- prepare_figure(obj$x)
+  obj <- prepare_figure(obj)
 
-  mod_list <- unname(unlist(mods))
+  mod_list <- unname(unlist(obj$x$mods))
   mod_list <- mod_list[sapply(mod_list, function(a) inherits(a, "Model"))]
 
   fig <- list(list(
     version = "0.12.9",
     title = "Bokeh Figure",
     roots = list(
-      root_ids = list(mods$plot$get_prop("id")),
+      root_ids = list(obj$x$mods$plot$get_prop("id")),
       references = lapply(mod_list, function(a) a$get_all_props())
     )
   ))
@@ -228,7 +230,7 @@ rbokeh_prerender <- function(obj, keep_aux = FALSE) {
   obj$x$docs_json <- fig
 
   obj$x$elementid <- digest::digest(Sys.time())
-  obj$x$modelid <- mods$plot$get_prop("id")
+  obj$x$modelid <- obj$x$mods$plot$get_prop("id")
   obj$x$docid <- docid
 
   if (!keep_aux) {
