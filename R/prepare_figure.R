@@ -704,6 +704,17 @@ prepare_figure <- function(fig) {
   ## add necessary models to get a plot
   ##---------------------------------------------------------
 
+  ## gmap
+  if (inherits(x$mods$plot, "GMapPlot")) {
+    mo_mod <- do.call(GMapOptions$new, x$pars$gmap)
+    x$mods$plot$set_prop("map_options", mo_mod$get_instance())
+    x$mods$map_options <- mo_mod
+
+    # we want to force ranges for gmaps
+    x$pars$ranges$x$type <- "gmap"
+    x$pars$ranges$y$type <- "gmap"
+  }
+
   ## tiles
   if (!is.null(x$pars$tiles)) {
     # TODO: allow WMTSTileSource to vary based on x$pars$tiles$type
@@ -740,6 +751,8 @@ prepare_figure <- function(fig) {
       x$mods$plot$set_prop(whch, list(x$mods$axes[[whch]]$axis$get_instance()))
   }
 
+  xscl <- NULL
+  yscl <- NULL
   if (!is.null(x$mods$axes$above$scale))
     xscl <- x$mods$axes$above$scale$get_instance()
   if (!is.null(x$mods$axes$below$scale))
@@ -748,6 +761,15 @@ prepare_figure <- function(fig) {
     yscl <- x$mods$axes$right$scale$get_instance()
   if (!is.null(x$mods$axes$left$scale))
     yscl <- x$mods$axes$left$scale$get_instance()
+
+  if (is.null(xscl)) {
+    x$mods$axes$below$scale <- LinearScale$new()
+    xscl <- x$mods$axes$below$scale$get_instance()
+  }
+  if (is.null(yscl)) {
+    x$mods$axes$left$scale <- LinearScale$new()
+    yscl <- x$mods$axes$left$scale$get_instance()
+  }
 
   x$mods$plot$set_prop("x_scale", xscl)
   x$mods$plot$set_prop("y_scale", yscl)
@@ -953,6 +975,8 @@ add_range <- function(x, whch, use_computed_range = FALSE) {
     if (is.null(lims))
       lims <- c(-20000000, 20000000)
     rng <- Range1d$new(start = lims[1], end = lims[2])
+  } else if (type == "gmap") {
+    rng <- Range1d$new()
   } else if (type == "numeric") {
     if (!is.null(lims_spec)) {
       lims_spec <- lims_spec + c(-1, 1) * diff(lims_spec) * x$pars$gen$range_padding[[whch]]
@@ -1022,8 +1046,8 @@ add_axis <- function(x, whch) {
   if (is.null(args$axis$axis_label))
     args$axis$axis_label <- x$pars$axes[[whch]]$lab
 
-  if (is.null(type) || type == "numeric" || type == "map") {
-    if (x$pars$axes[[whch]]$log && type != "map") {
+  if (is.null(type) || type == "numeric" || type == "map" || type == "gmap") {
+    if (x$pars$axes[[whch]]$log && type != "map" && type != "gmap") {
       if (is.null(args$ticker$model))
         args$ticker$model <- "LogTicker"
       if (is.null(args$tickformatter$model))
@@ -1235,7 +1259,9 @@ get_renderers <- function(mods) {
   res <- c(glrs,
     unlist(unname(
       lapply(mods$axes, function(a) {
-        res <- list(a$axis$get_instance())
+        res <- list()
+        if (!is.null(a$axis))
+          res <- c(res, list(a$axis$get_instance()))
         if (!is.null(a$grid))
           res <- c(res, list(a$grid$get_instance()))
         res
