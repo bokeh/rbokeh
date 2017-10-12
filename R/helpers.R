@@ -121,22 +121,32 @@ get_can_be_vector <- function(mod) {
 
 add_layer <- function(fig, spec, lgroup, lname) {
   if (is.null(lname))
-    lname <- get_next_layer_name(fig)
+    lname <- get_next_layer_group_name(fig)
   if (is.null(lgroup))
-    lgroup <- "common"
+    lgroup <- get_next_layer_group_name(fig, which = "group")
+
+  spec$lgroup <- lgroup
 
   fig$x$layers[[lname]] <- spec
 
   fig
 }
 
-get_next_layer_name <- function(obj) {
-  nms <- names(obj$x$layers)
-  nms <- nms[grepl("^l[0-9]+", nms)]
+get_next_layer_group_name <- function(obj, which = "layer") {
+  if (which == "layer") {
+    char <- "l"
+    nms <- names(obj$x$layers)
+  } else {
+    char <- "g"
+    nms <- unique(unlist(lapply(obj$x$layers, function(x) x$lgroup)))
+  }
+  rgx <- paste0("^", char, "[0-9]+")
+  nms <- nms[grepl(rgx, nms)]
   if (length(nms) == 0)
-    return ("l1")
-  val <- as.integer(gsub("l(.*)", "\\1", nms))
-  paste0("l", max(val) + 1)
+    return (paste0(char, "1"))
+  rgx <- paste0(char, "(.*)")
+  val <- as.integer(gsub(rgx, "\\1", nms))
+  paste0(char, max(val) + 1)
 }
 
 ## determine whether axis is "numeric" or "categorical"
