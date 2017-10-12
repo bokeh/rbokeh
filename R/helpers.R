@@ -54,8 +54,21 @@ get_specified_args <- function(nms = NULL, nnms = NULL) {
   lapply(res, rlang::eval_tidy)
 }
 
+# get the name of every argument that can be specified to a model's constructor
 get_init_formals <- function(cls) {
   names(formals(cls$public_methods$initialize))
+}
+
+# for a given model and list of arguments, return a reduced list of valid ones
+restrict_to_valid_args <- function(model, args) {
+  # TODO: should we message when args aren't used?
+  nms <- get_init_formals(model)
+  args[intersect(nms, names(args))]
+}
+
+call_with_valid_args <- function(model, args) {
+  args <- restrict_to_valid_args(model, args)
+  do.call(model$new, args)
 }
 
 get_bk_props_recurse <- function(mod) {

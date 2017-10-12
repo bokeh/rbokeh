@@ -271,6 +271,8 @@ prepare_figure <- function(fig) {
                   spc$range <- c(sz$min, sz$max)
                   spc$exponent <- sz$exponent
                 }
+                if (is.null(spc$exponent))
+                  spc$exponent <- x$theme$continuous$size$exponent
                 cjs <- js_transform_size_num(spc)
                 cjs_id <- digest::digest(list(val, attr_nm))
                 cur_ly[[cjs_id]] <- cjs
@@ -788,6 +790,11 @@ prepare_figure <- function(fig) {
   if (!is.null(x$mods$toolbar))
     x$mods$plot$set_prop("toolbar", x$mods$toolbar$get_instance())
 
+  ## resolve plot theme
+  ##---------------------------------------------------------
+  for (nm in names(x$theme$plot))
+    x$mods$plot$set_prop(nm, x$theme$plot[[nm]])
+
   fig$x <- x
 
   fig
@@ -843,99 +850,8 @@ js_transform_size_num <- function(spc) {
   do.call(CustomJSTransform$new, args)
 }
 
-# f <- function(x, dmn, rng)
-#   rng[1] + (rng[2] - rng[1]) * (x - dmn[1]) / (dmn[2] - dmn[1])
-# f(100, dmn, rng)
-# f(200, dmn, rng)
-
-
-## before using d3 scales:
-# var intervals = [{intr_str}];
-# var pal = ['{pal_str}'];
-# var n = pal.length;
-# var ii = 0;
-# while (ii < n) {{
-#   if (x > intervals[ii] && x <= intervals[ii + 1]) {{
-#     return pal[ii];
-#   }}
-#   ii++;
-# }};
-# return '#eeeeee'
-
-## using colormapper:
-# cm_id <- digest::digest(list(val, "color"))
-# cm <- cur_ly[[cm_id]]
-# if (is.null(cm)) {
-#   cm <- CategoricalColorMapper$new(
-#     factors = spc$domain,
-#     palette = spc$range
-#   )
-#   cur_ly[[cm_id]] <- cm
-#   if (ly$legend)
-#     cur_ly$legend_item <- LegendItem$new(
-#       label = list(field = sanitize(nm)))
-# }
-# ly[[attr_nm]] <- list(
-#   field = nm,
-#   transform = cm$get_instance())
-
-
-## ColorBar stuff (This was used for mapping continuous
-##   attrs to properties but was replaced with binning and
-##   inclusion in the legend. Salvage work here so we can
-##   use it with the Image glyph)
+##
 ##---------------------------------------------------------
-
-# TODO: support log color mapper (via spec())
-# cm <- LinearColorMapper$new(
-#   low = min(val, na.rm = TRUE),
-#   high = max(val, na.rm = TRUE),
-#   # low_color = ,
-#   # high_color = ,
-#   # nan_color = ,
-#   palette = bk_gradient_palettes$PuBuGn5
-#   # x$theme$continuous...
-# )
-
-# # LogTickFormatter
-# # LogTicker
-
-# tckf <- BasicTickFormatter$new()
-# tck <- BasicTicker$new()
-# cb <- ColorBar$new(
-#   color_mapper = cm$get_instance(),
-#   formatter = tckf$get_instance(),
-#   ticker = tck$get_instance(),
-#   plot = x$mods$plot$get_instance())
-# # label_standoff = 12
-# # location = c(0, 0)
-
-# # TODO: what if a right axis is being used?
-# # TODO: ideally continuous, categorical mappers all in same legend
-# #   not a color bar on the right and a legend inside, etc.
-# x$mods$plot$set_prop("right", list(cb$get_instance()))
-# cur_ly[[cm_id]] <- cm
-# if (is.null(x$mods$color_bar)) {
-#   x$mods$color_bar <- list(
-#     cb = cb,
-#     cb_tckf = tckf,
-#     cb_tck = tck
-#   )
-# } else {
-#   message("Currently only one color bar (continuous color mapping) is ",
-#     "supported per plot. Ignoring additional continuous color mapping.")
-# }
-
-
-
-# get_next_layer_name <- function(obj) {
-#   nms <- names(obj$x$mods$layers)
-#   nms <- nms[grepl("^l[0-9]+", nms)]
-#   if (length(nms) == 0)
-#     return ("l1")
-#   val <- as.integer(gsub("l(.*)", "\\1", nms))
-#   paste0("l", max(val) + 1)
-# }
 
 add_ranges <- function(x, use_computed_range = FALSE) {
   for (whch in c("x", "y"))
@@ -1085,24 +1001,36 @@ add_axis <- function(x, whch) {
     scl <- LinearScale$new()
   }
 
+  # TODO: things like axis_label_text_font_size should
+  # be able to have a CustomJSTransform
+
   tck_mod <- getFromNamespace(args$ticker$model, "rbokeh")
   args$ticker$model <- NULL
-  tck <- do.call(tck_mod$new, args$ticker)
+  # reconcile with theme
+  ticker_args <- modifyList(x$theme$ticker[[xy]], args$ticker)
+  tck <- call_with_valid_args(tck_mod, ticker_args)
 
   args$grid$ticker <- tck$get_instance()
-  grd <- do.call(Grid$new, args$grid)
+  # reconcile with theme
+
+  grid_args <- modifyList(x$theme$grid[[xy]], args$grid)
+  grd <- call_with_valid_args(Grid, grid_args)
 
   tf_mod <- getFromNamespace(args$tickformatter$model, "rbokeh")
   args$tickformatter$model <- NULL
-  tf <- do.call(tf_mod$new, args$tickformatter)
+  tf <- call_with_valid_args(tf_mod, args$tickformatter)
 
   args$axis$formatter <- tf$get_instance()
   args$axis$ticker <- tck$get_instance()
   ax_mod <- getFromNamespace(args$axis$model, "rbokeh")
   args$axis$model <- NULL
   args$axis$axis_label <- x$pars$gen$labs[[xy]]
-
-  axs <- do.call(ax_mod$new, args$axis)
+  # reconcile with theme
+  axis_args <- modifyList(x$theme$axis[[xy]], args$axis)
+  # we want users to be able specify orientation in degrees
+  if (!is.null(axis_args$major_label_orientation))
+    axis_args$major_label_orientation <- axis_args$major_label_orientation * pi / 180
+  axs <- call_with_valid_args(ax_mod, axis_args)
 
   if (is.null(x$mods$axes))
     x$mods$axes <- list()
@@ -1287,6 +1215,102 @@ get_renderers <- function(mods) {
 
   res
 }
+
+# f <- function(x, dmn, rng)
+#   rng[1] + (rng[2] - rng[1]) * (x - dmn[1]) / (dmn[2] - dmn[1])
+# f(100, dmn, rng)
+# f(200, dmn, rng)
+
+
+## before using d3 scales:
+# var intervals = [{intr_str}];
+# var pal = ['{pal_str}'];
+# var n = pal.length;
+# var ii = 0;
+# while (ii < n) {{
+#   if (x > intervals[ii] && x <= intervals[ii + 1]) {{
+#     return pal[ii];
+#   }}
+#   ii++;
+# }};
+# return '#eeeeee'
+
+## using colormapper:
+# cm_id <- digest::digest(list(val, "color"))
+# cm <- cur_ly[[cm_id]]
+# if (is.null(cm)) {
+#   cm <- CategoricalColorMapper$new(
+#     factors = spc$domain,
+#     palette = spc$range
+#   )
+#   cur_ly[[cm_id]] <- cm
+#   if (ly$legend)
+#     cur_ly$legend_item <- LegendItem$new(
+#       label = list(field = sanitize(nm)))
+# }
+# ly[[attr_nm]] <- list(
+#   field = nm,
+#   transform = cm$get_instance())
+
+
+## ColorBar stuff (This was used for mapping continuous
+##   attrs to properties but was replaced with binning and
+##   inclusion in the legend. Salvage work here so we can
+##   use it with the Image glyph)
+##---------------------------------------------------------
+
+# TODO: support log color mapper (via spec())
+# cm <- LinearColorMapper$new(
+#   low = min(val, na.rm = TRUE),
+#   high = max(val, na.rm = TRUE),
+#   # low_color = ,
+#   # high_color = ,
+#   # nan_color = ,
+#   palette = bk_gradient_palettes$PuBuGn5
+#   # x$theme$continuous...
+# )
+
+# # LogTickFormatter
+# # LogTicker
+
+# tckf <- BasicTickFormatter$new()
+# tck <- BasicTicker$new()
+# cb <- ColorBar$new(
+#   color_mapper = cm$get_instance(),
+#   formatter = tckf$get_instance(),
+#   ticker = tck$get_instance(),
+#   plot = x$mods$plot$get_instance())
+# # label_standoff = 12
+# # location = c(0, 0)
+
+# # TODO: what if a right axis is being used?
+# # TODO: ideally continuous, categorical mappers all in same legend
+# #   not a color bar on the right and a legend inside, etc.
+# x$mods$plot$set_prop("right", list(cb$get_instance()))
+# cur_ly[[cm_id]] <- cm
+# if (is.null(x$mods$color_bar)) {
+#   x$mods$color_bar <- list(
+#     cb = cb,
+#     cb_tckf = tckf,
+#     cb_tck = tck
+#   )
+# } else {
+#   message("Currently only one color bar (continuous color mapping) is ",
+#     "supported per plot. Ignoring additional continuous color mapping.")
+# }
+
+
+
+# get_next_layer_name <- function(obj) {
+#   nms <- names(obj$x$mods$layers)
+#   nms <- nms[grepl("^l[0-9]+", nms)]
+#   if (length(nms) == 0)
+#     return ("l1")
+#   val <- as.integer(gsub("l(.*)", "\\1", nms))
+#   paste0("l", max(val) + 1)
+# }
+
+
 
 ## Note: old continuous color mapper
 ## This commented code is how it can be done with creating a new variable

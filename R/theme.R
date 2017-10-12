@@ -13,6 +13,9 @@ set_theme <- function(fig, theme) {
   fig
 }
 
+# TODO: add lists for all possible tickers
+# TODO: add TickFormatter options
+
 #' Themes
 #' @rdname themes
 #' @export
@@ -44,10 +47,14 @@ bk_default_theme <- function() {
     ungrouped = list(fill_color = "black", line_color = "black",
       text_color = "black", fill_alpha = 0.5, line_alpha = 1,
       size = 20, glyph = 1, line_dash = NULL, line_width = 1),
-    plot = NULL,
+    plot = list(),
     title = NULL,
-    axis = list(axis_label_text_font_size = "12pt"),
-    grid = NULL,
+    axis = list(
+      x = list(axis_label_text_font_size = "12pt"),
+      y = list(axis_label_text_font_size = "12pt")
+    ),
+    ticker = list(x = list(), y = list()),
+    grid = list(x = list(), y = list()),
     legend = NULL
   )
 }
@@ -90,17 +97,46 @@ bk_ggplot_theme <- function() {
     ungrouped = list(fill_color = "black", line_color = "black",
       text_color = "black", fill_alpha = 1, line_alpha = 1,
       size = 10, glyph = 16, line_dash = NULL, line_width = 1),
-    plot = list(background_fill_color = "#E6E6E6",
-      outline_line_color = "white"),
-    grid = list(grid_line_color = "white",
-      minor_grid_line_color = "white",
-      minor_grid_line_alpha = 0.4),
-    axis = list(axis_line_color = "white",
-      major_label_text_color = "#7F7F7F",
-      major_tick_line_color = "#7F7F7F",
-      minor_tick_line_alpha = 0,
-      axis_label_text_font_style = "normal",
-      num_minor_ticks = 2)
+    plot = list(
+      background_fill_color = "#E6E6E6",
+      outline_line_color = "white"
+    ),
+    grid = list(
+      x = list(
+        grid_line_color = "white",
+        minor_grid_line_color = "white",
+        minor_grid_line_alpha = 0.4
+      ),
+      y = list(
+        grid_line_color = "white",
+        minor_grid_line_color = "white",
+        minor_grid_line_alpha = 0.4
+      )
+    ),
+    axis = list(
+      x = list(
+        axis_line_color = "white",
+        major_label_text_color = "#7F7F7F",
+        major_tick_line_color = "#7F7F7F",
+        minor_tick_line_alpha = 0,
+        axis_label_text_font_style = "normal"
+      ),
+      y = list(
+        axis_line_color = "white",
+        major_label_text_color = "#7F7F7F",
+        major_tick_line_color = "#7F7F7F",
+        minor_tick_line_alpha = 0,
+        axis_label_text_font_style = "normal"
+      )
+    ),
+    ticker = list(
+      x = list(
+        num_minor_ticks = 2
+      ),
+      y = list(
+        num_minor_ticks = 2
+      )
+    )
   )
 }
 
@@ -142,13 +178,9 @@ theme_title <- function(fig,
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  if (is.null(pars)) {
-    specified <- names(as.list(match.call())[-1])
-    pars <- as.list(environment())[specified]
-  }
-  # pars <- pars[names(pars) %in% names(title_par_validator_map)]
+  args <- get_specified_args(nnms = "fig")
 
-  fig$x$theme$title <- pars
+  fig$x$theme$title <- args
 
   fig
 }
@@ -247,19 +279,15 @@ theme_axis <- function(fig,
   minor_tick_line_dash_offset = 0,
   minor_tick_line_join = "miter",
   minor_tick_line_width = 1,
-  minor_tick_out = NULL,
-  pars = NULL
+  minor_tick_out = NULL
 ) {
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  if (is.null(pars)) {
-    specified <- names(as.list(match.call())[-1])
-    pars <- as.list(environment())[specified]
-  }
-  # pars <- pars[names(pars) %in% names(axis_par_validator_map)]
+  args <- get_specified_args(nnms = c("fig", "which"))
 
-  fig$x$theme$axis <- pars
+  for (whch in which)
+    fig$x$theme$axis[[whch]] <- args
 
   fig
 }
@@ -310,13 +338,10 @@ theme_grid <- function(fig,
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  if (is.null(pars)) {
-    specified <- names(as.list(match.call())[-1])
-    pars <- as.list(environment())[specified]
-  }
-  # pars <- pars[names(pars) %in% names(grid_par_validator_map)]
+  args <- get_specified_args(nnms = c("fig", "which"))
 
-  fig$x$theme$grid <- pars
+  for (whch in which)
+    fig$x$theme$grid[[whch]] <- args
 
   fig
 }
@@ -416,7 +441,6 @@ theme_legend <- function(fig,
 # @example man-roxygen/ex-theme.R
 #' @export
 theme_plot <- function(fig,
-  pars = NULL,
   background_fill_color = "white",
   background_fill_alpha = 1,
   border_fill_color = "white",
@@ -437,13 +461,9 @@ theme_plot <- function(fig,
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  if (is.null(pars)) {
-    specified <- names(as.list(match.call())[-1])
-    pars <- as.list(environment())[specified]
-  }
-  # pars <- pars[names(pars) %in% names(figure_par_validator_map)]
+  args <- get_specified_args(nnms = "fig")
 
-  fig$x$theme$plot <- pars
+  fig$x$theme$plot <- args
 
   fig
 }
