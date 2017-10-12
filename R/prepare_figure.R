@@ -7,11 +7,20 @@ prepare_figure <- function(fig) {
   # keep a list of data sources so we don't duplicate data
   data_sources <- list()
 
+  # build up a list of legend items to resolve into a final legend
+  legend <- list()
+
   for (lnm in names(x$layers)) {
     # lnm <- names(x$layers)[1]
 
     # this holds the arguments and data that were specified for this layer
     ly <- x$layers[[lnm]]
+
+    lgp <- ly$lgroup
+    ly$lgroup <- NULL
+
+    if (is.null(legend[[lgp]]))
+      legend[[lgp]] <- list()
 
     if (ly$type == "glyph") {
       # this will hold all the model instances for the layer
@@ -228,6 +237,10 @@ prepare_figure <- function(fig) {
                   spc$range <- x$theme$continuous$color(length(spc$domain) - 1)
                 }
                 cjs <- js_transform_color_num(spc)
+
+                # legend[[length(legend) + 1]] <- structure(list(
+                #   nm, spc$domain, spc$range
+                # ), names = c("name", "label", attr_nm))
               } else {
                 ## map discrete variable to discrete color palette
                 ##---------------------------------------------------------
@@ -246,8 +259,75 @@ prepare_figure <- function(fig) {
                 if (is.null(spc$unknown)) {
                   spc$unknown <- x$theme$discrete$color_unknown
                 }
+
                 ## for consistency, we use d3 transform instead of ColorMapper
                 cjs <- js_transform_color_cat(spc)
+
+                if (is.logical(ly$legend) && ly$legend) {
+                  lgnd_nm <- digest::digest(spc$domain)
+                  if (is.null(legend[[lgp]][[lgnd_nm]])) {
+                    legend[[lgp]][[lgnd_nm]] <- structure(list(
+                      nm, spc$domain, spc$range
+                    ), names = c("name", "label", attr_nm))
+                  } else {
+                    legend[[lgp]][[lgnd_nm]][[attr_nm]] <- spc$range
+                  }
+                  legend[[lgp]][[lgnd_nm]]$glyph_props <- cur_glyph_props
+                  legend[[lgp]][[lgnd_nm]]$lname <- lnm
+                }
+              }
+              cjs_id <- digest::digest(list(val, attr_nm))
+              cur_ly[[cjs_id]] <- cjs
+              ly[[attr_nm]] <- list(
+                field = sanitize(nm),
+                transform = cjs$get_instance())
+            } else if (grepl("alpha", attr_nm)) {
+              ## handle alpha mappings
+              ##---------------------------------------------------------
+
+              if (is.numeric(val)) {
+                ## map continuous variable to discrete alpha
+                ##---------------------------------------------------------
+
+                if (is.null(spc$domain)) {
+                  # get number of intervals from the theme
+                  n_intervals <- x$theme$continuous$color_n_intervals
+                  spc$domain <- pretty(val, n_intervals)
+                }
+                if (is.null(spc$range)) {
+                  spc$range <- x$theme$continuous$color(length(spc$domain) - 1)
+                }
+                cjs <- js_transform_color_num(spc)
+
+                # legend[[length(legend) + 1]] <- structure(list(
+                #   nm, spc$domain, spc$range
+                # ), names = c("name", "label", attr_nm))
+              } else {
+                ## map discrete variable to discrete alpha
+                ##---------------------------------------------------------
+
+                if (is.null(spc$domain)) {
+                  # get domain from data
+                  if (is.factor(val)) {
+                    spc$domain <- levels(val)
+                  } else {
+                    spc$domain <- unique(val)
+                  }
+                }
+                if (is.null(spc$range)) {
+                  spc$range <- ppoints(length(spc$domain))
+                }
+                if (is.null(spc$unknown)) {
+                  spc$unknown <- min(spc$range) / 2
+                }
+
+                ## for consistency (and finer legend control)
+                ## we use d3 transform instead of ColorMapper
+                cjs <- js_transform_alpha_cat(spc)
+
+                # legend[[length(legend) + 1]] <- structure(list(
+                #   nm, spc$domain, spc$range
+                # ), names = c("name", "label", attr_nm))
               }
               cjs_id <- digest::digest(list(val, attr_nm))
               cur_ly[[cjs_id]] <- cjs
@@ -570,12 +650,12 @@ prepare_figure <- function(fig) {
       if (!is.null(cur_ly$hover))
         cur_ly$hover$set_prop("renderers", list(cur_ly$glyph_renderer$get_instance()))
 
-      ## add renderer to legend item
-      ##---------------------------------------------------------
+      # ## add renderer to legend item
+      # ##---------------------------------------------------------
 
-      if (!is.null(cur_ly$legend_item))
-        cur_ly$legend_item$set_prop("renderers",
-          list(cur_ly$glyph_renderer$get_instance()))
+      # if (!is.null(cur_ly$legend_item))
+      #   cur_ly$legend_item$set_prop("renderers",
+      #     list(cur_ly$glyph_renderer$get_instance()))
 
       x$mods$layers[[lnm]] <- cur_ly
     } else if (ly$type == "annotation") {
@@ -745,7 +825,9 @@ prepare_figure <- function(fig) {
   } else {
     x$mods$plot$set_prop("toolbar_location", NULL)
   }
-  x$mods <- add_legend(x$mods)
+
+# browser()
+  x$mods <- add_legend(x$mods, legend)
 
   ## axes
   for (whch in names(x$pars$axes)) {
@@ -834,6 +916,23 @@ js_transform_color_cat <- function(spc) {
   do.call(CustomJSTransform$new, args)
 }
 
+js_transform_alpha_cat <- function(spc) {
+  dom_str <- paste(spc$domain, collapse = "', '")
+  pal_str <- paste(spc$range, collapse = "', '")
+  args <- custom_js_transform(
+    func = glue::glue("
+      return alpha(x);
+    "),
+    global = glue::glue("
+      var alpha = RBK.scaleOrdinal()
+        .domain(['{dom_str}'])
+        .range(['{pal_str}'])
+        .unknown(['{spc$unknown}']);")
+  )
+  do.call(CustomJSTransform$new, args)
+}
+
+
 js_transform_size_num <- function(spc) {
   dom_str <- paste(spc$domain, collapse = ", ")
   pal_str <- paste(spc$range, collapse = ", ")
@@ -883,7 +982,6 @@ add_range <- function(x, whch, use_computed_range = FALSE) {
     x$mods$transforms$xrange <- CustomJS$new(code = args$callback)
     args$callback <- x$mods$transforms$xrange$get_instance()
   }
-
   if (type == "map") {
     lims <- lims_spec
     if (is.null(lims))
@@ -893,7 +991,7 @@ add_range <- function(x, whch, use_computed_range = FALSE) {
     rng <- Range1d$new(start = lims[1], end = lims[2])
   } else if (type == "gmap") {
     rng <- Range1d$new()
-  } else if (type == "numeric") {
+  } else if (type == "numeric" || type == "datetime") {
     if (!is.null(lims_spec)) {
       lims_spec <- lims_spec + c(-1, 1) * diff(lims_spec) * x$pars$gen$range_padding[[whch]]
       args$start <- lims_spec[1]
@@ -910,6 +1008,10 @@ add_range <- function(x, whch, use_computed_range = FALSE) {
       if (is.null(args$range_padding))
         args$range_padding <- 0.07 # TODO: make 0.07 padding factor part of theme
     }
+    glph_nms <- unname(unlist(lapply(x$mods$layers, function(a) {
+      a$glyph_renderer$get_prop("name")
+    })))
+    args$names <- glph_nms
     rng <- do.call(DataRange1d$new, args)
   } else if (type == "categorical") {
     if (!is.null(lims_spec)) {
@@ -919,20 +1021,6 @@ add_range <- function(x, whch, use_computed_range = FALSE) {
         args$factors <- x$pars$ranges[[whch]]$lims_calc
     }
     rng <- do.call(FactorRange$new, args)
-  } else if (type == "datetime") {
-    if (!is.null(lims_spec)) {
-      args$start <- lims_spec[1]
-      args$end <- lims_spec[2]
-    } else if (use_computed_range) {
-      drng <- x$pars$ranges[[whch]]$lims_calc
-      if (is.null(args$start))
-        args$start <- drng[1]
-      if (is.null(args$end))
-        args$end <- drng[2]
-      if (is.null(args$range_padding))
-        args$range_padding <- 0.07 # TODO: make 0.07 padding factor part of theme
-    }
-    rng <- do.call(DataRange1d$new, args)
   }
 
   x$mods$ranges[[whch]] <- rng
@@ -1012,7 +1100,6 @@ add_axis <- function(x, whch) {
 
   args$grid$ticker <- tck$get_instance()
   # reconcile with theme
-
   grid_args <- modifyList(x$theme$grid[[xy]], args$grid)
   grd <- call_with_valid_args(Grid, grid_args)
 
@@ -1162,21 +1249,82 @@ add_tools <- function(mods, args, logo) {
   mods
 }
 
-add_legend <- function(mods) {
-  lgnd_items <- unname(lapply(mods$layers, function(x) {
-    if (is.null(x$legend_item))
-      return(NULL)
-    x$legend_item$get_instance()
-  }))
-  lgnd_items[sapply(lgnd_items, is.null)] <- NULL
+append_list <- function(x, val) {
+  x[[length(x) + 1]] <- val
+  x
+}
 
-  if (length(lgnd_items) > 0) {
-    lgnd <- Legend$new(
-      items = lgnd_items,
-      plot = mods$plot$get_instance()
-    )
-    mods$legend <- lgnd
+add_legend <- function(mods, legend) {
+
+  null_cds <- ColumnDataSource$new()
+
+  legend <- unname(unlist(legend, recursive = FALSE))
+
+  legend_items <- list()
+  glyphs <- list()
+  renderers <- list()
+
+  for (lgnd in legend) {
+    name <- lgnd$name
+    lname <- lgnd$lname
+    labels <- lgnd$label
+    glyph_props <- lgnd$glyph_props
+    lgnd$name <- NULL
+    lgnd$lname <- NULL
+    lgnd$label <- NULL
+    lgnd$glyph_props <- NULL
+
+    legend_items <- append_list(legend_items, LegendItem$new(label = name))
+
+    for (i in seq_along(labels)) {
+      glph <- lapply(lgnd, function(x) x[i])
+
+      if (!is.null(glph$color)) {
+        if (is.null(glph$line_color))
+          glph$line_color <- glph$color
+        if (is.null(glph$fill_color))
+          glph$fill_color <- glph$color
+        glph$color <- NULL
+      }
+
+      # # resolve alpha -> line_alpha and fill_alpha
+      # if (is.null(glph$alpha))
+      #   glph$alpha <- 1 # TODO: get this from theme?
+      # if (is.null(glph$line_alpha))
+      #   glph$line_alpha <- glph$alpha
+      # if (is.null(glph$fill_alpha))
+      #   glph$fill_alpha <- glph$alpha * 0.5 # TODO: get this from theme? (fill_alpha_factor?)
+
+      glph_mod <- mods$layers[[lname]]$glyph$clone(deep = TRUE)
+      glph_mod$reset_id()
+      for (nm in intersect(glph_mod$specified_args, names(glph)))
+        glph_mod$set_prop(nm, glph[[nm]])
+
+      # glph <- fix_glyph_color_alpha(glph, glyph_props)
+      # cur_model <- utils::getFromNamespace(glyph_props$glyph, "rbokeh")
+      # par_nms <- get_init_formals(cur_model)
+      # glph_mod <- do.call(cur_model$new, glph[intersect(names(glph), par_nms)])
+      glphr_mod <- GlyphRenderer$new(glyph = glph_mod$get_instance(),
+        data_source = mods$layers[[lname]]$data_source$get_instance(),
+        visible = FALSE)
+        # data_source = null_cds$get_instance(), visible = FALSE)
+      lgndi_mod <- LegendItem$new(label = labels[i],
+        renderers = list(glphr_mod$get_instance()))
+
+      glyphs <- append_list(glyphs, glph_mod)
+      renderers <- append_list(renderers, glphr_mod)
+      legend_items <- append_list(legend_items, lgndi_mod)
+    }
   }
+
+  mods$legend <- list(
+    renderers = renderers,
+    glyphs = glyphs,
+    items = legend_items,
+    legend = Legend$new(items = lapply(legend_items, function(x) x$get_instance()),
+      plot = mods$plot$get_instance()),
+    cds = null_cds
+  )
 
   mods
 }
@@ -1196,8 +1344,10 @@ get_renderers <- function(mods) {
       })
     ), recursive = FALSE))
 
-  if (!is.null(mods$legend))
-    res[[length(res) + 1]] <- mods$legend$get_instance()
+  if (!is.null(mods$legend)) {
+    res[[length(res) + 1]] <- mods$legend$legend$get_instance()
+    res <- c(res,  lapply(mods$legend$renderers, function(x) x$get_instance()))
+  }
 
   for (tl in mods$tools) {
     if (length(tl$ovr) > 0)
