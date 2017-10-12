@@ -37,6 +37,9 @@ Base <- R6::R6Class("Base",
         message("Not able to set property \'", name, "\'")
       }
     },
+    reset_id = function() {
+      private$id <- digest::digest(Sys.time())
+    },
     get_prop = function(name) {
       private[[name]]
     },
