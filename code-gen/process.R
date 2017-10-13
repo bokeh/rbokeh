@@ -39,5 +39,7 @@ bk_prop_types$BoxAnnotation$top$type <- "Float"
 bk_prop_types$BoxAnnotation$bottom$type <- "Float"
 bk_prop_types$BoxAnnotation$left$type <- "Float"
 bk_prop_types$BoxAnnotation$right$type <- "Float"
+# this is incorrect in the provided spec
+bk_prop_types$ImageURL$url$type <- "StringSpec(String, Dict(Enum('field', 'value', 'transform'), Either(String, Instance(Transform), List(String))), List(String))"
 
 save(bk_prop_types, file = "inst/bk_prop_types.rda", compress = "bzip2")
