@@ -263,19 +263,9 @@ prepare_figure <- function(fig) {
                 ## for consistency, we use d3 transform instead of ColorMapper
                 cjs <- js_transform_color_cat(spc)
 
-                if (is.logical(ly$legend) && ly$legend) {
-                  lgnd_nm <- digest::digest(spc$domain)
-                  if (is.null(legend[[lgp]][[lgnd_nm]])) {
-                    legend[[lgp]][[lgnd_nm]] <- structure(list(
-                      nm, spc$domain, spc$range
-                    ), names = c("name", "label", attr_nm))
-                  } else {
-                    legend[[lgp]][[lgnd_nm]][[attr_nm]] <- spc$range
-                  }
-                  legend[[lgp]][[lgnd_nm]]$glyph_props <- cur_glyph_props
-                  legend[[lgp]][[lgnd_nm]]$lname <- lnm
-                }
               }
+              if (is.logical(ly$legend) && ly$legend)
+                legend <- update_legend(legend, spc, lgp, lnm, nm, attr_nm)
               cjs_id <- digest::digest(list(val, attr_nm))
               cur_ly[[cjs_id]] <- cjs
               ly[[attr_nm]] <- list(
@@ -531,9 +521,11 @@ prepare_figure <- function(fig) {
       ## glyph
       ##---------------------------------------------------------
 
+      ly_color_idx <- which(lnm == names(x$layers))
+
       # resolve color -> line_color and fill_color
       if (is.null(ly$color))
-        ly$color <- x$theme$discrete$color(1)
+        ly$color <- tail(x$theme$discrete$color(ly_color_idx), 1)
       if (is.null(ly$line_color))
         ly$line_color <- ly$color
       if (is.null(ly$fill_color))
@@ -811,10 +803,10 @@ prepare_figure <- function(fig) {
     x$pars$ranges$y$type <- "map"
   }
 
-  # ImageURL cannot set axis ranges automatically for some reason
+  # Image and ImageURL cannot set axis ranges automatically for some reason
   # so we have to explicitly set the ranges
   use_computed_range <- FALSE
-  if ("Image" %in% sapply(x$layers, function(x) x$model))
+  if (any(c("Image", "ImageURL") %in% sapply(x$layers, function(x) x$model)))
     use_computed_range <- TRUE
 
   x <- add_ranges(x, use_computed_range)
@@ -826,7 +818,6 @@ prepare_figure <- function(fig) {
     x$mods$plot$set_prop("toolbar_location", NULL)
   }
 
-# browser()
   x$mods <- add_legend(x$mods, legend)
 
   ## axes
@@ -1268,11 +1259,9 @@ add_legend <- function(mods, legend) {
     name <- lgnd$name
     lname <- lgnd$lname
     labels <- lgnd$label
-    glyph_props <- lgnd$glyph_props
     lgnd$name <- NULL
     lgnd$lname <- NULL
     lgnd$label <- NULL
-    lgnd$glyph_props <- NULL
 
     legend_items <- append_list(legend_items, LegendItem$new(label = name))
 
@@ -1364,6 +1353,21 @@ get_renderers <- function(mods) {
     res[[length(res) + 1]] <- mods$tiles$renderer$get_instance()
 
   res
+}
+
+
+update_legend <- function(legend, map_spec, lgroup, lname, nm, attr_nm) {
+  lgnd_nm <- digest::digest(map_spec$domain)
+  if (is.null(legend[[lgroup]][[lgnd_nm]])) {
+    legend[[lgroup]][[lgnd_nm]] <- structure(list(
+      nm, map_spec$domain, map_spec$range
+    ), names = c("name", "label", attr_nm))
+  } else {
+    legend[[lgroup]][[lgnd_nm]][[attr_nm]] <- map_spec$range
+  }
+  legend[[lgroup]][[lgnd_nm]]$lname <- lname
+
+  legend
 }
 
 # f <- function(x, dmn, rng)
