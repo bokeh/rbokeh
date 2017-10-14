@@ -7,8 +7,17 @@
 tool_reset(fig, reset_size = TRUE, remove = FALSE)
 }
 \arguments{
+\item{fig}{Figure to modify.}
+
 \item{reset_size}{Whether activating the Reset tool should also reset the plot's canvas dimensions to their original size.}
+
+\item{remove}{Logical indicating whether the tool should be removed.}
 }
 \description{
 Add "reset" tool to a Bokeh figure
+}
+\examples{
+figure() \%>\%
+  ly_points(1:10) \%>\%
+  tool_reset()
 }

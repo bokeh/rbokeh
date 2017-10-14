@@ -1,9 +1,9 @@
 #' Instantiate an rbokeh figure.
 #'
 #' @param data A default data frame to be used by the layers added to the figure.
-#' @param width TODO_DOC
-#' @param height TODO_DOC
-#' @param title TODO_DOC
+#' @param width Figure width in pixels.
+#' @param height Figure width in pixels.
+#' @param title A title to display on the plot.
 #' @param title_location Where the title will be located. Titles on the left or right side will  be rotated. One of 'above', 'below', 'left', 'right'.
 #' @param xlab Label for x axis. Also specifiable in \code{\link{x_axis}}.
 #' @param ylab Label for y axis. Also specifiable in \code{\link{y_axis}}.
@@ -59,6 +59,22 @@
 #'
 #' # custom limits
 #' figure(xlim = c(-10, 20)) %>%
+#'   ly_points(1:10, 1:10)
+#'
+#' # specifying tools
+#' figure(tools = "crosshair") %>%
+#'   ly_points(1:10, 1:10)
+#'
+#' # specifying tools
+#' figure(tools = c("lasso_select", "poly_select")) %>%
+#'   ly_points(1:10, 1:10)
+#'
+#' # gray logo
+#' figure(logo = "grey") %>%
+#'   ly_points(1:10, 1:10) %>%
+#'
+#' # no toolbar
+#' figure(tools = NULL) %>%
 #'   ly_points(1:10, 1:10)
 #' @export
 figure <- function(

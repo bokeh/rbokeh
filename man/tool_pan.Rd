@@ -7,7 +7,11 @@
 tool_pan(fig, dimensions = NULL, remove = FALSE)
 }
 \arguments{
-\item{dimensions}{a vector specifying whether the pan tool should pan with respect to the x axis ("width") and the y axis ("height") or both (c("width", "height"))}
+\item{fig}{Figure to modify.}
+
+\item{dimensions}{Which dimensions the pan tool is constrained to act in. By default the pan tool will pan in any dimension, but can be configured to only pan horizontally across the width of the plot, or vertically across the height of the plot. One of 'width', 'height', or 'both'.}
+
+\item{remove}{Logical indicating whether the tool should be removed.}
 }
 \description{
 Add "pan" tool to a Bokeh figure
@@ -18,4 +22,7 @@ Add "pan" tool to a Bokeh figure
 figure() \%>\% ly_points(1:10) \%>\%
  tool_pan(dimensions = "height")
 }
+figure(tools = NULL) \%>\%
+  ly_points(1:10) \%>\%
+  tool_pan(dimensions = "width")
 }

@@ -34,11 +34,11 @@ gmap(data = NULL, lat = 0, lng = 0, zoom = 0, api_key = NULL,
 
 \item{scale_control}{Whether the Google map should display its distance scale control.}
 
-\item{width}{TODO_DOC}
+\item{width}{Figure width in pixels.}
 
-\item{height}{TODO_DOC}
+\item{height}{Figure width in pixels.}
 
-\item{title}{TODO_DOC}
+\item{title}{A title to display on the plot.}
 
 \item{title_location}{Where the title will be located. Titles on the left or right side will  be rotated. One of 'above', 'below', 'left', 'right'.}
 

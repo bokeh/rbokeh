@@ -11,12 +11,41 @@ tool_box_select(fig, dimensions = NULL, select_every_mousemove = TRUE,
   names = NULL, callback = NULL, remove = FALSE)
 }
 \arguments{
-\item{select_every_mousemove}{Whether a selection computation should happen on every mouse event, or only once, when the selection region is completed. Default: TRUE.}
+\item{fig}{Figure to modify.}
 
-\item{names}{A list of names to query for. If set, only renderers that have a matching value for their ``name`` attribute will be used.}
+\item{dimensions}{Which dimensions the box selection is to be free in. By default, users may freely draw selections boxes with any dimensions. If only "width" is supplied, the box will be constrained to span the entire vertical space of the plot, only the horizontal dimension can be controlled. If only "height" is supplied, the box will be constrained to span the entire horizontal space of the plot, and the vertical dimension can be controlled. One of 'width', 'height', or 'both'.}
 
-\item{A}{callback to run in the browser on completion of drawing a selection box. The cb_data parameter that is available to the Callback code will contain one BoxSelectTool-specific field:}
+\item{select_every_mousemove}{Whether a selection computation should happen on every mouse event, or only once, when the selection region is completed. Default: False}
+
+\item{line_color}{The line color values for the box.}
+
+\item{line_alpha}{The line alpha values for the box.}
+
+\item{fill_color}{The fill color values for the box.}
+
+\item{fill_alpha}{The fill alpha values for the box.}
+
+\item{line_width}{The line width values for the box.}
+
+\item{line_dash}{The line dash values for the box.}
+
+\item{line_dash_offset}{The line dash offset values for the box.}
+
+\item{line_join}{The line join values for the box.}
+
+\item{line_cap}{The line cap values for the box.}
+
+\item{names}{A list of names to query for. If set, only renderers that have a matching value for their "name" attribute will be used.}
+
+\item{callback}{A callback to run in the browser on completion of drawing a selection box. The cb_data parameter that is available to the Callback code will contain one BoxSelectTool-specific field: :geometry: object containing the coordinates of the selection box.}
+
+\item{remove}{Logical indicating whether the tool should be removed.}
 }
 \description{
 Add "box_select" tool to a Bokeh figure
+}
+\examples{
+figure(tools = NULL) \%>\%
+  ly_points(1:10) \%>\%
+  tool_box_select(line_color = "red", callback = "console.log('calling back...')")
 }

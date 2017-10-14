@@ -6,6 +6,17 @@
 \usage{
 tool_undo(fig, remove = FALSE)
 }
+\arguments{
+\item{fig}{Figure to modify.}
+
+\item{remove}{Logical indicating whether the tool should be removed.}
+}
 \description{
 Add "undo" tool to a Bokeh figure
+}
+\examples{
+figure() \%>\%
+  ly_points(1:10) \%>\%
+  tool_undo() \%>\%
+  tool_redo()
 }

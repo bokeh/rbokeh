@@ -6,6 +6,16 @@
 \usage{
 tool_save(fig, remove = FALSE)
 }
+\arguments{
+\item{fig}{Figure to modify.}
+
+\item{remove}{Logical indicating whether the tool should be removed.}
+}
 \description{
 Add "save" tool to a Bokeh figure
+}
+\examples{
+figure(tools = NULL) \%>\%
+  ly_points(1:10) \%>\%
+  tool_save()
 }

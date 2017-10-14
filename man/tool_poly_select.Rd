@@ -10,8 +10,35 @@ tool_poly_select(fig, line_color = NULL, line_alpha = NULL,
   line_cap = NULL, names = NULL, remove = FALSE)
 }
 \arguments{
-\item{names}{A list of names to query for. If set, only renderers that have a matching value for their ``name`` attribute will be used.}
+\item{fig}{Figure to modify.}
+
+\item{line_color}{The line color values for the polygon.}
+
+\item{line_alpha}{The line alpha values for the polygon.}
+
+\item{fill_color}{The fill color values for the polygon.}
+
+\item{fill_alpha}{The fill alpha values for the polygon.}
+
+\item{line_width}{The line width values for the polygon.}
+
+\item{line_dash}{The line dash values for the polygon.}
+
+\item{line_dash_offset}{The line dash offset values for the polygon.}
+
+\item{line_join}{The line join values for the polygon.}
+
+\item{line_cap}{The line cap values for the polygon.}
+
+\item{names}{A list of names to query for. If set, only renderers that have a matching value for their "name" attribute will be used.}
+
+\item{remove}{Logical indicating whether the tool should be removed.}
 }
 \description{
 Add "poly_select" tool to a Bokeh figure
+}
+\examples{
+figure(tools = NULL) \%>\%
+  ly_points(1:10) \%>\%
+  tool_poly_select(line_color = "red")
 }

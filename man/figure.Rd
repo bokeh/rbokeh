@@ -19,11 +19,11 @@ figure(data = NULL, width = 600, height = 600, title = NULL,
 \arguments{
 \item{data}{A default data frame to be used by the layers added to the figure.}
 
-\item{width}{TODO_DOC}
+\item{width}{Figure width in pixels.}
 
-\item{height}{TODO_DOC}
+\item{height}{Figure width in pixels.}
 
-\item{title}{TODO_DOC}
+\item{title}{A title to display on the plot.}
 
 \item{title_location}{Where the title will be located. Titles on the left or right side will  be rotated. One of 'above', 'below', 'left', 'right'.}
 
@@ -111,5 +111,21 @@ figure(xaxes = "above", yaxes = "right", xgrid = FALSE, ygrid = FALSE,
 
 # custom limits
 figure(xlim = c(-10, 20)) \%>\%
+  ly_points(1:10, 1:10)
+
+# specifying tools
+figure(tools = "crosshair") \%>\%
+  ly_points(1:10, 1:10)
+
+# specifying tools
+figure(tools = c("lasso_select", "poly_select")) \%>\%
+  ly_points(1:10, 1:10)
+
+# gray logo
+figure(logo = "grey") \%>\%
+  ly_points(1:10, 1:10) \%>\%
+
+# no toolbar
+figure(tools = NULL) \%>\%
   ly_points(1:10, 1:10)
 }

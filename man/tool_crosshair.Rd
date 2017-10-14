@@ -8,14 +8,23 @@ tool_crosshair(fig, dimensions = NULL, line_width = NULL,
   line_alpha = NULL, line_color = NULL, remove = FALSE)
 }
 \arguments{
+\item{fig}{Figure to modify.}
+
 \item{dimensions}{Which dimensions the crosshair tool is to track. By default, both a vertical and horizontal line will be drawn. If only "width" is supplied, only a horizontal line will be drawn. If only "height" is supplied, only a vertical line will be drawn. One of 'width', 'height', or 'both'.}
 
 \item{line_width}{Stroke width in units of pixels.}
 
-\item{line_alpha}{An alpha value to use to stroke paths with.}
+\item{line_alpha}{An alpha value to use to stroke paths with. Acceptable values are floating point numbers between 0 (transparent) and 1 (opaque).}
 
-\item{line_color}{A color to use to stroke the crosshair paths with.}
+\item{line_color}{A color to use to stroke paths with.}
+
+\item{remove}{Logical indicating whether the tool should be removed.}
 }
 \description{
 Add "crosshair" tool to a Bokeh figure
+}
+\examples{
+figure(tools = NULL) \%>\%
+  ly_points(1:10) \%>\%
+  tool_crosshair(line_width = 12, line_alpha = 0.25)
 }

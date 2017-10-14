@@ -7,8 +7,17 @@
 tool_wheel_pan(fig, dimension = NULL, remove = FALSE)
 }
 \arguments{
-\item{Which}{dimension the wheel pan tool is constrained to act in. By default the wheel pan tool will pan the plot along the x-axis. Must be one of 'width' or 'height'.}
+\item{fig}{Figure to modify.}
+
+\item{dimension}{Which dimension the wheel pan tool is constrained to act in. By default the wheel pan tool will pan the plot along the x-axis. Must be one of 'width' or 'height'.}
+
+\item{remove}{Logical indicating whether the tool should be removed.}
 }
 \description{
 Add "wheel_pan" tool to a Bokeh figure
+}
+\examples{
+figure(tools = NULL) \%>\%
+  ly_points(1:10) \%>\%
+  tool_wheel_pan(dimension = "width")
 }

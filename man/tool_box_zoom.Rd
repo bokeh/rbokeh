@@ -11,10 +11,37 @@ tool_box_zoom(fig, dimensions = NULL, match_aspect = FALSE,
   remove = FALSE)
 }
 \arguments{
+\item{fig}{Figure to modify.}
+
 \item{dimensions}{Which dimensions the zoom box is to be free in. By default, users may freely draw zoom boxes with any dimensions. If only "width" is supplied, the box will be constrained to span the entire vertical space of the plot, only the horizontal dimension can be controlled. If only "height" is supplied, the box will be constrained to span the entire horizontal space of the plot, and the vertical dimension can be controlled. One of 'width', 'height', or 'both'.}
 
-\item{match_aspect}{Whether the box zoom region should be restricted to have the same aspect ratio as the plot region. Boolean. Note: If the tool is restricted to one dimension, this value has no effect.}
+\item{match_aspect}{Whether the box zoom region should be restricted to have the same aspect ratio as the plot region. Note: If the tool is restricted to one dimension, this value has no effect.}
+
+\item{line_color}{The line color values for the box.}
+
+\item{line_alpha}{The line alpha values for the box.}
+
+\item{fill_color}{The fill color values for the box.}
+
+\item{fill_alpha}{The fill alpha values for the box.}
+
+\item{line_width}{The line width values for the box.}
+
+\item{line_dash}{The line dash values for the box.}
+
+\item{line_dash_offset}{The line dash offset values for the box.}
+
+\item{line_join}{The line join values for the box.}
+
+\item{line_cap}{The line cap values for the box.}
+
+\item{remove}{Logical indicating whether the tool should be removed.}
 }
 \description{
 Add "box_zoom" tool to a Bokeh figure
+}
+\examples{
+figure(tools = "reset") \%>\%
+  ly_points(1:10) \%>\%
+  tool_box_zoom(line_color = "red", match_aspect = TRUE)
 }

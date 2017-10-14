@@ -7,10 +7,24 @@
 tool_help(fig, redirect = NULL, help_tooltip = NULL, remove = FALSE)
 }
 \arguments{
+\item{fig}{Figure to modify.}
+
 \item{redirect}{Site to be redirected through upon click.}
 
 \item{help_tooltip}{Tooltip displayed when hovering over the help icon.}
+
+\item{remove}{Logical indicating whether the tool should be removed.}
 }
 \description{
 Add "help" tool to a Bokeh figure
+}
+\examples{
+figure(tools = NULL) \%>\%
+  ly_points(1:10, 1:10) \%>\%
+  tool_help(help_tooltip = "you can do it!")
+
+# help tool specified but then later removed
+figure(tools = "help") \%>\%
+  ly_points(1:10, 1:10) \%>\%
+  tool_help(remove = TRUE)
 }

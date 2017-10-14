@@ -7,8 +7,17 @@
 tool_wheel_zoom(fig, dimensions = NULL, remove = FALSE)
 }
 \arguments{
+\item{fig}{Figure to modify.}
+
 \item{dimensions}{Which dimensions the wheel zoom tool is constrained to act in. By default the wheel zoom tool will zoom in any dimension, but can be configured to only zoom horizontally across the width of the plot, or vertically across the height of the plot. One of 'width', 'height', or 'both'.}
+
+\item{remove}{Logical indicating whether the tool should be removed.}
 }
 \description{
 Add "wheel_zoom" tool to a Bokeh figure
+}
+\examples{
+figure(tools = NULL) \%>\%
+  ly_points(1:10) \%>\%
+  tool_wheel_zoom()
 }
