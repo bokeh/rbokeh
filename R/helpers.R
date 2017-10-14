@@ -152,6 +152,11 @@ get_next_layer_group_name <- function(obj, which = "layer") {
 ## determine whether axis is "numeric" or "categorical"
 get_glyph_axis_type <- function(a, prev_type = NULL, which = "x") {
   # this will surely get more complex...
+  if (is.list(a)) {
+    # it must be a list of sequences, so get the first value and use it to check
+    if (!is.null(a[[1]][[1]]))
+      a <- a[[1]][[1]]
+  }
   res <- NULL
   if (is.character(a) || is.factor(a) || inherits(a, "bk_cat")) {
     res <- "categorical"

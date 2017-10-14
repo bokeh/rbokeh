@@ -10,7 +10,7 @@ ly_polygons(fig, xs = NULL, ys = NULL, data = figure_data(fig),
   ns_alpha = NULL, lgroup = NULL, lname = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{xs}{vector or list of values or field name of polygon x coordinates - see details}
 

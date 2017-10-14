@@ -1,7 +1,7 @@
 #' Add a "curve" layer to a Bokeh figure
 #'
 #' Draws a curve corresponding to a function over the interval \code{[from, to]}.
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param expr,from,to,n parameters sent to \code{\link[graphics]{curve}}
 # template par-lineprops
 # template par-legend
@@ -60,7 +60,7 @@ ly_curve <- function(
 #' Add a "contour" layer to a Bokeh figure
 #'
 #' Computes and draws contour lines.
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param z a matrix containing the values to compute contour lines for
 #' @param x,y locations of grid lines at which the values in \code{image} are measured (see \code{\link[grDevices]{contourLines}})
 #' @param nlevels,levels parameters sent to \code{\link[grDevices]{contourLines}})
@@ -98,7 +98,7 @@ ly_contour <- function(
 #' Add an "abline" layer to a Bokeh figure
 #'
 #' Draws one or more straight lines.
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param a,b the intercept and slope of the line(s) to draw
 #' @param v the x value(s) for vertical lines
 #' @param h the y value(s) for horizontal lines

@@ -11,7 +11,7 @@ ly_contour(fig, z, x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1,
   lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{z}{a matrix containing the values to compute contour lines for}
 

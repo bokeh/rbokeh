@@ -7,11 +7,11 @@
 ly_oval(fig, x, y = NULL, width = 1, height = 1, angle = 0,
   data = figure_data(fig), color = NULL, alpha = NULL, hov_color = NULL,
   hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL, sel_color = NULL,
-  sel_alpha = NULL, hover = NULL, url = NULL, legend = TRUE,
-  lname = NULL, lgroup = NULL, ...)
+  sel_alpha = NULL, hover = NULL, url = NULL, lname = NULL,
+  lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{values or field name of center x coordinates}
 

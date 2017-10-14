@@ -1,6 +1,6 @@
 #' Add a "box" annotation to a Bokeh figure
 #'
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @family annotation functions
 #' @export
 ann_box <- function(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,

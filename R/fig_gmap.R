@@ -35,6 +35,7 @@ gmap <- function(
   width = 600,
   height = 600,
   title = NULL,
+  title_location = NULL,
   xlab = NULL,
   ylab = NULL,
   xlim = NULL,
@@ -45,14 +46,22 @@ gmap <- function(
   legend_location = "top_right",
   logo = NULL,
   theme = getOption("bokeh_theme"),
+  tools = c("pan", "wheel_zoom", "save"),
   toolbar_location = "above",
+  toolbar_sticky = NULL,
   h_symmetry = TRUE,
   v_symmetry = FALSE,
   lod_factor = 10,
   lod_interval = 300,
   lod_threshold = NULL,
   lod_timeout = 500,
-  tools = c("pan", "wheel_zoom", "save")
+  output_backend = "canvas",
+  min_border = NULL,
+  min_border_left = NULL,
+  min_border_bottom = NULL,
+  min_border_right = NULL,
+  min_border_top = NULL,
+  hidpi = NULL
 ) {
   if (missing(api_key)) {
     # try to get it from options
@@ -80,6 +89,7 @@ gmap <- function(
     width = width,
     height = height,
     title = title,
+    title_location = title_location,
     xlab = xlab,
     ylab = ylab,
     xlim = xlim,
@@ -90,6 +100,8 @@ gmap <- function(
     legend_location = legend_location,
     logo = logo,
     theme = theme,
+    tools = tools,
+    toolbar_sticky = toolbar_sticky,
     toolbar_location = toolbar_location,
     h_symmetry = h_symmetry,
     v_symmetry = v_symmetry,
@@ -97,7 +109,13 @@ gmap <- function(
     lod_interval = lod_interval,
     lod_threshold = lod_threshold,
     lod_timeout = lod_timeout,
-    tools = tools
+    output_backend = output_backend,
+    min_border = min_border,
+    min_border_left = min_border_left,
+    min_border_bottom = min_border_bottom,
+    min_border_right = min_border_right,
+    min_border_top = min_border_top,
+    hidpi = hidpi
   )
 
   fig$x$pars$axes$below$draw <- FALSE
@@ -129,7 +147,7 @@ gmap <- function(
 #' Get a Google Map Style
 #'
 #' @param name name of map style to retrieve (see details)
-#' @example man-roxygen/ex-gmap.R
+# @example man-roxygen/ex-gmap.R
 #' @details This function provides Google Maps themes that can be passed to the \code{map_style} argument of \code{\link{gmap}}.  Currently the most popular styles from \url{https://snazzymaps.com} are available.  You can also visit this site or others to specify a custom \code{map_style}.  Available styles are: "subtle_grayscale", "shades_of_grey", "blue_water", "pale_dawn", "blue_essence", "apple_mapsesque", "midnight_commander", "light_monochrome", "paper", "retro", "flat_map", "cool_grey".
 #' @seealso \code{\link{gmap}}
 #' @export

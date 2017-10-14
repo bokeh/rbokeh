@@ -10,7 +10,7 @@ y_range(fig, lims = NULL, min_interval = NULL, max_interval = NULL,
   follow_interval = NULL, callback = NULL, clear = FALSE)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{lims}{either a vector (min, max) if the range is numeric, or a vector of values if the range is categorical.  In the latter case, the order in which the values are supplied is how they will be arranged on the axis.}
 

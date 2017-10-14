@@ -1,6 +1,6 @@
 #' Add a "points" layer to a Bokeh figure
 #' Draws points with the given coordinates.
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name of line x coordinates
 #' @param y values or field name of line y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
@@ -39,7 +39,7 @@ ly_points <- function(fig, x = NULL, y = NULL, data = figure_data(fig),
 
 #' Add a "lines" layer to a Bokeh figure
 #' Draws lines with the given coordinates.
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name of line x coordinates
 #' @param y values or field name of line y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
@@ -76,7 +76,7 @@ ly_lines <- function(
 
 
 #' Add a "text" layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x x coordinates of text anchors
 #' @param y y coordinates of text anchors
 #' @param text text values to render
@@ -119,7 +119,7 @@ ly_text <- function(fig,
     model = "Text",
     type = "glyph",
     data = data,
-    legend = legend,
+    # legend = legend,
     use_all_data = FALSE), # for now (TODO)
     quos(...))
 
@@ -127,7 +127,7 @@ ly_text <- function(fig,
 }
 
 #' Add a "rect" layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param xleft values or field name of left edges
 #' @param ybottom values or field name of bottom edges
 #' @param xright values or field name of right edges
@@ -174,7 +174,7 @@ ly_rect <- function(
 
 
 #' Add a "crect" (centered rectangle) layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name of center x coordinates
 #' @param y values or field name of center y coordinates
 #' @param data an optional data frame, providing the source for inputs xleft, ybottom, xright, ytop, and other glyph properties
@@ -226,7 +226,7 @@ ly_crect <- function(
 # but they are not supported in BokehJS...
 
 #' Add an "oval" layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name of center x coordinates
 #' @param y values or field name of center y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
@@ -248,7 +248,7 @@ ly_oval <- function(
   ns_color = NULL, ns_alpha = NULL,
   sel_color = NULL, sel_alpha = NULL,
   hover = NULL, url = NULL,
-  legend = TRUE,
+  # legend = TRUE,
   lname = NULL, lgroup = NULL,
   ...
 ) {
@@ -263,7 +263,7 @@ ly_oval <- function(
     model = "Oval",
     type = "glyph",
     data = data,
-    legend = legend,
+    # legend = legend, # TODO: check back in on this...
     use_all_data = FALSE),
     quos(...))
 
@@ -271,7 +271,7 @@ ly_oval <- function(
 }
 
 #' Add a "patch" layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name of patch x coordinates
 #' @param y values or field name of patch y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
@@ -316,7 +316,7 @@ ly_patch <- function(
 
 
 #' Add an "annular_wedge" layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name of center x coordinates
 #' @param y values or field name of center y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
@@ -377,7 +377,7 @@ ly_annular_wedge <- function(
 }
 
 #' Add an "annulus" layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name of center x coordinates
 #' @param y values or field name of center y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
@@ -432,7 +432,7 @@ ly_annulus <- function(
 }
 
 #' Add an "arc" layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name of center x coordinates
 #' @param y values or field name of center y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
@@ -489,7 +489,7 @@ ly_arc <- function(
 }
 
 #' Add a "wedge" layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name of center x coordinates
 #' @param y values or field name of center y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
@@ -551,7 +551,7 @@ ly_wedge <- function(
 #' Add a "segments" layer to a Bokeh figure
 #'
 #' Draws line segments with the given starting and ending coordinates.
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x0 values or field name of starting x coordinates
 #' @param y0 values or field name of starting y coordinates
 #' @param x1 values or field name of ending x coordinates
@@ -600,7 +600,7 @@ ly_segments <- function(
 #' Add a "ray" layer to a Bokeh figure
 #'
 #' Draws line segments starting at the given coordinate and extending the given length at the given angle.
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name of center x coordinates
 #' @param y values or field name of center y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other glyph properties
@@ -621,7 +621,7 @@ ly_ray <- function(
   hov_color = NULL, hov_alpha = NULL,
   ns_color = NULL, ns_alpha = NULL,
   sel_color = NULL, sel_alpha = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  legend = TRUE, lname = NULL, lgroup = NULL, visible = TRUE,
   ...
 ) {
 
@@ -647,7 +647,7 @@ ly_ray <- function(
 #' Add a "bezier" layer to a Bokeh figure
 #'
 #' Draws Bezier curves with the given starting, ending, and control points.
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x0 values or field name of starting x coordinates
 #' @param y0 values or field name of starting y coordinates
 #' @param x1 values or field name of ending x coordinates
@@ -702,7 +702,7 @@ ly_bezier <- function(
 #' Add a "quadratic" layer to a Bokeh figure
 #'
 #' Draws quadratic curves with the given starting, ending, and control points.
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x0 values or field name of starting x coordinates
 #' @param y0 values or field name of starting y coordinates
 #' @param x1 values or field name of ending x coordinates
@@ -755,7 +755,7 @@ ly_quadratic <- function(
 #' Add a "multi_line" layer to a Bokeh figure
 #'
 #' Draws multiple lines with the given lists of coordinates.
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param xs list of vectors of x coordinates
 #' @param ys list of vectors of y coordinates
 # template par-lineprops
@@ -790,7 +790,7 @@ ly_multi_line <- function(
 }
 
 #' Add a "polygons" layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param xs vector or list of values or field name of polygon x coordinates - see details
 #' @param ys vector or list of values or field name of polygon y coordinates - see details
 #' @param group vector or field name of grouping variable - see details
@@ -873,7 +873,7 @@ ly_polygons <- function(
 #' Add an "image" layer to a Bokeh figure
 #'
 #' Draws a grid of rectangles with colors corresponding to the values in \code{z}
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param z matrix or vector of image values
 #' @param rows if \code{z} is a vector, how many rows should be used in treating it as a matrix
 #' @param byrow if \code{z} is a vector, should it be turned into a matrix by row
@@ -959,7 +959,7 @@ ly_image <- function(
 #' Add an "image_url" layer to a Bokeh figure
 #'
 #' Renders raster images from URLs at provided coordinates
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x x coordinates
 #' @param y y coordinates
 #' @param data an optional data frame, providing the source for inputs x, y, and other properties
@@ -987,7 +987,7 @@ ly_image_url <- function(
 
   spec <- c(list(
     x = enquo(x), y = enquo(y), url = enquo(url),
-    w = enquo(w), h = enquo(h), dilate = dilate, anchor = anchor, angle = angle,
+    w = enquo(w), h = enquo(h), angle = enquo(angle), dilate = dilate, anchor = anchor,
     global_alpha = global_alpha,
     retry_attempts = retry_attempts, retry_timeout = retry_timeout,
     model = "ImageURL",
@@ -1000,6 +1000,6 @@ ly_image_url <- function(
   add_layer(fig, spec, lgroup, lname)
 }
 
-ly_ellipse <- function() {
+# ly_ellipse <- function() {
 
-}
+# }

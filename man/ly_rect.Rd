@@ -11,7 +11,7 @@ ly_rect(fig, xleft, ybottom, xright, ytop, data = figure_data(fig),
   lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{xleft}{values or field name of left edges}
 

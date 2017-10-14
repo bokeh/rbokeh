@@ -12,7 +12,7 @@ theme_title(fig, pars = NULL, background_fill_color = "white",
   text_font_style = "normal")
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{pars}{optionally specify a named list of all parameters - useful when dealing with theme lists}
 

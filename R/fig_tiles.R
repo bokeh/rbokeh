@@ -1,5 +1,7 @@
+#' Specify a tile provider for a tile map plot.
 #' @param url Tile service url e.g., http://c.tile.openstreetmap.org/{Z}/{X}/{Y}.png
 #' @param attribution Data provider attribution content. This can include HTML content.
+#' @param type The type of tile provider (currently only "WMTS" is supported).
 tile_spec <- function(url, attribution, type = "WMTS") {
   if (type != "WMTS")
     stop("Currently only 'WMTS' tile sources are supported.")
@@ -54,7 +56,8 @@ tile_spec <- function(url, attribution, type = "WMTS") {
 # http://maps.stamen.com/terrain-background/#12/37.7706/-122.3782
 
 
-#' Add map tiles to a Bokeh figure
+#' Add map tiles to a Bokeh figure.
+#' @param fig figure to modify
 #' @param tile_spec A character string indicating to use one of the pre-defined tile specifications (see details) or a custom tile specification from calling \code{\link{tile_spec}}.
 #' @param hi_res When using a pre-defined tile specification, should a high-resolution (if available) version of the tiles be served? Boolean.
 #' @param y_origin_offset A y-offset in plot coordinates

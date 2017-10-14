@@ -188,3 +188,36 @@ paste_nice <- function(..., indent = 0, exdent = NULL, simplify = TRUE) {
   gsub("([^ ])=([^ ])", "\\1 = \\2", res)
 }
 
+
+# to help build R docs
+get_docs <- function(mods, model, pars = NULL) {
+  clean_text <- function(a) {
+    tmp <- strsplit(a, "\n")[[1]]
+    tmp <- gsub("\\.\\. note:", "Note:", tmp)
+    tmp <- tmp[tmp != ""]
+    tmp <- tmp[!grepl("id='", tmp)]
+    tmp <- tmp[!grepl(">>>", tmp)]
+    tmp <- tmp[!grepl("\\.\\. code:", tmp)]
+    tmp <- gsub("``", "\"", tmp)
+    tmp <- gsub("\"None\"", "\\\\code{NULL}", tmp)
+    tmp <- gsub("\"True\"", "\\\\code{TRUE}", tmp)
+    tmp <- gsub("\"False\"", "\\\\code{FALSE}", tmp)
+    tmp <- gsub("Note::", "Note:", tmp)
+    tmp <- trimws(tmp)
+    paste(tmp, collapse = " ")
+  }
+
+  props <- mods[[model]]$props
+  nms <- sapply(props, function(x) x$name)
+  if (is.null(pars))
+    pars <- nms
+  names(props) <- nms
+
+  pars <- unname(unlist(lapply(props[pars], function(x) {
+    paste("#' @param", x$name, clean_text(x$desc))
+  })))
+  hd <- paste0("#' ", clean_text(mods[[model]]$desc))
+  paste(c(hd, pars), collapse = "\n")
+}
+
+

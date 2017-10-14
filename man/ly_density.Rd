@@ -13,7 +13,7 @@ ly_density(fig, x, data = figure_data(fig), bw = "nrd0", adjust = 1,
   legend = NULL, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x, bw, adjust, kernel, weights, window, n, cut, na.rm}{parameters passed to \code{\link[stats]{density}}}
 

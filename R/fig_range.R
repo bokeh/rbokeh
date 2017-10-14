@@ -1,5 +1,5 @@
 #' Update x axis range in a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param lims either a vector (min, max) if the range is numeric, or a vector of values if the range is categorical.  In the latter case, the order in which the values are supplied is how they will be arranged on the axis.
 #' @param min_interval The level that the range is allowed to zoom in. For numeric ranges, it is expressed as the minimum visible interval. For categorical ranges, it is expressed as the minimum number of visible categories. If set to \code{NULL} (default), the minimum interval is not bound.
 #' @param max_interval The level that the range is allowed to zoom out. For numeric ranges, it is expressed as the maximum visible interval. For categorical ranges, it is expressed as the maximum number of visible categories. Note that \code{bounds} can impose an implicit constraint on the maximum interval as well.

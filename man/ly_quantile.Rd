@@ -11,7 +11,7 @@ ly_quantile(fig, x, group = NULL, data = figure_data(fig), probs = NULL,
   lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{numeric vector or field name of variable to compute sample quantiles for}
 

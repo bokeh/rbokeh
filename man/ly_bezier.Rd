@@ -11,7 +11,7 @@ ly_bezier(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = figure_data(fig),
   lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x0}{values or field name of starting x coordinates}
 

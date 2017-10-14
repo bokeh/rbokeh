@@ -14,7 +14,7 @@ theme_grid(fig, which = c("x", "y"), band_fill_alpha = 1,
   minor_grid_line_join = "miter", minor_grid_line_width = 1, pars = NULL)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{which}{which grids to apply attributes to ("x" and/or "y")}
 

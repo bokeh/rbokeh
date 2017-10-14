@@ -10,7 +10,7 @@ ly_multi_line(fig, xs = NULL, ys = NULL, data = figure_data(fig),
   ns_alpha = NULL, lgroup = NULL, lname = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{xs}{list of vectors of x coordinates}
 

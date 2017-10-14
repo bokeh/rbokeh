@@ -11,7 +11,7 @@ ly_image_url(fig, x = NULL, y = NULL, url, w = 10, h = 10,
   ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{x coordinates}
 

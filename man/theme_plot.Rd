@@ -4,19 +4,16 @@
 \alias{theme_plot}
 \title{Override theme parameters for general plot attributes}
 \usage{
-theme_plot(fig, pars = NULL, background_fill_color = "white",
-  background_fill_alpha = 1, border_fill_color = "white",
-  border_fill_alpha = 1, outline_line_alpha = 1,
-  outline_line_cap = "butt", outline_line_color = "black",
-  outline_line_dash = NULL, outline_line_dash_offset = 0,
-  outline_line_join = "miter", outline_line_width = 1, min_border = 50,
-  min_border_bottom = 50, min_border_left = 50, min_border_right = 50,
-  min_border_top = 50)
+theme_plot(fig, background_fill_color = "white", background_fill_alpha = 1,
+  border_fill_color = "white", border_fill_alpha = 1,
+  outline_line_alpha = 1, outline_line_cap = "butt",
+  outline_line_color = "black", outline_line_dash = NULL,
+  outline_line_dash_offset = 0, outline_line_join = "miter",
+  outline_line_width = 1, min_border = 50, min_border_bottom = 50,
+  min_border_left = 50, min_border_right = 50, min_border_top = 50)
 }
 \arguments{
-\item{fig}{figure to modify}
-
-\item{pars}{optionally specify a named list of all parameters - useful when dealing with theme lists}
+\item{fig}{Figure to modify.}
 
 \item{background_fill_color}{(color) background color of plot}
 
@@ -49,6 +46,8 @@ theme_plot(fig, pars = NULL, background_fill_color = "white",
 \item{min_border_right}{(integer) Minimum size in pixels of the padding region to the right of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.}
 
 \item{min_border_top}{(integer) Minimum size in pixels of the padding region above the top of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.}
+
+\item{pars}{optionally specify a named list of all parameters - useful when dealing with theme lists}
 }
 \description{
 Override theme parameters for general plot attributes

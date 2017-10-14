@@ -10,7 +10,7 @@ ly_patch(fig, x, y = NULL, data = figure_data(fig), color = NULL,
   url = NULL, legend = TRUE, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{values or field name of patch x coordinates}
 

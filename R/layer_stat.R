@@ -19,7 +19,7 @@ ctg <- function(a, b) {
 #' Add a "hist" layer to a Bokeh figure
 #'
 #' Draws a histogram
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x either a vector to be passed to \code{\link[graphics]{hist}} or an object of class "histogram"
 #' @param breaks,freq,include.lowest,right parameters passed to \code{\link[graphics]{hist}}
 #' @param data an optional data frame, providing the source for x
@@ -82,7 +82,7 @@ ly_hist <- function(
 #' Add a "density" layer to a Bokeh figure
 #'
 #' Draws a kernel density estimate
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x,bw,adjust,kernel,weights,window,n,cut,na.rm parameters passed to \code{\link[stats]{density}}
 #' @param data an optional data frame, providing the source for x
 # template par-lineprops
@@ -136,7 +136,7 @@ ly_density <- function(
 #' Add a "quantile" layer to a Bokeh figure
 #'
 #' Draws quantiles
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x numeric vector or field name of variable to compute sample quantiles for
 #' @param group values or field name of a grouping variable to break quantile computations up by
 #' @param data an optional data frame, providing the source for x
@@ -230,7 +230,7 @@ ly_quantile <- function(
 }
 
 #' Add a "boxplot" layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x either a numeric vector or a factor
 #' @param y either a numeric vector or a factor
 #' @param data an optional data frame, providing the source for x and y
@@ -406,7 +406,7 @@ ly_boxplot <- function(
 #' Add a "barchart" layer to a Bokeh figure
 #'
 #' Draws a bar chart
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name for x variable, or if NULL, x-axis will be counts of y
 #' @param y values or field name for y variable, or if NULL, y-axis will be counts of x
 #' @param data an optional data frame, providing the source for inputs x, y, and color properties
@@ -429,7 +429,7 @@ ly_bar <- function(
   color = NULL, alpha = 1,
   position = c("stack", "fill", "dodge"), width = 0.9, hover = FALSE,
   origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
-  lname = NULL, lgroup = NULL, legend = NULL, ...
+  lname = NULL, lgroup = NULL, legend = TRUE, ...
 ) {
 
   # we'll do everything as if x is the factor
@@ -471,6 +471,10 @@ ly_bar <- function(
   } else {
     stop("in ly_bar one of 'x' or 'y' must be numeric and the other not numeric", call. = FALSE)
   }
+
+  # if user doesn't specify legend title, get it from the specified value for "color"
+  if (is.logical(legend) && legend)
+    legend <- rlang::quo_name(enquo(color))
 
   color <- rlang::eval_tidy(enquo(color), data)
 
@@ -533,6 +537,7 @@ ly_bar <- function(
   # }
 
   if (hover) {
+    # TODO: rename the color column so it's not "color"
     hovdat <- data.frame(
       variable = res$x,
       value = res$y
@@ -563,14 +568,14 @@ ly_bar <- function(
     xleft = xleft, ybottom = ybottom, xright = xright, ytop = ytop,
     # xlab = args$info$x_name, ylab = args$info$y_name,
     data = res, hover = hovdat,
-    # color = color_value,
-    lname = lname, lgroup = lgroup
-    # legend = args$info$legend)
+    color = color,
+    lname = lname, lgroup = lgroup,
+    legend = legend
   )
 }
 
 #' Add a "hexbin" layer to a Bokeh figure
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param x values or field name of center x coordinates to be binned
 #' @param y values or field name of center y coordinates to be binned
 #' @param data an optional data frame, providing the source for x and y

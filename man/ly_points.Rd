@@ -11,7 +11,7 @@ ly_points(fig, x = NULL, y = NULL, data = figure_data(fig), glyph = 21,
   ns_alpha = NULL, lgroup = NULL, lname = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{values or field name of line x coordinates}
 

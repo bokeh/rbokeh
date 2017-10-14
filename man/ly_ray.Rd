@@ -8,10 +8,10 @@ ly_ray(fig, x, y = NULL, data = figure_data(fig), length = NULL,
   angle = NULL, type = 1, width = 1, color = NULL, alpha = NULL,
   hover = NULL, url = NULL, hov_color = NULL, hov_alpha = NULL,
   ns_color = NULL, ns_alpha = NULL, sel_color = NULL, sel_alpha = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE, ...)
+  legend = TRUE, lname = NULL, lgroup = NULL, visible = TRUE, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{values or field name of center x coordinates}
 

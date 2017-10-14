@@ -17,7 +17,7 @@ theme_legend(fig, background_fill_alpha = 0.95,
   legend_spacing = 3, pars = NULL)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{background_fill_alpha}{(numeric) background color alpha of plot}
 

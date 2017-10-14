@@ -10,7 +10,7 @@ ly_curve(fig, expr, from = NULL, to = NULL, n = 101, width = 1,
   lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{expr, from, to, n}{parameters sent to \code{\link[graphics]{curve}}}
 }

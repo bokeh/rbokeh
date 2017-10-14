@@ -142,7 +142,7 @@ bk_ggplot_theme <- function() {
 
 #' Override theme parameters for general plot attributes
 #'
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param background_fill_color (color) background color of plot
 #' @param background_fill_alpha (numeric) background color alpha of plot
 #' @param border_fill_color (color) fill color of border area of plot
@@ -187,7 +187,7 @@ theme_title <- function(fig,
 
 #' Override theme parameters for axis attributes
 #'
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param which which grids to apply attributes to ("x" and/or "y")
 #' @param num_minor_ticks number of minor ticks
 #' @param axis_label_standoff (integer) The distance in pixels that the axis labels should be offset from the tick labels.
@@ -294,7 +294,7 @@ theme_axis <- function(fig,
 
 #' Override theme parameters for grid attributes
 #'
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param which which grids to apply attributes to ("x" and/or "y")
 #' @param band_fill_alpha The fill alpha of alternating bands between Grid lines.
 #' @param band_fill_color The fill color of alternating bands between Grid lines.
@@ -348,7 +348,7 @@ theme_grid <- function(fig,
 
 #' Override theme parameters for legend attributes
 #'
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param background_fill_color (color) background color of plot
 #' @param background_fill_alpha (numeric) background color alpha of plot
 #' @param border_line_alpha The line alpha for the legend border outline.
@@ -420,7 +420,7 @@ theme_legend <- function(fig,
 
 #' Override theme parameters for general plot attributes
 #'
-#' @param fig figure to modify
+#' @param fig Figure to modify.
 #' @param background_fill_color (color) background color of plot
 #' @param background_fill_alpha (numeric) background color alpha of plot
 #' @param border_fill_color (color) fill color of border area of plot

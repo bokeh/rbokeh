@@ -11,7 +11,7 @@ ly_lines(fig, x = NULL, y = NULL, data = figure_data(fig), type = 1,
   lgroup = NULL, lname = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{values or field name of line x coordinates}
 

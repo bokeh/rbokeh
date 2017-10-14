@@ -11,7 +11,7 @@ ly_boxplot(fig, x, y = NULL, data = figure_data(fig), width = 0.9,
   lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{either a numeric vector or a factor}
 

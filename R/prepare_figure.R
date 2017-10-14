@@ -263,9 +263,17 @@ prepare_figure <- function(fig) {
                 ## for consistency, we use d3 transform instead of ColorMapper
                 cjs <- js_transform_color_cat(spc)
 
+
+                # TODO: move this logic into update_legend()
+                if (is.character(ly$legend)) {
+                  legend_head <- ly$legend
+                  ly$legend <- TRUE
+                } else {
+                  legend_head <- nm
+                }
+                if (is.logical(ly$legend) && ly$legend)
+                  legend <- update_legend(legend, spc, lgp, lnm, legend_head, attr_nm)
               }
-              if (is.logical(ly$legend) && ly$legend)
-                legend <- update_legend(legend, spc, lgp, lnm, nm, attr_nm)
               cjs_id <- digest::digest(list(val, attr_nm))
               cur_ly[[cjs_id]] <- cjs
               ly[[attr_nm]] <- list(
@@ -1106,7 +1114,8 @@ add_axis <- function(x, whch) {
   # reconcile with theme
   axis_args <- modifyList(x$theme$axis[[xy]], args$axis)
   # we want users to be able specify orientation in degrees
-  if (!is.null(axis_args$major_label_orientation))
+  if (!is.null(axis_args$major_label_orientation) &&
+    is.numeric(axis_args$major_label_orientation))
     axis_args$major_label_orientation <- axis_args$major_label_orientation * pi / 180
   axs <- call_with_valid_args(ax_mod, axis_args)
 

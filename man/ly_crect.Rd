@@ -11,7 +11,7 @@ ly_crect(fig, x, y = NULL, width = 1, height = 1, angle = 0,
   lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{values or field name of center x coordinates}
 

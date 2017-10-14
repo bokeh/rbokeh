@@ -24,10 +24,10 @@ theme_axis(fig, which = c("x", "y"), num_minor_ticks = 5,
   minor_tick_line_alpha = 1, minor_tick_line_cap = "butt",
   minor_tick_line_color = "black", minor_tick_line_dash = NULL,
   minor_tick_line_dash_offset = 0, minor_tick_line_join = "miter",
-  minor_tick_line_width = 1, minor_tick_out = NULL, pars = NULL)
+  minor_tick_line_width = 1, minor_tick_out = NULL)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{which}{which grids to apply attributes to ("x" and/or "y")}
 

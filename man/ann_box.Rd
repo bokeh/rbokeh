@@ -10,7 +10,7 @@ ann_box(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,
   lname = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 }
 \description{
 Add a "box" annotation to a Bokeh figure

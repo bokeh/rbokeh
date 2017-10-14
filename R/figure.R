@@ -1,12 +1,45 @@
 #' Instantiate an rbokeh figure
 #'
-#' @param data default dataset to use
+#' @param data A default data frame to be used by the layers added to the figure.
+#' @param width TODO_DOC
+#' @param height TODO_DOC
+#' @param title TODO_DOC
+#' @param title_location Where the title will be located. Titles on the left or right side will  be rotated. One of 'above', 'below', 'left', 'right'.
+#' @param xlab TODO_DOC
+#' @param ylab TODO_DOC
+#' @param xlim TODO_DOC
+#' @param ylim TODO_DOC
+#' @param range_padding TODO_DOC
+#' @param xgrid TODO_DOC
+#' @param ygrid TODO_DOC
+#' @param xaxes TODO_DOC
+#' @param yaxes TODO_DOC
+#' @param legend_location TODO_DOC
+#' @param tools TODO_DOC
+#' @param logo TODO_DOC
+#' @param theme TODO_DOC
+#' @param toolbar_location Where the toolbar will be located. If set to None, no toolbar will be attached to the plot. One of 'above', 'below', 'left', 'right'.
+#' @param toolbar_sticky Stick the toolbar to the edge of the plot. Default: TRUE If FALSE, the toolbar will be outside of the axes, titles etc.
+#' @param v_symmetry Whether the total vertical padding on both sides of the plot will be made equal (the top or bottom padding amount, whichever is larger).
+#' @param h_symmetry Whether the total horizontal padding on both sides of the plot will be made equal (the left or right padding amount, whichever is larger).
+#' @param lod_factor Decimation factor to use when applying level-of-detail decimation.
+#' @param lod_interval Interval (in ms) during which an interactive tool event will enable level-of-detail downsampling.
+#' @param lod_threshold A number of data points, above which level-of-detail downsampling may be performed by glyph renderers. Set to ``None`` to disable any level-of-detail downsampling.
+#' @param lod_timeout Timeout (in ms) for checking whether interactive tool events are still occurring. Once level-of-detail mode is enabled, a check is made every ``lod_timeout`` ms. If no interactive tool events have happened, level-of-detail mode is disabled.
+#' @param output_backend Specify the output backend for the plot area. Default is "canvas", HTML5 Canvas. Note: When set to "webgl", glyphs without a WebGL rendering implementation will fall back to rendering onto 2D canvas. Must be one of 'canvas', 'svg', 'webgl'.
+#' @param min_border A convenience property to set all all the ``min_border_X`` properties to the same value. If an individual border property is explicitly set, it will override ``min_border``.
+#' @param min_border_left Minimum size in pixels of the padding region to the left of the central plot region. Note: This is a *minimum*. The padding region may expand as needed to accommodate titles or axes, etc.
+#' @param min_border_bottom Minimum size in pixels of the padding region below the bottom of the central plot region. Note: This is a *minimum*. The padding region may expand as needed to accommodate titles or axes, etc.
+#' @param min_border_right Minimum size in pixels of the padding region to the right of the central plot region. Note: This is a *minimum*. The padding region may expand as needed to accommodate titles or axes, etc.
+#' @param min_border_top Minimum size in pixels of the padding region above the top of the central plot region. Note: This is a *minimum*. The padding region may expand as needed to accommodate titles or axes, etc.
+#' @param hidpi Whether to use HiDPI mode when available.
 #' @export
 figure <- function(
   data = NULL,
   width = 600,
   height = 600,
   title = NULL,
+  title_location = NULL,
   xlab = NULL,
   ylab = NULL,
   xlim = NULL,
@@ -14,27 +47,41 @@ figure <- function(
   range_padding = 0.07,
   xgrid = TRUE,
   ygrid = TRUE,
+  xaxes = TRUE,
+  yaxes = TRUE,
   legend_location = "top_right",
-  tools = c("pan", "wheel_zoom", "box_zoom", "reset", "save", "help"),
   logo = NULL,
   theme = getOption("bokeh_theme"),
+  tools = c("pan", "wheel_zoom", "box_zoom", "reset", "save", "help"),
   toolbar_location = "above",
+  toolbar_sticky = NULL,
   h_symmetry = TRUE,
   v_symmetry = FALSE,
   lod_factor = 10,
   lod_interval = 300,
   lod_threshold = NULL,
-  lod_timeout = 500
-  # output_backend = "canvas" # note: was "webgl = FALSE/TRUE"
+  lod_timeout = 500,
+  output_backend = "canvas",
+  min_border = NULL,
+  min_border_left = NULL,
+  min_border_bottom = NULL,
+  min_border_right = NULL,
+  min_border_top = NULL,
+  hidpi = NULL
   ) {
 
-  plt <- Plot$new(plot_height = height, plot_width = width,
-    h_symmetry = h_symmetry, v_symmetry = v_symmetry,
-    toolbar_location = toolbar_location,
-    lod_factor = lod_factor, lod_interval = lod_interval,
-    lod_threshold = lod_threshold, lod_timeout = lod_timeout
-    # output_backend = output_backend
-  )
+  args <- get_specified_args(nms = c(
+    "h_symmetry", "v_symmetry", "toolbar_location", "lod_factor",
+    "lod_interval", "lod_threshold", "lod_timeout", "output_backend",
+    "toolbar_sticky", "title_location", "min_border", "min_border_left",
+    "min_border_bottom", "min_border_right", "min_border_top", "hidpi"))
+  args$plot_height <- height
+  args$plot_width <- width
+
+  if (!is.null(args$title) && !is.null(args$title_location))
+    args$title_location <- NULL
+
+  plt <- do.call(Plot$new, args)
 
   obj <- htmlwidgets::createWidget(
     name = "rbokeh",
@@ -66,7 +113,7 @@ figure <- function(
         ),
         axes = list(
           below = list(
-            draw = TRUE,
+            draw = yaxes,
             log = FALSE,
             args = list(
               ticker = list(),
@@ -76,7 +123,7 @@ figure <- function(
             )
           ),
           left = list(
-            draw = TRUE,
+            draw = xaxes,
             log = FALSE,
             args = list(
               ticker = list(),

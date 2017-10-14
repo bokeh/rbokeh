@@ -11,7 +11,7 @@ ly_text(fig, x, y = NULL, text = NULL, color = NULL, alpha = NULL,
   ns_color = NULL, ns_alpha = NULL, lgroup = NULL, lname = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{x coordinates of text anchors}
 

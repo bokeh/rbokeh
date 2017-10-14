@@ -11,7 +11,7 @@ ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{a, b}{the intercept and slope of the line(s) to draw}
 

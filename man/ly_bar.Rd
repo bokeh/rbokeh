@@ -7,10 +7,10 @@
 ly_bar(fig, x = NULL, y = NULL, data = figure_data(fig), color = NULL,
   alpha = 1, position = c("stack", "fill", "dodge"), width = 0.9,
   hover = FALSE, origin = NULL, breaks = NULL, right = FALSE,
-  binwidth = NULL, lname = NULL, lgroup = NULL, legend = NULL, ...)
+  binwidth = NULL, lname = NULL, lgroup = NULL, legend = TRUE, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{values or field name for x variable, or if NULL, x-axis will be counts of y}
 

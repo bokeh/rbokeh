@@ -10,7 +10,7 @@ ly_hexbin(fig, x, y = NULL, data = figure_data(fig), xbins = 30,
   line = FALSE, alpha = 1, hover = TRUE, visible = TRUE)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{values or field name of center x coordinates to be binned}
 

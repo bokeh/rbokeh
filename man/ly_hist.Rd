@@ -10,7 +10,7 @@ ly_hist(fig, x, data = figure_data(fig), breaks = "Sturges", freq = TRUE,
   sel_color = NULL, sel_alpha = NULL, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
-\item{fig}{figure to modify}
+\item{fig}{Figure to modify.}
 
 \item{x}{either a vector to be passed to \code{\link[graphics]{hist}} or an object of class "histogram"}
 
