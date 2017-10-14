@@ -1,7 +1,3 @@
-NULL
-
-## GMapPlot model is the same as Plot except for map_options
-
 ## when rendering maybe use something
 ## like this to approximate zoom level
 ## for a given glyph_x_ranges and glyph_y_ranges
@@ -12,16 +8,24 @@ NULL
 #' @param lat The latitude where the map should be centered.
 #' @param lng The longitude where the map should be centered.
 #' @param zoom The initial zoom level to use when displaying the map.
-#' @param scale_control Whether the Google map should display its distance scale control.
 #' @param map_type The `map type`_ to use for the GMapPlot. One of 'satellite', 'roadmap', 'terrain', 'hybrid'. See \url{https://developers.google.com/maps/documentation/javascript/reference#MapTypeId} for more details.
 #' @param api_key Google Maps \href{https://developers.google.com/maps/documentation/javascript/get-api-key}{API key}. If not specified, a search for an environmen variable, \code{GMAP_API_KEY}, will be done.
 #' @param map_style a json string of a Google Maps style - see \code{\link{gmap_style}}
-#' @note This can be used in the same way as \code{\link{figure}}, adding layers on top of the Google Map.
-#' There is an open issue documenting points appearing to sometimes be a few pixels off from their intended location.
+#' @param scale_control Whether the Google map should display its distance scale control.
+#' @note This function can be used in the same way as \code{\link{figure}}, adding layers on top of the Google Map.
 #' Google has its own terms of service for using Google Maps API and any use of rbokeh with Google Maps must be within Google's Terms of Service
 #' @inheritParams figure
 #' @seealso \code{\link{gmap_style}}
-# @example man-roxygen/ex-gmap.R
+#' @examples
+#' gmap(lat = 40.74, lng = -73.95, zoom = 11,
+#'   width = 600, height = 600,
+#'   map_style = gmap_style("blue_water"), map_type = "roadmap")
+#'
+#' gmap(lat = 40.44, lng = -113.785, zoom = 4,
+#'   width = 1000, height = 700,
+#'   map_style = gmap_style("blue_water"), map_type = "roadmap") %>%
+#'   ly_points(long, lat, data = us.cities, color = factor(capital),
+#'     size = spec(pop, range = c(2, 50)), hover = maps::us.cities)
 #' @export
 gmap <- function(
   data = NULL,

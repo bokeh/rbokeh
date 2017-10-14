@@ -42,27 +42,23 @@ gmap(data = NULL, lat = 0, lng = 0, zoom = 0, api_key = NULL,
 
 \item{title_location}{Where the title will be located. Titles on the left or right side will  be rotated. One of 'above', 'below', 'left', 'right'.}
 
-\item{xlab}{TODO_DOC}
+\item{xlab}{Label for x axis. Also specifiable in \code{\link{x_axis}}.}
 
-\item{ylab}{TODO_DOC}
+\item{ylab}{Label for y axis. Also specifiable in \code{\link{y_axis}}.}
 
-\item{xlim}{TODO_DOC}
+\item{xlim}{The extent of the plotting area in the x-dimension (will be computed automatically if not specified). Also specifiable in \code{\link{x_range}}.}
 
-\item{ylim}{TODO_DOC}
+\item{ylim}{The extent of the plotting area in the y-dimension (will be computed automatically if not specified). Also specifiable in \code{\link{y_range}}.}
 
-\item{range_padding}{TODO_DOC}
+\item{xgrid}{Logical indicating whether to draw x axis grid lines.}
 
-\item{xgrid}{TODO_DOC}
+\item{ygrid}{Logical indicating whether to draw y axis grid lines.}
 
-\item{ygrid}{TODO_DOC}
+\item{legend_location}{The location where the legend should draw itself, or NULL to omit the legend. One of 'top_right', 'top_left', 'bottom_left', 'bottom_right'.}
 
-\item{legend_location}{TODO_DOC}
+\item{theme}{An rbokeh theme to use. See, for example, \code{\link{bk_default_theme}}.}
 
-\item{logo}{TODO_DOC}
-
-\item{theme}{TODO_DOC}
-
-\item{tools}{TODO_DOC}
+\item{tools}{character vector of interactivity tools options (acceptable values are: "box_select", "lasso_select", "poly_select", "crosshair", "box_zoom", "wheel_zoom", "zoom_in", "zoom_out", "pan", "wheel_pan", "reset", "undo", "redo", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see \code{\link{tool_box_select}}, for example, where links to the rest of the family of tool functions can also be found. If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.}
 
 \item{toolbar_location}{Where the toolbar will be located. If set to None, no toolbar will be attached to the plot. One of 'above', 'below', 'left', 'right'.}
 
@@ -98,9 +94,19 @@ gmap(data = NULL, lat = 0, lng = 0, zoom = 0, api_key = NULL,
 Initialize a Bokeh Google Map plot
 }
 \note{
-This can be used in the same way as \code{\link{figure}}, adding layers on top of the Google Map.
-There is an open issue documenting points appearing to sometimes be a few pixels off from their intended location.
+This function can be used in the same way as \code{\link{figure}}, adding layers on top of the Google Map.
 Google has its own terms of service for using Google Maps API and any use of rbokeh with Google Maps must be within Google's Terms of Service
+}
+\examples{
+gmap(lat = 40.74, lng = -73.95, zoom = 11,
+  width = 600, height = 600,
+  map_style = gmap_style("blue_water"), map_type = "roadmap")
+
+gmap(lat = 40.44, lng = -113.785, zoom = 4,
+  width = 1000, height = 700,
+  map_style = gmap_style("blue_water"), map_type = "roadmap") \%>\%
+  ly_points(long, lat, data = us.cities, color = factor(capital),
+    size = spec(pop, range = c(2, 50)), hover = maps::us.cities)
 }
 \seealso{
 \code{\link{gmap_style}}

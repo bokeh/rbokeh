@@ -2,12 +2,12 @@
 % Please edit documentation in R/figure.R
 \name{figure}
 \alias{figure}
-\title{Instantiate an rbokeh figure}
+\title{Instantiate an rbokeh figure.}
 \usage{
 figure(data = NULL, width = 600, height = 600, title = NULL,
   title_location = NULL, xlab = NULL, ylab = NULL, xlim = NULL,
   ylim = NULL, range_padding = 0.07, xgrid = TRUE, ygrid = TRUE,
-  xaxes = TRUE, yaxes = TRUE, legend_location = "top_right",
+  xaxes = "below", yaxes = "left", legend_location = "top_right",
   logo = NULL, theme = getOption("bokeh_theme"), tools = c("pan",
   "wheel_zoom", "box_zoom", "reset", "save", "help"),
   toolbar_location = "above", toolbar_sticky = NULL, h_symmetry = TRUE,
@@ -27,31 +27,27 @@ figure(data = NULL, width = 600, height = 600, title = NULL,
 
 \item{title_location}{Where the title will be located. Titles on the left or right side will  be rotated. One of 'above', 'below', 'left', 'right'.}
 
-\item{xlab}{TODO_DOC}
+\item{xlab}{Label for x axis. Also specifiable in \code{\link{x_axis}}.}
 
-\item{ylab}{TODO_DOC}
+\item{ylab}{Label for y axis. Also specifiable in \code{\link{y_axis}}.}
 
-\item{xlim}{TODO_DOC}
+\item{xlim}{The extent of the plotting area in the x-dimension (will be computed automatically if not specified). Also specifiable in \code{\link{x_range}}.}
 
-\item{ylim}{TODO_DOC}
+\item{ylim}{The extent of the plotting area in the y-dimension (will be computed automatically if not specified). Also specifiable in \code{\link{y_range}}.}
 
-\item{range_padding}{TODO_DOC}
+\item{xgrid}{Logical indicating whether to draw x axis grid lines.}
 
-\item{xgrid}{TODO_DOC}
+\item{ygrid}{Logical indicating whether to draw y axis grid lines.}
 
-\item{ygrid}{TODO_DOC}
+\item{xaxes}{Where to put x axis, or FALSE if no x axis ticks / labels.}
 
-\item{xaxes}{TODO_DOC}
+\item{yaxes}{Where to put y axis, or FALSE if no y axis ticks / labels.}
 
-\item{yaxes}{TODO_DOC}
+\item{legend_location}{The location where the legend should draw itself, or NULL to omit the legend. One of 'top_right', 'top_left', 'bottom_left', 'bottom_right'.}
 
-\item{legend_location}{TODO_DOC}
+\item{theme}{An rbokeh theme to use. See, for example, \code{\link{bk_default_theme}}.}
 
-\item{logo}{TODO_DOC}
-
-\item{theme}{TODO_DOC}
-
-\item{tools}{TODO_DOC}
+\item{tools}{character vector of interactivity tools options (acceptable values are: "box_select", "lasso_select", "poly_select", "crosshair", "box_zoom", "wheel_zoom", "zoom_in", "zoom_out", "pan", "wheel_pan", "reset", "undo", "redo", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see \code{\link{tool_box_select}}, for example, where links to the rest of the family of tool functions can also be found. If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.}
 
 \item{toolbar_location}{Where the toolbar will be located. If set to None, no toolbar will be attached to the plot. One of 'above', 'below', 'left', 'right'.}
 
@@ -82,7 +78,38 @@ figure(data = NULL, width = 600, height = 600, title = NULL,
 \item{min_border_top}{Minimum size in pixels of the padding region above the top of the central plot region. Note: This is a *minimum*. The padding region may expand as needed to accommodate titles or axes, etc.}
 
 \item{hidpi}{Whether to use HiDPI mode when available.}
+
+\item{padding_factor}{If limits are not explicitly specified, by what factor should the computed extents of the data be padded? This is a number used as a multiplier of the computed range.}
 }
 \description{
-Instantiate an rbokeh figure
+Instantiate an rbokeh figure.
+}
+\examples{
+# empty figure
+figure()
+
+# figure with single point
+figure() \%>\%
+  ly_points(1, 1)
+
+# simple figure
+figure() \%>\%
+  ly_points(1:10, 1:10)
+
+# use svg to render the plot
+figure(output_backend = "svg") \%>\%
+  ly_points(1:10, 1:10)
+
+# remove axes and grid
+figure(xaxes = FALSE, yaxes = FALSE, xgrid = FALSE, ygrid = FALSE) \%>\%
+  ly_points(1:10, 1:10)
+
+# axis above and right
+figure(xaxes = "above", yaxes = "right", xgrid = FALSE, ygrid = FALSE,
+  toolbar_location = "left") \%>\%
+  ly_points(1:10, 1:10)
+
+# custom limits
+figure(xlim = c(-10, 20)) \%>\%
+  ly_points(1:10, 1:10)
 }

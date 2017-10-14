@@ -1,23 +1,22 @@
-#' Instantiate an rbokeh figure
+#' Instantiate an rbokeh figure.
 #'
 #' @param data A default data frame to be used by the layers added to the figure.
 #' @param width TODO_DOC
 #' @param height TODO_DOC
 #' @param title TODO_DOC
 #' @param title_location Where the title will be located. Titles on the left or right side will  be rotated. One of 'above', 'below', 'left', 'right'.
-#' @param xlab TODO_DOC
-#' @param ylab TODO_DOC
-#' @param xlim TODO_DOC
-#' @param ylim TODO_DOC
-#' @param range_padding TODO_DOC
-#' @param xgrid TODO_DOC
-#' @param ygrid TODO_DOC
-#' @param xaxes TODO_DOC
-#' @param yaxes TODO_DOC
-#' @param legend_location TODO_DOC
-#' @param tools TODO_DOC
-#' @param logo TODO_DOC
-#' @param theme TODO_DOC
+#' @param xlab Label for x axis. Also specifiable in \code{\link{x_axis}}.
+#' @param ylab Label for y axis. Also specifiable in \code{\link{y_axis}}.
+#' @param xlim The extent of the plotting area in the x-dimension (will be computed automatically if not specified). Also specifiable in \code{\link{x_range}}.
+#' @param ylim The extent of the plotting area in the y-dimension (will be computed automatically if not specified). Also specifiable in \code{\link{y_range}}.
+#' @param padding_factor If limits are not explicitly specified, by what factor should the computed extents of the data be padded? This is a number used as a multiplier of the computed range.
+#' @param xgrid Logical indicating whether to draw x axis grid lines.
+#' @param ygrid Logical indicating whether to draw y axis grid lines.
+#' @param xaxes Where to put x axis, or FALSE if no x axis ticks / labels.
+#' @param yaxes Where to put y axis, or FALSE if no y axis ticks / labels.
+#' @param legend_location The location where the legend should draw itself, or NULL to omit the legend. One of 'top_right', 'top_left', 'bottom_left', 'bottom_right'.
+#' @param tools character vector of interactivity tools options (acceptable values are: "box_select", "lasso_select", "poly_select", "crosshair", "box_zoom", "wheel_zoom", "zoom_in", "zoom_out", "pan", "wheel_pan", "reset", "undo", "redo", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see \code{\link{tool_box_select}}, for example, where links to the rest of the family of tool functions can also be found. If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.
+#' @param theme An rbokeh theme to use. See, for example, \code{\link{bk_default_theme}}.
 #' @param toolbar_location Where the toolbar will be located. If set to None, no toolbar will be attached to the plot. One of 'above', 'below', 'left', 'right'.
 #' @param toolbar_sticky Stick the toolbar to the edge of the plot. Default: TRUE If FALSE, the toolbar will be outside of the axes, titles etc.
 #' @param v_symmetry Whether the total vertical padding on both sides of the plot will be made equal (the top or bottom padding amount, whichever is larger).
@@ -33,6 +32,34 @@
 #' @param min_border_right Minimum size in pixels of the padding region to the right of the central plot region. Note: This is a *minimum*. The padding region may expand as needed to accommodate titles or axes, etc.
 #' @param min_border_top Minimum size in pixels of the padding region above the top of the central plot region. Note: This is a *minimum*. The padding region may expand as needed to accommodate titles or axes, etc.
 #' @param hidpi Whether to use HiDPI mode when available.
+#' @examples
+#' # empty figure
+#' figure()
+#'
+#' # figure with single point
+#' figure() %>%
+#'   ly_points(1, 1)
+#'
+#' # simple figure
+#' figure() %>%
+#'   ly_points(1:10, 1:10)
+#'
+#' # use svg to render the plot
+#' figure(output_backend = "svg") %>%
+#'   ly_points(1:10, 1:10)
+#'
+#' # remove axes and grid
+#' figure(xaxes = FALSE, yaxes = FALSE, xgrid = FALSE, ygrid = FALSE) %>%
+#'   ly_points(1:10, 1:10)
+#'
+#' # axis above and right
+#' figure(xaxes = "above", yaxes = "right", xgrid = FALSE, ygrid = FALSE,
+#'   toolbar_location = "left") %>%
+#'   ly_points(1:10, 1:10)
+#'
+#' # custom limits
+#' figure(xlim = c(-10, 20)) %>%
+#'   ly_points(1:10, 1:10)
 #' @export
 figure <- function(
   data = NULL,
@@ -47,8 +74,8 @@ figure <- function(
   range_padding = 0.07,
   xgrid = TRUE,
   ygrid = TRUE,
-  xaxes = TRUE,
-  yaxes = TRUE,
+  xaxes = "below",
+  yaxes = "left",
   legend_location = "top_right",
   logo = NULL,
   theme = getOption("bokeh_theme"),
@@ -80,6 +107,21 @@ figure <- function(
 
   if (!is.null(args$title) && !is.null(args$title_location))
     args$title_location <- NULL
+
+  axis_left <- axis_below <- TRUE
+  axis_right <- axis_above <- FALSE
+  if (is.logical(xaxes) && !xaxes) {
+    axis_below <- FALSE
+  } else if (xaxes == "above") {
+    axis_below <- FALSE
+    axis_above <- TRUE
+  }
+  if (is.logical(yaxes) && !yaxes) {
+    axis_left <- FALSE
+  } else if (yaxes == "right") {
+    axis_left <- FALSE
+    axis_right <- TRUE
+  }
 
   plt <- do.call(Plot$new, args)
 
@@ -113,7 +155,7 @@ figure <- function(
         ),
         axes = list(
           below = list(
-            draw = yaxes,
+            draw = axis_below,
             log = FALSE,
             args = list(
               ticker = list(),
@@ -123,7 +165,7 @@ figure <- function(
             )
           ),
           left = list(
-            draw = xaxes,
+            draw = axis_left,
             log = FALSE,
             args = list(
               ticker = list(),
@@ -133,7 +175,7 @@ figure <- function(
             )
           ),
           above = list(
-            draw = FALSE,
+            draw = axis_above,
             log = FALSE,
             args = list(
               ticker = list(),
@@ -143,7 +185,7 @@ figure <- function(
             )
           ),
           right = list(
-            draw = FALSE,
+            draw = axis_right,
             type = NULL,
             log = FALSE,
             args = list(
@@ -169,32 +211,6 @@ figure <- function(
   obj
 }
 
-### present:
-# h_symmetry
-# v_symmetry
-# plot_height
-# plot_width
-# title
-# lod_factor
-# lod_interval
-# lod_threshold
-# lod_timeout
-
-### to add:
-# min_border
-# min_border_bottom
-# min_border_left
-# min_border_right
-# min_border_top
-# output_backend ('canvas', 'svg', 'webgl') (causes an error in rendering...)
-
-### look into:
-# title_location
-# tool_events
-# toolbar
-# toolbar_location
-# toolbar_sticky
-
 ### taken care of in other places:
 # background_fill_alpha
 # background_fill_color
@@ -213,20 +229,7 @@ figure <- function(
 # y_range
 # y_scale
 
-### ignore
-## inner_height
-## inner_width
-## layout_height
-## layout_width
-## above
-## below
-## left
-## right
-## extra_x_ranges
-## extra_y_ranges
-## hidpi
-
-
+# internal
 figure_data <- function(fig) {
   if (is.list(fig)) {
     # will return NULL even if it all doesn't exist,
@@ -237,6 +240,7 @@ figure_data <- function(fig) {
   return(NULL)
 }
 
+# internal
 rbokeh_prerender <- function(obj, keep_aux = FALSE) {
 
   obj <- prepare_figure(obj)
