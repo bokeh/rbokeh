@@ -12,50 +12,6 @@ tile_spec <- function(url, attribution, type = "WMTS") {
   )
 }
 
-
-# max_zoom = 30,
-# min_zoom = 0,
-# tile_size = 256,
-# wrap_around = true,
-# x_origin_offset = 20037508.34,
-# y_origin_offset = 20037508.34
-# initial_resolution = 156543.03392804097,
-# extra_url_vars = NULL
-
-# http://maps.stamen.com/
-# https://carto.com/location-data-services/basemaps/
-
-# toner
-# http://maps.stamen.com/toner/#12/37.7706/-122.3782
-
-# toner-hybrid
-# http://maps.stamen.com/toner-hybrid/#12/37.7706/-122.3782
-
-# toner-labels
-# http://maps.stamen.com/toner-labels/#12/37.7706/-122.3782
-
-# toner-lines
-# http://maps.stamen.com/toner-lines/#12/37.7706/-122.3782
-
-# toner-background
-# http://maps.stamen.com/toner-background/#12/37.7706/-122.3782
-
-# toner-lite
-# http://maps.stamen.com/toner-lite/#12/37.7706/-122.3782
-
-# terrain
-# http://maps.stamen.com/terrain/#12/37.7706/-122.3782
-
-# terrain-labels
-# http://maps.stamen.com/terrain-labels/#12/37.7706/-122.3782
-
-# terrain-lines
-# http://maps.stamen.com/terrain-lines/#12/37.7706/-122.3782
-
-# terrain-background
-# http://maps.stamen.com/terrain-background/#12/37.7706/-122.3782
-
-
 #' Add map tiles to a Bokeh figure.
 #' @param fig figure to modify
 #' @param tile_spec A character string indicating to use one of the pre-defined tile specifications (see details) or a custom tile specification from calling \code{\link{tile_spec}}.
@@ -69,8 +25,51 @@ tile_spec <- function(url, attribution, type = "WMTS") {
 #' @param tile_size Tile size in pixels (e.g. 256)
 #' @param alpha Tile opacity 0.0 - 1.0.
 #' @param render_parents Flag enable/disable drawing of parent tiles while waiting for new tiles to arrive. Default value is TRUE.
-#' @param visible Is the renderer visible.
+#' @param visible Is the renderer visible?
 #' @param level Specifies the level in which to paint this renderer. One of 'image', 'underlay', 'glyph', 'annotation', 'overlay'.
+#' @details
+#' Here is a list of pre-defined tile specifications from different sources:
+#'
+#' \strong{Stamen} (\url{http://maps.stamen.com/})
+#'
+#' \itemize{
+#'   \item toner ---\url{http://maps.stamen.com/toner/#12/37.7706/-122.3782}
+#'   \item toner-hybrid ---\url{http://maps.stamen.com/toner-hybrid/#12/37.7706/-122.3782}
+#'   \item toner-labels ---\url{http://maps.stamen.com/toner-labels/#12/37.7706/-122.3782}
+#'   \item toner-lines ---\url{http://maps.stamen.com/toner-lines/#12/37.7706/-122.3782}
+#'   \item toner-background ---\url{http://maps.stamen.com/toner-background/#12/37.7706/-122.3782}
+#'   \item toner-lite ---\url{http://maps.stamen.com/toner-lite/#12/37.7706/-122.3782}
+#'   \item terrain ---\url{http://maps.stamen.com/terrain/#12/37.7706/-122.3782}
+#'   \item terrain-labels ---\url{http://maps.stamen.com/terrain-labels/#12/37.7706/-122.3782}
+#'   \item terrain-lines ---\url{http://maps.stamen.com/terrain-lines/#12/37.7706/-122.3782}
+#'   \item terrain-background ---\url{http://maps.stamen.com/terrain-background/#12/37.7706/-122.3782}
+#' }
+#'
+#' \strong{Carto} (\url{https://carto.com/location-data-services/basemaps/})
+#'
+#' \itemize{
+#'   \item carto_light_all
+#'   \item carto_dark_all
+#'   \item carto_light_nolabels
+#'   \item carto_light_only_labels
+#'   \item carto_dark_nolabels
+#'   \item carto_dark_only_labels
+#' }
+#'
+#' \strong{Wikipedia}
+#'
+#' \itemize{
+#'   \item wikepedia
+#' }
+#' @examples
+#' figure(width = 800) %>%
+#'   add_tiles("stamen_toner")
+#'
+#' figure(width = 800) %>%
+#'   add_tiles("carto_light_all")
+#'
+#' figure(width = 800) %>%
+#'   add_tiles("wikipedia")
 #' @export
 add_tiles <- function(
   fig,
@@ -132,7 +131,7 @@ watercolor_attrib <- paste0(
 
 carto_attrib <- paste0(
   "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a> ",
-  "contributors,&copy; <a href=\"https://cartodb.com/attributions\">CartoDB</a>"
+  "contributors,&copy; <a href=\"https://cartodb.com/attributions\">Carto</a>"
 )
 
 wiki_attrib <- paste0(
@@ -186,27 +185,27 @@ tile_sources <- list(
     url = "http://tile.stamen.com/watercolor/{z}/{x}/{y}.png",
     attribution = watercolor_attrib
   ),
-  "cartodb_light_all" = tile_spec(
+  "carto_light_all" = tile_spec(
     url = "http://tiles.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
     attribution = carto_attrib
   ),
-  "cartodb_dark_all" = tile_spec(
+  "carto_dark_all" = tile_spec(
     url = "http://tiles.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
     attribution = carto_attrib
   ),
-  "cartodb_light_nolabels" = tile_spec(
+  "carto_light_nolabels" = tile_spec(
     url = "http://tiles.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
     attribution = carto_attrib
   ),
-  "cartodb_light_only_labels" = tile_spec(
+  "carto_light_only_labels" = tile_spec(
     url = "http://tiles.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png",
     attribution = carto_attrib
   ),
-  "cartodb_dark_nolabels" = tile_spec(
+  "carto_dark_nolabels" = tile_spec(
     url = "http://tiles.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png",
     attribution = carto_attrib
   ),
-  "cartodb_dark_only_labels" = tile_spec(
+  "carto_dark_only_labels" = tile_spec(
     url = "http://tiles.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png",
     attribution = carto_attrib
   ),

@@ -34,10 +34,55 @@ add_tiles(fig, tile_spec, hi_res = TRUE, y_origin_offset = NULL,
 
 \item{render_parents}{Flag enable/disable drawing of parent tiles while waiting for new tiles to arrive. Default value is TRUE.}
 
-\item{visible}{Is the renderer visible.}
+\item{visible}{Is the renderer visible?}
 
 \item{level}{Specifies the level in which to paint this renderer. One of 'image', 'underlay', 'glyph', 'annotation', 'overlay'.}
 }
 \description{
 Add map tiles to a Bokeh figure.
+}
+\details{
+Here is a list of pre-defined tile specifications from different sources:
+
+\strong{Stamen} (\url{http://maps.stamen.com/})
+
+\itemize{
+  \item toner ---\url{http://maps.stamen.com/toner/#12/37.7706/-122.3782}
+  \item toner-hybrid ---\url{http://maps.stamen.com/toner-hybrid/#12/37.7706/-122.3782}
+  \item toner-labels ---\url{http://maps.stamen.com/toner-labels/#12/37.7706/-122.3782}
+  \item toner-lines ---\url{http://maps.stamen.com/toner-lines/#12/37.7706/-122.3782}
+  \item toner-background ---\url{http://maps.stamen.com/toner-background/#12/37.7706/-122.3782}
+  \item toner-lite ---\url{http://maps.stamen.com/toner-lite/#12/37.7706/-122.3782}
+  \item terrain ---\url{http://maps.stamen.com/terrain/#12/37.7706/-122.3782}
+  \item terrain-labels ---\url{http://maps.stamen.com/terrain-labels/#12/37.7706/-122.3782}
+  \item terrain-lines ---\url{http://maps.stamen.com/terrain-lines/#12/37.7706/-122.3782}
+  \item terrain-background ---\url{http://maps.stamen.com/terrain-background/#12/37.7706/-122.3782}
+}
+
+\strong{Carto} (\url{https://carto.com/location-data-services/basemaps/})
+
+\itemize{
+  \item carto_light_all
+  \item carto_dark_all
+  \item carto_light_nolabels
+  \item carto_light_only_labels
+  \item carto_dark_nolabels
+  \item carto_dark_only_labels
+}
+
+\strong{Wikipedia}
+
+\itemize{
+  \item wikepedia
+}
+}
+\examples{
+figure(width = 800) \%>\%
+  add_tiles("stamen_toner")
+
+figure(width = 800) \%>\%
+  add_tiles("carto_light_all")
+
+figure(width = 800) \%>\%
+  add_tiles("wikipedia")
 }
