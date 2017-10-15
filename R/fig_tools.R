@@ -26,6 +26,7 @@
 #' figure(tools = NULL) %>%
 #'   ly_points(1:10) %>%
 #'   tool_box_select(line_color = "red", callback = "console.log('calling back...')")
+#' @family tools
 #' @export
 tool_box_select <- function(fig,
   dimensions = NULL,
@@ -75,6 +76,7 @@ tool_box_select <- function(fig,
 #' figure(tools = NULL) %>%
 #'   ly_points(1:10) %>%
 #'   tool_lasso_select(line_color = "red", callback = "console.log('calling back...')")
+#' @family tools
 #' @export
 tool_lasso_select <- function(fig,
   select_every_mousemove = TRUE,
@@ -118,6 +120,7 @@ tool_lasso_select <- function(fig,
 #' figure(tools = NULL) %>%
 #'   ly_points(1:10) %>%
 #'   tool_poly_select(line_color = "red")
+#' @family tools
 #' @export
 tool_poly_select <- function(fig,
   line_color = NULL,
@@ -150,6 +153,7 @@ tool_poly_select <- function(fig,
 #' figure(tools = NULL) %>%
 #'   ly_points(1:10) %>%
 #'   tool_crosshair(line_width = 12, line_alpha = 0.25)
+#' @family tools
 #' @export
 tool_crosshair <- function(fig,
   dimensions = NULL,
@@ -182,6 +186,7 @@ tool_crosshair <- function(fig,
 #' figure(tools = "reset") %>%
 #'   ly_points(1:10) %>%
 #'   tool_box_zoom(line_color = "red", match_aspect = TRUE)
+#' @family tools
 #' @export
 tool_box_zoom <- function(fig,
   dimensions = NULL,
@@ -211,6 +216,7 @@ tool_box_zoom <- function(fig,
 #' figure(tools = NULL) %>%
 #'   ly_points(1:10) %>%
 #'   tool_wheel_zoom()
+#' @family tools
 #' @export
 tool_wheel_zoom <- function(fig, dimensions = NULL, remove = FALSE) {
   args <- get_specified_args(nms = "dimensions")
@@ -229,6 +235,7 @@ tool_wheel_zoom <- function(fig, dimensions = NULL, remove = FALSE) {
 #'   ly_points(1:10) %>%
 #'   tool_zoom_in(factor = 0.5) %>%
 #'   tool_zoom_out(factor = 0.5)
+#' @family tools
 #' @export
 tool_zoom_in <- function(fig, dimensions = NULL, factor = NULL, remove = FALSE) {
   args <- get_specified_args(nms = c("dimensions", "factor"))
@@ -247,6 +254,7 @@ tool_zoom_in <- function(fig, dimensions = NULL, factor = NULL, remove = FALSE) 
 #'   ly_points(1:10) %>%
 #'   tool_zoom_in(factor = 0.5) %>%
 #'   tool_zoom_out(factor = 0.5)
+#' @family tools
 #' @export
 tool_zoom_out <- function(fig, dimensions = NULL, factor = NULL, remove = FALSE) {
   args <- get_specified_args(nms = c("dimensions", "factor"))
@@ -269,6 +277,7 @@ tool_zoom_out <- function(fig, dimensions = NULL, factor = NULL, remove = FALSE)
 #' figure(tools = NULL) %>%
 #'   ly_points(1:10) %>%
 #'   tool_pan(dimensions = "width")
+#' @family tools
 #' @export
 tool_pan <- function(fig, dimensions = NULL, remove = FALSE) {
   args <- get_specified_args(nms = "dimensions")
@@ -285,6 +294,7 @@ tool_pan <- function(fig, dimensions = NULL, remove = FALSE) {
 #' figure(tools = NULL) %>%
 #'   ly_points(1:10) %>%
 #'   tool_wheel_pan(dimension = "width")
+#' @family tools
 #' @export
 tool_wheel_pan <- function(fig, dimension = NULL, remove = FALSE) {
   args <- get_specified_args(nms = "dimension")
@@ -301,6 +311,7 @@ tool_wheel_pan <- function(fig, dimension = NULL, remove = FALSE) {
 #' figure() %>%
 #'   ly_points(1:10) %>%
 #'   tool_reset()
+#' @family tools
 #' @export
 tool_reset <- function(fig, reset_size = TRUE, remove = FALSE) {
   args <- get_specified_args(nms = "reset_size")
@@ -315,6 +326,7 @@ tool_reset <- function(fig, reset_size = TRUE, remove = FALSE) {
 #'   ly_points(1:10) %>%
 #'   tool_undo() %>%
 #'   tool_redo()
+#' @family tools
 #' @export
 tool_undo <- function(fig, remove = FALSE) {
   update_tool(fig, "undo", NULL, remove = remove)
@@ -328,6 +340,7 @@ tool_undo <- function(fig, remove = FALSE) {
 #'   ly_points(1:10) %>%
 #'   tool_undo() %>%
 #'   tool_redo()
+#' @family tools
 #' @export
 tool_redo <- function(fig, remove = FALSE) {
   update_tool(fig, "redo", NULL, remove = remove)
@@ -340,6 +353,7 @@ tool_redo <- function(fig, remove = FALSE) {
 #' figure(tools = NULL) %>%
 #'   ly_points(1:10) %>%
 #'   tool_save()
+#' @family tools
 #' @export
 tool_save <- function(fig, remove = FALSE) {
   update_tool(fig, "save", NULL, remove = remove)
@@ -359,6 +373,7 @@ tool_save <- function(fig, remove = FALSE) {
 #' figure(tools = "help") %>%
 #'   ly_points(1:10, 1:10) %>%
 #'   tool_help(remove = TRUE)
+#' @family tools
 #' @export
 tool_help <- function(fig, redirect = NULL, help_tooltip = NULL, remove = FALSE) {
   args <- get_specified_args(nnms = "fig")

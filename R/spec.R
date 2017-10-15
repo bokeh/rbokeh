@@ -1,6 +1,79 @@
+#' Provide additional specification information about a Bokeh plot attribute.
+#' @param x Data / variable / expression to add specification information to.
+#' @param domain The domain of \code{x}. If \code{x} is categorical, this is the unique values or levels of the factor. If \code{x} is numeric, this is the desired range of the data to map from. If not supplied, this is inferred directly from \code{x}.
+#' @param range The range of the mapping to be made from \code{x} to the associated plot attribute. For example, if \code{x} is being mapped to a color attribute and \code{x} is categorical, then \code{range} can be specified as a vector of colors to map the unique values of \code{x} to. See examples below.
+#' @param transform An optional string specifying a JavaScript transform to be applied to the data in the browser, the result of which will be the attribute value(s) used in rendering. See examples below.
+#' @param units The units according which to treat the attribute. One of 'screen' or 'data'. If 'screen', the value of \code{x} will specify the attribute in terms of pixels on the screen. If 'data', the value of \code{x} will specify the attribute in terms of the scale of the data on the plot. This is only valid in the case of a numeric \code{x} applying to a plot attribute such as \code{size}, and is not applicable to all glyphs. It will be ignored if not applicable.
+# @param name
+#' @param exponent When \code{x} is being mapped to a \code{size} attribute, the exponent to use in the transformation.
+# @param log
+#' @param unknown The color to use for values of \code{x} that cannot be mapped to the specified range.
 #' @export
-spec <- function(x, domain = NULL, range = NULL, transform = NULL, units = "screen", name = NULL,
-  exponent = 0.5, log = FALSE, unknown = "lightgray") {
+#' @examples
+#' # no custom spec
+#' figure() %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length,
+#'     color = spec(Species, range = c("red", "green", "blue")),
+#'   data = iris)
+#'
+#' # specifying a custom mapping for color
+#' figure() %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length,
+#'     color = spec(Species, range = c("red", "green", "blue")),
+#'   data = iris)
+#'
+#' # explicitly specifying which values correspond to which color
+#' figure() %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length,
+#'     color = spec(Species, domain = c("virginica", "versicolor", "setosa"),
+#'       range = c("red", "blue", "green")),
+#'   data = iris)
+#'
+#' # unmapped values are plotted in gray (with default theme)
+#' iris$Species2 <- as.character(iris$Species)
+#' iris$Species2[1:20] <- "unknown"
+#' figure() %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length,
+#'     color = spec(Species2, domain = c("virginica", "versicolor", "setosa"),
+#'       range = c("red", "blue", "green")),
+#'   data = iris)
+#'
+#' # specifying "screen" vs. "data" units
+#' figure() %>%
+#'   ly_oval(Sepal.Length, Sepal.Width,
+#'     width = spec(15, units = "screen"),
+#'     height = spec(30, units = "screen"),
+#'     angle = pi / 4,
+#'     data = iris, color = Species)
+#'
+#' # example using custom JS transforms for every specified plot attribute
+#' # random size, line width, and color
+#' # note that JS transforms are automatically vectorized if provided as a string
+#' figure() %>%
+#'   ly_points(rnorm(100), rnorm(100),
+#'     size = spec(1:100, transform = "return Math.random() * 50 + 10;"),
+#'     line_width = spec(1:100, transform = "return Math.random() * 10"),
+#'     color = spec(1:100, transform = "
+#'       var rnd = function() { return Math.floor(Math.random() * 255); }
+#'       return '#' + (rnd()).toString(16) + (rnd()).toString(16) + (rnd()).toString(16);
+#'     "))
+#'
+#' # using spec to specify size of points
+#' # requires google API key
+#' \dontrun{
+#' gmap(lat = 40.44, lng = -113.785, zoom = 4,
+#'   width = 1000, height = 700,
+#'   map_style = gmap_style("blue_water"), map_type = "roadmap") %>%
+#'   ly_points(long, lat, data = us.cities, color = factor(capital),
+#'     size = spec(pop, range = c(2, 50)), hover = us.cities)
+#' }
+spec <- function(x,
+  domain = NULL, range = NULL,
+  transform = NULL, units = "screen",
+  # name = NULL,
+  exponent = 0.5,
+  # log = FALSE,
+  unknown = "lightgray") {
 
   # TODO: validate other arguments...
 
@@ -24,14 +97,14 @@ spec <- function(x, domain = NULL, range = NULL, transform = NULL, units = "scre
   if (!missing(units))
     spc$units <- units
 
-  if (!missing(name))
-    spc$name <- name
+  # if (!missing(name))
+  #   spc$name <- name
 
   if (!missing(exponent))
     spc$exponent <- exponent
 
-  if (!missing(log))
-    spc$log <- log
+  # if (!missing(log))
+  #   spc$log <- log
 
   if (!missing(unknown))
     spc$unknown <- unknown

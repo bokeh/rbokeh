@@ -30,8 +30,6 @@ y_axis(fig, label = NULL, position = "left", log = FALSE, draw = TRUE,
 \item{axis}{An axis specificition (see "See Also" below).}
 
 \item{grid}{A grid specificition (see "See Also" below).}
-
-\item{x, y}{numeric vectors.}
 }
 \description{
 Customize x or y axis of a Bokeh figure.

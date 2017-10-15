@@ -9,7 +9,6 @@
 #' @param axis  An axis specificition (see "See Also" below).
 #' @param grid  A grid specificition (see "See Also" below).
 #' @seealso \code{\link{ticker_num}}, \code{\link{ticker_fixed}}, \code{\link{ticker_interval}}, \code{\link{ticker_log}}, \code{\link{ticker_date}}, \code{\link{ticker_cat}}, \code{\link{tickformatter_num}}, \code{\link{tickformatter_func}}, \code{\link{tickformatter_numeral}}, \code{\link{tickformatter_printf}}, \code{\link{tickformatter_log}}, \code{\link{tickformatter_date}}, \code{\link{tickformatter_cat}}, \code{\link{axis_spec}}, \code{\link{grid_spec}},
-#' @param x,y numeric vectors.
 #' @example man-roxygen/ex-axis.R
 #' @name axis
 NULL

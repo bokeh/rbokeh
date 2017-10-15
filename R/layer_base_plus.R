@@ -95,154 +95,154 @@ ly_contour <- function(
   )
 }
 
-#' Add an "abline" layer to a Bokeh figure
-#'
-#' Draws one or more straight lines.
-#' @param fig Figure to modify.
-#' @param a,b the intercept and slope of the line(s) to draw
-#' @param v the x value(s) for vertical lines
-#' @param h the y value(s) for horizontal lines
-#' @param coef a vector of length two giving the intercept and slope
-# template par-lineprops
-# template par-legend
-# template par-lnamegroup
-# template dots-line
-# @example man-roxygen/ex-lines.R
-#' @examples
-#' # abline with mixed axes for h and v
-#' figure() %>%
-#'   ly_points(1:26, letters) %>%
-#'   ly_abline(h = "j") %>%
-#'   ly_abline(v = 10)
-#'
-#' # multiple hv lines
-#' figure() %>%
-#'   ly_points(1:10) %>%
-#'   ly_abline(v = 1:10) %>%
-#'   ly_abline(h = 1:10)
-#'
-#' # multiple ab lines
-#' figure() %>%
-#'   ly_points(0:10) %>%
-#'   ly_abline(0, seq(0, 1, by = 0.1))
-#' @family layer functions
-#' @export
-ly_abline <- function(
-  fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
-  color = "black", alpha = NULL, width = 1, type = 1,
-  hov_color = NULL, hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL,
-  sel_color = NULL, sel_alpha = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL,
-  ...) {
+# #' Add an "abline" layer to a Bokeh figure
+# #'
+# #' Draws one or more straight lines.
+# #' @param fig Figure to modify.
+# #' @param a,b the intercept and slope of the line(s) to draw
+# #' @param v the x value(s) for vertical lines
+# #' @param h the y value(s) for horizontal lines
+# #' @param coef a vector of length two giving the intercept and slope
+# # template par-lineprops
+# # template par-legend
+# # template par-lnamegroup
+# # template dots-line
+# # @example man-roxygen/ex-lines.R
+# #' @examples
+# #' # abline with mixed axes for h and v
+# #' figure() %>%
+# #'   ly_points(1:26, letters) %>%
+# #'   ly_abline(h = "j") %>%
+# #'   ly_abline(v = 10)
+# #'
+# #' # multiple hv lines
+# #' figure() %>%
+# #'   ly_points(1:10) %>%
+# #'   ly_abline(v = 1:10) %>%
+# #'   ly_abline(h = 1:10)
+# #'
+# #' # multiple ab lines
+# #' figure() %>%
+# #'   ly_points(0:10) %>%
+# #'   ly_abline(0, seq(0, 1, by = 0.1))
+# #' @family layer functions
+# #' @export
+# ly_abline <- function(
+#   fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
+#   color = "black", alpha = NULL, width = 1, type = 1,
+#   hov_color = NULL, hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL,
+#   sel_color = NULL, sel_alpha = NULL,
+#   legend = NULL, lname = NULL, lgroup = NULL,
+#   ...) {
 
-  # x_axis_type <- "numeric"
-  # y_axis_type <- "numeric"
-  # if (!is.null(h) || !is.null(v)) {
-  #   x_axis_type <- fig$x$spec$x_axis_type
-  #   y_axis_type <- fig$x$spec$y_axis_type
-  # }
+#   # x_axis_type <- "numeric"
+#   # y_axis_type <- "numeric"
+#   # if (!is.null(h) || !is.null(v)) {
+#   #   x_axis_type <- fig$x$spec$x_axis_type
+#   #   y_axis_type <- fig$x$spec$y_axis_type
+#   # }
 
-  # manage data
-  if (!is.null(coef) || inherits(a, "lm")) {
-    if (is.null(coef))
-      coef <- a
-    if (inherits(coef, "lm"))
-      coef <- coef(coef)
-    coef <- as.numeric(coef)
-    a <- coef[1]
-    b <- coef[2]
-  }
+#   # manage data
+#   if (!is.null(coef) || inherits(a, "lm")) {
+#     if (is.null(coef))
+#       coef <- a
+#     if (inherits(coef, "lm"))
+#       coef <- coef(coef)
+#     coef <- as.numeric(coef)
+#     a <- coef[1]
+#     b <- coef[2]
+#   }
 
-  if (!is.null(a) && !is.null(b)) {
-    nn <- max(c(length(a), length(b)))
-    if (length(a) < nn)
-      a <- rep(a, nn)[1:nn]
-    if (length(b) < nn)
-      b <- rep(b, nn)[1:nn]
-    x0 <- rep(0, nn)
-    y0 <- a
-    x1 <- rep(1, nn)
-    y1 <- b * x1 + a
-  } else if (!is.null(h)) {
-    if (inherits(h, c("Date", "POSIXt"))) {
-      # y_axis_type <- "datetime"
-      h <- to_epoch(h)
-    }
-    nn <- length(h)
-    x0 <- rep(0, nn)
-    y0 <- h
-    x1 <- rep(1, nn)
-    y1 <- h
-  } else if (!is.null(v)) {
-    if (inherits(v, c("Date", "POSIXt"))) {
-      # x_axis_type <- "datetime"
-      v <- to_epoch(v)
-    }
-    nn <- length(v)
-    x0 <- v
-    y0 <- rep(0, nn)
-    x1 <- v
-    y1 <- rep(1, nn)
-  }
+#   if (!is.null(a) && !is.null(b)) {
+#     nn <- max(c(length(a), length(b)))
+#     if (length(a) < nn)
+#       a <- rep(a, nn)[1:nn]
+#     if (length(b) < nn)
+#       b <- rep(b, nn)[1:nn]
+#     x0 <- rep(0, nn)
+#     y0 <- a
+#     x1 <- rep(1, nn)
+#     y1 <- b * x1 + a
+#   } else if (!is.null(h)) {
+#     if (inherits(h, c("Date", "POSIXt"))) {
+#       # y_axis_type <- "datetime"
+#       h <- to_epoch(h)
+#     }
+#     nn <- length(h)
+#     x0 <- rep(0, nn)
+#     y0 <- h
+#     x1 <- rep(1, nn)
+#     y1 <- h
+#   } else if (!is.null(v)) {
+#     if (inherits(v, c("Date", "POSIXt"))) {
+#       # x_axis_type <- "datetime"
+#       v <- to_epoch(v)
+#     }
+#     nn <- length(v)
+#     x0 <- v
+#     y0 <- rep(0, nn)
+#     x1 <- v
+#     y1 <- rep(1, nn)
+#   }
 
-  defer_fn <- function(data, xlim, ylim) {
-    if (length(data$x0) == 1) {
-      if (data$x0 == "x0")
-        return(data)
-    } else if (length(data$x0) == 0) {
-      return(data)
-    }
-    if (is.list(data$x0))
-      data <- unlist(data, recursive = FALSE)
-    if (all(data$x0 == data$x1)) {
-      ## vertical lines
-      lo <- head(ylim, 1)
-      up <- tail(ylim, 1)
-      if (is.character(lo)) {
-        lo <- paste0(lo, ":0")
-        up <- paste0(up, ":1")
-      }
-      data$y0 <- rep(lo, length(data$y0))
-      data$y1 <- rep(up, length(data$y1))
-    } else if (all(data$y0 == data$y1)) {
-      ## horizontal line
-      lo <- head(xlim, 1)
-      up <- tail(xlim, 1)
-      if (is.character(lo)) {
-        lo <- paste0(lo, ":0")
-        up <- paste0(up, ":1")
-      }
-      data$x0 <- rep(lo, length(data$x0))
-      data$x1 <- rep(up, length(data$x1))
-    } else {
-      ## line
-      b <- (data$y1 - data$y0) / (data$x1 - data$x0)
-      a <- data$y1 - b * data$x1
-      nn <- length(a)
-      data$x0 <- rep(head(xlim, 1), nn)
-      data$x1 <- rep(tail(xlim, 1), nn)
-      data$y0 <- data$x0 * b + a
-      data$y1 <- data$x1 * b + a
-    }
-    # now below wrap each result with list so json encoding is happy
-    if (length(data$x0) == 1) {
-      data$x0 <- list(data$x0)
-      data$x1 <- list(data$x1)
-      data$y0 <- list(data$y0)
-      data$y1 <- list(data$y1)
-    }
-    data
-  }
+#   defer_fn <- function(data, xlim, ylim) {
+#     if (length(data$x0) == 1) {
+#       if (data$x0 == "x0")
+#         return(data)
+#     } else if (length(data$x0) == 0) {
+#       return(data)
+#     }
+#     if (is.list(data$x0))
+#       data <- unlist(data, recursive = FALSE)
+#     if (all(data$x0 == data$x1)) {
+#       ## vertical lines
+#       lo <- head(ylim, 1)
+#       up <- tail(ylim, 1)
+#       if (is.character(lo)) {
+#         lo <- paste0(lo, ":0")
+#         up <- paste0(up, ":1")
+#       }
+#       data$y0 <- rep(lo, length(data$y0))
+#       data$y1 <- rep(up, length(data$y1))
+#     } else if (all(data$y0 == data$y1)) {
+#       ## horizontal line
+#       lo <- head(xlim, 1)
+#       up <- tail(xlim, 1)
+#       if (is.character(lo)) {
+#         lo <- paste0(lo, ":0")
+#         up <- paste0(up, ":1")
+#       }
+#       data$x0 <- rep(lo, length(data$x0))
+#       data$x1 <- rep(up, length(data$x1))
+#     } else {
+#       ## line
+#       b <- (data$y1 - data$y0) / (data$x1 - data$x0)
+#       a <- data$y1 - b * data$x1
+#       nn <- length(a)
+#       data$x0 <- rep(head(xlim, 1), nn)
+#       data$x1 <- rep(tail(xlim, 1), nn)
+#       data$y0 <- data$x0 * b + a
+#       data$y1 <- data$x1 * b + a
+#     }
+#     # now below wrap each result with list so json encoding is happy
+#     if (length(data$x0) == 1) {
+#       data$x0 <- list(data$x0)
+#       data$x1 <- list(data$x1)
+#       data$y0 <- list(data$y0)
+#       data$y1 <- list(data$y1)
+#     }
+#     data
+#   }
 
-  ly_segments(fig,
-    x0 = x0, y0 = y0, x1 = x1, y1 = y1,
-    type = type, width = width,
-    color = color, alpha = alpha,
-    hov_color = hov_color, hov_alpha = hov_alpha,
-    ns_color = ns_color, ns_alpha = ns_alpha,
-    sel_color = sel_color, sel_alpha = sel_alpha,
-    # hover = hover, url = url, TODO?
-    legend = legend,
-    lname = lname, lgroup = lgroup
-  )
-}
+#   ly_segments(fig,
+#     x0 = x0, y0 = y0, x1 = x1, y1 = y1,
+#     type = type, width = width,
+#     color = color, alpha = alpha,
+#     hov_color = hov_color, hov_alpha = hov_alpha,
+#     ns_color = ns_color, ns_alpha = ns_alpha,
+#     sel_color = sel_color, sel_alpha = sel_alpha,
+#     # hover = hover, url = url, TODO?
+#     legend = legend,
+#     lname = lname, lgroup = lgroup
+#   )
+# }

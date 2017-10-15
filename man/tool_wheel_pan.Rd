@@ -21,3 +21,13 @@ figure(tools = NULL) \%>\%
   ly_points(1:10) \%>\%
   tool_wheel_pan(dimension = "width")
 }
+\seealso{
+Other tools: \code{\link{tool_box_select}},
+  \code{\link{tool_box_zoom}},
+  \code{\link{tool_crosshair}}, \code{\link{tool_help}},
+  \code{\link{tool_lasso_select}}, \code{\link{tool_pan}},
+  \code{\link{tool_poly_select}}, \code{\link{tool_redo}},
+  \code{\link{tool_reset}}, \code{\link{tool_save}},
+  \code{\link{tool_undo}}, \code{\link{tool_wheel_zoom}},
+  \code{\link{tool_zoom_in}}, \code{\link{tool_zoom_out}}
+}

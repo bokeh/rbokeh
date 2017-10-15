@@ -33,18 +33,17 @@ Draws a bar chart
 This function expects one of either x or y to be categorical and the other to be numeric or NULL.  The numeric variable is summed for each categorical variable and bars are plotted.  If no numeric variable is supplied, the unique values of the categorical variable will be tabulated.  Within each categorical variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each categorical variable level, stacking the bars.  The "dodge" choice will plot the bars for each level of the categorical variable side by side.
 }
 \seealso{
-Other layer functions: \code{\link{ly_abline}},
-  \code{\link{ly_annular_wedge}}, \code{\link{ly_annulus}},
-  \code{\link{ly_arc}}, \code{\link{ly_bezier}},
-  \code{\link{ly_boxplot}}, \code{\link{ly_contour}},
-  \code{\link{ly_crect}}, \code{\link{ly_curve}},
-  \code{\link{ly_density}}, \code{\link{ly_hist}},
-  \code{\link{ly_image_url}}, \code{\link{ly_image}},
-  \code{\link{ly_lines}}, \code{\link{ly_multi_line}},
-  \code{\link{ly_oval}}, \code{\link{ly_patch}},
-  \code{\link{ly_points}}, \code{\link{ly_polygons}},
-  \code{\link{ly_quadratic}}, \code{\link{ly_quantile}},
-  \code{\link{ly_ray}}, \code{\link{ly_rect}},
-  \code{\link{ly_segments}}, \code{\link{ly_text}},
-  \code{\link{ly_wedge}}
+Other layer functions: \code{\link{ly_annular_wedge}},
+  \code{\link{ly_annulus}}, \code{\link{ly_arc}},
+  \code{\link{ly_bezier}}, \code{\link{ly_boxplot}},
+  \code{\link{ly_contour}}, \code{\link{ly_crect}},
+  \code{\link{ly_curve}}, \code{\link{ly_density}},
+  \code{\link{ly_hist}}, \code{\link{ly_image_url}},
+  \code{\link{ly_image}}, \code{\link{ly_lines}},
+  \code{\link{ly_multi_line}}, \code{\link{ly_oval}},
+  \code{\link{ly_patch}}, \code{\link{ly_points}},
+  \code{\link{ly_polygons}}, \code{\link{ly_quadratic}},
+  \code{\link{ly_quantile}}, \code{\link{ly_ray}},
+  \code{\link{ly_rect}}, \code{\link{ly_segments}},
+  \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }

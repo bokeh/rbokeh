@@ -2,7 +2,7 @@
 % Please edit documentation in R/layer_annotation.R
 \name{ann_box}
 \alias{ann_box}
-\title{Add a "box" annotation to a Bokeh figure}
+\title{Add a "box" annotation (rectangular shaded region) to a Bokeh figure}
 \usage{
 ann_box(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,
   left_units = NULL, bottom_units = NULL, right_units = NULL,
@@ -11,7 +11,48 @@ ann_box(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,
 }
 \arguments{
 \item{fig}{Figure to modify.}
+
+\item{left}{The x-coordinates of the left edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.}
+
+\item{bottom}{The y-coordinates of the bottom edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.}
+
+\item{right}{The x-coordinates of the right edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.}
+
+\item{top}{The y-coordinates of the top edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.}
+
+\item{left_units}{The unit type for the left attribute. Interpreted as "data space" units by default.}
+
+\item{bottom_units}{The unit type for the bottom attribute. Interpreted as "data space" units by default.}
+
+\item{right_units}{The unit type for the right attribute. Interpreted as "data space" units by default.}
+
+\item{top_units}{The unit type for the top attribute. Interpreted as "data space" units by default.}
 }
 \description{
-Add a "box" annotation to a Bokeh figure
+Add a "box" annotation (rectangular shaded region) to a Bokeh figure
+}
+\examples{
+figure(data = iris) \%>\%
+  ly_points(x = Sepal.Width, y = Sepal.Length, color = Species) \%>\%
+  ann_box(bottom = 5, color = "black")
+
+# with screen units
+figure(data = iris) \%>\%
+  ly_points(x = Sepal.Width, y = Sepal.Length, color = Species) \%>\%
+  ann_box(bottom = 540, bottom_units = "screen", color = "black")
+
+# text annotation with box annotation and screen units to illustrate
+# an inside-plot heading that doesn't move with pan/zoom
+figure(data = iris) \%>\%
+  ly_points(x = Sepal.Width, y = Sepal.Length, color = Species) \%>\%
+  ann_box(bottom = 565, bottom_units = "screen", color = "black") \%>\%
+  ann_labels(200, 570, "Header", text_color = "white",
+    x_units = "screen", y_units = "screen")
+}
+\seealso{
+Other annotation functions: \code{\link{ann_arrow}},
+  \code{\link{ann_band}}, \code{\link{ann_labels}},
+  \code{\link{ann_poly}}, \code{\link{ann_span}},
+  \code{\link{ann_title}}, \code{\link{ann_whisker}},
+  \code{\link{arrow}}
 }

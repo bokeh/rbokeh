@@ -6,7 +6,7 @@
 \alias{pal_bk_glyph}
 \alias{pal_gradient}
 \alias{pal_bk_line_dash}
-\title{Palettes for themes}
+\title{Palettes for themes.}
 \usage{
 pal_color(colors)
 
@@ -20,20 +20,20 @@ pal_gradient(cols = c("#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B"),
 pal_bk_line_dash()
 }
 \arguments{
-\item{colors}{a vector of colors to be used in the color palette}
+\item{colors}{A vector of colors to be used in the color palette.}
 
-\item{pal}{palette name}
+\item{pal}{Palette name.}
 
-\item{cols}{a vector of colors to ramp across for a continuous palette}
+\item{cols}{A vector of colors to ramp across for a continuous palette.}
 
-\item{space}{passed on to \code{\link{colorRampPalette}[grDevices]}}
+\item{space}{Passed on to \code{\link{colorRampPalette}[grDevices]}.}
 
-\item{min}{minimum value}
+\item{min}{Minimum value.}
 
-\item{max}{maximum value}
+\item{max}{Maximum value.}
 }
 \description{
-Palettes for themes
+Palettes for themes.
 
-Palettes for themes
+Palettes for themes.
 }

@@ -467,5 +467,3 @@ theme_plot <- function(fig,
 
   fig
 }
-
-

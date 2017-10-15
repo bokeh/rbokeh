@@ -1,21 +1,3 @@
-ctg <- function(a, b) {
-  lvls <- NULL
-  if (is.factor(a)) {
-    lvls <- levels(a)
-    # don't want to store the levels for every item
-    a <- as.character(a)
-  }
-  if (!is.character(a))
-    a <- as.character(a)
-  if (!is.numeric(b))
-    b <- as.numeric(b)
-  res <- mapply(list, a, b,
-    SIMPLIFY = FALSE, USE.NAMES = FALSE)
-  class(res) <- c("list", "bk_cat")
-  attr(res, "bk_lvls") <- lvls
-  res
-}
-
 #' Add a "hist" layer to a Bokeh figure
 #'
 #' Draws a histogram
@@ -261,8 +243,8 @@ ly_boxplot <- function(
   ...
 ) {
 
-  x <- rlang::eval_tidy(x, data)
-  y <- rlang::eval_tidy(y, data)
+  x <- rlang::eval_tidy(enquo(x), data)
+  y <- rlang::eval_tidy(enquo(y), data)
 
   # if (missing(y)) {
   #   args$data$x <- args$data$y
@@ -322,11 +304,11 @@ ly_boxplot <- function(
     bp <- grDevices::boxplot.stats(x = x[idx[[ii]]], coef = coef)
 
     gp_vec <- as.character(group[idx[[ii]][1]])
-    gp <- ctg(gp_vec, 0) ## doesn't work right now
+    gp <- cat_offset(gp_vec, 0) ## doesn't work right now
     ## for lines and whiskers
-    gpl <- ctg(gp_vec, -0.1)
+    gpl <- cat_offset(gp_vec, -0.1)
     # gpl <- paste(gp_vec, ":0.4", sep = "")
-    gpr <- ctg(gp_vec, 0.1)
+    gpr <- cat_offset(gp_vec, 0.1)
     # gpr <- paste(gp_vec, ":0.6", sep = "")
     hgt1 <- bp$stats[3] - bp$stats[2]
     md1 <- hgt1 / 2 + bp$stats[2]
@@ -515,17 +497,17 @@ ly_bar <- function(
   ##---------------------------------------------------------
 
   if (position %in% c("stack", "fill")) {
-    res$xleft <- I(ctg(res$x, -width / 2))
+    res$xleft <- I(cat_offset(res$x, -width / 2))
     # paste0(res$x, ":", 1 - width)
-    res$xright <- I(ctg(res$x, width / 2))
+    res$xright <- I(cat_offset(res$x, width / 2))
     # paste0(res$x, ":", width)
   } else {
     res <- do.call(rbind, by(res, res$x, function(a) {
       nn <- nrow(a)
       pts <- seq(-width / 2, width / 2, length = nn + 1)
-      a$xleft <- I(ctg(a$x, utils::head(pts, nn)))
+      a$xleft <- I(cat_offset(a$x, utils::head(pts, nn)))
       # paste0(a$x, ":", utils::head(pts, nn))
-      a$xright <- I(ctg(a$x, utils::tail(pts, nn)))
+      a$xright <- I(cat_offset(a$x, utils::tail(pts, nn)))
       # paste0(a$x, ":", utils::tail(pts, nn))
       a
     }))
@@ -604,8 +586,8 @@ ly_hexbin <- function(
 
   minarea <- 0.04; maxarea <- 0.8; mincnt <- 1; maxcnt <- NULL
 
-  x <- rlang::eval_tidy(x, data)
-  y <- rlang::eval_tidy(y, data)
+  x <- rlang::eval_tidy(enquo(x), data)
+  y <- rlang::eval_tidy(enquo(y), data)
 
   if (!inherits(x, "hexbin")) {
     # xy_names <- get_xy_names(args$data$x, args$data$y,

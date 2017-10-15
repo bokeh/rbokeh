@@ -1,107 +1,108 @@
-#' Set palettes for various plot attributes
-#'
-#' @param fig figure to update theme palettes for
-#' @param discrete_color a discrete color palette to override the theme (see details)
-#' @param discrete_alpha a discrete alpha palette to override the theme (see details)
-#' @param continuous_color a continuous color palette to override the theme (see details)
-#' @param continuous_alpha a continuous alpha palette to override the theme (see details)
-#' @param discrete_glyph a discrete glyph palette to override the theme
-#' @param discrete_fill_color a discrete fill_color palette to override the theme
-#' @param discrete_line_color a discrete line_color palette to override the theme
-#' @param discrete_text_color a discrete text_color palette to override the theme
-#' @param discrete_fill_alpha a discrete fill_alpha palette to override the theme
-#' @param discrete_line_alpha a discrete line_alpha palette to override the theme
-#' @param discrete_text_alpha a discrete text_alpha palette to override the theme
-#' @param discrete_line_dash a discrete line_dash palette to override the theme
-#' @param discrete_line_width a discrete line_width palette to override the theme
-#' @param discrete_size a discrete size palette to override the theme
-#' @param continuous_glyph a continuous glyph palette to override the theme
-#' @param continuous_fill_color a continuous fill_color palette to override the theme
-#' @param continuous_line_color a continuous line_color palette to override the theme
-#' @param continuous_text_color a continuous text_color palette to override the theme
-#' @param continuous_fill_alpha a continuous fill_alpha palette to override the theme
-#' @param continuous_line_alpha a continuous line_alpha palette to override the theme
-#' @param continuous_text_alpha a continuous text_alpha palette to override the theme
-#' @param continuous_line_dash a continuous line_dash palette to override the theme
-#' @param continuous_line_width a continuous line_width palette to override the theme
-#' @param continuous_size a continuous size palette to override the theme
-#' @details
-#' Palettes specified in this function will override the existing theme and apply the specified attributes when they are not otherwise explicitly specified in a layer function.  See the contents of \code{bk_default_theme} for an example of the theme elements this will update.  As a convenience, if you use \code{discrete_color}, the palette will apply to all the \code{discrete_***_color} attributes unless those are explicitly specified also.  The same pattern is true for \code{discrete_alpha}, \code{continuous_color}, and \code{continuous_alpha}.  For specifying discrete color palettes, the easiest thing to do is use \code{\link{pal_color}} with a vector of colors you want to use in the palette.
-# @examples
-# figure() %>%
-#   ly_points(Sepal.Length, Sepal.Width, data = iris,
-#     color = Species, glyph = Species) %>%
-#   set_palette(discrete_color = pal_color(c("red", "blue", "green")))
-#'
-#' @export
-set_palette <- function(fig,
-  discrete_color = NULL, discrete_alpha = NULL,
-  continuous_color = NULL, continuous_alpha = NULL,
-  discrete_glyph = NULL, discrete_fill_color = NULL,
-  discrete_line_color = NULL, discrete_text_color = NULL,
-  discrete_fill_alpha = NULL, discrete_line_alpha = NULL,
-  discrete_text_alpha = NULL, discrete_line_dash = NULL,
-  discrete_line_width = NULL, discrete_size = NULL,
-  continuous_glyph = NULL, continuous_fill_color = NULL,
-  continuous_line_color = NULL, continuous_text_color = NULL,
-  continuous_fill_alpha = NULL, continuous_line_alpha = NULL,
-  continuous_text_alpha = NULL, continuous_line_dash = NULL,
-  continuous_line_width = NULL, continuous_size = NULL) {
+# TODO:
+# #' Set palettes for various plot attributes
+# #'
+# #' @param fig figure to update theme palettes for
+# #' @param discrete_color a discrete color palette to override the theme (see details)
+# #' @param discrete_alpha a discrete alpha palette to override the theme (see details)
+# #' @param continuous_color a continuous color palette to override the theme (see details)
+# #' @param continuous_alpha a continuous alpha palette to override the theme (see details)
+# #' @param discrete_glyph a discrete glyph palette to override the theme
+# #' @param discrete_fill_color a discrete fill_color palette to override the theme
+# #' @param discrete_line_color a discrete line_color palette to override the theme
+# #' @param discrete_text_color a discrete text_color palette to override the theme
+# #' @param discrete_fill_alpha a discrete fill_alpha palette to override the theme
+# #' @param discrete_line_alpha a discrete line_alpha palette to override the theme
+# #' @param discrete_text_alpha a discrete text_alpha palette to override the theme
+# #' @param discrete_line_dash a discrete line_dash palette to override the theme
+# #' @param discrete_line_width a discrete line_width palette to override the theme
+# #' @param discrete_size a discrete size palette to override the theme
+# #' @param continuous_glyph a continuous glyph palette to override the theme
+# #' @param continuous_fill_color a continuous fill_color palette to override the theme
+# #' @param continuous_line_color a continuous line_color palette to override the theme
+# #' @param continuous_text_color a continuous text_color palette to override the theme
+# #' @param continuous_fill_alpha a continuous fill_alpha palette to override the theme
+# #' @param continuous_line_alpha a continuous line_alpha palette to override the theme
+# #' @param continuous_text_alpha a continuous text_alpha palette to override the theme
+# #' @param continuous_line_dash a continuous line_dash palette to override the theme
+# #' @param continuous_line_width a continuous line_width palette to override the theme
+# #' @param continuous_size a continuous size palette to override the theme
+# #' @details
+# #' Palettes specified in this function will override the existing theme and apply the specified attributes when they are not otherwise explicitly specified in a layer function.  See the contents of \code{bk_default_theme} for an example of the theme elements this will update.  As a convenience, if you use \code{discrete_color}, the palette will apply to all the \code{discrete_***_color} attributes unless those are explicitly specified also.  The same pattern is true for \code{discrete_alpha}, \code{continuous_color}, and \code{continuous_alpha}.  For specifying discrete color palettes, the easiest thing to do is use \code{\link{pal_color}} with a vector of colors you want to use in the palette.
+# # @examples
+# # figure() %>%
+# #   ly_points(Sepal.Length, Sepal.Width, data = iris,
+# #     color = Species, glyph = Species) %>%
+# #   set_palette(discrete_color = pal_color(c("red", "blue", "green")))
+# #'
+# #' @export
+# set_palette <- function(fig,
+#   discrete_color = NULL, discrete_alpha = NULL,
+#   continuous_color = NULL, continuous_alpha = NULL,
+#   discrete_glyph = NULL, discrete_fill_color = NULL,
+#   discrete_line_color = NULL, discrete_text_color = NULL,
+#   discrete_fill_alpha = NULL, discrete_line_alpha = NULL,
+#   discrete_text_alpha = NULL, discrete_line_dash = NULL,
+#   discrete_line_width = NULL, discrete_size = NULL,
+#   continuous_glyph = NULL, continuous_fill_color = NULL,
+#   continuous_line_color = NULL, continuous_text_color = NULL,
+#   continuous_fill_alpha = NULL, continuous_line_alpha = NULL,
+#   continuous_text_alpha = NULL, continuous_line_dash = NULL,
+#   continuous_line_width = NULL, continuous_size = NULL) {
 
-  specified <- setdiff(names(as.list(match.call())[-1]), "fig")
-  if (length(specified) > 0) {
-    pars <- as.list(environment())[specified]
-    # need to do some validation here...
-    build_object <- function(type, pars) {
-      res <- NULL
-      pnames <- names(pars)
-      nms <- pnames[grepl(paste0("^", type, "_"), pnames)]
-      if (length(nms) > 0) {
-        res <- pars[nms]
-        names(res) <- gsub(paste0("^", type, "_"), "", nms)
-        if (paste0(type, "_color") %in% nms) {
-          if (is.null(res$fill_color))
-            res$fill_color <- res$color
-          if (is.null(res$line_color))
-            res$line_color <- res$color
-          if (is.null(res$text_color))
-            res$text_color <- res$color
-          res$color <- NULL
-        }
-        if (paste0(type, "_alpha") %in% nms) {
-          if (is.null(res$fill_alpha))
-            res$fill_alpha <- res$alpha
-          if (is.null(res$line_alpha))
-            res$line_alpha <- res$alpha
-          if (is.null(res$text_alpha))
-            res$text_alpha <- res$alpha
-          res$alpha <- NULL
-        }
-      }
-      res
-    }
+#   specified <- setdiff(names(as.list(match.call())[-1]), "fig")
+#   if (length(specified) > 0) {
+#     pars <- as.list(environment())[specified]
+#     # need to do some validation here...
+#     build_object <- function(type, pars) {
+#       res <- NULL
+#       pnames <- names(pars)
+#       nms <- pnames[grepl(paste0("^", type, "_"), pnames)]
+#       if (length(nms) > 0) {
+#         res <- pars[nms]
+#         names(res) <- gsub(paste0("^", type, "_"), "", nms)
+#         if (paste0(type, "_color") %in% nms) {
+#           if (is.null(res$fill_color))
+#             res$fill_color <- res$color
+#           if (is.null(res$line_color))
+#             res$line_color <- res$color
+#           if (is.null(res$text_color))
+#             res$text_color <- res$color
+#           res$color <- NULL
+#         }
+#         if (paste0(type, "_alpha") %in% nms) {
+#           if (is.null(res$fill_alpha))
+#             res$fill_alpha <- res$alpha
+#           if (is.null(res$line_alpha))
+#             res$line_alpha <- res$alpha
+#           if (is.null(res$text_alpha))
+#             res$text_alpha <- res$alpha
+#           res$alpha <- NULL
+#         }
+#       }
+#       res
+#     }
 
-    res <- list()
-    res$discrete <- build_object("discrete", pars)
-    res$continuous <- build_object("continuous", pars)
-  } else {
-    res <- NULL
-  }
+#     res <- list()
+#     res$discrete <- build_object("discrete", pars)
+#     res$continuous <- build_object("continuous", pars)
+#   } else {
+#     res <- NULL
+#   }
 
-  if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
-    for (ii in seq_along(fig$x$spec$figs))
-      fig$x$spec$figs[[ii]]$x$spec$theme_update <- res
-  } else {
-    fig$x$spec$theme_update <- res
-  }
+#   if (!is.null(fig$x$modeltype) && fig$x$modeltype == "GridPlot") {
+#     for (ii in seq_along(fig$x$spec$figs))
+#       fig$x$spec$figs[[ii]]$x$spec$theme_update <- res
+#   } else {
+#     fig$x$spec$theme_update <- res
+#   }
 
-  fig
-}
+#   fig
+# }
 
 
-#' Palettes for themes
+#' Palettes for themes.
 #' @rdname palettes
-#' @param colors a vector of colors to be used in the color palette
+#' @param colors A vector of colors to be used in the color palette.
 #' @export
 pal_color <- function(colors) {
   function(n) {
@@ -112,11 +113,11 @@ pal_color <- function(colors) {
   }
 }
 
-#' Palettes for themes
+#' Palettes for themes.
 #' @rdname palettes
-#' @param pal palette name
-#' @param min minimum value
-#' @param max maximum value
+#' @param pal Palette name.
+#' @param min Minimum value.
+#' @param max Maximum value.
 #' @export
 pal_tableau <- function(pal = "Tableau10") {
   colors <- tableau_colors[[pal]]
@@ -141,8 +142,8 @@ pal_bk_glyph <- function() {
 
 #' @rdname palettes
 #' @export
-#' @param cols a vector of colors to ramp across for a continuous palette
-#' @param space passed on to \code{\link{colorRampPalette}[grDevices]}
+#' @param cols A vector of colors to ramp across for a continuous palette.
+#' @param space Passed on to \code{\link{colorRampPalette}[grDevices]}.
 #' @importFrom grDevices colorRampPalette
 pal_gradient <- function(
   cols = c("#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B"), space = "rgb") {

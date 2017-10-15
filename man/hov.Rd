@@ -2,7 +2,7 @@
 % Please edit documentation in R/spec_hov_tap.R
 \name{hov}
 \alias{hov}
-\title{Create hover specification}
+\title{Create a hover specification.}
 \usage{
 hov(data = NULL, line_policy = NULL, callback = NULL, anchor = NULL,
   show_arrow = NULL, mode = NULL, attachment = NULL,
@@ -15,7 +15,7 @@ hov(data = NULL, line_policy = NULL, callback = NULL, anchor = NULL,
 
 \item{anchor}{If point policy is set to `"snap_to_data"`, `anchor` defines the attachment point of a tooltip. The default is to attach to the center of a glyph. Must be one of 'top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right'.}
 
-\item{show_arrow}{Boolean. Whether tooltip's arrow should be shown.}
+\item{show_arrow}{Logical specifying whether tooltip's arrow should be shown.}
 
 \item{mode}{Whether to consider hover pointer as a point (x/y values), or a span on h or v directions. Must be one of 'mouse', 'hline', 'vline'.}
 
@@ -24,5 +24,5 @@ hov(data = NULL, line_policy = NULL, callback = NULL, anchor = NULL,
 \item{point_policy}{Whether the tooltip position should snap to the "center" (or other anchor) position of the associated glyph, or always follow the current mouse cursor position. Must be one of 'snap_to_data', 'follow_mouse', 'none'.}
 }
 \description{
-Create hover specification
+Create a hover specification.
 }

@@ -1,8 +1,40 @@
-#' Add a "box" annotation to a Bokeh figure
+# dput(setdiff(names(formals(ann_box)), c("...", "lname", "lgroup", "fig", "alpha", "color")))
+
+# get_docs(mods, "BoxAnnotation",
+#   c("left", "bottom", "right", "top", "left_units", "bottom_units",
+# "right_units", "top_units")) %>% cat()
+
+#' Add a "box" annotation (rectangular shaded region) to a Bokeh figure
 #'
 #' @param fig Figure to modify.
+#' @param left The x-coordinates of the left edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.
+#' @param bottom The y-coordinates of the bottom edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.
+#' @param right The x-coordinates of the right edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.
+#' @param top The y-coordinates of the top edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.
+#' @param left_units The unit type for the left attribute. Interpreted as "data space" units by default.
+#' @param bottom_units The unit type for the bottom attribute. Interpreted as "data space" units by default.
+#' @param right_units The unit type for the right attribute. Interpreted as "data space" units by default.
+#' @param top_units The unit type for the top attribute. Interpreted as "data space" units by default.
 #' @family annotation functions
 #' @export
+#' @examples
+# box annotation
+#' figure(data = iris) %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length, color = Species) %>%
+#'   ann_box(bottom = 5, color = "black")
+#'
+#' # with screen units
+#' figure(data = iris) %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length, color = Species) %>%
+#'   ann_box(bottom = 540, bottom_units = "screen", color = "black")
+#'
+#' # text annotation with box annotation and screen units to illustrate
+#' # an inside-plot heading that doesn't move with pan/zoom
+#' figure(data = iris) %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length, color = Species) %>%
+#'   ann_box(bottom = 565, bottom_units = "screen", color = "black") %>%
+#'   ann_labels(200, 570, "Header", text_color = "white",
+#'     x_units = "screen", y_units = "screen")
 ann_box <- function(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,
   left_units = NULL,  bottom_units = NULL,  right_units = NULL,  top_units = NULL,
   color = NULL, alpha = NULL, lgroup = NULL, lname = NULL, ...) {
@@ -21,9 +53,53 @@ ann_box <- function(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,
 }
 
 
+# dput(setdiff(names(formals(ann_arrow)),
+#   c("...", "lname", "lgroup", "fig", "alpha", "color", "data")))
 
+# get_docs(mods, "Arrow",
+#   c("x_start", "y_start", "x_end", "y_end", "line_width", "start",
+#   "start_units", "end", "end_units", "line_dash", "line_join",
+#   "line_dash_offset", "line_cap")) %>% cat()
 
-
+#' Add an "arrow" annotation to a Bokeh figure
+#' @param fig Figure to modify.
+#' @param x_start The x-coordinates to locate the start of the arrows.
+#' @param y_start The y-coordinates to locate the start of the arrows.
+#' @param x_end The x-coordinates to locate the end of the arrows.
+#' @param y_end The y-coordinates to locate the end of the arrows.
+#' @param width The line width values for the arrow body.
+#' @param data An optional data frame supplying data to which other parameters can refer.
+#' @param start Instance of ArrowHead.
+#' @param start_units The unit type for the start_x and start_y attributes. Interpreted as "data space" units by default.
+#' @param end Instance of ArrowHead.
+#' @param end_units The unit type for the end_x and end_y attributes. Interpreted as "data space" units by default.
+#' @param line_dash The line dash values for the arrow body.
+#' @param line_join The line join values for the arrow body.
+#' @param line_dash_offset The line dash offset values for the arrow body.
+#' @param line_cap The line cap values for the arrow body.
+#' @family annotation functions
+#' @examples
+#' figure() %>%
+#'   ly_points(1:10, 1:10) %>%
+#'   ann_arrow(3, 5, 4, 4)
+#'
+#' # with different head
+#' figure() %>%
+#'   ly_points(1:10, 1:10) %>%
+#'   ann_arrow(3, 5, 4, 4, end = "vee")
+#'
+#' # with more specific head parameters using "arrow()"
+#' figure() %>%
+#'   ly_points(1:10, 1:10) %>%
+#'   ann_arrow(3, 5, 4, 4, end = arrow("vee", color = "red"))
+#'
+#' # vectorized example using a data frame of values as input
+#' da <- cbind(expand.grid(1:4, 3:8), cbind(expand.grid(2:5, 4:9)))
+#' names(da) <- c("x1", "y1", "x2", "y2")
+#' figure() %>%
+#'   ly_points(x = 1:5, y = 3:7) %>%
+#'   ann_arrow(x1, y1, x2, y2, data = da,
+#'     end = arrow("vee", color = "red", size = 50), start = arrow("tee", color = "red"))
 #' @export
 ann_arrow <- function(fig, x_start = NULL, y_start = NULL, x_end = NULL, y_end = NULL,
   color = NULL, alpha = NULL, width = NULL, data = figure_data(fig),
@@ -57,6 +133,14 @@ ann_arrow <- function(fig, x_start = NULL, y_start = NULL, x_end = NULL, y_end =
 # "normal", "open", "tee", "vee"
 # "screen", "data"
 
+# get_docs(mods, "NormalHead",
+#   c("x_start", "y_start", "x_end", "y_end", "line_width", "start",
+#   "start_units", "end", "end_units", "line_dash", "line_join",
+#   "line_dash_offset", "line_cap")) %>% cat()
+
+#' Specify details of an arrow head.
+#' @param fig Figure to modify.
+#' @family annotation functions
 #' @export
 arrow <- function(type = c("normal", "open", "tee", "vee"), size = NULL,
   color = NULL, alpha = NULL,
@@ -81,7 +165,7 @@ arrow <- function(type = c("normal", "open", "tee", "vee"), size = NULL,
   spec
 }
 
-#' @export
+# internal
 get_arrow_mod <- function(spec, theme) {
   # resolve color -> line_color and fill_color
   if (is.null(spec$color))
@@ -107,6 +191,16 @@ get_arrow_mod <- function(spec, theme) {
   do.call(mod$new, spec[intersect(names(spec), par_nms)])
 }
 
+# dput(setdiff(names(formals(ann_arrow)),
+#   c("...", "lname", "lgroup", "fig", "alpha", "color", "data")))
+
+# get_docs(mods, "Arrow",
+#   c("x_start", "y_start", "x_end", "y_end", "line_width", "start",
+#   "start_units", "end", "end_units", "line_dash", "line_join",
+#   "line_dash_offset", "line_cap")) %>% cat()
+
+#' @param fig Figure to modify.
+#' @family annotation functions
 #' @export
 ann_band <- function(fig, base = NULL, lower = NULL, upper = NULL,
   base_units = NULL, lower_units = NULL, upper_units = NULL,
@@ -137,6 +231,8 @@ ann_band <- function(fig, base = NULL, lower = NULL, upper = NULL,
 # instead set these models automatically and let other parameters easily
 # control the attributes of the heads
 
+#' @param fig Figure to modify.
+#' @family annotation functions
 #' @export
 ann_whisker <- function(fig, base = NULL, lower = NULL, upper = NULL,
   lower_head = NULL, upper_head = NULL, dimension = NULL, data = figure_data(fig),
@@ -167,6 +263,8 @@ ann_whisker <- function(fig, base = NULL, lower = NULL, upper = NULL,
   add_layer(fig, spec, lgroup, lname)
 }
 
+#' @param fig Figure to modify.
+#' @family annotation functions
 #' @export
 ann_labels <- function(fig, x = NULL, y = NULL, text = NULL, angle = NULL,
   data = figure_data(fig),
@@ -203,6 +301,8 @@ ann_labels <- function(fig, x = NULL, y = NULL, text = NULL, angle = NULL,
   add_layer(fig, spec, lgroup, lname)
 }
 
+#' @param fig Figure to modify.
+#' @family annotation functions
 #' @export
 ann_span <- function(fig, location = NULL, dimension = c("height", "width"),
   location_units = NULL, line_color = NULL, line_alpha = NULL,
@@ -224,6 +324,8 @@ ann_span <- function(fig, location = NULL, dimension = c("height", "width"),
   add_layer(fig, spec, lgroup, lname)
 }
 
+#' @param fig Figure to modify.
+#' @family annotation functions
 #' @export
 ann_poly <- function(fig, xs = NULL, ys = NULL, color = NULL, alpha = NULL,
   ys_units = NULL, xs_units = NULL, line_width = NULL, line_cap = NULL,
@@ -243,6 +345,8 @@ ann_poly <- function(fig, xs = NULL, ys = NULL, color = NULL, alpha = NULL,
   add_layer(fig, spec, lgroup, lname)
 }
 
+#' @param fig Figure to modify.
+#' @family annotation functions
 #' @export
 ann_title <- function(fig, text = NULL, align = NULL, text_color = NULL,
   text_alpha = NULL, text_font_size = NULL, text_font = NULL,

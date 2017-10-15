@@ -2,7 +2,7 @@
 % Please edit documentation in R/spec_ajax_data.R
 \name{ajax_data}
 \alias{ajax_data}
-\title{Specify an Ajax data source}
+\title{Specify an Ajax data source.}
 \usage{
 ajax_data(data_url, polling_interval = 100, method = "GET",
   mode = "replace", max_size = NULL, content_type = NULL,
@@ -13,7 +13,7 @@ ajax_data(data_url, polling_interval = 100, method = "GET",
 
 \item{polling_interval}{Polling interval for updating data source in milliseconds.}
 
-\item{method}{http method - "GET" or "POST"}
+\item{method}{HTTP method - "GET" or "POST".}
 
 \item{mode}{Whether to append new data to existing data (up to "max_size"), or to replace existing data entirely. Must be one of "replace" or "append".}
 
@@ -21,12 +21,12 @@ ajax_data(data_url, polling_interval = 100, method = "GET",
 
 \item{content_type}{Set the "contentType" parameter for the Ajax request.}
 
-\item{if_modified}{Whether to include an "If-Modified-Since" header in AJAX requests to the server. If this header is supported by the server, then only new data since the last request will be returned.}
+\item{if_modified}{Whether to include an "If-Modified-Since" header in AJAX requests to the server. If this header is supported by the server, then only new data since the last request will be returned. Either 'replace' or 'append'.}
 
 \item{http_headers}{Named list of HTTP headers to set for the Ajax request.}
 }
 \description{
-Specify an Ajax data source
+Specify an Ajax data source.
 }
 \examples{
 d <- ajax_data("http://127.0.0.1:8080")

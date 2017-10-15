@@ -35,6 +35,8 @@ figure(data = NULL, width = 600, height = 600, title = NULL,
 
 \item{ylim}{The extent of the plotting area in the y-dimension (will be computed automatically if not specified). Also specifiable in \code{\link{y_range}}.}
 
+\item{range_padding}{If limits are not explicitly specified, by what factor should the computed extents of the data be padded? This is a number used as a multiplier of the computed range.}
+
 \item{xgrid}{Logical indicating whether to draw x axis grid lines.}
 
 \item{ygrid}{Logical indicating whether to draw y axis grid lines.}
@@ -43,7 +45,9 @@ figure(data = NULL, width = 600, height = 600, title = NULL,
 
 \item{yaxes}{Where to put y axis, or FALSE if no y axis ticks / labels.}
 
-\item{legend_location}{The location where the legend should draw itself, or NULL to omit the legend. One of 'top_right', 'top_left', 'bottom_left', 'bottom_right'.}
+\item{legend_location}{The location where the legend should draw itself, or \code{NULL} to omit the legend. One of 'top_right', 'top_left', 'bottom_left', 'bottom_right'.}
+
+\item{logo}{What version of the Bokeh logo to display on the toolbar. If set to \code{NULL}, no logo will be displayed. One of 'normal', 'grey', or \code{NULL}.}
 
 \item{theme}{An rbokeh theme to use. See, for example, \code{\link{bk_default_theme}}.}
 
@@ -78,8 +82,6 @@ figure(data = NULL, width = 600, height = 600, title = NULL,
 \item{min_border_top}{Minimum size in pixels of the padding region above the top of the central plot region. Note: This is a *minimum*. The padding region may expand as needed to accommodate titles or axes, etc.}
 
 \item{hidpi}{Whether to use HiDPI mode when available.}
-
-\item{padding_factor}{If limits are not explicitly specified, by what factor should the computed extents of the data be padded? This is a number used as a multiplier of the computed range.}
 }
 \description{
 Instantiate an rbokeh figure.

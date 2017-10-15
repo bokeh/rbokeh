@@ -1,13 +1,12 @@
-#' Specify an Ajax data source
+#' Specify an Ajax data source.
 #'
 #' @param data_url The URL to the endpoint for the data.
 #' @param polling_interval Polling interval for updating data source in milliseconds.
-#' @param method http method - "GET" or "POST"
+#' @param method HTTP method - "GET" or "POST".
 #' @param mode Whether to append new data to existing data (up to "max_size"), or to replace existing data entirely. Must be one of "replace" or "append".
 #' @param max_size Maximum size of the data array being kept after each pull requests. Larger than that size, the data will be right shifted.
 #' @param content_type Set the "contentType" parameter for the Ajax request.
-#' @param if_modified Whether to include an "If-Modified-Since" header in AJAX requests to the server. If this header is supported by the server, then only new data since the last request will be returned.
-# > Enum('replace', 'append')
+#' @param if_modified Whether to include an "If-Modified-Since" header in AJAX requests to the server. If this header is supported by the server, then only new data since the last request will be returned. Either 'replace' or 'append'.
 #' @param http_headers Named list of HTTP headers to set for the Ajax request.
 #' @examples
 #' d <- ajax_data("http://127.0.0.1:8080")

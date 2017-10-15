@@ -2,17 +2,36 @@
 % Please edit documentation in R/shiny.R
 \name{rbokehOutput}
 \alias{rbokehOutput}
-\title{Widget output function for use in Shiny}
+\title{Widget output function for use in Shiny.}
 \usage{
 rbokehOutput(outputId, width = "100\%", height = "400px")
 }
 \arguments{
-\item{outputId}{output variable to read from}
+\item{outputId}{Output variable to read from.}
 
-\item{width}{a valid CSS unit for the width or a number, which will be coerced to a string and have "px" appended.}
+\item{width}{A valid CSS unit for the width or a number, which will be coerced to a string and have "px" appended.}
 
 \item{height}{a valid CSS unit for the height or a number, which will be coerced to a string and have "px" appended.}
 }
 \description{
-Widget output function for use in Shiny
+Widget output function for use in Shiny.
+}
+\examples{
+\dontrun{
+library("shiny")
+library("rbokeh")
+
+ui <- fluidPage(rbokehOutput("rbokeh"))
+
+server <- function(input, output, session) {
+  output$rbokeh <- renderRbokeh({
+    # Use invalidateLater() and jitter() to add some motion
+    invalidateLater(1000, session)
+    figure() \%>\%
+      ly_points(jitter(cars$speed), jitter(cars$dist))
+  })
+}
+
+shinyApp(ui, server)
+}
 }

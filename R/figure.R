@@ -9,12 +9,13 @@
 #' @param ylab Label for y axis. Also specifiable in \code{\link{y_axis}}.
 #' @param xlim The extent of the plotting area in the x-dimension (will be computed automatically if not specified). Also specifiable in \code{\link{x_range}}.
 #' @param ylim The extent of the plotting area in the y-dimension (will be computed automatically if not specified). Also specifiable in \code{\link{y_range}}.
-#' @param padding_factor If limits are not explicitly specified, by what factor should the computed extents of the data be padded? This is a number used as a multiplier of the computed range.
+#' @param range_padding If limits are not explicitly specified, by what factor should the computed extents of the data be padded? This is a number used as a multiplier of the computed range.
 #' @param xgrid Logical indicating whether to draw x axis grid lines.
 #' @param ygrid Logical indicating whether to draw y axis grid lines.
 #' @param xaxes Where to put x axis, or FALSE if no x axis ticks / labels.
 #' @param yaxes Where to put y axis, or FALSE if no y axis ticks / labels.
-#' @param legend_location The location where the legend should draw itself, or NULL to omit the legend. One of 'top_right', 'top_left', 'bottom_left', 'bottom_right'.
+#' @param legend_location The location where the legend should draw itself, or \code{NULL} to omit the legend. One of 'top_right', 'top_left', 'bottom_left', 'bottom_right'.
+#' @param logo What version of the Bokeh logo to display on the toolbar. If set to \code{NULL}, no logo will be displayed. One of 'normal', 'grey', or \code{NULL}.
 #' @param tools character vector of interactivity tools options (acceptable values are: "box_select", "lasso_select", "poly_select", "crosshair", "box_zoom", "wheel_zoom", "zoom_in", "zoom_out", "pan", "wheel_pan", "reset", "undo", "redo", "save", "help").  Additionally, tool functions can be called on a figure to specify more control - see \code{\link{tool_box_select}}, for example, where links to the rest of the family of tool functions can also be found. If \code{NULL}, the toolbar will not be drawn.  If \code{""} the toolbar will be drawn but no tools will be added by default.
 #' @param theme An rbokeh theme to use. See, for example, \code{\link{bk_default_theme}}.
 #' @param toolbar_location Where the toolbar will be located. If set to None, no toolbar will be attached to the plot. One of 'above', 'below', 'left', 'right'.

@@ -45,3 +45,13 @@ figure(tools = "reset") \%>\%
   ly_points(1:10) \%>\%
   tool_box_zoom(line_color = "red", match_aspect = TRUE)
 }
+\seealso{
+Other tools: \code{\link{tool_box_select}},
+  \code{\link{tool_crosshair}}, \code{\link{tool_help}},
+  \code{\link{tool_lasso_select}}, \code{\link{tool_pan}},
+  \code{\link{tool_poly_select}}, \code{\link{tool_redo}},
+  \code{\link{tool_reset}}, \code{\link{tool_save}},
+  \code{\link{tool_undo}}, \code{\link{tool_wheel_pan}},
+  \code{\link{tool_wheel_zoom}},
+  \code{\link{tool_zoom_in}}, \code{\link{tool_zoom_out}}
+}

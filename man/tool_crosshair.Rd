@@ -28,3 +28,13 @@ figure(tools = NULL) \%>\%
   ly_points(1:10) \%>\%
   tool_crosshair(line_width = 12, line_alpha = 0.25)
 }
+\seealso{
+Other tools: \code{\link{tool_box_select}},
+  \code{\link{tool_box_zoom}}, \code{\link{tool_help}},
+  \code{\link{tool_lasso_select}}, \code{\link{tool_pan}},
+  \code{\link{tool_poly_select}}, \code{\link{tool_redo}},
+  \code{\link{tool_reset}}, \code{\link{tool_save}},
+  \code{\link{tool_undo}}, \code{\link{tool_wheel_pan}},
+  \code{\link{tool_wheel_zoom}},
+  \code{\link{tool_zoom_in}}, \code{\link{tool_zoom_out}}
+}

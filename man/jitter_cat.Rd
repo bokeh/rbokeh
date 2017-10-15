@@ -2,15 +2,20 @@
 % Please edit documentation in R/helpers.R
 \name{jitter_cat}
 \alias{jitter_cat}
-\title{Add a small amount of (rbokeh-compatible) noise to a character vector}
+\title{Add a small amount of (rbokeh-compatible) noise to a character vector or factor.}
 \usage{
 jitter_cat(x, factor = 0.5)
 }
 \arguments{
-\item{x}{numeric vector to which jitter should be added}
+\item{x}{Numeric vector to which jitter should be added.}
 
-\item{factor}{a factor between 0 and 1 that}
+\item{factor}{A factor between 0 and 1 that indicates how much jitter should be added.}
 }
 \description{
-Add a small amount of (rbokeh-compatible) noise to a character vector
+Add a small amount of (rbokeh-compatible) noise to a character vector or factor.
+}
+\examples{
+figure(data = lattice::singer) \%>\%
+  ly_points(jitter_cat(voice.part), jitter(height), color = "black") \%>\%
+  ly_boxplot(voice.part, height, with_outliers = FALSE)
 }
