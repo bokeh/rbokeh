@@ -659,6 +659,7 @@ prepare_figure <- function(fig) {
 
       x$mods$layers[[lnm]] <- cur_ly
     } else if (ly$type == "annotation") {
+      cur_ly <- list()
 
       ## deal with annotation layers
       ##---------------------------------------------------------
