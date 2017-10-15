@@ -1,9 +1,58 @@
+#' Add an offset to a categorical variable for Bokeh plotting.
+#' @param x The categorical data to offset, a vector of categorical / factor data.
+#' @param offset A numeric vector of matching length of \code{x} that specifies the categorical offset. Typically these are values between -0.5 and 0.5.
+#' @details This function allows specification of plotting values in between two categorical values. Suppose, for example, a categorical axis has axis ticks ordered "a", "b", "c". Then plotting \code{cat_offset("a", -0.5)} will plot a value halfway between "a" and "b", while plotting \code{cat_offset("a", 0.5)} will plot a value halfway between "b" and "c".
+#' @examples
+#' figure(title = "Periodic Table", data = elements,
+#'   xgrid = FALSE, ygrid = FALSE, xlab = "", ylab = "",
+#'   xlim = as.character(1:18), ylim = c("   ", "  ", " ", as.character(7:1)),
+#'   height = 700, width = 1200) %>%
+#'   ly_crect(cat_offset(group, group_offset), period, 0.9, 0.9,
+#'     color = group_block, fill_alpha = 0.6, legend = FALSE,
+#'     hover = list(name, atomic_number, group_block, atomic_mass,
+#'       electronic_configuration)) %>%
+#'   ly_text(cat_offset(group, sym_offset), period, text = symbol,
+#'     font_style = "bold", font_size = "15pt",
+#'     align = "left", baseline = "middle") %>%
+#'   ly_text(cat_offset(group, sym_offset), cat_offset(period, 0.3), text = atomic_number_p,
+#'     font_size = "9pt", align = "left", baseline = "middle") %>%
+#'   ly_text(cat_offset(group, sym_offset), cat_offset(period, -0.2), text = name,
+#'     font_size = "6pt", align = "left", baseline = "middle") %>%
+#'   ly_text(cat_offset(group, sym_offset), cat_offset(period, -0.35), text = atomic_mass,
+#'     font_size = "6pt", align = "left", baseline = "middle") %>%
+#'   x_axis(axis = axis_spec(visible = FALSE)) %>%
+#'   y_axis(axis = axis_spec(visible = FALSE))
+#' @export
+cat_offset <- function(x, offset) {
+  lvls <- NULL
+  if (is.factor(x)) {
+    lvls <- levels(x)
+    # don't want to store the levels for every item
+    x <- as.character(x)
+  }
+  if (!is.character(x))
+    x <- as.character(x)
+  if (!is.numeric(offset))
+    offset <- as.numeric(offset)
+  res <- mapply(list, x, offset,
+    SIMPLIFY = FALSE, USE.NAMES = FALSE)
+  class(res) <- c("list", "bk_cat")
+  attr(res, "bk_lvls") <- lvls
+  res
+}
+
+
+#' Specify that a plot variable should be treated "as-is" instead of being mapped.
+#' @param x A vector or variable name.
 #' @export
 asis <- function(x) {
   class(x) <- unique(c(class(x), "as_is"))
   x
 }
 
+#' Convert a date or POSIXct to Unix epoch time.
+#' @param x Date or POSIXct vector.
+#' @note Date-type data is automatically converted (since Bokeh expects dates in epoch time) using this function when a plot is being built, so this function should rarely need to be called explicitly.
 #' @export
 to_epoch <- function(x) {
   if (inherits(x, "Date")) {
@@ -14,29 +63,27 @@ to_epoch <- function(x) {
   x
 }
 
+#' Add a small amount of (rbokeh-compatible) noise to a character vector or factor.
+#'
+#' @param x Numeric vector to which jitter should be added.
+#' @param factor A factor between 0 and 1 that indicates how much jitter should be added.
 #' @export
+#' @importFrom stats runif
+#' @examples
+#' figure(data = lattice::singer) %>%
+#'   ly_points(jitter_cat(voice.part), jitter(height), color = "black") %>%
+#'   ly_boxplot(voice.part, height, with_outliers = FALSE)
+jitter_cat <- function(x, factor = 0.5) {
+  offset <- stats::runif(min = -0.5 * factor,
+    max = 0.5 * factor, length(x))
+  cat_offset(x, offset)
+}
+
 sanitize <- function(x) {
   gsub("\\.", "_", x)
 }
 
-
-#' Add a small amount of (rbokeh-compatible) noise to a character vector
-#'
-#' @param x numeric vector to which jitter should be added
-#' @param factor a factor between 0 and 1 that
-#' @export
-#' @importFrom stats runif
-# @examples
-# figure(data = lattice::singer) %>%
-#   ly_points(catjitter(voice.part), jitter(height), color = "black") %>%
-#   ly_boxplot(voice.part, height, with_outliers = FALSE)
-jitter_cat <- function(x, factor = 0.5) {
-  # TODO: validate factor and x
-  # TODO: make sure this preserves factor ordering
-  paste0(x, ":", stats::runif(min = 0.5 * (1 - factor),
-    max = 0.5 + 0.5 * factor, length(x)))
-}
-
+# get the list values of arguments that were actually specified in a function call
 # nms is an optional vector of names to subset results to
 get_specified_args <- function(nms = NULL, nnms = NULL) {
 
@@ -84,7 +131,8 @@ get_bk_props_recurse <- function(mod) {
 
 get_can_be_vector <- function(mod) {
   types <- get_bk_props_recurse(mod)
-  can_be_vector <- sapply(types, function(x) grepl("'field'|DistanceSpec|AngleSpec|NumberSpec", x$type))
+  can_be_vector <- sapply(types, function(x)
+    grepl("'field'|DistanceSpec|AngleSpec|NumberSpec", x$type))
   can_be_vector <- names(can_be_vector[can_be_vector])
   if (any(grepl("fill_color|line_color", can_be_vector)))
     can_be_vector <- c(can_be_vector, "color")
