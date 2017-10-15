@@ -5,12 +5,12 @@ HTMLWidgets.widget({
 
   factory: function(el, width, height) {
 
-    //clear el for Shiny/dynamic contexts
-    el.innerHTML = '';
     var bokeh_obj;
 
     return {
       renderValue: function(x) {
+        // clear el for Shiny/dynamic contexts
+        el.innerHTML = '';
 
         if(x.isJSON === true) {
           x.docs_json = JSON.parse(x.docs_json);
