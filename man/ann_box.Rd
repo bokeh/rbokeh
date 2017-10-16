@@ -20,17 +20,61 @@ ann_box(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,
 
 \item{top}{The y-coordinates of the top edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.}
 
-\item{left_units}{The unit type for the left attribute. Interpreted as "data space" units by default.}
+\item{left_units}{The unit type for the left attribute. Interpreted as "data space" units by default. One of "data" or "screen".}
 
-\item{bottom_units}{The unit type for the bottom attribute. Interpreted as "data space" units by default.}
+\item{bottom_units}{The unit type for the bottom attribute. Interpreted as "data space" units by default. One of "data" or "screen".}
 
-\item{right_units}{The unit type for the right attribute. Interpreted as "data space" units by default.}
+\item{right_units}{The unit type for the right attribute. Interpreted as "data space" units by default. One of "data" or "screen".}
 
-\item{top_units}{The unit type for the top attribute. Interpreted as "data space" units by default.}
+\item{top_units}{The unit type for the top attribute. Interpreted as "data space" units by default. One of "data" or "screen".}
+
+\item{color}{Color for the glyph - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'. For glyphs with both fill and line properties, see "Handling color" below.}
+
+\item{alpha}{The alpha transparency of the glyph between 0 (transparent) and 1 (opaque). If the glyph has both fill and color properties, see "Handling alpha" below.}
+
+\item{lgroup}{Layer group.}
+
+\item{lname}{Layer name.}
+
+\item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
 \description{
 Add a "box" annotation (rectangular shaded region) to a Bokeh figure
 }
+\section{Handling color}{
+ The \code{color} parameter is a high-level plot attribute that provides default behavior for coloring glyphs.
+\itemize{
+  \item When using a glyph that only has line properties, this will be the color of the line.
+  \item When using a glyph that has has line and fill properties, this will be the color of the line and the fill, with the alpha level of the fill reduced by 50\%.
+  \item If full control over fill and line color is desired, the \code{fill_color} and \code{line_color} attributes can be specified explicitly and will override \code{color}.
+}
+When color is \code{NULL} and \code{fill_color} or \code{line_color} are not specified, the color will be chosen from the theme.
+}
+
+\section{Handling alpha}{
+ The \code{alpha} is a high-level plot attribute that sets the transparency of the glyph being plotted.
+\itemize{
+  \item When using a glyph that only has line properties, this will be the alpha of the line.
+  \item When using a glyph that has has line and fill properties, this will be the alpha of the line and the alpha of the fill will be set to 50\% of this value.
+  \item Individual fill and line alpha can be specified with \code{fill_alpha} and \code{line_alpha} and will override \code{alpha}.
+}
+}
+
+\section{Additional parameters}{
+
+\tabular{ll}{
+  \code{fill_color} \tab color to use to fill the glyph with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' \cr
+  \code{fill_alpha} \tab transparency value between 0 (transparent) and 1 (opaque) \cr
+  \code{line_color} \tab color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' \cr
+  \code{line_width} \tab stroke width in units of pixels \cr
+  \code{line_alpha} \tab transparency value between 0 (transparent) and 1 (opaque) \cr
+  \code{line_join} \tab how path segments should be joined together 'miter' 'round' 'bevel' \cr
+  \code{line_cap} \tab how path segments should be terminated 'butt' 'round' 'square' \cr
+  \code{line_dash} \tab array of integer pixel distances that describe the on-off pattern of dashing to use \cr
+  \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
+ }
+}
+
 \examples{
 figure(data = iris) \%>\%
   ly_points(x = Sepal.Width, y = Sepal.Length, color = Species) \%>\%

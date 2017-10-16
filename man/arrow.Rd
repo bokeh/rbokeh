@@ -9,11 +9,51 @@ arrow(type = c("normal", "open", "tee", "vee"), size = NULL, color = NULL,
   line_dash = NULL, line_dash_offset = NULL, ...)
 }
 \arguments{
-\item{fig}{Figure to modify.}
+\item{type}{The arrow head type. One of "normal", "open", "tee", "vee".}
+
+\item{size}{The size, in pixels, of the arrow head.}
+
+\item{color}{Color for the glyph - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'. For glyphs with both fill and line properties, see "Handling color" below.}
+
+\item{alpha}{The alpha transparency of the glyph between 0 (transparent) and 1 (opaque). If the glyph has both fill and color properties, see "Handling alpha" below.}
+
+\item{line_width}{The line width values for the arrow head outline.}
+
+\item{line_join}{The line join values for the arrow head outline.}
+
+\item{line_cap}{The line cap values for the arrow head outline.}
+
+\item{line_dash}{The line dash values for the arrow head outline.}
+
+\item{line_dash_offset}{The line dash offset values for the arrow head outline.}
+
+\item{\ldots}{Additional parameters to pass to the arrow head specification.}
 }
 \description{
 Specify details of an arrow head.
 }
+\note{
+See \code{\link{ann_arrow}} for examples.
+}
+\section{Handling color}{
+ The \code{color} parameter is a high-level plot attribute that provides default behavior for coloring glyphs.
+\itemize{
+  \item When using a glyph that only has line properties, this will be the color of the line.
+  \item When using a glyph that has has line and fill properties, this will be the color of the line and the fill, with the alpha level of the fill reduced by 50\%.
+  \item If full control over fill and line color is desired, the \code{fill_color} and \code{line_color} attributes can be specified explicitly and will override \code{color}.
+}
+When color is \code{NULL} and \code{fill_color} or \code{line_color} are not specified, the color will be chosen from the theme.
+}
+
+\section{Handling alpha}{
+ The \code{alpha} is a high-level plot attribute that sets the transparency of the glyph being plotted.
+\itemize{
+  \item When using a glyph that only has line properties, this will be the alpha of the line.
+  \item When using a glyph that has has line and fill properties, this will be the alpha of the line and the alpha of the fill will be set to 50\% of this value.
+  \item Individual fill and line alpha can be specified with \code{fill_alpha} and \code{line_alpha} and will override \code{alpha}.
+}
+}
+
 \seealso{
 Other annotation functions: \code{\link{ann_arrow}},
   \code{\link{ann_band}}, \code{\link{ann_box}},

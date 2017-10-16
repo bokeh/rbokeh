@@ -11,7 +11,7 @@ theme_grid(fig, which = c("x", "y"), band_fill_alpha = 1,
   grid_line_width = 1, minor_grid_line_alpha = 1,
   minor_grid_line_cap = "butt", minor_grid_line_color = "black",
   minor_grid_line_dash = NULL, minor_grid_line_dash_offset = 0,
-  minor_grid_line_join = "miter", minor_grid_line_width = 1, pars = NULL)
+  minor_grid_line_join = "miter", minor_grid_line_width = 1)
 }
 \arguments{
 \item{fig}{Figure to modify.}
@@ -49,8 +49,6 @@ theme_grid(fig, which = c("x", "y"), band_fill_alpha = 1,
 \item{minor_grid_line_join}{('miter', 'round', 'bevel') The line join of the minor Grid lines.}
 
 \item{minor_grid_line_width}{The line width of the minor Grid lines.}
-
-\item{pars}{optionally specify a named list of all parameters - useful when dealing with theme lists}
 }
 \description{
 Override theme parameters for grid attributes

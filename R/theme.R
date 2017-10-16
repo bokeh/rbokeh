@@ -154,14 +154,14 @@ bk_ggplot_theme <- function() {
 #' @param text_font (string) The text font for the plot title.
 #' @param text_font_size (string - e.g. '12pt') The text font size for the plot title.
 #' @param text_font_style ('normal', 'italic', 'bold') The text font style for the plot title.
-#' @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
+# @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
 # @examples
 # figure(title = "asdf") %>%
 #   ly_points(1:10) %>%
 #   theme_title(text_color = "red")
 #' @export
 theme_title <- function(fig,
-  pars = NULL,
+  # pars = NULL,
   background_fill_color = "white",
   background_fill_alpha = 1,
   border_fill_color = "white",
@@ -232,7 +232,7 @@ theme_title <- function(fig,
 #' @param minor_tick_line_join ('miter', 'round', 'bevel') The line join of the minor ticks.
 #' @param minor_tick_line_width (integer) The line width of the minor ticks.
 #' @param minor_tick_out (integer) The distance in pixels that major ticks should extend out of the main plot area.
-#' @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
+# @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
 # @example man-roxygen/ex-theme.R
 #' @export
 theme_axis <- function(fig,
@@ -312,7 +312,7 @@ theme_axis <- function(fig,
 #' @param minor_grid_line_dash_offset The line dash offset of the minor Grid lines.
 #' @param minor_grid_line_join ('miter', 'round', 'bevel') The line join of the minor Grid lines.
 #' @param minor_grid_line_width The line width of the minor Grid lines.
-#' @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
+# @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
 # @example man-roxygen/ex-theme.R
 #' @export
 theme_grid <- function(fig,
@@ -332,8 +332,8 @@ theme_grid <- function(fig,
   minor_grid_line_dash = NULL,
   minor_grid_line_dash_offset = 0,
   minor_grid_line_join = "miter",
-  minor_grid_line_width = 1,
-  pars = NULL
+  minor_grid_line_width = 1
+  # pars = NULL
 ) {
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
@@ -372,7 +372,7 @@ theme_grid <- function(fig,
 #' @param label_width The width (in pixels) of the area that legend labels should occupy.
 #' @param legend_padding Amount of padding around the legend.
 #' @param legend_spacing Amount of spacing between legend entries.
-#' @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
+# @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
 # @examples
 # figure(legend_location = "top_left") %>%
 #   ly_points(1:10, legend = "a") %>%
@@ -401,19 +401,15 @@ theme_legend <- function(fig,
   label_text_font_style = "normal",
   label_width = 50,
   legend_padding = 10,
-  legend_spacing = 3,
-  pars = NULL
+  legend_spacing = 3
+  # pars = NULL
 ) {
   # this will provide a list of all user-specified arguments
   # (can ignore the defaults for the ones they don't specify
   # because they are defaults if not specified in bokeh)
-  if (is.null(pars)) {
-    specified <- names(as.list(match.call())[-1])
-    pars <- as.list(environment())[specified]
-  }
-  # pars <- pars[names(pars) %in% names(legend_par_validator_map)]
+  args <- get_specified_args(nnms = "fig")
 
-  fig$x$theme$legend <- pars
+  fig$x$theme$legend <- args
 
   fig
 }
@@ -437,7 +433,7 @@ theme_legend <- function(fig,
 #' @param min_border_left (integer) Minimum size in pixels of the padding region to the left of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.
 #' @param min_border_right (integer) Minimum size in pixels of the padding region to the right of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.
 #' @param min_border_top (integer) Minimum size in pixels of the padding region above the top of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.
-#' @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
+# @param pars optionally specify a named list of all parameters - useful when dealing with theme lists
 # @example man-roxygen/ex-theme.R
 #' @export
 theme_plot <- function(fig,

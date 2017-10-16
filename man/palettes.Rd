@@ -27,10 +27,6 @@ pal_bk_line_dash()
 \item{cols}{A vector of colors to ramp across for a continuous palette.}
 
 \item{space}{Passed on to \code{\link{colorRampPalette}[grDevices]}.}
-
-\item{min}{Minimum value.}
-
-\item{max}{Maximum value.}
 }
 \description{
 Palettes for themes.

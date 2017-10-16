@@ -135,7 +135,6 @@ ly_text <- function(fig,
 #' @param data an optional data frame, providing the source for inputs xleft, ybottom, xright, ytop, and other glyph properties
 # template par-coloralpha
 # template par-hover
-# template par-url
 # template par-legend
 # template par-lnamegroup
 # template dots-fillline

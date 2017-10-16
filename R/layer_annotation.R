@@ -11,10 +11,13 @@
 #' @param bottom The y-coordinates of the bottom edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.
 #' @param right The x-coordinates of the right edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.
 #' @param top The y-coordinates of the top edge of the box annotation. Datetime values are also accepted, but note that they are immediately converted to milliseconds-since-epoch.
-#' @param left_units The unit type for the left attribute. Interpreted as "data space" units by default.
-#' @param bottom_units The unit type for the bottom attribute. Interpreted as "data space" units by default.
-#' @param right_units The unit type for the right attribute. Interpreted as "data space" units by default.
-#' @param top_units The unit type for the top attribute. Interpreted as "data space" units by default.
+#' @param left_units The unit type for the left attribute. Interpreted as "data space" units by default. One of "data" or "screen".
+#' @param bottom_units The unit type for the bottom attribute. Interpreted as "data space" units by default. One of "data" or "screen".
+#' @param right_units The unit type for the right attribute. Interpreted as "data space" units by default. One of "data" or "screen".
+#' @param top_units The unit type for the top attribute. Interpreted as "data space" units by default. One of "data" or "screen".
+#' @template par-coloralpha
+#' @template par-lnamegroup
+#' @template dots-fillline
 #' @family annotation functions
 #' @export
 #' @examples
@@ -47,7 +50,7 @@ ann_box <- function(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,
     model = "BoxAnnotation",
     type = "annotation",
     use_all_data = FALSE),
-    ...)
+    quos(...))
 
   add_layer(fig, spec, lgroup, lname)
 }
@@ -67,7 +70,8 @@ ann_box <- function(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,
 #' @param y_start The y-coordinates to locate the start of the arrows.
 #' @param x_end The x-coordinates to locate the end of the arrows.
 #' @param y_end The y-coordinates to locate the end of the arrows.
-#' @param width The line width values for the arrow body.
+#' @template par-coloralpha
+#' @param line_width The line width values for the arrow body.
 #' @param data An optional data frame supplying data to which other parameters can refer.
 #' @param start Instance of ArrowHead.
 #' @param start_units The unit type for the start_x and start_y attributes. Interpreted as "data space" units by default.
@@ -77,6 +81,8 @@ ann_box <- function(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,
 #' @param line_join The line join values for the arrow body.
 #' @param line_dash_offset The line dash offset values for the arrow body.
 #' @param line_cap The line cap values for the arrow body.
+#' @template par-lnamegroup
+#' @template dots-fillline
 #' @family annotation functions
 #' @examples
 #' figure() %>%
@@ -102,10 +108,10 @@ ann_box <- function(fig, left = NULL, bottom = NULL, right = NULL, top = NULL,
 #'     end = arrow("vee", color = "red", size = 50), start = arrow("tee", color = "red"))
 #' @export
 ann_arrow <- function(fig, x_start = NULL, y_start = NULL, x_end = NULL, y_end = NULL,
-  color = NULL, alpha = NULL, width = NULL, data = figure_data(fig),
+  color = NULL, alpha = NULL, line_width = NULL, data = figure_data(fig),
   start = NULL, start_units = NULL, end = NULL, end_units = NULL,
   line_dash = NULL, line_join = NULL, line_dash_offset = NULL, line_cap = NULL,
-  lgroup = NULL, lname = NULL
+  lgroup = NULL, lname = NULL, ...
 ) {
 
   if (is.character(start))
@@ -116,7 +122,8 @@ ann_arrow <- function(fig, x_start = NULL, y_start = NULL, x_end = NULL, y_end =
   spec <- list(
     x_start = enquo(x_start), y_start = enquo(y_start),
     x_end = enquo(x_end), y_end = enquo(y_end),
-    line_color = enquo(color), line_alpha = enquo(alpha), line_width = enquo(width),
+    line_color = enquo(color), line_alpha = enquo(alpha),
+    line_width = enquo(line_width),
     start = start, start_units = enquo(start_units),
     end = end, end_units = enquo(end_units),
     line_dash = enquo(line_dash), line_join = enquo(line_join),
@@ -133,13 +140,23 @@ ann_arrow <- function(fig, x_start = NULL, y_start = NULL, x_end = NULL, y_end =
 # "normal", "open", "tee", "vee"
 # "screen", "data"
 
+# dput(setdiff(names(formals(arrow)), c("...", "lname", "lgroup", "fig", "alpha", "color")))
+
 # get_docs(mods, "NormalHead",
-#   c("x_start", "y_start", "x_end", "y_end", "line_width", "start",
-#   "start_units", "end", "end_units", "line_dash", "line_join",
-#   "line_dash_offset", "line_cap")) %>% cat()
+#   c("size", "line_width", "line_join", "line_cap", "line_dash",
+#     "line_dash_offset")) %>% cat()
 
 #' Specify details of an arrow head.
-#' @param fig Figure to modify.
+#' @param type The arrow head type. One of "normal", "open", "tee", "vee".
+#' @param size The size, in pixels, of the arrow head.
+#' @template par-coloralpha
+#' @param line_width The line width values for the arrow head outline.
+#' @param line_join The line join values for the arrow head outline.
+#' @param line_cap The line cap values for the arrow head outline.
+#' @param line_dash The line dash values for the arrow head outline.
+#' @param line_dash_offset The line dash offset values for the arrow head outline.
+#' @param \ldots Additional parameters to pass to the arrow head specification.
+#' @note See \code{\link{ann_arrow}} for examples.
 #' @family annotation functions
 #' @export
 arrow <- function(type = c("normal", "open", "tee", "vee"), size = NULL,
@@ -199,9 +216,46 @@ get_arrow_mod <- function(spec, theme) {
 #   "start_units", "end", "end_units", "line_dash", "line_join",
 #   "line_dash_offset", "line_cap")) %>% cat()
 
+
+# dput(setdiff(names(formals(ann_band)),
+#   c("...", "lname", "lgroup", "fig", "alpha", "color", "data")))
+
+# get_docs(mods, "Band",
+#   c("base", "lower", "upper", "base_units", "lower_units", "upper_units",
+#     "dimension", "line_width", "line_dash", "line_dash_offset",
+#     "line_join", "line_cap")) %>% cat()
+
+#' Add a "band" annotation (filled area band) to a Bokeh figure
 #' @param fig Figure to modify.
+#' @param base The orthogonal coordinates of the upper and lower values.
+#' @param lower The coordinates of the lower portion of the filled area band.
+#' @param upper The coordinations of the upper portion of the filled area band.
+#' @param base_units Either "screen" or "data".
+#' @param lower_units Either "screen" or "data".
+#' @param upper_units Either "screen" or "data".
+#' @param dimension The direction of the band.
+#' @template par-coloralpha
+#' @param data An optional data frame supplying data to which other parameters can refer.
+#' @param line_width The line width values for the band.
+#' @param line_dash The line dash values for the band.
+#' @param line_dash_offset The line dash offset values for the band.
+#' @param line_join The line join values for the band.
+#' @param line_cap The line cap values for the band.>
+#' @template par-lnamegroup
+#' @template dots-fillline
 #' @family annotation functions
 #' @export
+#' @examples
+# band annotation example
+#' x <- runif(100)
+#' d <- data.frame(x = x, y = x ^ 2 + rnorm(100, sd = 0.1))
+#' mod <- loess(y ~ x, data = d)
+#' sx <- seq(min(x), max(x), length = 100)
+#' pr <- predict(mod, newdata = sx, se = TRUE)
+#' bd <- data.frame(x = sx, l = pr$fit - pr$se.fit * 2, u = pr$fit + pr$se.fit * 2)
+#' figure() %>%
+#'   ly_points(x, y, data = d) %>%
+#'   ann_band(x, l, u, data = bd, dimension = "height", color = "gray")
 ann_band <- function(fig, base = NULL, lower = NULL, upper = NULL,
   base_units = NULL, lower_units = NULL, upper_units = NULL,
   dimension = c("height", "width"), color = NULL, alpha = NULL,
@@ -220,18 +274,45 @@ ann_band <- function(fig, base = NULL, lower = NULL, upper = NULL,
     data = data,
     model = "Band",
     type = "annotation",
-    ...)
+    quos(...))
 
   add_layer(fig, spec, lgroup, lname)
 }
 
 # cat(paste(names(bk_prop_types$Whisker), collapse = "\n"))
 
+# dput(setdiff(names(formals(ann_whisker)),
+#   c("...", "lname", "lgroup", "fig", "alpha", "color", "data")))
+
+# get_docs(mods, "Whisker",
+#   c("base", "lower", "upper", "lower_head", "upper_head", "dimension",
+# "base_units", "lower_units", "upper_units", "line_color", "line_alpha",
+# "line_width", "line_dash", "line_dash_offset", "line_join", "line_cap")) %>% cat()
+
 # TODO: this is silly to specify lower_head and upper_head as arror models...
 # instead set these models automatically and let other parameters easily
 # control the attributes of the heads
 
+#' Add a "whisker" annotation to a Bokeh figure
 #' @param fig Figure to modify.
+#' @param base The orthogonal coordinates of the upper and lower values.
+#' @param lower The coordinates of the lower end of the whiskers.
+#' @param upper The coordinations of the upper end of the whiskers.
+#' @param lower_head Instance of ArrowHead.
+#' @param upper_head Instance of ArrowHead.
+#' @param dimension The direction of the band.
+#' @param data An optional data frame supplying data to which other parameters can refer.
+#' @param base_units Either "screen" or "data".
+#' @param lower_units Either "screen" or "data".
+#' @param upper_units Either "screen" or "data".
+#' @param line_color The line color values for the whisker body.
+#' @param line_alpha The line alpha values for the whisker body.
+#' @param line_width The line width values for the whisker body.
+#' @param line_dash The line dash values for the whisker body.
+#' @param line_dash_offset The line dash offset values for the whisker body.
+#' @param line_join The line join values for the whisker body.
+#' @param line_cap The line cap values for the whisker body.
+#' @template par-lnamegroup
 #' @family annotation functions
 #' @export
 ann_whisker <- function(fig, base = NULL, lower = NULL, upper = NULL,
@@ -239,7 +320,7 @@ ann_whisker <- function(fig, base = NULL, lower = NULL, upper = NULL,
   base_units = NULL, lower_units = NULL, upper_units = NULL,
   line_color = NULL, line_alpha = NULL, line_width = NULL, line_dash = NULL,
   line_dash_offset = NULL, line_join = NULL, line_cap = NULL,
-  lgroup = NULL, lname = NULL, ...) {
+  lgroup = NULL, lname = NULL) {
 
   if (is.character(lower_head))
     lower_head <- arrow(lower_head)
@@ -257,15 +338,61 @@ ann_whisker <- function(fig, base = NULL, lower = NULL, upper = NULL,
     line_join = enquo(line_join), line_cap = enquo(line_cap),
     data = data,
     model = "Whisker",
-    type = "annotation",
-    ...)
+    type = "annotation")
 
   add_layer(fig, spec, lgroup, lname)
 }
 
+
+# dput(setdiff(names(formals(ann_labels)),
+#   c("...", "lname", "lgroup", "fig", "alpha", "color", "data")))
+
+# get_docs(mods, "LabelSet",
+#   c("x", "y", "text", "angle", "x_units", "y_units", "angle_units",
+# "x_offset", "y_offset", "text_align", "text_color", "text_alpha",
+# "text_font", "text_font_size", "text_font_style", "text_baseline",
+# "background_fill_color", "background_fill_alpha", "border_line_color",
+# "border_line_alpha", "border_line_width", "border_line_join",
+# "border_line_dash", "border_line_dash_offset", "border_line_cap",
+# "render_mode")) %>% cat()
+
+#' Add a "label" annotation to a Bokeh figure
 #' @param fig Figure to modify.
+#' @param x The x-coordinates to locate the text anchors.
+#' @param y The y-coordinates to locate the text anchors.
+#' @param text The text values to render.
+#' @param angle The angles to rotate the text, as measured from the horizontal. Warning: The center of rotation for canvas and css render_modes is different. For \code{render_mode="canvas"} the label is rotated from the top-left corner of the annotation, while for \code{render_mode="css"} the annotation is rotated around it's center.
+#' @param x_units The unit type for the xs attribute. Interpreted as "data space" units by default. One of "data" or "screen".
+#' @param y_units The unit type for the ys attribute. Interpreted as "data space" units by default. One of "data" or "screen".
+#' @param angle_units One of "rad" or "deg".
+#' @param data An optional data frame supplying data to which other parameters can refer.
+#' @param x_offset Offset values to apply to the x-coordinates. This is useful, for instance, if it is desired to "float" text a fixed distance in screen units from a given data position.
+#' @param y_offset Offset values to apply to the y-coordinates. This is useful, for instance, if it is desired to "float" text a fixed distance in screen units from a given data position.
+#' @param text_align The text align values for the text.
+#' @param text_color The text color values for the text.
+#' @param text_alpha The text alpha values for the text.
+#' @param text_font The text font values for the text.
+#' @param text_font_size The text font size values for the text.
+#' @param text_font_style The text font style values for the text.
+#' @param text_baseline The text baseline values for the text.
+#' @param background_fill_color The fill color values for the text bounding box.
+#' @param background_fill_alpha The fill alpha values for the text bounding box.
+#' @param border_line_color The line color values for the text bounding box.
+#' @param border_line_alpha The line alpha values for the text bounding box.
+#' @param border_line_width The line width values for the text bounding box.
+#' @param border_line_join The line join values for the text bounding box.
+#' @param border_line_dash The line dash values for the text bounding box.
+#' @param border_line_dash_offset The line dash offset values for the text bounding box.
+#' @param border_line_cap The line cap values for the text bounding box.
+#' @param render_mode Specifies whether the text is rendered as a canvas element or as an css element overlaid on the canvas. The default mode is "canvas". Note: The CSS labels won't be present in the output using the "save" tool. Warning: Not all visual styling properties are supported if the render_mode is set to "css". The border_line_dash property isn't fully supported and border_line_dash_offset isn't supported at all. Setting text_alpha will modify the opacity of the entire background box and border in addition to the text. Finally, clipping label annotations inside of the plot area isn't supported in "css" mode.
+#' @template par-lnamegroup
 #' @family annotation functions
 #' @export
+#' @examples
+#' d <- data.frame(x = 1:10, y = rnorm(10), txt = letters[1:10])
+#' figure(data = d) %>%
+#'   ly_points(x, y) %>%
+#'   ann_labels(x, y, txt)
 ann_labels <- function(fig, x = NULL, y = NULL, text = NULL, angle = NULL,
   data = figure_data(fig),
   x_units = NULL, y_units = NULL, angle_units = NULL, x_offset = NULL, y_offset = NULL,
@@ -274,7 +401,7 @@ ann_labels <- function(fig, x = NULL, y = NULL, text = NULL, angle = NULL,
   background_fill_color = NULL, background_fill_alpha = NULL, border_line_color = NULL,
   border_line_alpha = NULL, border_line_width = NULL, border_line_join = NULL,
   border_line_dash = NULL, border_line_dash_offset = NULL, border_line_cap = NULL,
-  render_mode = NULL, lgroup = NULL, lname = NULL, ...) {
+  render_mode = NULL, lgroup = NULL, lname = NULL) {
 
   spec <- list(
     x = enquo(x), y = enquo(y), text = enquo(text), angle = enquo(angle),
@@ -295,20 +422,40 @@ ann_labels <- function(fig, x = NULL, y = NULL, text = NULL, angle = NULL,
     border_line_cap = enquo(border_line_cap), render_mode = enquo(render_mode),
     data = data,
     model = "LabelSet",
-    type = "annotation",
-    ...)
+    type = "annotation")
 
   add_layer(fig, spec, lgroup, lname)
 }
 
+# dput(setdiff(names(formals(ann_span)),
+#   c("...", "lname", "lgroup", "fig", "alpha", "color", "data")))
+
+# get_docs(mods, "Span",
+#   c("location", "dimension", "location_units", "line_color", "line_alpha",
+# "line_width", "line_cap", "line_join", "line_dash", "line_dash_offset",
+# "render_mode")) %>% cat()
+
+#' Add a "span" (horizontal or vertical line) annotation to a Bokeh figure
 #' @param fig Figure to modify.
+#' @param location The location of the span, along "dimension".
+#' @param dimension The direction of the span.
+#' @param location_units The unit type for the location attribute. Interpreted as "data space" units by default.
+#' @param line_color The line color values for the span.
+#' @param line_alpha The line alpha values for the span.
+#' @param line_width The line width values for the span.
+#' @param line_cap The line cap values for the span.
+#' @param line_join The line join values for the span.
+#' @param line_dash The line dash values for the span.
+#' @param line_dash_offset The line dash offset values for the span.
+#' @param render_mode Specifies whether the span is rendered as a canvas element or as a css element overlaid on the canvas. The default mode is "canvas". Warning: The line_dash and line_dash_offset attributes aren't supported if the render_mode is set to "css".
+#' @template par-lnamegroup
 #' @family annotation functions
 #' @export
 ann_span <- function(fig, location = NULL, dimension = c("height", "width"),
   location_units = NULL, line_color = NULL, line_alpha = NULL,
   line_width = NULL, line_cap = NULL, line_join = NULL, line_dash = NULL,
   line_dash_offset = NULL, render_mode = NULL,
-  lgroup = NULL, lname = NULL, ...) {
+  lgroup = NULL, lname = NULL) {
 
   spec <- list(
     location = enquo(location), location_units = enquo(location_units),
@@ -318,13 +465,32 @@ ann_span <- function(fig, location = NULL, dimension = c("height", "width"),
     line_dash = enquo(line_dash), line_dash_offset = enquo(line_dash_offset),
     render_mode = enquo(render_mode),
     model = "Span",
-    type = "annotation",
-    ...)
+    type = "annotation")
 
   add_layer(fig, spec, lgroup, lname)
 }
 
+# dput(setdiff(names(formals(ann_poly)),
+#   c("...", "lname", "lgroup", "fig", "alpha", "color", "data")))
+
+# get_docs(mods, "PolyAnnotation",
+#   c("xs", "ys", "ys_units", "xs_units", "line_width", "line_cap",
+# "line_join", "line_dash", "line_dash_offset")) %>% cat()
+
+#' Add a "polygon" annotation to a Bokeh figure
 #' @param fig Figure to modify.
+#' @param xs The x-coordinates of the region to draw.
+#' @param ys The y-coordinates of the region to draw.
+#' @template par-coloralpha
+#' @param xs_units The unit type for the xs attribute. Interpreted as "data space" units by default. One of "data" or "screen".
+#' @param ys_units The unit type for the ys attribute. Interpreted as "data space" units by default. One of "data" or "screen".
+#' @param line_width The line width values for the polygon.
+#' @param line_cap The line cap values for the polygon.
+#' @param line_join The line join values for the polygon.
+#' @param line_dash The line dash values for the polygon.
+#' @param line_dash_offset The line dash offset values for the polygon.
+#' @template par-lnamegroup
+#' @template dots-fillline
 #' @family annotation functions
 #' @export
 ann_poly <- function(fig, xs = NULL, ys = NULL, color = NULL, alpha = NULL,
@@ -340,14 +506,53 @@ ann_poly <- function(fig, xs = NULL, ys = NULL, color = NULL, alpha = NULL,
     line_dash_offset = enquo(line_dash_offset),
     model = "PolyAnnotation",
     type = "annotation",
-    ...)
+    quos(...))
 
   add_layer(fig, spec, lgroup, lname)
 }
 
+# dput(setdiff(names(formals(ann_title)),
+#   c("...", "lname", "lgroup", "fig", "alpha", "color", "data")))
+
+# get_docs(mods, "Title",
+#   c("text", "align", "text_color", "text_alpha", "text_font_size",
+# "text_font", "text_font_style", "offset", "background_fill_color",
+# "background_fill_alpha", "border_line_color", "border_line_alpha",
+# "border_line_width", "border_line_join", "border_line_cap", "border_line_dash",
+# "border_line_dash_offset", "render_mode")) %>% cat()
+
+#' Add or update the "title" annotation to a Bokeh figure
 #' @param fig Figure to modify.
+#' @param text The text value to render.
+#' @param align Location to align the title text.
+#' @param text_color Color to use to render text with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'.
+#' @param text_alpha An alpha value to use to fill text with. Acceptable values are floating point numbers between 0 (transparent) and 1 (opaque).
+#' @param text_font_size Font size in px, em, or pt, e.g., '12pt', '1.5em'.
+#' @param text_font Name of a font to use for rendering text, e.g., 'times', 'helvetica'.
+#' @param text_font_style A style to use for rendering text. One of 'normal' 'italic' 'bold'.
+#' @param offset Offset the text by a number of pixels (can be positive or negative). Shifts the text in different directions based on the location of the title. Possible values are "above", "below", "right", "left".
+#' @param background_fill_color The fill color values for the text bounding box.
+#' @param background_fill_alpha The fill alpha values for the text bounding box.
+#' @param border_line_color The line color values for the text bounding box.
+#' @param border_line_alpha The line alpha values for the text bounding box.
+#' @param border_line_width The line width values for the text bounding box.
+#' @param border_line_join The line join values for the text bounding box.
+#' @param border_line_cap The line cap values for the text bounding box.
+#' @param border_line_dash The line dash values for the text bounding box.
+#' @param border_line_dash_offset The line dash offset values for the text bounding box.
+#' @param render_mode Specifies whether the text is rendered as a canvas element or as an css element overlaid on the canvas. The default mode is "canvas". Note: The CSS labels won't be present in the output using the "save" tool. Warning: Not all visual styling properties are supported if the render_mode is set to "css". The border_line_dash property isn't fully supported and border_line_dash_offset isn't supported at all. Setting text_alpha will modify the opacity of the entire background box and border in addition to the text. Finally, clipping Label annotations inside of the plot area isn't supported in "css" mode.
 #' @family annotation functions
 #' @export
+#' @examples
+#' # note title can also be specified in figure() but more control with ann_title()
+#' figure() %>%
+#'   ly_points(1:10, 1:10) %>%
+#'   ann_title("title example")
+#'
+#' # more control over title annotation
+#' figure(title = "title example") %>%
+#'   ly_points(1:10, 1:10) %>%
+#'   ann_title(text_font = "Courier", text_font_size = 20)
 ann_title <- function(fig, text = NULL, align = NULL, text_color = NULL,
   text_alpha = NULL, text_font_size = NULL, text_font = NULL,
   text_font_style = NULL, offset = NULL, background_fill_color = NULL,

@@ -46,8 +46,6 @@ theme_plot(fig, background_fill_color = "white", background_fill_alpha = 1,
 \item{min_border_right}{(integer) Minimum size in pixels of the padding region to the right of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.}
 
 \item{min_border_top}{(integer) Minimum size in pixels of the padding region above the top of the central plot region. This is a minimum. The padding region may expand as needed to accommodate titles or axes, etc.}
-
-\item{pars}{optionally specify a named list of all parameters - useful when dealing with theme lists}
 }
 \description{
 Override theme parameters for general plot attributes

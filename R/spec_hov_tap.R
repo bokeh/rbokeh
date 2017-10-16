@@ -1,15 +1,103 @@
 #' Create a hover specification.
 #'
+#' @param tooltips either a data frame of values to be shown as tooltips when the glyph is hovered or a string specifying a custom tooltip (see details section). If NULL, tooltips will not be shown.
 #' @param line_policy When showing tooltips for lines, designates whether the tooltip position should be the "previous" or "next" points on the line, the "nearest" point to the current mouse position, or "interpolate" alongthe line to the current mouse position. Must be one of 'prev', 'next', 'nearest', 'interp', 'none'.
 #' @param point_policy Whether the tooltip position should snap to the "center" (or other anchor) position of the associated glyph, or always follow the current mouse cursor position. Must be one of 'snap_to_data', 'follow_mouse', 'none'.
 #' @param anchor If point policy is set to `"snap_to_data"`, `anchor` defines the attachment point of a tooltip. The default is to attach to the center of a glyph. Must be one of 'top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right'.
 #' @param show_arrow Logical specifying whether tooltip's arrow should be shown.
 #' @param mode Whether to consider hover pointer as a point (x/y values), or a span on h or v directions. Must be one of 'mouse', 'hline', 'vline'.
 #' @param attachment Whether tooltip's arrow should appear in the horizontal or vertical dimension. Must be one of 'horizontal', 'vertical'.
-#' @param callback A callback to run in the browser whenever the input's value changes. The cb_data parameter that is available to the Callback code will contain two HoverTool specific fields: :index: object containing the indices of the hovered points in the data, and source :geometry: object containing the coordinates of the hover cursor.
+#' @param callback A callback to run in the browser whenever the input's value changes. The cb_data parameter that is available to the Callback code will contain two specific fields: :index: object containing the indices of the hovered points in the data, and source :geometry: object containing the coordinates of the hover cursor.
+#' @details
+#' Instances of text in a specified \code{tooltip} string starting with "@" are interpreted as columns on the layer's data source. For instance, "@temp" would look up values to display from the "temp" column of the data source.
+#'
+#' Field names starting with "$" are special, known fields:
+#'
+#' \itemize{
+#' \item $index --- index of selected point in the data source
+#' \item $x --- x-coordinate under the cursor in data space
+#' \item $y --- y-coordinate under the cursor in data space
+#' \item $sx --- x-coordinate under the cursor in screen (canvas) space
+#' \item $sy --- y-coordinate under the cursor in screen (canvas) space
+#' \item $color --- color data from data source, with the syntax: "$color[options]:field_name". The available options are: 'hex' (to display the color as a hex value), and 'swatch' to also display a small color swatch.
+#' }
+#'
+#' Field names that begin with "@" are associated with columns in the data source (if specified) associated with the layer that the hover specification is being applied to (or the global figure data source if non is supplied for the layer). For instance the field name "@price" will display values from the "price" column whenever a hover is triggered.  If the hover is for the 17th glyph, then the hover tooltip will correspondingly display the 17th price value.
+#'
+#' By default, values for fields (e.g. "@foo") are displayed in a basic numeric format. However it is possible to control the formatting of values more precisely. Fields can be modified by appending a format specified to the end in curly braces. Some examples are below.
+#'
+#' \itemize{
+#' \item \code{@foo{0,0.000}} --- formats 10000.1234 as: 10,000.123
+#' \item \code{@foo{(.00)}} --- formats -10000.1234 as: (10000.123)
+#' \item \code{@foo{($ 0.00 a)}} --- formats 1230974 as: $ 1.23 m
+#' }
+#'
+#' Specifying a format "{safe}" after a field name will override automatic escaping of the tooltip data source. Any HTML tags in the data tags will be rendered as HTML in the resulting hover output.
+#'
+#' \code{NULL} is also a valid value for tooltips. This turns off the rendering of tooltips. This is mostly useful when supplying other actions on hover via the callback property.
 #' @export
+#' @examples
+#' specifying other hover parameters like point_policy
+#' figure() %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length, color = Species, data = iris,
+#'     size = 30, hov_line_width = 10,
+#'     hover = hov(list(Species, Sepal.Length), point_policy = "follow_mouse"))
+#'
+#' # mode = "hline"
+#' chippy <- function(x) sin(cos(x) * exp(-x / 2))
+#' ss <- seq(-7, 7, length = 1000)
+#' d <- data.frame(x = ss, y = chippy(ss))
+#' figure(data = d, width = 800, height = 300) %>%
+#'   ly_points(x, y, size = 20,
+#'     fill_color = "grey", fill_alpha = 0.05,
+#'     hov_fill_color = "firebrick", hov_alpha = 0.3,
+#'     line_color = NA, hov_line_color = "white",
+#'     hover = hov(data = d, mode = "hline")) %>%
+#'   ly_lines(x, y, color = "gray", hov_color = "white", type = 2)
+#'
+#' # callback
+#' figure() %>%
+#'   ly_points(1:10, hover = hov(callback = "console.log('hovering...')"))
+#'
+#' # the remaining examples don't use hov() explicitly but illustrate more hover options
+#'
+#' # hover example (using list() with variable names found in the data)
+#' # also illustrating the ability to specify hover glyph properties (hov_line_width)
+#' figure() %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length, color = Species, data = iris,
+#'     hov_line_width = 10, hover = list(Species))
+#'
+#' # hover illustrating that it works with R expressions as well
+#' figure() %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length, color = Species, data = iris,
+#'     hov_line_width = 10, hover = list(Sepal.Length, SepalWidthSquared = Sepal.Width ^ 2))
+#'
+#' # hover illustrating using custom text and accessing variables with @
+#' figure() %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length, color = Species, data = iris,
+#'     hov_line_width = 10, hover = "the species is '@Species' and sepal lenth is '@Sepal.Length'")
+#'
+#' # hover example showing using html in the tooltip to create a barchart of the values
+#' iris2 <- iris
+#' iris2$sw <- paste0(iris2$Sepal.Width * 20, "px")
+#' iris2$pw <- paste0(iris2$Petal.Width * 20, "px")
+#' iris2$sl <- paste0(iris2$Sepal.Length * 20, "px")
+#' iris2$pl <- paste0(iris2$Petal.Width * 20, "px")
+#'
+#' style_str <- "white-space: nowrap; border: 1px solid white; background: steelblue; height: 15px;"
+#'
+#' figure() %>%
+#'   ly_points(x = Sepal.Width, y = Sepal.Length, color = Species,
+#'   data = iris2, hover = glue::glue("
+#' <div>
+#'   <div style='{style_str} width: @sw'>Sepal width</div>
+#'   <div style='{style_str} width: @pw'>Petal Width</div>
+#'   <div style='{style_str} width: @sl'>Sepal width</div>
+#'   <div style='{style_str} width: @pl'>Petal Length</div>
+#' </div>
+#' "))
 hov <- function(
-  data = NULL,
+  tooltips = NULL,
   line_policy = NULL,
   callback = NULL,
   anchor = NULL,
@@ -19,7 +107,7 @@ hov <- function(
   point_policy = NULL) {
 
   spec <- list()
-  spec$data <- enquo(data)
+  spec$data <- enquo(tooltips)
   spec$line_policy <- line_policy
   spec$callback <- callback
   spec$anchor <- anchor

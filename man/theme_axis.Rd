@@ -116,8 +116,6 @@ theme_axis(fig, which = c("x", "y"), num_minor_ticks = 5,
 \item{minor_tick_line_width}{(integer) The line width of the minor ticks.}
 
 \item{minor_tick_out}{(integer) The distance in pixels that major ticks should extend out of the main plot area.}
-
-\item{pars}{optionally specify a named list of all parameters - useful when dealing with theme lists}
 }
 \description{
 Override theme parameters for axis attributes

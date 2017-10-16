@@ -9,7 +9,7 @@
 # template dots-line
 #' @examples
 #' \donttest{
-#' chippy <- function(x) sin(cos(x)*exp(-x/2))
+#' chippy <- function(x) sin(cos(x) * exp(-x / 2))
 #' figure(width = 800) %>%
 #'   ly_curve(chippy, -8, 7, n = 2001)
 #' }

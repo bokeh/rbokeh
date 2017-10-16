@@ -14,7 +14,7 @@ theme_legend(fig, background_fill_alpha = 0.95,
   label_text_baseline = "bottom", label_text_color = "#444444",
   label_text_font = "Helvetica", label_text_font_size = "12pt",
   label_text_font_style = "normal", label_width = 50, legend_padding = 10,
-  legend_spacing = 3, pars = NULL)
+  legend_spacing = 3)
 }
 \arguments{
 \item{fig}{Figure to modify.}
@@ -64,8 +64,6 @@ theme_legend(fig, background_fill_alpha = 0.95,
 \item{legend_padding}{Amount of padding around the legend.}
 
 \item{legend_spacing}{Amount of spacing between legend entries.}
-
-\item{pars}{optionally specify a named list of all parameters - useful when dealing with theme lists}
 }
 \description{
 Override theme parameters for legend attributes

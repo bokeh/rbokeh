@@ -116,8 +116,8 @@ pal_color <- function(colors) {
 #' Palettes for themes.
 #' @rdname palettes
 #' @param pal Palette name.
-#' @param min Minimum value.
-#' @param max Maximum value.
+# @param min Minimum value.
+# @param max Maximum value.
 #' @export
 pal_tableau <- function(pal = "Tableau10") {
   colors <- tableau_colors[[pal]]
