@@ -125,7 +125,7 @@ figure(tools = c("lasso_select", "poly_select")) \%>\%
 
 # gray logo
 figure(logo = "grey") \%>\%
-  ly_points(1:10, 1:10) \%>\%
+  ly_points(1:10, 1:10)
 
 # no toolbar
 figure(tools = NULL) \%>\%

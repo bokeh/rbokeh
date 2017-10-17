@@ -20,12 +20,12 @@ A specification that is used as the \code{ticker} argument for \code{\link{x_axi
 Generate nice ticks across different date and time scales.
 }
 \examples{
-figure(data = d, width = 1000) \%>\%
-  ly_lines(date, co2_df) \%>\%
+figure(width = 1000) \%>\%
+  ly_lines(date, co2, data = co2_df) \%>\%
   x_axis(ticker = ticker_date(desired_num_ticks = 20))
 
-figure(data = d, width = 1000) \%>\%
-  ly_lines(date, co2_df) \%>\%
+figure(width = 1000) \%>\%
+  ly_lines(date, co2, data = co2_df) \%>\%
   x_axis(tickformatter = tickformatter_date(year = "'\%y"))
 
 figure() \%>\%

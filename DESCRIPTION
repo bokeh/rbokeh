@@ -26,7 +26,10 @@ Imports:
     curl,
     glue,
     rlang,
-    scales
+    scales,
+    hexbin,
+    lattice,
+    maps
 Suggests:
     testthat,
     lintr,

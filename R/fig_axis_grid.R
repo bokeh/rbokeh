@@ -88,7 +88,7 @@ update_axis <- function(fig, position, draw, args, which) {
       fig$x$pars$axes[[position]]$args[[nm]] <- cur_obj
     } else {
       fig$x$pars$axes[[position]]$args[[nm]] <-
-        modifyList(fig$x$pars$axes[[position]]$args[[nm]], cur_obj)
+        utils::modifyList(fig$x$pars$axes[[position]]$args[[nm]], cur_obj)
     }
     fig$x$pars$axes[[position]]$args[[nm]]$clear <- NULL
   }
@@ -243,12 +243,12 @@ ticker_log <- function(
 #' @param clear A logical indicating whether all non-specified parameters should be cleared out of any exising specification in the figure. This can be useful when modifying a previously-defined figure.
 #' @return A specification that is used as the \code{ticker} argument for \code{\link{x_axis}} or \code{\link{y_axis}}.
 #' @examples
-#' figure(data = d, width = 1000) %>%
-#'   ly_lines(date, co2_df) %>%
+#' figure(width = 1000) %>%
+#'   ly_lines(date, co2, data = co2_df) %>%
 #'   x_axis(ticker = ticker_date(desired_num_ticks = 20))
 #'
-#' figure(data = d, width = 1000) %>%
-#'   ly_lines(date, co2_df) %>%
+#' figure(width = 1000) %>%
+#'   ly_lines(date, co2, data = co2_df) %>%
 #'   x_axis(tickformatter = tickformatter_date(year = "'%y"))
 #'
 #' figure() %>%
@@ -338,8 +338,8 @@ tickformatter_num <- function(
 #'     ticker = ticker_num(desired_num_ticks = 20),
 #'     tickformatter = tickformatter_func(code = "return tick + 'm';"))
 #'
-#' figure(data = d, width = 1000) %>%
-#'   ly_lines(date, co2_df) %>%
+#' figure(width = 1000) %>%
+#'   ly_lines(date, co2, data = co2_df) %>%
 #'   x_axis(tickformatter = tickformatter_func("
 #' var cur = new Date();
 #' var diff = (cur.getTime() - tick) / (1000 * 60 * 60 * 24 * 365);
@@ -734,9 +734,7 @@ tickformatter_cat <- function(clear = FALSE) {
 #'   )) %>%
 #'   y_axis(label = "y axis", axis = axis_spec(
 #'     major_label_text_color = "red"
-#'   )) %>%
-#'   rbokeh_prerender(keep_aux = TRUE)
-#'   prepare_figure()
+#'   ))
 #'
 #' figure() %>%
 #'   ly_points(1:10) %>%

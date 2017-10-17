@@ -431,14 +431,12 @@ ly_boxplot <- function(
 #' figure() %>%
 #'   ly_bar(variety, yield, color = year,
 #'     data = lattice::barley, position = "fill", width = 1) %>%
-#'   theme_axis("x", major_label_orientation = 90) %>%
-#'   set_palette(discrete_color = pal_color(c("red", "blue")))
+#'   theme_axis("x", major_label_orientation = 90)
 #'
-#' # swap axes and use different palette
+#' # swap axes and
 #' figure() %>%
 #'   ly_bar(yield, variety, color = year,
-#'     data = lattice::barley, position = "fill") %>%
-#'   set_palette(discrete_color = pal_color(c("red", "blue")))
+#'     data = lattice::barley, position = "fill")
 #'
 #' # side by side bars
 #' figure() %>%
@@ -498,7 +496,7 @@ ly_bar <- function(
 
   # if user doesn't specify legend title, get it from the specified value for "color"
   cl <- enquo(color)
-  if (is.logical(legend) && legend && !quo_is_null(cl))
+  if (is.logical(legend) && legend && !rlang::quo_is_null(cl))
     legend <- rlang::quo_name(cl)
 
   color <- rlang::eval_tidy(enquo(color), data)

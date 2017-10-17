@@ -121,14 +121,12 @@ figure() \%>\%
 figure() \%>\%
   ly_bar(variety, yield, color = year,
     data = lattice::barley, position = "fill", width = 1) \%>\%
-  theme_axis("x", major_label_orientation = 90) \%>\%
-  set_palette(discrete_color = pal_color(c("red", "blue")))
+  theme_axis("x", major_label_orientation = 90)
 
-# swap axes and use different palette
+# swap axes and
 figure() \%>\%
   ly_bar(yield, variety, color = year,
-    data = lattice::barley, position = "fill") \%>\%
-  set_palette(discrete_color = pal_color(c("red", "blue")))
+    data = lattice::barley, position = "fill")
 
 # side by side bars
 figure() \%>\%

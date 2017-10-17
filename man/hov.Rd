@@ -57,7 +57,7 @@ Specifying a format "{safe}" after a field name will override automatic escaping
 \code{NULL} is also a valid value for tooltips. This turns off the rendering of tooltips. This is mostly useful when supplying other actions on hover via the callback property.
 }
 \examples{
-specifying other hover parameters like point_policy
+# specifying other hover parameters like point_policy
 figure() \%>\%
   ly_points(x = Sepal.Width, y = Sepal.Length, color = Species, data = iris,
     size = 30, hov_line_width = 10,
@@ -72,7 +72,7 @@ figure(data = d, width = 800, height = 300) \%>\%
     fill_color = "grey", fill_alpha = 0.05,
     hov_fill_color = "firebrick", hov_alpha = 0.3,
     line_color = NA, hov_line_color = "white",
-    hover = hov(data = d, mode = "hline")) \%>\%
+    hover = hov(tooltips = d, mode = "hline")) \%>\%
   ly_lines(x, y, color = "gray", hov_color = "white", type = 2)
 
 # callback

@@ -89,7 +89,7 @@ update_range <- function(fig, args, clear, which) {
     fig$x$pars$ranges[[which]]$args <- args
   } else {
     fig$x$pars$ranges[[which]]$args <-
-      modifyList(fig$x$pars$ranges[[which]]$args, args)
+      utils::modifyList(fig$x$pars$ranges[[which]]$args, args)
   }
 
   fig

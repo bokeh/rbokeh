@@ -15,3 +15,8 @@ _gh-pages
 code-gen
 ^docs-dev$
 ^js-scales$
+\.vscode
+inst/htmlwidgets/lib/bokehjs/prev
+inst/htmlwidgets/lib/bokehjs/notused
+docs-dev
+data-raw

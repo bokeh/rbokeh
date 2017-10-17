@@ -114,6 +114,10 @@ spec <- function(x,
   x
 }
 
+#' Specify a custom JavaScript transformation.
+#' @param func A string of JavaScript code to be applied to one value of an array.
+#' @param v_func An optional string of JavaScript code to be applied to an entire array. If not specified, the array will be looped over and \code{func} will be applied to each element.
+#' @param global A string of JavaScript code indicating global values to be specified prior to the code for \code{func} or \code{v_func}.
 #' @export
 custom_js_transform <- function(func, v_func = NULL, global = NULL) {
   if (!is.character(func))

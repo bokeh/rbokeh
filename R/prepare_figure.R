@@ -318,7 +318,7 @@ prepare_figure <- function(fig) {
                   }
                 }
                 if (is.null(spc$range)) {
-                  spc$range <- ppoints(length(spc$domain))
+                  spc$range <- stats::ppoints(length(spc$domain))
                 }
                 if (is.null(spc$unknown)) {
                   spc$unknown <- min(spc$range) / 2
@@ -538,7 +538,7 @@ prepare_figure <- function(fig) {
 
       # resolve color -> line_color and fill_color
       if (is.null(ly$color))
-        ly$color <- tail(x$theme$discrete$color(ly_color_idx), 1)
+        ly$color <- utils::tail(x$theme$discrete$color(ly_color_idx), 1)
       if (is.null(ly$line_color))
         ly$line_color <- ly$color
       if (is.null(ly$fill_color))
@@ -1100,12 +1100,12 @@ add_axis <- function(x, whch) {
   tck_mod <- getFromNamespace(args$ticker$model, "rbokeh")
   args$ticker$model <- NULL
   # reconcile with theme
-  ticker_args <- modifyList(x$theme$ticker[[xy]], args$ticker)
+  ticker_args <- utils::modifyList(x$theme$ticker[[xy]], args$ticker)
   tck <- call_with_valid_args(tck_mod, ticker_args)
 
   args$grid$ticker <- tck$get_instance()
   # reconcile with theme
-  grid_args <- modifyList(x$theme$grid[[xy]], args$grid)
+  grid_args <- utils::modifyList(x$theme$grid[[xy]], args$grid)
   grd <- call_with_valid_args(Grid, grid_args)
 
   tf_mod <- getFromNamespace(args$tickformatter$model, "rbokeh")
@@ -1118,7 +1118,7 @@ add_axis <- function(x, whch) {
   args$axis$model <- NULL
   args$axis$axis_label <- x$pars$gen$labs[[xy]]
   # reconcile with theme
-  axis_args <- modifyList(x$theme$axis[[xy]], args$axis)
+  axis_args <- utils::modifyList(x$theme$axis[[xy]], args$axis)
   # we want users to be able specify orientation in degrees
   if (!is.null(axis_args$major_label_orientation) &&
     is.numeric(axis_args$major_label_orientation))

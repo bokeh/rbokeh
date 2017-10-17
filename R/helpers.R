@@ -86,9 +86,8 @@ sanitize <- function(x) {
 # get the list values of arguments that were actually specified in a function call
 # nms is an optional vector of names to subset results to
 get_specified_args <- function(nms = NULL, nnms = NULL) {
-
   res <- rlang::lang_args(match.call(
-    def = sys.function(-1),
+    definition = sys.function(-1),
     call = sys.call(-1)
   ))
 
@@ -224,8 +223,8 @@ get_glyph_axis_type <- function(a, prev_type = NULL, which = "x") {
 }
 
 get_glyph_range <- function(vals, prev_range, axis_type = NULL) {
-  if (is.null(axis_type))
-    axis_type <- get_axis_type(vals)
+  # if (is.null(axis_type))
+  #   axis_type <- get_axis_type(vals)
 
   if (inherits(vals, c("Date", "POSIXt")))
     vals <- to_epoch(vals)

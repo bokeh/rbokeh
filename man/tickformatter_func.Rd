@@ -26,8 +26,8 @@ figure() \%>\%
     ticker = ticker_num(desired_num_ticks = 20),
     tickformatter = tickformatter_func(code = "return tick + 'm';"))
 
-figure(data = d, width = 1000) \%>\%
-  ly_lines(date, co2_df) \%>\%
+figure(width = 1000) \%>\%
+  ly_lines(date, co2, data = co2_df) \%>\%
   x_axis(tickformatter = tickformatter_func("
 var cur = new Date();
 var diff = (cur.getTime() - tick) / (1000 * 60 * 60 * 24 * 365);

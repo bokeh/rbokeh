@@ -18,3 +18,5 @@ vignettes/index_cache/
 js-scales/node_modules
 js-scales/lib
 inst/htmlwidgets/lib/bokehjs/prev
+inst/htmlwidgets/lib/bokehjs/notused
+\.vscode

@@ -141,9 +141,7 @@ figure() \%>\%
   )) \%>\%
   y_axis(label = "y axis", axis = axis_spec(
     major_label_text_color = "red"
-  )) \%>\%
-  rbokeh_prerender(keep_aux = TRUE)
-  prepare_figure()
+  ))
 
 figure() \%>\%
   ly_points(1:10) \%>\%

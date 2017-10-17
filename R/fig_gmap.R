@@ -17,6 +17,7 @@
 #' @inheritParams figure
 #' @seealso \code{\link{gmap_style}}
 #' @examples
+#' \dontrun{
 #' gmap(lat = 40.74, lng = -73.95, zoom = 11,
 #'   width = 600, height = 600,
 #'   map_style = gmap_style("blue_water"), map_type = "roadmap")
@@ -26,6 +27,7 @@
 #'   map_style = gmap_style("blue_water"), map_type = "roadmap") %>%
 #'   ly_points(long, lat, data = us.cities, color = factor(capital),
 #'     size = spec(pop, range = c(2, 50)), hover = maps::us.cities)
+#' }
 #' @export
 gmap <- function(
   data = NULL,
@@ -88,7 +90,7 @@ gmap <- function(
     tools <- c("pan", "wheel_zoom", "save")
   }
 
-  fig <- figure(
+  args <- list(
     data = data,
     width = width,
     height = height,
@@ -121,6 +123,8 @@ gmap <- function(
     min_border_top = min_border_top,
     hidpi = hidpi
   )
+
+  fig <- do.call(figure, args)
 
   fig$x$pars$axes$below$draw <- FALSE
   fig$x$pars$axes$left$draw <- FALSE

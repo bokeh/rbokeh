@@ -166,8 +166,7 @@ ly_text <- function(fig,
     type = "glyph",
     data = data,
     legend = legend,
-    use_all_data = FALSE), # for now (TODO)
-    quos(...))
+    use_all_data = FALSE)) # for now (TODO)
 
   add_layer(fig, spec, lgroup, lname)
 }

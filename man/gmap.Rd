@@ -102,6 +102,7 @@ This function can be used in the same way as \code{\link{figure}}, adding layers
 Google has its own terms of service for using Google Maps API and any use of rbokeh with Google Maps must be within Google's Terms of Service
 }
 \examples{
+\dontrun{
 gmap(lat = 40.74, lng = -73.95, zoom = 11,
   width = 600, height = 600,
   map_style = gmap_style("blue_water"), map_type = "roadmap")
@@ -111,6 +112,7 @@ gmap(lat = 40.44, lng = -113.785, zoom = 4,
   map_style = gmap_style("blue_water"), map_type = "roadmap") \%>\%
   ly_points(long, lat, data = us.cities, color = factor(capital),
     size = spec(pop, range = c(2, 50)), hover = maps::us.cities)
+}
 }
 \seealso{
 \code{\link{gmap_style}}
