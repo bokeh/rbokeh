@@ -193,11 +193,16 @@ prepare_figure <- function(fig) {
               }
             }
             ly[[attr_nm]] <- list(field = sanitize(nm))
-          } else if (length(val) == 1) {
+          } else if (length(val) == 1 && (!attr_nm %in% c("x", "y"))) {
             ly[[attr_nm]] <- val
-          } else if (length(val) > 1) {
+          } else if (length(val) > 1 || attr_nm %in% c("x", "y")) {
             nm <- paste0("col", length(ly$data) + 1, "___")
-            ly$data[[nm]] <- val
+            if (is.null(ly$data)) {
+              ly$data <- data.frame(val)
+              names(ly$data) <- nm
+            } else {
+              ly$data[[nm]] <- val
+            }
             if (!is.data.frame(ly$data)) {
               ly$data <- as.data.frame(ly$data)
             }
