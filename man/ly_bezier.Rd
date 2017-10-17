@@ -5,34 +5,78 @@
 \title{Add a "bezier" layer to a Bokeh figure}
 \usage{
 ly_bezier(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = figure_data(fig),
-  color = NULL, alpha = NULL, type = 1, width = 1, hov_color = NULL,
-  hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL, sel_color = NULL,
-  sel_alpha = NULL, hover = NULL, url = NULL, legend = TRUE,
+  color = NULL, alpha = NULL, type = 1, width = 1, legend = TRUE,
   lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{x0}{values or field name of starting x coordinates}
+\item{x0}{Values or field name / expression indicating starting x coordinates.}
 
-\item{y0}{values or field name of starting y coordinates}
+\item{y0}{Values or field name / expression indicating starting y coordinates.}
 
-\item{x1}{values or field name of ending x coordinates}
+\item{x1}{Values or field name / expression indicating ending x coordinates.}
 
-\item{y1}{values or field name of ending y coordinates}
+\item{y1}{Values or field name / expression indicating ending y coordinates.}
 
-\item{cx0}{values or field name of first control point x coordinates}
+\item{cx0}{Values or field name / expression indicating first control point x coordinates.}
 
-\item{cy0}{values or field name of first control point y coordinates}
+\item{cy0}{Values or field name / expression indicating first control point y coordinates.}
 
-\item{cx1}{values or field name of second control point x coordinates}
+\item{cx1}{Values or field name / expression indicating second control point x coordinates.}
 
-\item{cy1}{values or field name of second control point y coordinates}
+\item{cy1}{Values or field name / expression indicating second control point y coordinates.}
 
-\item{data}{an optional data frame, providing the source for start, end, and control point intputs, as well as other glyph properties}
+\item{data}{An optional data frame, providing the source for start, end, and control point intputs, as well as other glyph properties.}
+
+\item{color}{Color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'.}
+
+\item{alpha}{Transparency value for the line between 0 (transparent) and 1 (opaque).}
+
+\item{type}{An integer between 1 and 6 matching the \code{lty} property in \code{\link[graphics]{par}} or an array of integer pixel distances that describe the on-off pattern of dashing to use.}
+
+\item{width}{Stroke width in units of pixels.}
+
+\item{legend}{Either a logical specifying not to plot a legend for this layer (FALSE) or a string indicating the name of the legend entry for this layer. Note that when mapping plot attributes to variables in \code{data}, a legend is automatically created and does not need to be specified. See "Mapped plot attributes and legends" below.}
+
+\item{lname}{Layer name.}
+
+\item{lgroup}{Layer group.}
+
+\item{\ldots}{Additional parameters for fine control over line properties. See "Additional parameters" below.}
 }
 \description{
 Draws Bezier curves with the given starting, ending, and control points.
+}
+\section{Mapped plot attributes and legends}{
+ When specifying an input data frame for a layer through the \code{data} argument, columns of \code{data} can be used to specify various plot attributes such as \code{color}, etc. For example, with \code{ly_points(..., data = iris, color = Species)}, the \code{Species} variable is used to determine how to color the points.  Here, \code{Species} is "mapped" to the \code{color} attribute.  Both continuous and categorical variables can be mapped.  In the case of continuous variables, the range is cut into slices and attributes are applied to each interval.  The mapping from the values of the variable to the actual plot attributes is determined based on the theme. When attributes are mapped, legend entries are automatically created for the mappings (when possible).
+}
+
+\section{Additional parameters}{
+
+\tabular{ll}{
+  \code{line_join} \tab How path segments should be joined together. One of 'miter' 'round' 'bevel'. \cr
+  \code{line_cap} \tab How path segments should be terminated. One of 'butt' 'round' 'square'. \cr
+  \code{line_dash} \tab An integer between 1 and 6 matching the \code{lty} property in \code{\link[graphics]{par}} or an array of integer pixel distances that describe the on-off pattern of dashing to use. \cr
+  \code{line_dash_offset} \tab The distance in pixels into the line_dash that the pattern should start from.
+ }
+}
+
+\examples{
+# this plot does not serve any practical purpose but illustrates ly_bezier
+figure() \%>\%
+  ly_bezier(
+    x0 = Sepal.Length,
+    x1 = Sepal.Length + runif(150),
+    cx0 = Sepal.Length + runif(150),
+    cx1 = Sepal.Length + runif(150),
+    y0 = Sepal.Width,
+    y1 = Sepal.Width + runif(150),
+    cy0 = Sepal.Width + runif(150),
+    cy1 = Sepal.Width + runif(150),
+    color = Species,
+    data = iris,
+    hover = iris)
 }
 \seealso{
 Other layer functions: \code{\link{ly_annular_wedge}},

@@ -7,24 +7,84 @@
 ly_segments(fig, x0, y0, x1, y1, data = figure_data(fig), type = 1,
   width = 1, color = NULL, alpha = NULL, hov_color = NULL,
   hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL, sel_color = NULL,
-  sel_alpha = NULL, hover = NULL, url = NULL, legend = TRUE,
-  lname = NULL, lgroup = NULL, ...)
+  sel_alpha = NULL, hover = NULL, legend = TRUE, lname = NULL,
+  lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{x0}{values or field name of starting x coordinates}
+\item{x0}{Values or field name / expression indicating starting x coordinates.}
 
-\item{y0}{values or field name of starting y coordinates}
+\item{y0}{Values or field name / expression indicating starting y coordinates.}
 
-\item{x1}{values or field name of ending x coordinates}
+\item{x1}{Values or field name / expression indicating ending x coordinates.}
 
-\item{y1}{values or field name of ending y coordinates}
+\item{y1}{Values or field name / expression indicating ending y coordinates.}
 
-\item{data}{an optional data frame, providing the source for inputs x, y, and other glyph properties}
+\item{data}{An optional data frame, providing the source for inputs x, y, and other glyph properties.}
+
+\item{type}{An integer between 1 and 6 matching the \code{lty} property in \code{\link[graphics]{par}} or an array of integer pixel distances that describe the on-off pattern of dashing to use.}
+
+\item{width}{Stroke width in units of pixels.}
+
+\item{color}{Color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'.}
+
+\item{alpha}{Transparency value for the line between 0 (transparent) and 1 (opaque).}
+
+\item{hov_color}{Color to use to stroke lines when they are hovered.}
+
+\item{hov_alpha}{Transparency value for the line when it is hovered.}
+
+\item{ns_color}{Color to use to stroke lines when they are not selected.}
+
+\item{ns_alpha}{Transparency value for the line when it is not selected.}
+
+\item{sel_color}{Color to use to stroke lines when they are selected.}
+
+\item{sel_alpha}{Transparency value for the line when it is selected.}
+
+\item{hover}{A data frame of variables to be displayed when hovering over the glyph, a vector of variable names that can be found and extracted from the \code{data} argument, a string specifying the tooltip text (see \code{\link{hov}} for details) or an explicit hover specification returned from calling \code{\link{hov}}. See \code{\link{hov}} for more details for some examples.}
+
+\item{legend}{Either a logical specifying not to plot a legend for this layer (FALSE) or a string indicating the name of the legend entry for this layer. Note that when mapping plot attributes to variables in \code{data}, a legend is automatically created and does not need to be specified. See "Mapped plot attributes and legends" below.}
+
+\item{lname}{Layer name.}
+
+\item{lgroup}{Layer group.}
+
+\item{\ldots}{Additional parameters for fine control over line properties. See "Additional parameters" below.}
 }
 \description{
 Draws line segments with the given starting and ending coordinates.
+}
+\section{Mapped plot attributes and legends}{
+ When specifying an input data frame for a layer through the \code{data} argument, columns of \code{data} can be used to specify various plot attributes such as \code{color}, etc. For example, with \code{ly_points(..., data = iris, color = Species)}, the \code{Species} variable is used to determine how to color the points.  Here, \code{Species} is "mapped" to the \code{color} attribute.  Both continuous and categorical variables can be mapped.  In the case of continuous variables, the range is cut into slices and attributes are applied to each interval.  The mapping from the values of the variable to the actual plot attributes is determined based on the theme. When attributes are mapped, legend entries are automatically created for the mappings (when possible).
+}
+
+\section{Additional parameters}{
+
+\tabular{ll}{
+  \code{line_join} \tab How path segments should be joined together. One of 'miter' 'round' 'bevel'. \cr
+  \code{line_cap} \tab How path segments should be terminated. One of 'butt' 'round' 'square'. \cr
+  \code{line_dash} \tab An integer between 1 and 6 matching the \code{lty} property in \code{\link[graphics]{par}} or an array of integer pixel distances that describe the on-off pattern of dashing to use. \cr
+  \code{line_dash_offset} \tab The distance in pixels into the line_dash that the pattern should start from.
+ }
+}
+
+\examples{
+wa_cancer <- data.frame(
+  LCL95.male = c(237, 233.1, 266, 219.8, 227.5, 239.7, 245.4, 237.5, 208, 216.2),
+  UCL95.male = c(466, 471.6, 316.8, 347.2, 303, 283.4, 263.3, 268.1, 300.3, 290.5),
+  rate.male = c(332, 329.8, 290.5, 276.4, 263, 260.8, 254.2, 252.4, 250.6, 250.3),
+  county = c("Columbia", "Wahkiakum", "Grays Harbor", "Pend Oreille", "Franklin",
+    "Cowlitz", "Pierce", "Thurston", "Klickitat", "Pacific"),
+  stringsAsFactors = FALSE)
+## y axis sorted by male rate
+ylim <- levels(with(wa_cancer, reorder(county, rate.male)))
+
+figure(ylim = ylim, data = wa_cancer) \%>\%
+  ly_segments(LCL95.male, county, UCL95.male,
+    county, width = 2, color = "steelblue") \%>\%
+  ly_points(rate.male, county, glyph = 16, color = "steelblue", hover = wa_cancer)
 }
 \seealso{
 Other layer functions: \code{\link{ly_annular_wedge}},

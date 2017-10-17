@@ -4,20 +4,87 @@
 \alias{ly_multi_line}
 \title{Add a "multi_line" layer to a Bokeh figure}
 \usage{
-ly_multi_line(fig, xs = NULL, ys = NULL, data = figure_data(fig),
-  type = 1, width = 1, color = NULL, alpha = NULL, hover = NULL,
-  legend = TRUE, hov_color = NULL, hov_alpha = NULL, ns_color = NULL,
-  ns_alpha = NULL, lgroup = NULL, lname = NULL, ...)
+ly_multi_line(fig, xs = NULL, ys = NULL, type = 1, width = 1,
+  color = NULL, alpha = NULL, hov_color = NULL, hov_alpha = NULL,
+  ns_color = NULL, ns_alpha = NULL, sel_color = NULL, sel_alpha = NULL,
+  hover = NULL, legend = TRUE, lgroup = NULL, lname = NULL, ...)
 }
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{xs}{list of vectors of x coordinates}
+\item{xs}{List of vectors of x coordinates.}
 
-\item{ys}{list of vectors of y coordinates}
+\item{ys}{List of vectors of y coordinates.}
+
+\item{type}{An integer between 1 and 6 matching the \code{lty} property in \code{\link[graphics]{par}} or an array of integer pixel distances that describe the on-off pattern of dashing to use.}
+
+\item{width}{Stroke width in units of pixels.}
+
+\item{color}{Color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'.}
+
+\item{alpha}{Transparency value for the line between 0 (transparent) and 1 (opaque).}
+
+\item{hov_color}{Color to use to stroke lines when they are hovered.}
+
+\item{hov_alpha}{Transparency value for the line when it is hovered.}
+
+\item{ns_color}{Color to use to stroke lines when they are not selected.}
+
+\item{ns_alpha}{Transparency value for the line when it is not selected.}
+
+\item{sel_color}{Color to use to stroke lines when they are selected.}
+
+\item{sel_alpha}{Transparency value for the line when it is selected.}
+
+\item{hover}{A data frame of variables to be displayed when hovering over the glyph, a vector of variable names that can be found and extracted from the \code{data} argument, a string specifying the tooltip text (see \code{\link{hov}} for details) or an explicit hover specification returned from calling \code{\link{hov}}. See \code{\link{hov}} for more details for some examples.}
+
+\item{legend}{Either a logical specifying not to plot a legend for this layer (FALSE) or a string indicating the name of the legend entry for this layer. Note that when mapping plot attributes to variables in \code{data}, a legend is automatically created and does not need to be specified. See "Mapped plot attributes and legends" below.}
+
+\item{lgroup}{Layer group.}
+
+\item{lname}{Layer name.}
+
+\item{\ldots}{Additional parameters for fine control over line properties. See "Additional parameters" below.}
 }
 \description{
 Draws multiple lines with the given lists of coordinates.
+}
+\section{Mapped plot attributes and legends}{
+ When specifying an input data frame for a layer through the \code{data} argument, columns of \code{data} can be used to specify various plot attributes such as \code{color}, etc. For example, with \code{ly_points(..., data = iris, color = Species)}, the \code{Species} variable is used to determine how to color the points.  Here, \code{Species} is "mapped" to the \code{color} attribute.  Both continuous and categorical variables can be mapped.  In the case of continuous variables, the range is cut into slices and attributes are applied to each interval.  The mapping from the values of the variable to the actual plot attributes is determined based on the theme. When attributes are mapped, legend entries are automatically created for the mappings (when possible).
+}
+
+\section{Additional parameters}{
+
+\tabular{ll}{
+  \code{line_join} \tab How path segments should be joined together. One of 'miter' 'round' 'bevel'. \cr
+  \code{line_cap} \tab How path segments should be terminated. One of 'butt' 'round' 'square'. \cr
+  \code{line_dash} \tab An integer between 1 and 6 matching the \code{lty} property in \code{\link[graphics]{par}} or an array of integer pixel distances that describe the on-off pattern of dashing to use. \cr
+  \code{line_dash_offset} \tab The distance in pixels into the line_dash that the pattern should start from.
+ }
+}
+
+\examples{
+xs <- list()
+ys <- list()
+for (i in 1:500) {
+  count <- sample(1:10, 1)
+  angles <- runif(count + 1, 0, 2 * pi)
+  x_dists <- (1 / 2) ^ (0:count) * cos(angles)
+  y_dists <- (1 / 2) ^ (0:count) * sin(angles)
+  xs[[length(xs) + 1]] <- c(cumsum(x_dists))
+  ys[[length(ys) + 1]] <- c(cumsum(y_dists))
+}
+
+figure() \%>\%
+  ly_multi_line(xs = xs, ys = ys, hover = data.frame(a = 1:500))
+
+figure() \%>\%
+  ly_multi_line(xs = xs, ys = ys,
+    color = sample(c("a", "b"), 500, replace = TRUE))
+
+figure() \%>\%
+  ly_multi_line(xs = xs, ys = ys,
+    color = asis(sample(c("red", "blue"), 500, replace = TRUE)))
 }
 \seealso{
 Other layer functions: \code{\link{ly_annular_wedge}},

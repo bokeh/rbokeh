@@ -7,25 +7,28 @@
 ly_image_url(fig, x = NULL, y = NULL, url, w = 10, h = 10,
   data = figure_data(fig), dilate = TRUE, anchor = "top_left",
   angle = 0, w_units = "screen", h_units = "screen", global_alpha = 1,
-  retry_attempts = 0, retry_timeout = 0, lgroup = NULL, lname = NULL,
-  ...)
+  retry_attempts = 0, retry_timeout = 0, lgroup = NULL, lname = NULL)
 }
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{x}{x coordinates}
+\item{x}{The image x coordinates.}
 
-\item{y}{y coordinates}
+\item{y}{The image y coordinates.}
 
-\item{w, h}{values or field names of width and height of image}
+\item{url}{Values or field name of image URLs.}
 
-\item{data}{an optional data frame, providing the source for inputs x, y, and other properties}
+\item{w, h}{Values or field names of width and height of image.}
 
-\item{dilate}{logical - Whether to always round fractional pixel locations in such a way as to make the images bigger. This setting may be useful if pixel rounding errors are causing images to have a gap between them, when they should appear flush.}
+\item{data}{An optional data frame, providing the source for inputs x, y, and other properties.}
+
+\item{dilate}{Logical indicating whether to always round fractional pixel locations in such a way as to make the images bigger. This setting may be useful if pixel rounding errors are causing images to have a gap between them, when they should appear flush.}
 
 \item{anchor}{Where the image is anchored to with respect to \code{x} and \code{y}. One of 'top_left', 'top_center', 'top_right', 'center_left', 'center', 'center_right', 'bottom_left', 'bottom_center', 'bottom_right'.}
 
-\item{angle}{values or field name of the angle to rotate the image, in radians}
+\item{angle}{Values or field name / expression indicating the angle to rotate the image, in radians.}
+
+\item{w_units, h_units}{One of "screen", "data".}
 
 \item{global_alpha}{An overall opacity that each image is rendered with (in addition to any inherent alpha values in the image itself).}
 
@@ -33,10 +36,27 @@ ly_image_url(fig, x = NULL, y = NULL, url, w = 10, h = 10,
 
 \item{retry_timeout}{Timeout (in ms) between retry attempts to load the image from the specified URL.}
 
-\item{image_url}{values or field name of image URLs}
+\item{lgroup}{Layer group.}
+
+\item{lname}{Layer name.}
 }
 \description{
 Renders raster images from URLs at provided coordinates
+}
+\examples{
+url <- c("  http://bokeh.pydata.org/en/latest/_static/images/logo.png",
+  "http://developer.r-project.org/Logo/Rlogo-4.png")
+ss <- seq(0, 2 * pi, length = 13)[-1]
+ws <- runif(12, 2.5, 5) * rep(c(1, 0.8), 6)
+imgdat <- data.frame(
+  x = sin(ss) * 10, y = cos(ss) * 10,
+  w = ws, h = ws * rep(c(1, 0.76), 6),
+  url = rep(url, 6),
+  angle = runif(12, 0, 2 * pi))
+
+figure(xlab = "x", ylab = "y", xlim = c(-12, 12), ylim = c(-12, 12)) \%>\%
+  ly_image_url(x, y, w = w, h = h, url = url, data = imgdat,
+    anchor = "center", global_alpha = 0.5)
 }
 \seealso{
 Other layer functions: \code{\link{ly_annular_wedge}},

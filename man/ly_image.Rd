@@ -5,32 +5,39 @@
 \title{Add an "image" layer to a Bokeh figure}
 \usage{
 ly_image(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
-  palette = "Spectral10", dilate = FALSE, lname = NULL, lgroup = NULL,
-  ...)
+  palette = "Spectral10", dilate = FALSE, lname = NULL, lgroup = NULL)
 }
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{z}{matrix or vector of image values}
+\item{z}{Matrix or vector of image values.}
 
-\item{rows}{if \code{z} is a vector, how many rows should be used in treating it as a matrix}
+\item{rows}{If \code{z} is a vector, how many rows should be used in treating it as a matrix.}
 
-\item{byrow}{if \code{z} is a vector, should it be turned into a matrix by row}
+\item{byrow}{If \code{z} is a vector, should it be turned into a matrix by row.}
 
-\item{x}{lower left x coordinates}
+\item{x}{Lower left x coordinates.}
 
-\item{y}{lower left y coordinates}
+\item{y}{Lower left y coordinates.}
 
-\item{dw}{image width distances}
+\item{dw}{Image width distances.}
 
-\item{dh}{image height distances}
+\item{dh}{Image height distances.}
 
-\item{palette}{name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
+\item{palette}{Name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values).}
 
-\item{dilate}{logical - whether to dilate pixel distance computations when drawing}
+\item{dilate}{Logical indicating whether to dilate pixel distance computations when drawing.}
+
+\item{lname}{Layer name.}
+
+\item{lgroup}{Layer group.}
 }
 \description{
 Draws a grid of rectangles with colors corresponding to the values in \code{z}
+}
+\examples{
+figure() \%>\%
+  ly_image(volcano)
 }
 \seealso{
 Other layer functions: \code{\link{ly_annular_wedge}},

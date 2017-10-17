@@ -7,42 +7,86 @@
 ly_text(fig, x, y = NULL, text = NULL, color = NULL, alpha = NULL,
   angle = NULL, data = figure_data(fig), x_offset = NULL,
   y_offset = NULL, font = NULL, font_size = NULL, font_style = NULL,
-  align = NULL, baseline = NULL, hov_color = NULL, hov_alpha = NULL,
-  ns_color = NULL, ns_alpha = NULL, lgroup = NULL, lname = NULL, ...)
+  align = NULL, baseline = NULL, legend = TRUE, hov_color = NULL,
+  hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL, sel_color = NULL,
+  sel_alpha = NULL, lgroup = NULL, lname = NULL)
 }
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{x}{x coordinates of text anchors}
+\item{x}{The x coordinates of text anchors.}
 
-\item{y}{y coordinates of text anchors}
+\item{y}{The y coordinates of text anchors.}
 
-\item{text}{text values to render}
+\item{text}{Text values to render.}
 
-\item{color}{text color values for the text}
+\item{color}{Text color values for the text.}
 
-\item{alpha}{text alpha values for the text}
+\item{alpha}{Text alpha values for the text.}
 
-\item{angle}{angle to rotate the text in radians}
+\item{angle}{Angle to rotate the text in radians.}
 
-\item{data}{an optional data frame, providing the source for inputs x, y, text, and other glyph properties}
+\item{data}{An optional data frame, providing the source for inputs x, y, text, and other glyph properties.}
 
-\item{x_offset}{offset values to apply to the x-coordinates}
+\item{x_offset}{Offset values to apply to the x-coordinates.}
 
-\item{y_offset}{offset values to apply to the y-coordinates}
+\item{y_offset}{Offset values to apply to the y-coordinates.}
 
-\item{font}{text font values for the text}
+\item{font}{Text font values for the text.}
 
-\item{font_size}{text font size values for the text}
+\item{font_size}{Text font size values for the text.}
 
-\item{font_style}{text font style values for the text ("normal", "italic", "bold")}
+\item{font_style}{Text font style values for the text ("normal", "italic", "bold").}
 
-\item{align}{text align values for the text ("left", "right", "center")}
+\item{align}{Text align values for the text. One of ("left", "right", "center").}
 
-\item{baseline}{text baseline values for the text ("top", "middle", "bottom", "alphabetic", "hanging")}
+\item{baseline}{Text baseline values for the text. One of ("top", "middle", "bottom", "alphabetic", "hanging").}
+
+\item{legend}{Either a logical specifying not to plot a legend for this layer (FALSE) or a string indicating the name of the legend entry for this layer. Note that when mapping plot attributes to variables in \code{data}, a legend is automatically created and does not need to be specified. See "Mapped plot attributes and legends" below.}
+
+\item{hov_color}{Text color values for the text when hovered.}
+
+\item{hov_alpha}{Text alpha values for the text when hovered.}
+
+\item{ns_color}{Text color values for the text when not selected.}
+
+\item{ns_alpha}{Text alpha values for the text when not selected.}
+
+\item{sel_color}{Text color values for the text when selected.}
+
+\item{sel_alpha}{Text alpha values for the text when selected.}
+
+\item{lgroup}{Layer group.}
+
+\item{lname}{Layer name.}
 }
 \description{
 Add a "text" layer to a Bokeh figure
+}
+\section{Mapped plot attributes and legends}{
+ When specifying an input data frame for a layer through the \code{data} argument, columns of \code{data} can be used to specify various plot attributes such as \code{color}, etc. For example, with \code{ly_points(..., data = iris, color = Species)}, the \code{Species} variable is used to determine how to color the points.  Here, \code{Species} is "mapped" to the \code{color} attribute.  Both continuous and categorical variables can be mapped.  In the case of continuous variables, the range is cut into slices and attributes are applied to each interval.  The mapping from the values of the variable to the actual plot attributes is determined based on the theme. When attributes are mapped, legend entries are automatically created for the mappings (when possible).
+}
+
+\examples{
+figure(title = "Periodic Table", data = elements,
+  xgrid = FALSE, ygrid = FALSE, xlab = "", ylab = "",
+  xlim = as.character(1:18), ylim = c("   ", "  ", " ", as.character(7:1)),
+  height = 700, width = 1200) \%>\%
+  ly_crect(cat_offset(group, group_offset), period, 0.9, 0.9,
+    color = group_block, fill_alpha = 0.6, legend = FALSE,
+    hover = list(name, atomic_number, group_block, atomic_mass,
+      electronic_configuration)) \%>\%
+  ly_text(cat_offset(group, sym_offset), period, text = symbol,
+    font_style = "bold", font_size = "15pt",
+    align = "left", baseline = "middle") \%>\%
+  ly_text(cat_offset(group, sym_offset), cat_offset(period, 0.3), text = atomic_number_p,
+    font_size = "9pt", align = "left", baseline = "middle") \%>\%
+  ly_text(cat_offset(group, sym_offset), cat_offset(period, -0.2), text = name,
+    font_size = "6pt", align = "left", baseline = "middle") \%>\%
+  ly_text(cat_offset(group, sym_offset), cat_offset(period, -0.35), text = atomic_mass,
+    font_size = "6pt", align = "left", baseline = "middle") \%>\%
+  x_axis(axis = axis_spec(visible = FALSE)) \%>\%
+  y_axis(axis = axis_spec(visible = FALSE))
 }
 \seealso{
 Other layer functions: \code{\link{ly_annular_wedge}},

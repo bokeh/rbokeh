@@ -7,28 +7,88 @@
 ly_quadratic(fig, x0, y0, x1, y1, cx, cy, data = figure_data(fig),
   color = NULL, alpha = NULL, type = 1, width = 1, hov_color = NULL,
   hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL, sel_color = NULL,
-  sel_alpha = NULL, hover = NULL, url = NULL, legend = TRUE,
-  lname = NULL, lgroup = NULL, ...)
+  sel_alpha = NULL, legend = TRUE, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{x0}{values or field name of starting x coordinates}
+\item{x0}{Values or field name / expression indicating starting x coordinates.}
 
-\item{y0}{values or field name of starting y coordinates}
+\item{y0}{Values or field name / expression indicating starting y coordinates.}
 
-\item{x1}{values or field name of ending x coordinates}
+\item{x1}{Values or field name / expression indicating ending x coordinates.}
 
-\item{y1}{values or field name of ending y coordinates}
+\item{y1}{Values or field name / expression indicating ending y coordinates.}
 
-\item{cx}{values or field name of control point x coordinates}
+\item{cx}{Values or field name / expression indicating control point x coordinates.}
 
-\item{cy}{values or field name of control point y coordinates}
+\item{cy}{Values or field name / expression indicating control point y coordinates.}
 
 \item{data}{an optional data frame, providing the source for start, end, and control point intputs, as well as other glyph properties}
+
+\item{color}{Color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'.}
+
+\item{alpha}{Transparency value for the line between 0 (transparent) and 1 (opaque).}
+
+\item{type}{An integer between 1 and 6 matching the \code{lty} property in \code{\link[graphics]{par}} or an array of integer pixel distances that describe the on-off pattern of dashing to use.}
+
+\item{width}{Stroke width in units of pixels.}
+
+\item{hov_color}{Color to use to stroke lines when they are hovered.}
+
+\item{hov_alpha}{Transparency value for the line when it is hovered.}
+
+\item{ns_color}{Color to use to stroke lines when they are not selected.}
+
+\item{ns_alpha}{Transparency value for the line when it is not selected.}
+
+\item{sel_color}{Color to use to stroke lines when they are selected.}
+
+\item{sel_alpha}{Transparency value for the line when it is selected.}
+
+\item{legend}{Either a logical specifying not to plot a legend for this layer (FALSE) or a string indicating the name of the legend entry for this layer. Note that when mapping plot attributes to variables in \code{data}, a legend is automatically created and does not need to be specified. See "Mapped plot attributes and legends" below.}
+
+\item{lname}{Layer name.}
+
+\item{lgroup}{Layer group.}
+
+\item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
 \description{
 Draws quadratic curves with the given starting, ending, and control points.
+}
+\section{Mapped plot attributes and legends}{
+ When specifying an input data frame for a layer through the \code{data} argument, columns of \code{data} can be used to specify various plot attributes such as \code{color}, etc. For example, with \code{ly_points(..., data = iris, color = Species)}, the \code{Species} variable is used to determine how to color the points.  Here, \code{Species} is "mapped" to the \code{color} attribute.  Both continuous and categorical variables can be mapped.  In the case of continuous variables, the range is cut into slices and attributes are applied to each interval.  The mapping from the values of the variable to the actual plot attributes is determined based on the theme. When attributes are mapped, legend entries are automatically created for the mappings (when possible).
+}
+
+\section{Additional parameters}{
+
+\tabular{ll}{
+  \code{fill_color} \tab color to use to fill the glyph with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' \cr
+  \code{fill_alpha} \tab transparency value between 0 (transparent) and 1 (opaque) \cr
+  \code{line_color} \tab color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' \cr
+  \code{line_width} \tab stroke width in units of pixels \cr
+  \code{line_alpha} \tab transparency value between 0 (transparent) and 1 (opaque) \cr
+  \code{line_join} \tab how path segments should be joined together 'miter' 'round' 'bevel' \cr
+  \code{line_cap} \tab how path segments should be terminated 'butt' 'round' 'square' \cr
+  \code{line_dash} \tab array of integer pixel distances that describe the on-off pattern of dashing to use \cr
+  \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
+ }
+}
+
+\examples{
+# this plot does not serve any practical purpose but illustrates ly_quadratic
+figure() \%>\%
+  ly_quadratic(
+    x0 = Sepal.Length,
+    x1 = Sepal.Length + runif(150),
+    cx = Sepal.Length + runif(150),
+    y0 = Sepal.Width,
+    y1 = Sepal.Width + runif(150),
+    cy = Sepal.Width + runif(150),
+    color = Species,
+    data = iris,
+    hover = iris)
 }
 \seealso{
 Other layer functions: \code{\link{ly_annular_wedge}},
