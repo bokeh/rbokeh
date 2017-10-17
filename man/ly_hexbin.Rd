@@ -7,34 +7,32 @@
 ly_hexbin(fig, x, y = NULL, data = figure_data(fig), xbins = 30,
   shape = 1, xbnds = NULL, ybnds = NULL, style = "colorscale",
   trans = NULL, inv = NULL, lname = NULL, palette = "RdYlGn11",
-  line = FALSE, alpha = 1, hover = TRUE, visible = TRUE)
+  line = FALSE, alpha = 1, hover = TRUE)
 }
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{x}{values or field name of center x coordinates to be binned}
+\item{x}{Values or field name / expression indicating center x coordinates to be binned.}
 
-\item{y}{values or field name of center y coordinates to be binned}
+\item{y}{Values or field name / expression indicating center y coordinates to be binned.}
 
-\item{data}{an optional data frame, providing the source for x and y}
+\item{data}{An optional data frame, providing the source for x and y.}
 
-\item{xbins, shape, xbnds, ybnds}{parameters passed to \code{\link[hexbin]{hexbin}}}
+\item{xbins, shape, xbnds, ybnds}{Parameters passed to \code{\link[hexbin]{hexbin}}.}
 
-\item{style}{type of plotting for hexbins (see \code{\link[hexbin]{grid.hexagons}}) - "colorramp" and "lattice" are currently supported}
+\item{style}{Type of plotting for hexbins (see \code{\link[hexbin]{grid.hexagons}}). Currently "colorramp" and "lattice" are supported.}
 
-\item{trans, inv}{transformation and inverse transformation function for the bin counts}
+\item{trans, inv}{Transformation and inverse transformation function for the bin counts.}
 
-\item{lname}{layer name}
+\item{lname}{Layer name.}
 
-\item{palette}{name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
+\item{palette}{Name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values).}
 
-\item{line}{logical - should hexagons have an outline?}
+\item{line}{Logical indicating whether hexagons should have an outline.}
 
-\item{alpha}{the alpha transparency of the hexagons between 0 (transparent) and 1 (opaque)}
+\item{alpha}{The alpha transparency of the hexagons between 0 (transparent) and 1 (opaque).}
 
-\item{hover}{logical - should a hover tool be added to show the count in each hexagon?}
-
-\item{visible}{should the layer be visible?}
+\item{hover}{Logical indicating whether a hover tool should be added to show the count in each hexagon.}
 }
 \description{
 Add a "hexbin" layer to a Bokeh figure

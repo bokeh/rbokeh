@@ -5,32 +5,136 @@
 \title{Add a "barchart" layer to a Bokeh figure}
 \usage{
 ly_bar(fig, x = NULL, y = NULL, data = figure_data(fig), color = NULL,
-  alpha = 1, position = c("stack", "fill", "dodge"), width = 0.9,
-  hover = FALSE, origin = NULL, breaks = NULL, right = FALSE,
-  binwidth = NULL, lname = NULL, lgroup = NULL, legend = TRUE, ...)
+  alpha = 1, hov_color = NULL, hov_alpha = NULL, ns_color = NULL,
+  ns_alpha = NULL, sel_color = NULL, sel_alpha = NULL,
+  position = c("stack", "fill", "dodge"), width = 0.9, hover = FALSE,
+  origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
+  lname = NULL, lgroup = NULL, legend = TRUE, ...)
 }
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{x}{values or field name for x variable, or if NULL, x-axis will be counts of y}
+\item{x}{Values or field name / expression for x variable, or if NULL, x-axis will be counts of y.}
 
-\item{y}{values or field name for y variable, or if NULL, y-axis will be counts of x}
+\item{y}{Values or field name / expression for y variable, or if NULL, y-axis will be counts of x.}
 
-\item{data}{an optional data frame, providing the source for inputs x, y, and color properties}
+\item{data}{An optional data frame, providing the source for inputs x, y, and color properties.}
 
-\item{position}{either "stack", "fill", or "dodge" (see details)}
+\item{color}{Color for the glyph - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'. For glyphs with both fill and line properties, see "Handling color" below.}
 
-\item{width}{with of each bar, a value between 0 (no width) and 1 (full width)}
+\item{alpha}{The alpha transparency of the glyph between 0 (transparent) and 1 (opaque). If the glyph has both fill and color properties, see "Handling alpha" below.}
 
-\item{hover}{logical - should a hover tool be added to show the value of each bar?}
+\item{hov_color}{Color for the glyph when it is hovered The same rules in the "Handling color" section apply.}
 
-\item{origin, breaks, right, binwidth}{parameters to be used for binning x when it is continuous (not yet implemented)}
+\item{hov_alpha}{The alpha transparency of the glyph when it is not hovered The same rules in the "Handling alpha" section apply.}
+
+\item{ns_color}{Color for the glyph when it is not selected The same rules in the "Handling color" section apply.}
+
+\item{ns_alpha}{The alpha transparency of the glyph when it is not not selected The same rules in the "Handling alpha" section apply.}
+
+\item{sel_color}{Color for the glyph when it is selected. The same rules in the "Handling color" section apply.}
+
+\item{sel_alpha}{The alpha transparency of the glyph when it is not selected. The same rules in the "Handling alpha" section apply.}
+
+\item{position}{Either "stack", "fill", or "dodge" (see details).}
+
+\item{width}{Width of each bar, a value between 0 (no width) and 1 (full width).}
+
+\item{hover}{Logical indicating whether a hover tool should be added to show the value of each bar?}
+
+\item{origin, breaks, right, binwidth}{Parameters to be used for binning x when it is continuous (not yet implemented).}
+
+\item{lname}{Layer name.}
+
+\item{lgroup}{Layer group.}
+
+\item{legend}{Either a logical specifying not to plot a legend for this layer (FALSE) or a string indicating the name of the legend entry for this layer. Note that when mapping plot attributes to variables in \code{data}, a legend is automatically created and does not need to be specified. See "Mapped plot attributes and legends" below.}
+
+\item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
 \description{
-Draws a bar chart
+Add a "barchart" layer to a Bokeh figure
 }
 \details{
 This function expects one of either x or y to be categorical and the other to be numeric or NULL.  The numeric variable is summed for each categorical variable and bars are plotted.  If no numeric variable is supplied, the unique values of the categorical variable will be tabulated.  Within each categorical variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each categorical variable level, stacking the bars.  The "dodge" choice will plot the bars for each level of the categorical variable side by side.
+}
+\section{Handling color}{
+ The \code{color} parameter is a high-level plot attribute that provides default behavior for coloring glyphs.
+\itemize{
+  \item When using a glyph that only has line properties, this will be the color of the line.
+  \item When using a glyph that has has line and fill properties, this will be the color of the line and the fill, with the alpha level of the fill reduced by 50\%.
+  \item If full control over fill and line color is desired, the \code{fill_color} and \code{line_color} attributes can be specified explicitly and will override \code{color}.
+}
+When color is \code{NULL} and \code{fill_color} or \code{line_color} are not specified, the color will be chosen from the theme.
+}
+
+\section{Handling alpha}{
+ The \code{alpha} is a high-level plot attribute that sets the transparency of the glyph being plotted.
+\itemize{
+  \item When using a glyph that only has line properties, this will be the alpha of the line.
+  \item When using a glyph that has has line and fill properties, this will be the alpha of the line and the alpha of the fill will be set to 50\% of this value.
+  \item Individual fill and line alpha can be specified with \code{fill_alpha} and \code{line_alpha} and will override \code{alpha}.
+}
+}
+
+\section{Mapped plot attributes and legends}{
+ When specifying an input data frame for a layer through the \code{data} argument, columns of \code{data} can be used to specify various plot attributes such as \code{color}, etc. For example, with \code{ly_points(..., data = iris, color = Species)}, the \code{Species} variable is used to determine how to color the points.  Here, \code{Species} is "mapped" to the \code{color} attribute.  Both continuous and categorical variables can be mapped.  In the case of continuous variables, the range is cut into slices and attributes are applied to each interval.  The mapping from the values of the variable to the actual plot attributes is determined based on the theme. When attributes are mapped, legend entries are automatically created for the mappings (when possible).
+}
+
+\section{Additional parameters}{
+
+\tabular{ll}{
+  \code{fill_color} \tab color to use to fill the glyph with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' \cr
+  \code{fill_alpha} \tab transparency value between 0 (transparent) and 1 (opaque) \cr
+  \code{line_color} \tab color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' \cr
+  \code{line_width} \tab stroke width in units of pixels \cr
+  \code{line_alpha} \tab transparency value between 0 (transparent) and 1 (opaque) \cr
+  \code{line_join} \tab how path segments should be joined together 'miter' 'round' 'bevel' \cr
+  \code{line_cap} \tab how path segments should be terminated 'butt' 'round' 'square' \cr
+  \code{line_dash} \tab array of integer pixel distances that describe the on-off pattern of dashing to use \cr
+  \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
+ }
+}
+
+\examples{
+# ly_bar
+figure() \%>\%
+  ly_bar(variety, data = lattice::barley) \%>\%
+  theme_axis("x", major_label_orientation = 90)
+
+# total yield per variety
+figure() \%>\%
+  ly_bar(variety, yield, data = lattice::barley, hover = TRUE) \%>\%
+  theme_axis("x", major_label_orientation = 90)
+
+# swap axes and add hover
+figure() \%>\%
+  ly_bar(yield, variety, data = lattice::barley, hover = TRUE)
+# TODO: fix hover
+
+# stack by year
+figure() \%>\%
+  ly_bar(variety, yield, color = year, data = lattice::barley, hover = TRUE) \%>\%
+  theme_axis("x", major_label_orientation = 90)
+
+# proportional bars
+figure() \%>\%
+  ly_bar(variety, yield, color = year,
+    data = lattice::barley, position = "fill", width = 1) \%>\%
+  theme_axis("x", major_label_orientation = 90) \%>\%
+  set_palette(discrete_color = pal_color(c("red", "blue")))
+
+# swap axes and use different palette
+figure() \%>\%
+  ly_bar(yield, variety, color = year,
+    data = lattice::barley, position = "fill") \%>\%
+  set_palette(discrete_color = pal_color(c("red", "blue")))
+
+# side by side bars
+figure() \%>\%
+  ly_bar(variety, yield, color = year,
+    data = lattice::barley, position = "dodge") \%>\%
+  theme_axis("x", major_label_orientation = 90)
 }
 \seealso{
 Other layer functions: \code{\link{ly_annular_wedge}},

@@ -1080,7 +1080,7 @@ ly_polygons <- function(
 #'
 #' Draws a grid of rectangles with colors corresponding to the values in \code{z}
 #' @param fig Figure to modify.
-#' @param z Matrix or vector of image values.
+#' @param z A matrix or vector of image values.
 #' @param rows If \code{z} is a vector, how many rows should be used in treating it as a matrix.
 #' @param byrow If \code{z} is a vector, should it be turned into a matrix by row.
 #' @param x Lower left x coordinates.

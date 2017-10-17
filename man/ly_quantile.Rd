@@ -13,21 +13,83 @@ ly_quantile(fig, x, group = NULL, data = figure_data(fig), probs = NULL,
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{x}{numeric vector or field name of variable to compute sample quantiles for}
+\item{x}{A numeric vector or field name of variable to compute sample quantiles for.}
 
-\item{group}{values or field name of a grouping variable to break quantile computations up by}
+\item{group}{Values or field name of a grouping variable to break quantile computations up by.}
 
-\item{data}{an optional data frame, providing the source for x}
+\item{data}{An optional data frame, providing the source for x.}
 
-\item{probs}{numeric vector of probabilities with values in \code{[0,1]} at which to compute quantiles - if \code{NULL}, every point of \code{x} is a quantile}
+\item{probs}{Numeric vector of probabilities with values in \code{[0,1]} at which to compute quantiles. If \code{NULL}, every point of \code{x} is a quantile.}
 
-\item{distn}{quantile function to use on the x-axis (e.g. \code{\link[stats]{qnorm}}) - default is \code{\link[stats]{qunif}},}
+\item{distn}{Quantile function to use on the x-axis (e.g. \code{\link[stats]{qnorm}}). The default is \code{\link[stats]{qunif}},}
 
-\item{ncutoff}{if the length of \code{x} exceeds this value and \code{probs} is not specified, compute quantiles at \code{ncutoff} points}
+\item{ncutoff}{If the length of \code{x} exceeds this value and \code{probs} is not specified, compute quantiles at \code{ncutoff} points.}
+
+\item{color}{Color for the glyph - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'. For glyphs with both fill and line properties, see "Handling color" below.}
+
+\item{alpha}{The alpha transparency of the glyph between 0 (transparent) and 1 (opaque). If the glyph has both fill and color properties, see "Handling alpha" below.}
+
+\item{hov_color}{Color for the glyph when it is hovered The same rules in the "Handling color" section apply.}
+
+\item{hov_alpha}{The alpha transparency of the glyph when it is not hovered The same rules in the "Handling alpha" section apply.}
+
+\item{ns_color}{Color for the glyph when it is not selected The same rules in the "Handling color" section apply.}
+
+\item{ns_alpha}{The alpha transparency of the glyph when it is not not selected The same rules in the "Handling alpha" section apply.}
+
+\item{sel_color}{Color for the glyph when it is selected. The same rules in the "Handling color" section apply.}
+
+\item{sel_alpha}{The alpha transparency of the glyph when it is not selected. The same rules in the "Handling alpha" section apply.}
+
+\item{legend}{Either a logical specifying not to plot a legend for this layer (FALSE) or a string indicating the name of the legend entry for this layer. Note that when mapping plot attributes to variables in \code{data}, a legend is automatically created and does not need to be specified. See "Mapped plot attributes and legends" below.}
+
+\item{lname}{Layer name.}
+
+\item{lgroup}{Layer group.}
+
+\item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
 \description{
 Draws quantiles
 }
+\section{Handling color}{
+ The \code{color} parameter is a high-level plot attribute that provides default behavior for coloring glyphs.
+\itemize{
+  \item When using a glyph that only has line properties, this will be the color of the line.
+  \item When using a glyph that has has line and fill properties, this will be the color of the line and the fill, with the alpha level of the fill reduced by 50\%.
+  \item If full control over fill and line color is desired, the \code{fill_color} and \code{line_color} attributes can be specified explicitly and will override \code{color}.
+}
+When color is \code{NULL} and \code{fill_color} or \code{line_color} are not specified, the color will be chosen from the theme.
+}
+
+\section{Handling alpha}{
+ The \code{alpha} is a high-level plot attribute that sets the transparency of the glyph being plotted.
+\itemize{
+  \item When using a glyph that only has line properties, this will be the alpha of the line.
+  \item When using a glyph that has has line and fill properties, this will be the alpha of the line and the alpha of the fill will be set to 50\% of this value.
+  \item Individual fill and line alpha can be specified with \code{fill_alpha} and \code{line_alpha} and will override \code{alpha}.
+}
+}
+
+\section{Mapped plot attributes and legends}{
+ When specifying an input data frame for a layer through the \code{data} argument, columns of \code{data} can be used to specify various plot attributes such as \code{color}, etc. For example, with \code{ly_points(..., data = iris, color = Species)}, the \code{Species} variable is used to determine how to color the points.  Here, \code{Species} is "mapped" to the \code{color} attribute.  Both continuous and categorical variables can be mapped.  In the case of continuous variables, the range is cut into slices and attributes are applied to each interval.  The mapping from the values of the variable to the actual plot attributes is determined based on the theme. When attributes are mapped, legend entries are automatically created for the mappings (when possible).
+}
+
+\section{Additional parameters}{
+
+\tabular{ll}{
+  \code{fill_color} \tab color to use to fill the glyph with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' \cr
+  \code{fill_alpha} \tab transparency value between 0 (transparent) and 1 (opaque) \cr
+  \code{line_color} \tab color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' \cr
+  \code{line_width} \tab stroke width in units of pixels \cr
+  \code{line_alpha} \tab transparency value between 0 (transparent) and 1 (opaque) \cr
+  \code{line_join} \tab how path segments should be joined together 'miter' 'round' 'bevel' \cr
+  \code{line_cap} \tab how path segments should be terminated 'butt' 'round' 'square' \cr
+  \code{line_dash} \tab array of integer pixel distances that describe the on-off pattern of dashing to use \cr
+  \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
+ }
+}
+
 \examples{
 figure(legend_location = "top_left") \%>\%
   ly_quantile(Sepal.Length, group = Species, data = iris)

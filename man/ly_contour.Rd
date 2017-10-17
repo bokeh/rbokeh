@@ -8,19 +8,60 @@ ly_contour(fig, z, x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1,
   length.out = ncol(z)), nlevels = 10, levels = pretty(range(z, na.rm =
   TRUE), nlevels), color = "black", alpha = 1, width = 1, type = 1,
   hov_color = NULL, hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL,
-  lname = NULL, lgroup = NULL, ...)
+  sel_color = NULL, sel_alpha = NULL, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{z}{a matrix containing the values to compute contour lines for}
+\item{z}{A matrix containing the values to compute contour lines for.}
 
-\item{x, y}{locations of grid lines at which the values in \code{image} are measured (see \code{\link[grDevices]{contourLines}})}
+\item{x, y}{Locations of grid lines at which the values in \code{image} are measured (see \code{\link[grDevices]{contourLines}}).}
 
-\item{nlevels, levels}{parameters sent to \code{\link[grDevices]{contourLines}})}
+\item{nlevels, levels}{Parameters sent to \code{\link[grDevices]{contourLines}}).}
+
+\item{color}{Color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'.}
+
+\item{alpha}{Transparency value for the line between 0 (transparent) and 1 (opaque).}
+
+\item{width}{Stroke width in units of pixels.}
+
+\item{type}{An integer between 1 and 6 matching the \code{lty} property in \code{\link[graphics]{par}} or an array of integer pixel distances that describe the on-off pattern of dashing to use.}
+
+\item{hov_color}{Color to use to stroke lines when they are hovered.}
+
+\item{hov_alpha}{Transparency value for the line when it is hovered.}
+
+\item{ns_color}{Color to use to stroke lines when they are not selected.}
+
+\item{ns_alpha}{Transparency value for the line when it is not selected.}
+
+\item{sel_color}{Color to use to stroke lines when they are selected.}
+
+\item{sel_alpha}{Transparency value for the line when it is selected.}
+
+\item{lname}{Layer name.}
+
+\item{lgroup}{Layer group.}
+
+\item{\ldots}{Additional parameters for fine control over line properties. See "Additional parameters" below.}
 }
 \description{
 Computes and draws contour lines.
+}
+\section{Additional parameters}{
+
+\tabular{ll}{
+  \code{line_join} \tab How path segments should be joined together. One of 'miter' 'round' 'bevel'. \cr
+  \code{line_cap} \tab How path segments should be terminated. One of 'butt' 'round' 'square'. \cr
+  \code{line_dash} \tab An integer between 1 and 6 matching the \code{lty} property in \code{\link[graphics]{par}} or an array of integer pixel distances that describe the on-off pattern of dashing to use. \cr
+  \code{line_dash_offset} \tab The distance in pixels into the line_dash that the pattern should start from.
+ }
+}
+
+\examples{
+figure(title = "Volcano") \%>\%
+  ly_image(volcano) \%>\%
+  ly_contour(volcano)
 }
 \seealso{
 Other layer functions: \code{\link{ly_annular_wedge}},

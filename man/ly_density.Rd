@@ -15,20 +15,55 @@ ly_density(fig, x, data = figure_data(fig), bw = "nrd0", adjust = 1,
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{x, bw, adjust, kernel, weights, window, n, cut, na.rm}{parameters passed to \code{\link[stats]{density}}}
+\item{x, bw, adjust, kernel, weights, window, n, cut, na.rm}{Parameters passed to \code{\link[stats]{density}}.}
 
-\item{data}{an optional data frame, providing the source for x}
+\item{data}{An optional data frame, providing the source for x.}
 
-\item{legend}{text to display in the legend entry for the density line}
+\item{color}{Color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'.}
+
+\item{alpha}{Transparency value for the line between 0 (transparent) and 1 (opaque).}
+
+\item{width}{Stroke width in units of pixels.}
+
+\item{type}{An integer between 1 and 6 matching the \code{lty} property in \code{\link[graphics]{par}} or an array of integer pixel distances that describe the on-off pattern of dashing to use.}
+
+\item{hov_color}{Color to use to stroke lines when they are hovered.}
+
+\item{hov_alpha}{Transparency value for the line when it is hovered.}
+
+\item{ns_color}{Color to use to stroke lines when they are not selected.}
+
+\item{ns_alpha}{Transparency value for the line when it is not selected.}
+
+\item{sel_color}{Color to use to stroke lines when they are selected.}
+
+\item{sel_alpha}{Transparency value for the line when it is selected.}
+
+\item{legend}{Text to display in the legend entry for the density line.}
+
+\item{lname}{Layer name.}
+
+\item{lgroup}{Layer group.}
+
+\item{\ldots}{Additional parameters for fine control over line properties. See "Additional parameters" below.}
 }
 \description{
 Draws a kernel density estimate
 }
+\section{Additional parameters}{
+
+\tabular{ll}{
+  \code{line_join} \tab How path segments should be joined together. One of 'miter' 'round' 'bevel'. \cr
+  \code{line_cap} \tab How path segments should be terminated. One of 'butt' 'round' 'square'. \cr
+  \code{line_dash} \tab An integer between 1 and 6 matching the \code{lty} property in \code{\link[graphics]{par}} or an array of integer pixel distances that describe the on-off pattern of dashing to use. \cr
+  \code{line_dash_offset} \tab The distance in pixels into the line_dash that the pattern should start from.
+ }
+}
+
 \examples{
-h <- figure(width = 600, height = 400) \%>\%
+figure(width = 600, height = 400) \%>\%
   ly_hist(eruptions, data = faithful, breaks = 40, freq = FALSE) \%>\%
   ly_density(eruptions, data = faithful)
-h
 }
 \seealso{
 Other layer functions: \code{\link{ly_annular_wedge}},

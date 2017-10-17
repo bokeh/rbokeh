@@ -13,26 +13,79 @@ ly_boxplot(fig, x, y = NULL, data = figure_data(fig), width = 0.9,
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{x}{either a numeric vector or a factor}
+\item{x}{Either a numeric vector or a factor.}
 
-\item{y}{either a numeric vector or a factor}
+\item{y}{eEither a numeric vector or a factor.}
 
-\item{data}{an optional data frame, providing the source for x and y}
+\item{data}{An optional data frame, providing the source for x and y.}
 
-\item{width}{with of each box, a value between 0 (no width) and 1 (full width)}
+\item{width}{Width of each box, a value between 0 (no width) and 1 (full width).}
 
-\item{coef}{see \code{\link[grDevices]{boxplot.stats}}}
+\item{coef}{See \code{\link[grDevices]{boxplot.stats}}.}
 
-\item{outlier_glyph}{the glyph used to plot the outliers. If set to
-\code{NA}, no outlier points are plotted. Run \code{point_types()} for
-possible values.}
+\item{color}{Color for the glyph - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo'. For glyphs with both fill and line properties, see "Handling color" below.}
 
-\item{outlier_size}{the size of the glyph used to plot outliers. If set to
-\code{NA}, no outlier points are plotted.}
+\item{alpha}{The alpha transparency of the glyph between 0 (transparent) and 1 (opaque). If the glyph has both fill and color properties, see "Handling alpha" below.}
+
+\item{hov_color}{Color for the glyph when it is hovered The same rules in the "Handling color" section apply.}
+
+\item{hov_alpha}{The alpha transparency of the glyph when it is not hovered The same rules in the "Handling alpha" section apply.}
+
+\item{ns_color}{Color for the glyph when it is not selected The same rules in the "Handling color" section apply.}
+
+\item{ns_alpha}{The alpha transparency of the glyph when it is not not selected The same rules in the "Handling alpha" section apply.}
+
+\item{sel_color}{Color for the glyph when it is selected. The same rules in the "Handling color" section apply.}
+
+\item{sel_alpha}{The alpha transparency of the glyph when it is not selected. The same rules in the "Handling alpha" section apply.}
+
+\item{outlier_glyph}{The glyph used to plot the outliers. If set to \code{NA}, no outlier points are plotted. Run \code{point_types()} for possible values.}
+
+\item{outlier_size}{The size of the glyph used to plot outliers. If set to \code{NA}, no outlier points are plotted.}
+
+\item{lname}{Layer name.}
+
+\item{lgroup}{Layer group.}
+
+\item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
 \description{
 Add a "boxplot" layer to a Bokeh figure
 }
+\section{Handling color}{
+ The \code{color} parameter is a high-level plot attribute that provides default behavior for coloring glyphs.
+\itemize{
+  \item When using a glyph that only has line properties, this will be the color of the line.
+  \item When using a glyph that has has line and fill properties, this will be the color of the line and the fill, with the alpha level of the fill reduced by 50\%.
+  \item If full control over fill and line color is desired, the \code{fill_color} and \code{line_color} attributes can be specified explicitly and will override \code{color}.
+}
+When color is \code{NULL} and \code{fill_color} or \code{line_color} are not specified, the color will be chosen from the theme.
+}
+
+\section{Handling alpha}{
+ The \code{alpha} is a high-level plot attribute that sets the transparency of the glyph being plotted.
+\itemize{
+  \item When using a glyph that only has line properties, this will be the alpha of the line.
+  \item When using a glyph that has has line and fill properties, this will be the alpha of the line and the alpha of the fill will be set to 50\% of this value.
+  \item Individual fill and line alpha can be specified with \code{fill_alpha} and \code{line_alpha} and will override \code{alpha}.
+}
+}
+
+\section{Additional parameters}{
+
+\tabular{ll}{
+  \code{fill_color} \tab color to use to fill the glyph with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' \cr
+  \code{fill_alpha} \tab transparency value between 0 (transparent) and 1 (opaque) \cr
+  \code{line_color} \tab color to use to stroke lines with - a hex code (with no alpha) or any of the 147 named CSS colors, e.g 'green', 'indigo' \cr
+  \code{line_width} \tab stroke width in units of pixels \cr
+  \code{line_alpha} \tab transparency value between 0 (transparent) and 1 (opaque) \cr
+  \code{line_join} \tab how path segments should be joined together 'miter' 'round' 'bevel' \cr
+  \code{line_cap} \tab how path segments should be terminated 'butt' 'round' 'square' \cr
+  \code{line_dash} \tab array of integer pixel distances that describe the on-off pattern of dashing to use \cr
+  \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
+ }
+}
+
 \examples{
 figure(ylab = "Height (inches)", width = 600) \%>\%
   ly_boxplot(voice.part, height, data = lattice::singer)

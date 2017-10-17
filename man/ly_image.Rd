@@ -10,7 +10,7 @@ ly_image(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
 \arguments{
 \item{fig}{Figure to modify.}
 
-\item{z}{Matrix or vector of image values.}
+\item{z}{A matrix or vector of image values.}
 
 \item{rows}{If \code{z} is a vector, how many rows should be used in treating it as a matrix.}
 

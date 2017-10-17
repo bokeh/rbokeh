@@ -2,18 +2,18 @@
 #'
 #' Draws a histogram
 #' @param fig Figure to modify.
-#' @param x either a vector to be passed to \code{\link[graphics]{hist}} or an object of class "histogram"
-#' @param breaks,freq,include.lowest,right parameters passed to \code{\link[graphics]{hist}}
-#' @param data an optional data frame, providing the source for x
-# template par-coloralpha
-# template par-lnamegroup
-# template dots-fillline
+#' @param x Either a vector to be passed to \code{\link[graphics]{hist}} or an object of class "histogram".
+#' @param breaks,freq,include.lowest,right Parameters passed to \code{\link[graphics]{hist}}.
+#' @param data An optional data frame, providing the source for x.
+#' @template par-coloralpha
+#' @template par-coloralpha-extra
+#' @template par-lnamegroup
+#' @template dots-fillline
 #' @family layer functions
 #' @examples
-#' h <- figure(width = 600, height = 400) %>%
+#' figure(width = 600, height = 400) %>%
 #'   ly_hist(eruptions, data = faithful, breaks = 40, freq = FALSE) %>%
 #'   ly_density(eruptions, data = faithful)
-#' h
 #' @export
 ly_hist <- function(
   fig, x, data = figure_data(fig),
@@ -65,18 +65,19 @@ ly_hist <- function(
 #'
 #' Draws a kernel density estimate
 #' @param fig Figure to modify.
-#' @param x,bw,adjust,kernel,weights,window,n,cut,na.rm parameters passed to \code{\link[stats]{density}}
-#' @param data an optional data frame, providing the source for x
+#' @param x,bw,adjust,kernel,weights,window,n,cut,na.rm Parameters passed to \code{\link[stats]{density}}.
+#' @param data An optional data frame, providing the source for x.
 # template par-lineprops
-#' @param legend text to display in the legend entry for the density line
-# template par-lnamegroup
-# template dots-line
+#' @param legend Text to display in the legend entry for the density line.
+#' @template par-lineprops
+#' @template par-lineprops-extra
+#' @template par-lnamegroup
+#' @template dots-line
 #' @family layer functions
 #' @examples
-#' h <- figure(width = 600, height = 400) %>%
+#' figure(width = 600, height = 400) %>%
 #'   ly_hist(eruptions, data = faithful, breaks = 40, freq = FALSE) %>%
 #'   ly_density(eruptions, data = faithful)
-#' h
 #' @export
 ly_density <- function(
   fig, x, data = figure_data(fig),
@@ -119,16 +120,17 @@ ly_density <- function(
 #'
 #' Draws quantiles
 #' @param fig Figure to modify.
-#' @param x numeric vector or field name of variable to compute sample quantiles for
-#' @param group values or field name of a grouping variable to break quantile computations up by
-#' @param data an optional data frame, providing the source for x
-#' @param probs numeric vector of probabilities with values in \code{[0,1]} at which to compute quantiles - if \code{NULL}, every point of \code{x} is a quantile
-#' @param distn quantile function to use on the x-axis (e.g. \code{\link[stats]{qnorm}}) - default is \code{\link[stats]{qunif}},
-#' @param ncutoff if the length of \code{x} exceeds this value and \code{probs} is not specified, compute quantiles at \code{ncutoff} points
-# template par-coloralpha
-# template par-legend
-# template par-lnamegroup
-# template dots-fillline
+#' @param x A numeric vector or field name of variable to compute sample quantiles for.
+#' @param group Values or field name of a grouping variable to break quantile computations up by.
+#' @param data An optional data frame, providing the source for x.
+#' @param probs Numeric vector of probabilities with values in \code{[0,1]} at which to compute quantiles. If \code{NULL}, every point of \code{x} is a quantile.
+#' @param distn Quantile function to use on the x-axis (e.g. \code{\link[stats]{qnorm}}). The default is \code{\link[stats]{qunif}},
+#' @param ncutoff If the length of \code{x} exceeds this value and \code{probs} is not specified, compute quantiles at \code{ncutoff} points.
+#' @template par-coloralpha
+#' @template par-coloralpha-extra
+#' @template par-legend
+#' @template par-lnamegroup
+#' @template dots-fillline
 #' @family layer functions
 #' @examples
 #' figure(legend_location = "top_left") %>%
@@ -213,19 +215,17 @@ ly_quantile <- function(
 
 #' Add a "boxplot" layer to a Bokeh figure
 #' @param fig Figure to modify.
-#' @param x either a numeric vector or a factor
-#' @param y either a numeric vector or a factor
-#' @param data an optional data frame, providing the source for x and y
-#' @param width with of each box, a value between 0 (no width) and 1 (full width)
-#' @param coef see \code{\link[grDevices]{boxplot.stats}}
-#' @param outlier_glyph the glyph used to plot the outliers. If set to
-#'   \code{NA}, no outlier points are plotted. Run \code{point_types()} for
-#'   possible values.
-#' @param outlier_size the size of the glyph used to plot outliers. If set to
-#'   \code{NA}, no outlier points are plotted.
-# template par-coloralpha
-# template par-lnamegroup
-# template dots-fillline
+#' @param x Either a numeric vector or a factor.
+#' @param y eEither a numeric vector or a factor.
+#' @param data An optional data frame, providing the source for x and y.
+#' @param width Width of each box, a value between 0 (no width) and 1 (full width).
+#' @param coef See \code{\link[grDevices]{boxplot.stats}}.
+#' @param outlier_glyph The glyph used to plot the outliers. If set to \code{NA}, no outlier points are plotted. Run \code{point_types()} for possible values.
+#' @param outlier_size The size of the glyph used to plot outliers. If set to \code{NA}, no outlier points are plotted.
+#' @template par-coloralpha
+#' @template par-coloralpha-extra
+#' @template par-lnamegroup
+#' @template dots-fillline
 #' @family layer functions
 #' @examples
 #' figure(ylab = "Height (inches)", width = 600) %>%
@@ -316,10 +316,12 @@ ly_boxplot <- function(
     md2 <- hgt2 / 2 + bp$stats[3]
 
     if (is.null(box_dat)) {
-      box_dat <- data.frame(x = rep(gp_vec, 2), y = c(md1, md2), width = width, height = c(hgt1, hgt2))
+      box_dat <- data.frame(x = rep(gp_vec, 2), y = c(md1, md2),
+        width = width, height = c(hgt1, hgt2))
     } else {
       box_dat <- rbind(box_dat,
-        data.frame(x = rep(gp_vec, 2), y = c(md1, md2), width = width, height = c(hgt1, hgt2)))
+        data.frame(x = rep(gp_vec, 2), y = c(md1, md2),
+          width = width, height = c(hgt1, hgt2)))
     }
 
     if (is.null(wsk_dat)) {
@@ -353,18 +355,18 @@ ly_boxplot <- function(
     width = width, height = height,
     # xlab = x_name, ylab = y_name,
     color = color, alpha = alpha,
-    hov_color = NULL, hov_alpha = NULL,
-    ns_color = NULL, ns_alpha = NULL,
-    sel_color = NULL, sel_alpha = NULL)
+    hov_color = hov_color, hov_alpha = hov_alpha,
+    ns_color = ns_color, ns_alpha = ns_alpha,
+    sel_color = sel_color, sel_alpha = sel_alpha)
 
   fig <- ly_segments(
     fig = fig,
     x0 = x0, y0 = y0, x1 = x1, y1 = y1, data = wsk_dat,
     # xlab = x_name, ylab = y_name,
     color = color, alpha = alpha,
-    hov_color = NULL, hov_alpha = NULL,
-    ns_color = NULL, ns_alpha = NULL,
-    sel_color = NULL, sel_alpha = NULL)
+    hov_color = hov_color, hov_alpha = hov_alpha,
+    ns_color = ns_color, ns_alpha = ns_alpha,
+    sel_color = sel_color, sel_alpha = sel_alpha)
 
   if (!is.null(out_dat)) {
     fig <- ly_points(
@@ -374,9 +376,9 @@ ly_boxplot <- function(
       size = outlier_size,
       # xlab = x_name, ylab = y_name,
       color = color, alpha = alpha,
-      hov_color = NULL, hov_alpha = NULL,
-      ns_color = NULL, ns_alpha = NULL,
-      sel_color = NULL, sel_alpha = NULL)
+      hov_color = hov_color, hov_alpha = hov_alpha,
+      ns_color = ns_color, ns_alpha = ns_alpha,
+      sel_color = sel_color, sel_alpha = sel_alpha)
   }
 
   # if (group_is_numeric && !fig$x$spec$has_x_axis)
@@ -387,28 +389,68 @@ ly_boxplot <- function(
 
 #' Add a "barchart" layer to a Bokeh figure
 #'
-#' Draws a bar chart
 #' @param fig Figure to modify.
-#' @param x values or field name for x variable, or if NULL, x-axis will be counts of y
-#' @param y values or field name for y variable, or if NULL, y-axis will be counts of x
-#' @param data an optional data frame, providing the source for inputs x, y, and color properties
-# template par-coloralpha
-#' @param position either "stack", "fill", or "dodge" (see details)
-#' @param width with of each bar, a value between 0 (no width) and 1 (full width)
-#' @param hover logical - should a hover tool be added to show the value of each bar?
-#' @param origin,breaks,right,binwidth parameters to be used for binning x when it is continuous (not yet implemented)
-# template par-lnamegroup
-# template par-legend
-# template dots-fillline
+#' @param x Values or field name / expression for x variable, or if NULL, x-axis will be counts of y.
+#' @param y Values or field name / expression for y variable, or if NULL, y-axis will be counts of x.
+#' @param data An optional data frame, providing the source for inputs x, y, and color properties.
+#' @param position Either "stack", "fill", or "dodge" (see details).
+#' @param width Width of each bar, a value between 0 (no width) and 1 (full width).
+#' @param hover Logical indicating whether a hover tool should be added to show the value of each bar?
+#' @param origin,breaks,right,binwidth Parameters to be used for binning x when it is continuous (not yet implemented).
+#' @template par-coloralpha
+#' @template par-coloralpha-extra
+#' @template par-lnamegroup
+#' @template par-legend
+#' @template dots-fillline
 #' @details
 #' This function expects one of either x or y to be categorical and the other to be numeric or NULL.  The numeric variable is summed for each categorical variable and bars are plotted.  If no numeric variable is supplied, the unique values of the categorical variable will be tabulated.  Within each categorical variable, if color maps to another grouping variable then the bars are split up.  In this case, there are three ways to display the bars with the \code{position} argument.  The default, "stack" will stack the bars.  The "fill" choice will show the relative proportion for each group within each categorical variable level, stacking the bars.  The "dodge" choice will plot the bars for each level of the categorical variable side by side.
-#'
 #' @family layer functions
-# @example man-roxygen/ex-bar.R
 #' @export
+#' @examples
+#' # ly_bar
+#' figure() %>%
+#'   ly_bar(variety, data = lattice::barley) %>%
+#'   theme_axis("x", major_label_orientation = 90)
+#'
+#' # total yield per variety
+#' figure() %>%
+#'   ly_bar(variety, yield, data = lattice::barley, hover = TRUE) %>%
+#'   theme_axis("x", major_label_orientation = 90)
+#'
+#' # swap axes and add hover
+#' figure() %>%
+#'   ly_bar(yield, variety, data = lattice::barley, hover = TRUE)
+#' # TODO: fix hover
+#'
+#' # stack by year
+#' figure() %>%
+#'   ly_bar(variety, yield, color = year, data = lattice::barley, hover = TRUE) %>%
+#'   theme_axis("x", major_label_orientation = 90)
+#'
+#' # proportional bars
+#' figure() %>%
+#'   ly_bar(variety, yield, color = year,
+#'     data = lattice::barley, position = "fill", width = 1) %>%
+#'   theme_axis("x", major_label_orientation = 90) %>%
+#'   set_palette(discrete_color = pal_color(c("red", "blue")))
+#'
+#' # swap axes and use different palette
+#' figure() %>%
+#'   ly_bar(yield, variety, color = year,
+#'     data = lattice::barley, position = "fill") %>%
+#'   set_palette(discrete_color = pal_color(c("red", "blue")))
+#'
+#' # side by side bars
+#' figure() %>%
+#'   ly_bar(variety, yield, color = year,
+#'     data = lattice::barley, position = "dodge") %>%
+#'   theme_axis("x", major_label_orientation = 90)
 ly_bar <- function(
   fig, x = NULL, y = NULL, data = figure_data(fig),
   color = NULL, alpha = 1,
+  hov_color = NULL, hov_alpha = NULL,
+  ns_color = NULL, ns_alpha = NULL,
+  sel_color = NULL, sel_alpha = NULL,
   position = c("stack", "fill", "dodge"), width = 0.9, hover = FALSE,
   origin = NULL, breaks = NULL, right = FALSE, binwidth = NULL,
   lname = NULL, lgroup = NULL, legend = TRUE, ...
@@ -455,8 +497,9 @@ ly_bar <- function(
   }
 
   # if user doesn't specify legend title, get it from the specified value for "color"
-  if (is.logical(legend) && legend)
-    legend <- rlang::quo_name(enquo(color))
+  cl <- enquo(color)
+  if (is.logical(legend) && legend && !quo_is_null(cl))
+    legend <- rlang::quo_name(cl)
 
   color <- rlang::eval_tidy(enquo(color), data)
 
@@ -551,6 +594,9 @@ ly_bar <- function(
     # xlab = args$info$x_name, ylab = args$info$y_name,
     data = res, hover = hovdat,
     color = color,
+    hov_color = hov_color, hov_alpha = hov_alpha,
+    ns_color = ns_color, ns_alpha = ns_alpha,
+    sel_color = sel_color, sel_alpha = sel_alpha,
     lname = lname, lgroup = lgroup,
     legend = legend
   )
@@ -558,18 +604,17 @@ ly_bar <- function(
 
 #' Add a "hexbin" layer to a Bokeh figure
 #' @param fig Figure to modify.
-#' @param x values or field name of center x coordinates to be binned
-#' @param y values or field name of center y coordinates to be binned
-#' @param data an optional data frame, providing the source for x and y
-#' @param xbins,shape,xbnds,ybnds parameters passed to \code{\link[hexbin]{hexbin}}
-#' @param style type of plotting for hexbins (see \code{\link[hexbin]{grid.hexagons}}) - "colorramp" and "lattice" are currently supported
-#' @param trans,inv transformation and inverse transformation function for the bin counts
-#' @param lname layer name
-#' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
-#' @param line logical - should hexagons have an outline?
-#' @param alpha the alpha transparency of the hexagons between 0 (transparent) and 1 (opaque)
-#' @param hover logical - should a hover tool be added to show the count in each hexagon?
-#' @param visible should the layer be visible?
+#' @param x Values or field name / expression indicating center x coordinates to be binned.
+#' @param y Values or field name / expression indicating center y coordinates to be binned.
+#' @param data An optional data frame, providing the source for x and y.
+#' @param xbins,shape,xbnds,ybnds Parameters passed to \code{\link[hexbin]{hexbin}}.
+#' @param style Type of plotting for hexbins (see \code{\link[hexbin]{grid.hexagons}}). Currently "colorramp" and "lattice" are supported.
+#' @param trans,inv Transformation and inverse transformation function for the bin counts.
+#' @param lname Layer name.
+#' @param palette Name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values).
+#' @param line Logical indicating whether hexagons should have an outline.
+#' @param alpha The alpha transparency of the hexagons between 0 (transparent) and 1 (opaque).
+#' @param hover Logical indicating whether a hover tool should be added to show the count in each hexagon.
 #' @examples
 #' \donttest{
 #' figure() %>% ly_hexbin(rnorm(10000), rnorm(10000))
@@ -581,7 +626,7 @@ ly_hexbin <- function(
   style = "colorscale",
   trans = NULL, inv = NULL, lname = NULL,
   palette = "RdYlGn11", line = FALSE, alpha = 1,
-  hover = TRUE, visible = TRUE
+  hover = TRUE
 ) {
 
   minarea <- 0.04; maxarea <- 0.8; mincnt <- 1; maxcnt <- NULL

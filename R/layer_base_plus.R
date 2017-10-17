@@ -2,24 +2,25 @@
 #'
 #' Draws a curve corresponding to a function over the interval \code{[from, to]}.
 #' @param fig Figure to modify.
-#' @param expr,from,to,n parameters sent to \code{\link[graphics]{curve}}
-# template par-lineprops
-# template par-legend
-# template par-lnamegroup
-# template dots-line
+#' @param expr,from,to,n Parameters sent to \code{\link[graphics]{curve}}.
+#' @template par-lineprops
+#' @template par-lineprops-extra
+#' @template par-legend
+#' @template par-lnamegroup
+#' @template dots-line
 #' @examples
-#' \donttest{
 #' chippy <- function(x) sin(cos(x) * exp(-x / 2))
 #' figure(width = 800) %>%
 #'   ly_curve(chippy, -8, 7, n = 2001)
-#' }
 #' @family layer functions
 #' @export
 ly_curve <- function(
   fig, expr, from = NULL, to = NULL, n = 101,
   width = 1, type = 1,
   color = "black", alpha = 1,
-  hov_color = NULL, hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL,
+  hov_color = NULL, hov_alpha = NULL,
+  ns_color = NULL, ns_alpha = NULL,
+  sel_color = NULL, sel_alpha = NULL,
   legend = NULL, lname = NULL, lgroup = NULL,
   ...
 ) {
@@ -51,6 +52,7 @@ ly_curve <- function(
     color = color, alpha = alpha, width = width, type = type,
     hov_color = hov_color, hov_alpha = hov_alpha,
     ns_color = ns_color, ns_alpha = ns_alpha,
+    sel_color = sel_color, sel_alpha = sel_alpha,
     # hover = hover, TODO?
     legend = legend, lname = lname, lgroup = lgroup,
     xlab = xname, ylab = yname
@@ -61,21 +63,27 @@ ly_curve <- function(
 #'
 #' Computes and draws contour lines.
 #' @param fig Figure to modify.
-#' @param z a matrix containing the values to compute contour lines for
-#' @param x,y locations of grid lines at which the values in \code{image} are measured (see \code{\link[grDevices]{contourLines}})
-#' @param nlevels,levels parameters sent to \code{\link[grDevices]{contourLines}})
-# template par-lineprops
-# template par-lnamegroup
-# template dots-line
-# @example man-roxygen/ex-image.R
+#' @param z A matrix containing the values to compute contour lines for.
+#' @param x,y Locations of grid lines at which the values in \code{image} are measured (see \code{\link[grDevices]{contourLines}}).
+#' @param nlevels,levels Parameters sent to \code{\link[grDevices]{contourLines}}).
+#' @template par-lineprops
+#' @template par-lineprops-extra
+#' @template par-lnamegroup
+#' @template dots-line
 #' @family layer functions
 #' @export
+#' @examples
+#' figure(title = "Volcano") %>%
+#'   ly_image(volcano) %>%
+#'   ly_contour(volcano)
 ly_contour <- function(
   fig, z,
   x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1, length.out = ncol(z)),
   nlevels = 10, levels = pretty(range(z, na.rm = TRUE), nlevels),
   color = "black", alpha = 1, width = 1, type = 1,
-  hov_color = NULL, hov_alpha = NULL, ns_color = NULL, ns_alpha = NULL,
+  hov_color = NULL, hov_alpha = NULL,
+  ns_color = NULL, ns_alpha = NULL,
+  sel_color = NULL, sel_alpha = NULL,
   lname = NULL, lgroup = NULL,
   ...
 ) {
@@ -90,7 +98,9 @@ ly_contour <- function(
     type = type, width = width, color = color, alpha = alpha,
     # hover = hover, TODO?
     legend = legend,
-    hov_color = hov_color, hov_alpha = hov_alpha, ns_color = ns_color, ns_alpha = ns_alpha,
+    hov_color = hov_color, hov_alpha = hov_alpha,
+    ns_color = ns_color, ns_alpha = ns_alpha,
+    sel_color = sel_color, sel_alpha = sel_alpha,
     lgroup = lgroup, lname = lname
   )
 }
