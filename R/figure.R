@@ -266,7 +266,7 @@ rbokeh_prerender <- function(obj, keep_aux = FALSE) {
   mod_list <- mod_list[sapply(mod_list, function(a) inherits(a, "Model"))]
 
   fig <- list(list(
-    version = "0.12.9",
+    version = "0.12.10",
     title = "Bokeh Figure",
     roots = list(
       root_ids = list(obj$x$mods$plot$get_prop("id")),
