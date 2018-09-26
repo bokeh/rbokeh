@@ -4,8 +4,9 @@
 \alias{ly_image}
 \title{Add an "image" layer to a Bokeh figure}
 \usage{
-ly_image(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
-  palette = "Spectral10", dilate = FALSE, lname = NULL, lgroup = NULL)
+ly_image(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1,
+  dh = 1, palette = "Spectral10", dilate = FALSE, lname = NULL,
+  lgroup = NULL)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -59,3 +60,4 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
+\concept{layer functions}

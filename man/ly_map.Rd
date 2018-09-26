@@ -4,8 +4,8 @@
 \alias{ly_map}
 \title{Add a "map" layer to a Bokeh figure}
 \usage{
-ly_map(fig, database = "world", regions = ".", color = NULL, alpha = 1,
-  lname = NULL, lgroup = NULL, ...)
+ly_map(fig, database = "world", regions = ".", color = NULL,
+  alpha = 1, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -75,3 +75,4 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
+\concept{layer functions}

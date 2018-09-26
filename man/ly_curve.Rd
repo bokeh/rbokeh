@@ -4,9 +4,9 @@
 \alias{ly_curve}
 \title{Add a "curve" layer to a Bokeh figure}
 \usage{
-ly_curve(fig, expr, from = NULL, to = NULL, n = 101, color = "black",
-  alpha = 1, width = 1, type = 1, legend = NULL, lname = NULL,
-  lgroup = NULL, ...)
+ly_curve(fig, expr, from = NULL, to = NULL, n = 101,
+  color = "black", alpha = 1, width = 1, type = 1, legend = NULL,
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -69,3 +69,4 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
+\concept{layer functions}

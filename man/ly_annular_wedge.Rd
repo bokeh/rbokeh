@@ -5,9 +5,10 @@
 \title{Add an "annular_wedge" layer to a Bokeh figure}
 \usage{
 ly_annular_wedge(fig, x, y = NULL, data = figure_data(fig),
-  inner_radius = 0.1, outer_radius = 0.3, start_angle = 0, end_angle = 2
-  * pi, direction = "anticlock", color = NULL, alpha = 1, hover = NULL,
-  url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...)
+  inner_radius = 0.1, outer_radius = 0.3, start_angle = 0,
+  end_angle = 2 * pi, direction = "anticlock", color = NULL,
+  alpha = 1, hover = NULL, url = NULL, legend = NULL,
+  lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -110,3 +111,4 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
+\concept{layer functions}

@@ -4,9 +4,10 @@
 \alias{ly_annulus}
 \title{Add an "annulus" layer to a Bokeh figure}
 \usage{
-ly_annulus(fig, x, y = NULL, data = figure_data(fig), inner_radius = 0.1,
-  outer_radius = 0.2, color = NULL, alpha = 1, hover = NULL,
-  url = NULL, legend = NULL, lname = NULL, lgroup = NULL, ...)
+ly_annulus(fig, x, y = NULL, data = figure_data(fig),
+  inner_radius = 0.1, outer_radius = 0.2, color = NULL, alpha = 1,
+  hover = NULL, url = NULL, legend = NULL, lname = NULL,
+  lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -103,3 +104,4 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
+\concept{layer functions}

@@ -6,9 +6,9 @@
 \usage{
 ly_text(fig, x, y = NULL, text = NULL, data = figure_data(fig),
   color = "black", alpha = 1, angle = 0, align = NULL,
-  baseline = NULL, font = NULL, font_size = NULL, font_style = NULL,
-  x_offset = NULL, y_offset = NULL, legend = NULL, lname = NULL,
-  lgroup = NULL)
+  baseline = NULL, font = NULL, font_size = NULL,
+  font_style = NULL, x_offset = NULL, y_offset = NULL,
+  legend = NULL, lname = NULL, lgroup = NULL)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -123,3 +123,4 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_ray}}, \code{\link{ly_rect}},
   \code{\link{ly_segments}}, \code{\link{ly_wedge}}
 }
+\concept{layer functions}

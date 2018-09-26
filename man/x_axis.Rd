@@ -6,9 +6,9 @@
 \usage{
 x_axis(fig, label, position = "below", log = FALSE, grid = TRUE,
   desired_num_ticks = NULL, num_minor_ticks = 5, visible = TRUE,
-  number_formatter = c("basic", "numeral", "printf"), power_limit_high = 5,
-  power_limit_low = -3, precision = NULL, use_scientific = TRUE,
-  format = NULL)
+  number_formatter = c("basic", "numeral", "printf"),
+  power_limit_high = 5, power_limit_low = -3, precision = NULL,
+  use_scientific = TRUE, format = NULL)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -92,3 +92,4 @@ figure() \%>\%
 \seealso{
 Other axes: \code{\link{y_axis}}
 }
+\concept{axes}

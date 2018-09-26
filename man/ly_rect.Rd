@@ -5,8 +5,8 @@
 \title{Add a "rect" layer to a Bokeh figure}
 \usage{
 ly_rect(fig, xleft, ybottom, xright, ytop, data = figure_data(fig),
-  color = NULL, alpha = 1, hover = NULL, url = NULL, legend = NULL,
-  lname = NULL, lgroup = NULL, ...)
+  color = NULL, alpha = 1, hover = NULL, url = NULL,
+  legend = NULL, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -94,3 +94,4 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_ray}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
+\concept{layer functions}

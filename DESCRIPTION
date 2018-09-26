@@ -38,8 +38,9 @@ Suggests:
     packagedocs,
     latticeExtra
 Enhances: shiny (>= 0.12)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 VignetteBuilder: packagedocs
+Encoding: UTF-8
 Remotes:
     hafen/packagedocs,
     hafen/lazyrmd@jsonp

@@ -4,9 +4,9 @@
 \alias{ly_abline}
 \title{Add an "abline" layer to a Bokeh figure}
 \usage{
-ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
-  color = "black", alpha = NULL, width = 1, type = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, ...)
+ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL,
+  coef = NULL, color = "black", alpha = NULL, width = 1,
+  type = 1, legend = NULL, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -94,3 +94,4 @@ Other layer functions: \code{\link{ly_annular_wedge}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
+\concept{layer functions}

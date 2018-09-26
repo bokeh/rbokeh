@@ -36,3 +36,4 @@ p \%>\%
 \seealso{
 Other ranges: \code{\link{x_range}}
 }
+\concept{ranges}

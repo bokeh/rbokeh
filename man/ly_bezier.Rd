@@ -4,9 +4,9 @@
 \alias{ly_bezier}
 \title{Add a "bezier" layer to a Bokeh figure}
 \usage{
-ly_bezier(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1, data = figure_data(fig),
-  color = "black", alpha = 1, width = 1, type = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, ...)
+ly_bezier(fig, x0, y0, x1, y1, cx0, cy0, cx1, cy1,
+  data = figure_data(fig), color = "black", alpha = 1, width = 1,
+  type = 1, legend = NULL, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -78,3 +78,4 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
+\concept{layer functions}

@@ -4,9 +4,9 @@
 \alias{ly_quantile}
 \title{Add a "quantile" layer to a Bokeh figure}
 \usage{
-ly_quantile(fig, x, group = NULL, data = figure_data(fig), probs = NULL,
-  distn = stats::qunif, ncutoff = 200, color = NULL, alpha = 1,
-  legend = TRUE, lname = NULL, lgroup = NULL, ...)
+ly_quantile(fig, x, group = NULL, data = figure_data(fig),
+  probs = NULL, distn = stats::qunif, ncutoff = 200, color = NULL,
+  alpha = 1, legend = TRUE, lname = NULL, lgroup = NULL, ...)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -96,3 +96,4 @@ Other layer functions: \code{\link{ly_abline}},
   \code{\link{ly_rect}}, \code{\link{ly_segments}},
   \code{\link{ly_text}}, \code{\link{ly_wedge}}
 }
+\concept{layer functions}

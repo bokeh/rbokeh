@@ -29,3 +29,4 @@ Other tools: \code{\link{tool_box_select}},
   \code{\link{tool_reset}}, \code{\link{tool_resize}},
   \code{\link{tool_tap}}, \code{\link{tool_wheel_zoom}}
 }
+\concept{tools}

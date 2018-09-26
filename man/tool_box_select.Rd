@@ -38,3 +38,4 @@ Other tools: \code{\link{tool_box_zoom}},
   \code{\link{tool_save}}, \code{\link{tool_tap}},
   \code{\link{tool_wheel_zoom}}
 }
+\concept{tools}
