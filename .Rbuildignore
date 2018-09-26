@@ -14,3 +14,8 @@ _gh-pages
 .codecov.yml
 vignettes2/
 ^js-scales
+^.vscode
+^docs-dev
+inst/htmlwidgets/lib/bokehjs/notused
+inst/htmlwidgets/lib/bokehjs/prev
+^code-gen
