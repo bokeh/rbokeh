@@ -19,3 +19,4 @@ vignettes2/
 inst/htmlwidgets/lib/bokehjs/notused
 inst/htmlwidgets/lib/bokehjs/prev
 ^code-gen
+^revdep$
