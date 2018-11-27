@@ -3,6 +3,9 @@ cache: packages
 r_binary_packages:
 - covr
 - lintr
+r:
+- release
+- devel
 after_success:
 - Rscript -e 'covr::codecov()'
 - Rscript -e 'devtools::install_github("hafen/lazyrmd@jsonp"); packagedocs::deploy_travis()'
@@ -10,6 +13,3 @@ branches:
   only:
   - master
   - dev
-env:
-  global:
-    secure: b86iRZi+98f5o2+SkCOc7AUGpJetF0iOnYOugY93qQjv5cRv9895GjuVSzZTIBpLMfVm6b3XkJOhs3lJOUfcjUXQF+wE+bUoZdA7Z5SANNpf/RopN9LfAzhwzNsVk8pUYwxSiTCqnz3ubQbcqIJMnQjopgzgLl1c0r3ubWm+KwU=
