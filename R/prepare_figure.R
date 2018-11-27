@@ -30,12 +30,12 @@ prepare_figure <- function(fig) {
       if (inherits(ly$data, "ajax_data")) {
         ly$ajax_data <- ly$data
         ly$data <- get_ajax_sample(ly$data)
-        # need to set the "column_names" attribute
-        ly$ajax_data$column_names <- names(ly$data)
-        snm <- sanitize(ly$ajax_data$column_names)
-        if (!all(snm == ly$ajax_data$column_names))
-          stop("Column names from AJAX data source have special characters (.)... ",
-            "Bokeh expects clean column names.")
+        # # need to set the "column_names" attribute
+        # ly$ajax_data$column_names <- names(ly$data)
+        # snm <- sanitize(ly$ajax_data$column_names)
+        # if (!all(snm == ly$ajax_data$column_names))
+        #   stop("Column names from AJAX data source have special characters (.)... ",
+        #     "Bokeh expects clean column names.")
       }
 
       # hover needs special handling
@@ -510,7 +510,7 @@ prepare_figure <- function(fig) {
         cur_ly$data_source <- do.call(AjaxDataSource$new, ly$ajax_data)
       } else {
         cur_ly$data_source <- ColumnDataSource$new(
-          column_names = cols_to_use,
+          # column_names = cols_to_use,
           data = lapply(dat, I), # I() makes correct JSON serialization in 1-row case
           name = paste(lnm, "data", sep = "_")
         )
@@ -747,7 +747,7 @@ prepare_figure <- function(fig) {
 
       if (!is.null(ly$data) && data_needed) {
         cur_ly$data_source <- ColumnDataSource$new(
-          column_names = names(ly$data),
+          # column_names = names(ly$data),
           data = lapply(ly$data, I), # I() makes correct JSON serialization in 1-row case
           name = paste(lnm, "data", sep = "_")
         )
