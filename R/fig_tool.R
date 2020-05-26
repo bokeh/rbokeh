@@ -1,4 +1,4 @@
-# http://bokeh.pydata.org/en/latest/docs/reference/models.html
+# https://bokeh.pydata.org/en/latest/docs/reference/models.html
 
 #' Add "pan" tool to a Bokeh figure
 #' @param dimensions a vector specifying whether the pan tool should pan with respect to the x axis ("width") and the y axis ("height") or "both"
@@ -230,7 +230,7 @@ tool_box_zoom <- function(fig,
     overlay = ba_model$ref))
 }
 
-tool_help <- function(fig, redirect = "http://hafen.github.io/rbokeh",
+tool_help <- function(fig, redirect = "https://hafen.github.io/rbokeh",
   help_tooltip = "Click to learn more about rbokeh.") {
   update_tool(fig, which = "help",
     args = list(plot_ref = fig$x$spec$ref, redirect = redirect,

@@ -1,0 +1,111 @@
+destination: docs
+
+reference:
+  - title: "rbokeh"
+    contents:
+      - rbokeh-package
+  - title: "Plots"
+    contents: 
+      - figure
+      - gmap
+      - grid_plot
+  - title: "Layer Functions"
+    contents: 
+      - ly_annular_wedge
+      - ly_annulus
+      - ly_arc
+      - ly_bezier
+      - ly_crect
+      - ly_image
+      - ly_image_url
+      - ly_lines
+      - ly_multi_line
+      - ly_oval
+      - ly_patch
+      - ly_points
+      - ly_polygons
+      - ly_quadratic
+      - ly_ray
+      - ly_rect
+      - ly_segments
+      - ly_text
+      - ly_wedge
+  - title: "Higher-Level Layer Functions"
+    contents: 
+      - ly_quantile
+      - ly_density
+      - ly_hist
+      - ly_hexbin
+      - ly_boxplot
+      - ly_abline
+      - ly_contour
+      - ly_curve
+      - ly_map
+      - ly_bar
+  - title: "Higher-Level Layer Functions"
+    contents: 
+      - x_axis
+      - x_range
+      - y_axis
+      - y_range
+  - title: "Themes"
+    contents: 
+      - set_theme
+      - theme_axis
+      - theme_grid
+      - theme_legend
+      - theme_plot
+      - theme_title
+      - set_palette
+      - bk_default_theme
+      - pal_color
+      # -
+      #   file: themes.Rd
+      #   title: "themes"
+      # -
+      #   file: palettes.Rd
+      #   title: "palettes"
+  - title: "Interaction Tools"
+    contents: 
+      - tool_hover
+      - tool_selection
+      - tool_tap
+      - tool_box_select
+      - tool_box_zoom
+      - tool_crosshair
+      - tool_lasso_select
+      - tool_pan
+      - tool_reset
+      - tool_resize
+      - tool_save
+      - tool_wheel_zoom
+  - title: "Callback Interactivity"
+    contents: 
+      - console_callback
+      - custom_callback
+      - debug_callback
+      - shiny_callback
+  - title: "Output"
+    contents: 
+      - print_model_json
+      - bokeh_render_json
+      - rbokehOutput
+      - renderRbokeh
+      - widget2gist
+      - widget2png
+      - rbokeh2html
+  - title: "Misc"
+    contents: 
+      - flightfreq
+      - elements
+      - nyctaxihex
+      - catjitter
+      - get_object_refs
+      - phantom_install
+      - "%>%"
+      - point_types
+      - gmap_style
+      - figure_data
+      - sub_names
+      - data_name_list
+      - b_eval

@@ -7,7 +7,7 @@
 #' @param style type of plotting for hexbins (see \code{\link[hexbin]{grid.hexagons}}) - "colorramp" and "lattice" are currently supported
 #' @param trans,inv transformation and inverse transformation function for the bin counts
 #' @param lname layer name
-#' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
+#' @param palette name of color palette to use for color ramp (see \href{https://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
 #' @param line logical - should hexagons have an outline?
 #' @param alpha the alpha transparency of the hexagons between 0 (transparent) and 1 (opaque)
 #' @param hover logical - should a hover tool be added to show the count in each hexagon?
@@ -74,7 +74,7 @@ ly_hexbin <- function(
       if (!palette %in% bk_gradient_palette_names)
         stop(
           "'palette' specified in ly_hexbin is not a valid color name or palette ",
-          "- see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+          "- see here: https://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
           call. = FALSE)
       palette <- colorRampPalette(bk_gradient_palettes[[palette]])
     }

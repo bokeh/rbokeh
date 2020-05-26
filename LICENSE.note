@@ -4,7 +4,7 @@ The rbokeh package includes other open source software components. The following
 is a list of these components (full copies of the license agreements used by
 these components are included below):
 
-- bokeh.js, http://bokeh.pydata.org/
+- bokeh.js, https://bokeh.pydata.org/
 
 
 bokeh.js license

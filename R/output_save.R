@@ -3,7 +3,7 @@
 #' @param p htmlwidget object
 #' @param file where to save png file
 #' @param timeout plot render timeout in milliseconds (see details)
-#' @details This uses phantomjs (\url{http://phantomjs.org}) to render your htmlwidget in a headless browser and take a screenshot of it, creating a static output.  This assumes that phantomjs has been installed on your machine and is available as a system call.  For plots that take longer to load and render, you may need to increase the value of \code{timeout}.  Note that this function is experimental.
+#' @details This uses phantomjs (\url{https://phantomjs.org}) to render your htmlwidget in a headless browser and take a screenshot of it, creating a static output.  This assumes that phantomjs has been installed on your machine and is available as a system call.  For plots that take longer to load and render, you may need to increase the value of \code{timeout}.  Note that this function is experimental.
 #' @examples
 #' \donttest{
 #' figure(tools = NULL) %>%
@@ -57,7 +57,7 @@ page.open('file://", ff, "', function() {
 phantom_install <- function() {
   message(
     "Please visit this page to install phantomjs on your system: ",
-    "http://phantomjs.org/download.html")
+    "https://phantomjs.org/download.html")
 }
 
 # similar to webshot

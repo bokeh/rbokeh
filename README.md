@@ -2,8 +2,8 @@
 
 [![Build Status](https://travis-ci.org/bokeh/rbokeh.svg?branch=master)](https://travis-ci.org/bokeh/rbokeh)
 [![codecov.io](https://codecov.io/github/hafen/rbokeh/coverage.svg?branch=master)](https://codecov.io/github/hafen/rbokeh?branch=master)
-[![CRAN](http://www.r-pkg.org/badges/version/rbokeh)](https://cran.r-project.org/package=rbokeh)
-[![](http://cranlogs.r-pkg.org/badges/rbokeh)](https://cran.r-project.org/package=rbokeh)
+[![CRAN](https://www.r-pkg.org/badges/version/rbokeh)](https://cran.r-project.org/package=rbokeh)
+[![](https://cranlogs.r-pkg.org/badges/rbokeh)](https://cran.r-project.org/package=rbokeh)
 
 # geofacet <img src="man/figures/logo.png" align="right" alt="" width="120" />
 

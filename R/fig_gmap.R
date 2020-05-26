@@ -3,7 +3,7 @@
 ## when rendering maybe use something
 ## like this to approximate zoom level
 ## for a given glyph_x_ranges and glyph_y_ranges
-# http://stackoverflow.com/questions/6048975/google-maps-v3-how-to-calculate-the-zoom-level-for-a-given-bounds
+# https://stackoverflow.com/questions/6048975/google-maps-v3-how-to-calculate-the-zoom-level-for-a-given-bounds
 
 #' Initialize a Bokeh Google Map plot
 #'

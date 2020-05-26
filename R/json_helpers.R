@@ -64,9 +64,9 @@ underscore2camel <- function(x) {
 #       'var model = Bokeh.Collections(modeltype).get(modelid);\n',
 #       'var view = new model.default_view({model: model, el: \'#', elementid, '\'});\n',
 #       'Bokeh.index[modelid] = view;\n'),
-#     css_external = paste0("http://cdn.pydata.org/bokeh/release/bokeh-", ver, ".min.css"),
-#     js_external = paste0("http://cdn.pydata.org/bokeh/release/bokeh-", ver, ".min.js")
+#     css_external = paste0("https://cdn.pydata.org/bokeh/release/bokeh-", ver, ".min.css"),
+#     js_external = paste0("https://cdn.pydata.org/bokeh/release/bokeh-", ver, ".min.js")
 #   )
 #   library(httr)
-#   a <- POST("http://codepen.io/pen/define/", body = list(data = data), encode = "json")
+#   a <- POST("https://codepen.io/pen/define/", body = list(data = data), encode = "json")
 # }
