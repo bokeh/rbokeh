@@ -16,8 +16,10 @@ pal_tableau(pal = "Tableau10")
 
 pal_bk_glyph()
 
-pal_gradient(cols = c("#66C2A4", "#41AE76", "#238B45", "#006D2C",
-  "#00441B"), space = "rgb")
+pal_gradient(
+  cols = c("#66C2A4", "#41AE76", "#238B45", "#006D2C", "#00441B"),
+  space = "rgb"
+)
 
 pal_size(min = 2, max = 20)
 

@@ -4,8 +4,12 @@
 \alias{rbokeh2html}
 \title{Get the HTML content required to embed a Bokeh figure}
 \usage{
-rbokeh2html(fig, file = tempfile(fileext = ".html"), pretty = FALSE,
-  secure = TRUE)
+rbokeh2html(
+  fig,
+  file = tempfile(fileext = ".html"),
+  pretty = FALSE,
+  secure = TRUE
+)
 }
 \arguments{
 \item{fig}{figure}

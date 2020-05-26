@@ -155,7 +155,7 @@ valid_glyph <- function(dd) {
 }
 
 valid_color <- function(dd) {
-  all(dd %in% css_colors | (nchar(as.character(dd)) == 7 && grepl("^#", dd)))
+  all(dd %in% css_colors | (nchar(as.character(dd)) == 7 & grepl("^#", dd)))
 }
 
 valid_line <- function(dd) {

@@ -4,10 +4,22 @@
 \alias{grid_plot}
 \title{Create a Bokeh grid plot from a list of Bokeh figures}
 \usage{
-grid_plot(figs, width = NULL, height = NULL, nrow = 1, ncol = 1,
-  byrow = TRUE, xlim = NULL, ylim = NULL, logo = NULL,
-  same_axes = FALSE, simplify_axes = TRUE, y_margin = NULL,
-  x_margin = NULL, link_data = FALSE)
+grid_plot(
+  figs,
+  width = NULL,
+  height = NULL,
+  nrow = 1,
+  ncol = 1,
+  byrow = TRUE,
+  xlim = NULL,
+  ylim = NULL,
+  logo = NULL,
+  same_axes = FALSE,
+  simplify_axes = TRUE,
+  y_margin = NULL,
+  x_margin = NULL,
+  link_data = FALSE
+)
 }
 \arguments{
 \item{figs}{list of Bokeh figures - see details for what is acceptable}

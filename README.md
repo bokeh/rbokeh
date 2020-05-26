@@ -5,6 +5,8 @@
 [![CRAN](http://www.r-pkg.org/badges/version/rbokeh)](https://cran.r-project.org/package=rbokeh)
 [![](http://cranlogs.r-pkg.org/badges/rbokeh)](https://cran.r-project.org/package=rbokeh)
 
+# geofacet <img src="man/figures/logo.png" align="right" alt="" width="120" />
+
 A native R plotting library that provides a flexible declarative interface for creating interactive web-based graphics, backed by the Bokeh visualization library.
 
 ### Install
@@ -13,14 +15,10 @@ A native R plotting library that provides a flexible declarative interface for c
 # from CRAN:
 install.packages("rbokeh")
 
-# from packages.deltarho.org:
-options(repos = c(deltarho = "http://packages.deltarho.org", getOption("repos")))
-install.packages("rbokeh")
-
 # from github:
-devtools::install_github("bokeh/rbokeh")
+remotes::install_github("bokeh/rbokeh")
 ```
 
 ### Use
 
-Please see [here](http://hafen.github.io/rbokeh).
+Please see [here](http://hafen.github.io/rbokeh/docs/articles/rbokeh.html).

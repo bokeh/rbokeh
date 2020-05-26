@@ -4,9 +4,22 @@
 \alias{ly_ray}
 \title{Add a "ray" layer to a Bokeh figure}
 \usage{
-ly_ray(fig, x, y = NULL, data = figure_data(fig), length = NULL,
-  angle = 0, color = "black", type = 1, width = 1, alpha = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, ...)
+ly_ray(
+  fig,
+  x,
+  y = NULL,
+  data = figure_data(fig),
+  length = NULL,
+  angle = 0,
+  color = "black",
+  type = 1,
+  width = 1,
+  alpha = NULL,
+  legend = NULL,
+  lname = NULL,
+  lgroup = NULL,
+  ...
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -55,19 +68,33 @@ Draws line segments starting at the given coordinate and extending the given len
 }
 
 \seealso{
-Other layer functions: \code{\link{ly_abline}},
-  \code{\link{ly_annular_wedge}}, \code{\link{ly_annulus}},
-  \code{\link{ly_arc}}, \code{\link{ly_bar}},
-  \code{\link{ly_bezier}}, \code{\link{ly_boxplot}},
-  \code{\link{ly_contour}}, \code{\link{ly_crect}},
-  \code{\link{ly_curve}}, \code{\link{ly_density}},
-  \code{\link{ly_hist}}, \code{\link{ly_image_url}},
-  \code{\link{ly_image}}, \code{\link{ly_lines}},
-  \code{\link{ly_map}}, \code{\link{ly_multi_line}},
-  \code{\link{ly_oval}}, \code{\link{ly_patch}},
-  \code{\link{ly_points}}, \code{\link{ly_polygons}},
-  \code{\link{ly_quadratic}}, \code{\link{ly_quantile}},
-  \code{\link{ly_rect}}, \code{\link{ly_segments}},
-  \code{\link{ly_text}}, \code{\link{ly_wedge}}
+Other layer functions: 
+\code{\link{ly_abline}()},
+\code{\link{ly_annular_wedge}()},
+\code{\link{ly_annulus}()},
+\code{\link{ly_arc}()},
+\code{\link{ly_bar}()},
+\code{\link{ly_bezier}()},
+\code{\link{ly_boxplot}()},
+\code{\link{ly_contour}()},
+\code{\link{ly_crect}()},
+\code{\link{ly_curve}()},
+\code{\link{ly_density}()},
+\code{\link{ly_hist}()},
+\code{\link{ly_image_url}()},
+\code{\link{ly_image}()},
+\code{\link{ly_lines}()},
+\code{\link{ly_map}()},
+\code{\link{ly_multi_line}()},
+\code{\link{ly_oval}()},
+\code{\link{ly_patch}()},
+\code{\link{ly_points}()},
+\code{\link{ly_polygons}()},
+\code{\link{ly_quadratic}()},
+\code{\link{ly_quantile}()},
+\code{\link{ly_rect}()},
+\code{\link{ly_segments}()},
+\code{\link{ly_text}()},
+\code{\link{ly_wedge}()}
 }
 \concept{layer functions}

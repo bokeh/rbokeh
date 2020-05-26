@@ -4,12 +4,21 @@
 \alias{theme_title}
 \title{Override theme parameters for general plot attributes}
 \usage{
-theme_title(fig, pars = NULL, background_fill_color = "white",
-  background_fill_alpha = 1, border_fill_color = "white",
-  border_fill_alpha = 1, align = "left", text_alpha = 1,
-  text_baseline = "bottom", text_color = "#444444",
-  text_font = "Helvetica", text_font_size = "12pt",
-  text_font_style = "normal")
+theme_title(
+  fig,
+  pars = NULL,
+  background_fill_color = "white",
+  background_fill_alpha = 1,
+  border_fill_color = "white",
+  border_fill_alpha = 1,
+  align = "left",
+  text_alpha = 1,
+  text_baseline = "bottom",
+  text_color = "#444444",
+  text_font = "Helvetica",
+  text_font_size = "12pt",
+  text_font_style = "normal"
+)
 }
 \arguments{
 \item{fig}{figure to modify}

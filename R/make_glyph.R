@@ -78,7 +78,7 @@ make_glyph <- function(fig, type, lname, lgroup, data, args,
         ## see if named args are valid
         ## if they are not, they will be marked as mapped
         if (!is.null(needs_map_fns[[nm]]))
-          if (needs_map_fns[[nm]](args[[nm]]) && !is.na(args[[nm]]))
+          if (needs_map_fns[[nm]](args[[nm]]) && (!all(is.na(args[[nm]]))))
             attr(args[[nm]], "mapped") <- TRUE
       }
     }

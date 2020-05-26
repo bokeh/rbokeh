@@ -1,27 +1,19 @@
 ---
-title: "rbokeh"
-subtitle: "R Interface for Bokeh"
-author: Ryan Hafen
-copyright: Ryan Hafen
-output:
-  packagedocs::package_docs:
-    toc: true
-redirect: http://hafen.github.io/rbokeh
+title: "Introduction to rbokeh"
+output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{rbokeh documentation}
-  %\VignetteEngine{packagedocs::redirect}
-navpills: |
-  <li class="active"><a href='index.html'>Docs</a></li>
-  <li><a href='rd.html'>Package Ref</a></li>
-  <li><a href='https://github.com/bokeh/rbokeh'>Github <i class='fa fa-github'></i></a></li>
+  %\VignetteIndexEntry{Introduction to rbokeh}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-```{r global_options, include=FALSE}
-# R output pre blocks are styled by default to indicate output
-knitr::opts_chunk$set(comment = NA)
-
-# shorthand for rd_link() - see ?packagedocs::rd_link for more information
-rdl <- function(x) packagedocs::rd_link(deparse(substitute(x)))
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+# # R output pre blocks are styled by default to indicate output
+# knitr::opts_chunk$set(comment = NA)
 ```
 
 # Background #
