@@ -40,7 +40,7 @@ ly_hexbin(
 
 \item{lname}{layer name}
 
-\item{palette}{name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
+\item{palette}{name of color palette to use for color ramp (see \href{https://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
 
 \item{line}{logical - should hexagons have an outline?}
 

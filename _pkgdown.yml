@@ -1,3 +1,10 @@
+navbar:
+  structure:
+    left:  [home, intro, reference, news]
+    right: [github]
+  components:
+    articles: ~
+
 destination: docs
 
 reference:

@@ -2,6 +2,7 @@ pandoc: 2.2.3.2
 pkgdown: 1.5.1
 pkgdown_sha: ~
 articles:
+  rbokeh-pkg: rbokeh-pkg.html
   rbokeh: rbokeh.html
-last_built: 2020-05-26T17:03Z
+last_built: 2020-05-26T18:41Z
 

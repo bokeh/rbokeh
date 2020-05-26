@@ -28,7 +28,7 @@ widget2gist(
 
 \item{description}{optional text to go in README.md to describe the gist}
 
-\item{license}{license under which gist is released - one of those accepted here: \url{http://bl.ocks.org/licenses.txt}}
+\item{license}{license under which gist is released - one of those accepted here: \url{https://bl.ocks.org/licenses.txt}}
 
 \item{border}{should the bl.ocks.org iframe have a border?}
 

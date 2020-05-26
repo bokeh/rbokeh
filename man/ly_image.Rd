@@ -36,7 +36,7 @@ ly_image(
 
 \item{dh}{image height distances}
 
-\item{palette}{name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
+\item{palette}{name of color palette to use for color ramp (see \href{https://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
 
 \item{dilate}{logical - whether to dilate pixel distance computations when drawing}
 

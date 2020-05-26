@@ -1,0 +1,10 @@
+---
+title: "rbokeh"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{rbokeh}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Please see the package documentation [here](https://hafen.github.io/rbokeh/).
