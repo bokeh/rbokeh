@@ -21,4 +21,4 @@ remotes::install_github("bokeh/rbokeh")
 
 ### Use
 
-Please see [here](http://hafen.github.io/rbokeh/docs/articles/rbokeh.html).
+Please see [here](http://hafen.github.io/rbokeh/articles/rbokeh.html).
