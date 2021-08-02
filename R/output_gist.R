@@ -4,7 +4,7 @@
 #' @param name name of the gist
 #' @param created optional string for a "Created by" to preceed the README
 #' @param description optional text to go in README.md to describe the gist
-#' @param license license under which gist is released - one of those accepted here: \url{http://bl.ocks.org/licenses.txt}
+#' @param license license under which gist is released - one of those accepted here: \url{https://bl.ocks.org/licenses.txt}
 #' @param border should the bl.ocks.org iframe have a border?
 #' @param scrolling should the bl.ocks.org iframe scroll?
 #' @param secure should https be used for cdn links?
@@ -73,11 +73,11 @@ widget2gist <- function(widget_string, name,
 
   message("* Browse this gist on github:")
   message("   ", gst$html_url)
-  bl_ocks <- paste0("http://bl.ocks.org/", gst$owner$login, "/", gst$id)
+  bl_ocks <- paste0("https://bl.ocks.org/", gst$owner$login, "/", gst$id)
   message("* View or share this gist on bl.ocks.org:")
   message("   ", bl_ocks)
   message("* Embed in an iframe:")
-  # emb <- paste0("http://bl.ocks.org/", gst$owner$login, "/raw/", gst$id)
+  # emb <- paste0("https://bl.ocks.org/", gst$owner$login, "/raw/", gst$id)
   index_raw <- gst$files[["index.html"]]$raw_url
   index_cdn <- gsub("gist\\.githubusercontent\\.com", "cdn.rawgit.com", index_raw)
   message(paste0("   <iframe width='", p$width + 20, "' height='", p$height + 20,

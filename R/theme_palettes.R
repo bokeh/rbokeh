@@ -181,7 +181,7 @@ pal_bk_line_width <- function() {
   }
 }
 
-# http://bokeh.pydata.org/en/latest/docs/reference/palettes.html
+# https://bokeh.pydata.org/en/latest/docs/reference/palettes.html
 # nolint start
 bk_gradient_palettes <- list(
   Spectral3 = c("#99d594", "#ffffbf", "#fc8d59"),

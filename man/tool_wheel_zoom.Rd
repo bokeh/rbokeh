@@ -4,12 +4,12 @@
 \alias{tool_wheel_zoom}
 \title{Add "wheel_zoom" tool to a Bokeh figure}
 \usage{
-tool_wheel_zoom(fig, dimensions = c("width", "height"))
+tool_wheel_zoom(fig, dimensions = "both")
 }
 \arguments{
 \item{fig}{figure to modify}
 
-\item{dimensions}{a vector specifying whether the wheel_zoom tool should zoom with respect to the x axis ("width") and the y axis ("height") or both (c("width", "height"))}
+\item{dimensions}{a vector specifying whether the wheel_zoom tool should zoom with respect to the x axis ("width") and the y axis ("height") or "both"}
 }
 \description{
 Add "wheel_zoom" tool to a Bokeh figure
@@ -25,11 +25,16 @@ figure() \%>\% ly_points(1:10) \%>\%
 }
 }
 \seealso{
-Other tools: \code{\link{tool_box_select}},
-  \code{\link{tool_box_zoom}},
-  \code{\link{tool_crosshair}}, \code{\link{tool_hover}},
-  \code{\link{tool_lasso_select}}, \code{\link{tool_pan}},
-  \code{\link{tool_reset}}, \code{\link{tool_resize}},
-  \code{\link{tool_save}}, \code{\link{tool_tap}}
+Other tools: 
+\code{\link{tool_box_select}()},
+\code{\link{tool_box_zoom}()},
+\code{\link{tool_crosshair}()},
+\code{\link{tool_hover}()},
+\code{\link{tool_lasso_select}()},
+\code{\link{tool_pan}()},
+\code{\link{tool_reset}()},
+\code{\link{tool_resize}()},
+\code{\link{tool_save}()},
+\code{\link{tool_tap}()}
 }
-
+\concept{tools}

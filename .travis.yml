@@ -1,14 +1,12 @@
 language: r
 cache: packages
 
-r_binary_packages:
-  - covr # code coverage check
-  - lintr # code lint
+r:
+- release
 
 after_success:
-  - Rscript -e 'covr::codecov()'
+- Rscript -e 'covr::codecov()'
 
 branches:
   only:
-    - master
-    - dev
+  - master

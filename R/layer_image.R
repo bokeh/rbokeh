@@ -10,7 +10,7 @@
 #' @param y lower left y coordinates
 #' @param dw image width distances
 #' @param dh image height distances
-#' @param palette name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
+#' @param palette name of color palette to use for color ramp (see \href{https://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)
 #' @param dilate logical - whether to dilate pixel distance computations when drawing
 #' @template par-lnamegroup
 #' @example man-roxygen/ex-image.R
@@ -18,7 +18,7 @@
 #' @export
 ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
   palette = "Spectral10", dilate = FALSE,
-  lname = NULL, lgroup = NULL, visible = TRUE) {
+  lname = NULL, lgroup = NULL) {
 
   validate_fig(fig, "ly_image")
   ## see if any options won't be used and give a message
@@ -30,7 +30,6 @@ ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
       y,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots()
     )
   )
@@ -54,13 +53,13 @@ ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
       stop(
         "'palette' specified in ly_image is a single color; please supply a ",
         "vector of colors or name of a bokeh palette - see here: ",
-        "http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+        "https://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
         call. = FALSE)
     } else {
       if (!palette %in% bk_gradient_palette_names){
         stop(
           "'palette' specified in ly_image is not a valid color name or palette - ",
-          "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+          "see here: https://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
           call. = FALSE)
       } else {
         palette <- bk_gradient_palettes[[palette]]
@@ -71,13 +70,13 @@ ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
     if (!valid_color(palette)){
       stop(
         "'palette' specified in ly_image is not a valid color name or palette - ",
-        "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+        "see here: https://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
         call. = FALSE)
     }
   } else {
     stop(
       "'palette' specified in ly_image is not a valid color name or palette - ",
-      "see here: http://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
+      "see here: https://bokeh.pydata.org/en/latest/docs/reference/palettes.html",
       call. = FALSE)
   }
 
@@ -108,7 +107,7 @@ ly_image <- function(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
 ly_image_url <- function(
   fig, x = 0, y = 0, data = figure_data(fig), w = 10, h = 10,
   image_url, dilate = TRUE, anchor = "top_left", angle = 0,
-  lname = NULL, lgroup = NULL, visible = TRUE
+  lname = NULL, lgroup = NULL
 ) {
 
   validate_fig(fig, "ly_image_url")
@@ -131,7 +130,6 @@ ly_image_url <- function(
       angle,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots()
     )
   )

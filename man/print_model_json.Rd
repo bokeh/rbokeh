@@ -4,8 +4,7 @@
 \alias{print_model_json}
 \title{Print the JSON of a Bokeh figure}
 \usage{
-print_model_json(fig, prepare = TRUE, pretty = TRUE, file = "",
-  pbcopy = FALSE)
+print_model_json(fig, prepare = TRUE, pretty = TRUE, file = "", pbcopy = FALSE)
 }
 \arguments{
 \item{fig}{figure to print}
@@ -28,4 +27,3 @@ p <- figure() \%>\% ly_points(1:10) \%>\%
 print_model_json(p)
 }
 }
-

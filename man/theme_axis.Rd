@@ -4,27 +4,54 @@
 \alias{theme_axis}
 \title{Override theme parameters for axis attributes}
 \usage{
-theme_axis(fig, which = c("x", "y"), num_minor_ticks = 5,
-  axis_label_standoff = NULL, axis_label_text_align = "left",
-  axis_label_text_alpha = 1, axis_label_text_baseline = "bottom",
-  axis_label_text_color = "#444444", axis_label_text_font = "Helvetica",
-  axis_label_text_font_size = "12pt", axis_label_text_font_style = "normal",
-  axis_line_alpha = 1, axis_line_cap = "butt", axis_line_color = "black",
-  axis_line_dash = NULL, axis_line_dash_offset = 0,
-  axis_line_join = "miter", axis_line_width = 1,
-  major_label_orientation = "horizontal", major_label_standoff = NULL,
-  major_label_text_align = "left", major_label_text_alpha = 1,
-  major_label_text_baseline = "bottom", major_label_text_color = "#444444",
-  major_label_text_font = "Helvetica", major_label_text_font_size = "12pt",
-  major_label_text_font_style = "normal", major_tick_in = NULL,
-  major_tick_line_alpha = 1, major_tick_line_cap = "butt",
-  major_tick_line_color = "black", major_tick_line_dash = NULL,
-  major_tick_line_dash_offset = 0, major_tick_line_join = "miter",
-  major_tick_line_width = 1, major_tick_out = NULL, minor_tick_in = NULL,
-  minor_tick_line_alpha = 1, minor_tick_line_cap = "butt",
-  minor_tick_line_color = "black", minor_tick_line_dash = NULL,
-  minor_tick_line_dash_offset = 0, minor_tick_line_join = "miter",
-  minor_tick_line_width = 1, minor_tick_out = NULL, pars = NULL)
+theme_axis(
+  fig,
+  which = c("x", "y"),
+  num_minor_ticks = 5,
+  axis_label_standoff = NULL,
+  axis_label_text_align = "left",
+  axis_label_text_alpha = 1,
+  axis_label_text_baseline = "bottom",
+  axis_label_text_color = "#444444",
+  axis_label_text_font = "Helvetica",
+  axis_label_text_font_size = "12pt",
+  axis_label_text_font_style = "normal",
+  axis_line_alpha = 1,
+  axis_line_cap = "butt",
+  axis_line_color = "black",
+  axis_line_dash = NULL,
+  axis_line_dash_offset = 0,
+  axis_line_join = "miter",
+  axis_line_width = 1,
+  major_label_orientation = "horizontal",
+  major_label_standoff = NULL,
+  major_label_text_align = "left",
+  major_label_text_alpha = 1,
+  major_label_text_baseline = "bottom",
+  major_label_text_color = "#444444",
+  major_label_text_font = "Helvetica",
+  major_label_text_font_size = "12pt",
+  major_label_text_font_style = "normal",
+  major_tick_in = NULL,
+  major_tick_line_alpha = 1,
+  major_tick_line_cap = "butt",
+  major_tick_line_color = "black",
+  major_tick_line_dash = NULL,
+  major_tick_line_dash_offset = 0,
+  major_tick_line_join = "miter",
+  major_tick_line_width = 1,
+  major_tick_out = NULL,
+  minor_tick_in = NULL,
+  minor_tick_line_alpha = 1,
+  minor_tick_line_cap = "butt",
+  minor_tick_line_color = "black",
+  minor_tick_line_dash = NULL,
+  minor_tick_line_dash_offset = 0,
+  minor_tick_line_join = "miter",
+  minor_tick_line_width = 1,
+  minor_tick_out = NULL,
+  pars = NULL
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -153,4 +180,3 @@ figure() \%>\%
   ly_boxplot(1:10)
 }
 }
-

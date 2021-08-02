@@ -4,9 +4,20 @@
 \alias{ly_image}
 \title{Add an "image" layer to a Bokeh figure}
 \usage{
-ly_image(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
-  palette = "Spectral10", dilate = FALSE, lname = NULL, lgroup = NULL,
-  visible = TRUE)
+ly_image(
+  fig,
+  z,
+  rows,
+  byrow = TRUE,
+  x = 0,
+  y = 0,
+  dw = 1,
+  dh = 1,
+  palette = "Spectral10",
+  dilate = FALSE,
+  lname = NULL,
+  lgroup = NULL
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -25,15 +36,13 @@ ly_image(fig, z, rows, byrow = TRUE, x = 0, y = 0, dw = 1, dh = 1,
 
 \item{dh}{image height distances}
 
-\item{palette}{name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
+\item{palette}{name of color palette to use for color ramp (see \href{https://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
 
 \item{dilate}{logical - whether to dilate pixel distance computations when drawing}
 
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 }
 \description{
 Draws a grid of rectangles with colors corresponding to the values in \code{z}
@@ -47,19 +56,33 @@ p
 }
 }
 \seealso{
-Other layer functions: \code{\link{ly_abline}},
-  \code{\link{ly_annular_wedge}}, \code{\link{ly_annulus}},
-  \code{\link{ly_arc}}, \code{\link{ly_bar}},
-  \code{\link{ly_bezier}}, \code{\link{ly_boxplot}},
-  \code{\link{ly_contour}}, \code{\link{ly_crect}},
-  \code{\link{ly_curve}}, \code{\link{ly_density}},
-  \code{\link{ly_hist}}, \code{\link{ly_image_url}},
-  \code{\link{ly_lines}}, \code{\link{ly_map}},
-  \code{\link{ly_multi_line}}, \code{\link{ly_oval}},
-  \code{\link{ly_patch}}, \code{\link{ly_points}},
-  \code{\link{ly_polygons}}, \code{\link{ly_quadratic}},
-  \code{\link{ly_quantile}}, \code{\link{ly_ray}},
-  \code{\link{ly_rect}}, \code{\link{ly_segments}},
-  \code{\link{ly_text}}, \code{\link{ly_wedge}}
+Other layer functions: 
+\code{\link{ly_abline}()},
+\code{\link{ly_annular_wedge}()},
+\code{\link{ly_annulus}()},
+\code{\link{ly_arc}()},
+\code{\link{ly_bar}()},
+\code{\link{ly_bezier}()},
+\code{\link{ly_boxplot}()},
+\code{\link{ly_contour}()},
+\code{\link{ly_crect}()},
+\code{\link{ly_curve}()},
+\code{\link{ly_density}()},
+\code{\link{ly_hist}()},
+\code{\link{ly_image_url}()},
+\code{\link{ly_lines}()},
+\code{\link{ly_map}()},
+\code{\link{ly_multi_line}()},
+\code{\link{ly_oval}()},
+\code{\link{ly_patch}()},
+\code{\link{ly_points}()},
+\code{\link{ly_polygons}()},
+\code{\link{ly_quadratic}()},
+\code{\link{ly_quantile}()},
+\code{\link{ly_ray}()},
+\code{\link{ly_rect}()},
+\code{\link{ly_segments}()},
+\code{\link{ly_text}()},
+\code{\link{ly_wedge}()}
 }
-
+\concept{layer functions}

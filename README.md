@@ -1,9 +1,9 @@
-# rbokeh
-
-[![Build Status](https://travis-ci.org/bokeh/rbokeh.svg?branch=master)](https://travis-ci.org/bokeh/rbokeh)
+[![R-CMD-check](https://github.com/hafen/rbokeh/workflows/R-CMD-check/badge.svg)](https://github.com/hafen/rbokeh/actions)
+<!-- [![Build Status](https://travis-ci.org/bokeh/rbokeh.svg?branch=master)](https://travis-ci.org/bokeh/rbokeh) -->
 [![codecov.io](https://codecov.io/github/hafen/rbokeh/coverage.svg?branch=master)](https://codecov.io/github/hafen/rbokeh?branch=master)
-[![CRAN](http://www.r-pkg.org/badges/version/rbokeh)](https://cran.r-project.org/package=rbokeh)
-[![](http://cranlogs.r-pkg.org/badges/rbokeh)](https://cran.r-project.org/package=rbokeh)
+[![CRAN](https://www.r-pkg.org/badges/version/rbokeh)](https://cran.r-project.org/package=rbokeh)
+[![](https://cranlogs.r-pkg.org/badges/rbokeh)](https://cran.r-project.org/package=rbokeh)
+# rbokeh <img src="man/figures/logo.png" align="right" alt="" width="120" />
 
 A native R plotting library that provides a flexible declarative interface for creating interactive web-based graphics, backed by the Bokeh visualization library.
 
@@ -13,14 +13,10 @@ A native R plotting library that provides a flexible declarative interface for c
 # from CRAN:
 install.packages("rbokeh")
 
-# from packages.deltarho.org:
-options(repos = c(deltarho = "http://packages.deltarho.org", getOption("repos")))
-install.packages("rbokeh")
-
 # from github:
-devtools::install_github("bokeh/rbokeh")
+remotes::install_github("bokeh/rbokeh")
 ```
 
 ### Use
 
-Please see [here](http://hafen.github.io/rbokeh).
+Please see [here](https://hafen.github.io/rbokeh/articles/rbokeh.html).

@@ -4,14 +4,27 @@
 \alias{theme_grid}
 \title{Override theme parameters for grid attributes}
 \usage{
-theme_grid(fig, which = c("x", "y"), band_fill_alpha = 1,
-  band_fill_color = "gray", grid_line_alpha = 1, grid_line_cap = "butt",
-  grid_line_color = "black", grid_line_dash = NULL,
-  grid_line_dash_offset = 0, grid_line_join = "miter",
-  grid_line_width = 1, minor_grid_line_alpha = 1,
-  minor_grid_line_cap = "butt", minor_grid_line_color = "black",
-  minor_grid_line_dash = NULL, minor_grid_line_dash_offset = 0,
-  minor_grid_line_join = "miter", minor_grid_line_width = 1, pars = NULL)
+theme_grid(
+  fig,
+  which = c("x", "y"),
+  band_fill_alpha = 1,
+  band_fill_color = "gray",
+  grid_line_alpha = 1,
+  grid_line_cap = "butt",
+  grid_line_color = "black",
+  grid_line_dash = NULL,
+  grid_line_dash_offset = 0,
+  grid_line_join = "miter",
+  grid_line_width = 1,
+  minor_grid_line_alpha = 1,
+  minor_grid_line_cap = "butt",
+  minor_grid_line_color = "black",
+  minor_grid_line_dash = NULL,
+  minor_grid_line_dash_offset = 0,
+  minor_grid_line_join = "miter",
+  minor_grid_line_width = 1,
+  pars = NULL
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -86,4 +99,3 @@ figure() \%>\%
   ly_boxplot(1:10)
 }
 }
-

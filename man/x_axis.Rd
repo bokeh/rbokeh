@@ -4,11 +4,22 @@
 \alias{x_axis}
 \title{Customize x axis of a Bokeh figure}
 \usage{
-x_axis(fig, label, position = "below", log = FALSE, grid = TRUE,
-  desired_num_ticks = NULL, num_minor_ticks = 5, visible = TRUE,
-  number_formatter = c("basic", "numeral", "printf"), power_limit_high = 5,
-  power_limit_low = -3, precision = NULL, use_scientific = TRUE,
-  format = NULL)
+x_axis(
+  fig,
+  label,
+  position = "below",
+  log = FALSE,
+  grid = TRUE,
+  desired_num_ticks = NULL,
+  num_minor_ticks = 5,
+  visible = TRUE,
+  number_formatter = c("basic", "numeral", "printf"),
+  power_limit_high = 5,
+  power_limit_low = -3,
+  precision = NULL,
+  use_scientific = TRUE,
+  format = NULL
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -28,9 +39,9 @@ x_axis(fig, label, position = "below", log = FALSE, grid = TRUE,
 \item{visible}{should axis be shown?}
 
 \item{number_formatter}{Bokeh numeric tick label formatter
-(\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.BasicTickFormatter}{"basic"},
-\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
-or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
+(\href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.BasicTickFormatter}{"basic"},
+\href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
+or \href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
 ignored if \code{log} is TRUE}
 
 \item{power_limit_high}{(int) Limit the use of scientific notation to when log(x) >= value. Only applicable when \code{number_formatter} is "basic".}
@@ -48,9 +59,9 @@ Customize x axis of a Bokeh figure
 }
 \details{
 \code{format} parameter:
-When \code{number_formatter} is "basic" and the axis type is datetime, \code{format} specifies how to display tick values from a continuous range as formatted datetimes. See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.DatetimeTickFormatter}{DatetimeTickFormatter}
-When \code{number_formatter} is "numeral", \code{format} specifies a human-readable format string. See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{NumeralTickFormatter}.
-When \code{number_formatter} is "printf", \code{format} is a printf-style format string. See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{PrintfTickFormatter}.
+When \code{number_formatter} is "basic" and the axis type is datetime, \code{format} specifies how to display tick values from a continuous range as formatted datetimes. See \href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.DatetimeTickFormatter}{DatetimeTickFormatter}
+When \code{number_formatter} is "numeral", \code{format} specifies a human-readable format string. See \href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{NumeralTickFormatter}.
+When \code{number_formatter} is "printf", \code{format} is a printf-style format string. See \href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{PrintfTickFormatter}.
 }
 \examples{
 figure() \%>\%
@@ -90,6 +101,7 @@ figure() \%>\%
   y_axis(number_formatter = "printf", format = "\%0.1f\%\%")
 }
 \seealso{
-Other axes: \code{\link{y_axis}}
+Other axes: 
+\code{\link{y_axis}()}
 }
-
+\concept{axes}

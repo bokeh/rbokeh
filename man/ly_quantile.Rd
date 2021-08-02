@@ -4,9 +4,21 @@
 \alias{ly_quantile}
 \title{Add a "quantile" layer to a Bokeh figure}
 \usage{
-ly_quantile(fig, x, group = NULL, data = figure_data(fig), probs = NULL,
-  distn = stats::qunif, ncutoff = 200, color = NULL, alpha = 1,
-  legend = TRUE, lname = NULL, lgroup = NULL, visible = TRUE, ...)
+ly_quantile(
+  fig,
+  x,
+  group = NULL,
+  data = figure_data(fig),
+  probs = NULL,
+  distn = stats::qunif,
+  ncutoff = 200,
+  color = NULL,
+  alpha = 1,
+  legend = TRUE,
+  lname = NULL,
+  lgroup = NULL,
+  ...
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -32,8 +44,6 @@ ly_quantile(fig, x, group = NULL, data = figure_data(fig), probs = NULL,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 
 \item{\ldots}{additional parameters for fine control over fill and line properties (see "Additional parameters" below)}
 }
@@ -77,24 +87,39 @@ When color is \code{NULL} and \code{fill_color} or \code{line_color} are not spe
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
 figure(legend_location = "top_left") \%>\%
   ly_quantile(Sepal.Length, group = Species, data = iris)
 }
 \seealso{
-Other layer functions: \code{\link{ly_abline}},
-  \code{\link{ly_annular_wedge}}, \code{\link{ly_annulus}},
-  \code{\link{ly_arc}}, \code{\link{ly_bar}},
-  \code{\link{ly_bezier}}, \code{\link{ly_boxplot}},
-  \code{\link{ly_contour}}, \code{\link{ly_crect}},
-  \code{\link{ly_curve}}, \code{\link{ly_density}},
-  \code{\link{ly_hist}}, \code{\link{ly_image_url}},
-  \code{\link{ly_image}}, \code{\link{ly_lines}},
-  \code{\link{ly_map}}, \code{\link{ly_multi_line}},
-  \code{\link{ly_oval}}, \code{\link{ly_patch}},
-  \code{\link{ly_points}}, \code{\link{ly_polygons}},
-  \code{\link{ly_quadratic}}, \code{\link{ly_ray}},
-  \code{\link{ly_rect}}, \code{\link{ly_segments}},
-  \code{\link{ly_text}}, \code{\link{ly_wedge}}
+Other layer functions: 
+\code{\link{ly_abline}()},
+\code{\link{ly_annular_wedge}()},
+\code{\link{ly_annulus}()},
+\code{\link{ly_arc}()},
+\code{\link{ly_bar}()},
+\code{\link{ly_bezier}()},
+\code{\link{ly_boxplot}()},
+\code{\link{ly_contour}()},
+\code{\link{ly_crect}()},
+\code{\link{ly_curve}()},
+\code{\link{ly_density}()},
+\code{\link{ly_hist}()},
+\code{\link{ly_image_url}()},
+\code{\link{ly_image}()},
+\code{\link{ly_lines}()},
+\code{\link{ly_map}()},
+\code{\link{ly_multi_line}()},
+\code{\link{ly_oval}()},
+\code{\link{ly_patch}()},
+\code{\link{ly_points}()},
+\code{\link{ly_polygons}()},
+\code{\link{ly_quadratic}()},
+\code{\link{ly_ray}()},
+\code{\link{ly_rect}()},
+\code{\link{ly_segments}()},
+\code{\link{ly_text}()},
+\code{\link{ly_wedge}()}
 }
-
+\concept{layer functions}

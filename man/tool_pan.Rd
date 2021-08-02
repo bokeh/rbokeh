@@ -4,12 +4,12 @@
 \alias{tool_pan}
 \title{Add "pan" tool to a Bokeh figure}
 \usage{
-tool_pan(fig, dimensions = c("width", "height"))
+tool_pan(fig, dimensions = "both")
 }
 \arguments{
 \item{fig}{figure to modify}
 
-\item{dimensions}{a vector specifying whether the pan tool should pan with respect to the x axis ("width") and the y axis ("height") or both (c("width", "height"))}
+\item{dimensions}{a vector specifying whether the pan tool should pan with respect to the x axis ("width") and the y axis ("height") or "both"}
 }
 \description{
 Add "pan" tool to a Bokeh figure
@@ -25,12 +25,16 @@ figure() \%>\% ly_points(1:10) \%>\%
 }
 }
 \seealso{
-Other tools: \code{\link{tool_box_select}},
-  \code{\link{tool_box_zoom}},
-  \code{\link{tool_crosshair}}, \code{\link{tool_hover}},
-  \code{\link{tool_lasso_select}},
-  \code{\link{tool_reset}}, \code{\link{tool_resize}},
-  \code{\link{tool_save}}, \code{\link{tool_tap}},
-  \code{\link{tool_wheel_zoom}}
+Other tools: 
+\code{\link{tool_box_select}()},
+\code{\link{tool_box_zoom}()},
+\code{\link{tool_crosshair}()},
+\code{\link{tool_hover}()},
+\code{\link{tool_lasso_select}()},
+\code{\link{tool_reset}()},
+\code{\link{tool_resize}()},
+\code{\link{tool_save}()},
+\code{\link{tool_tap}()},
+\code{\link{tool_wheel_zoom}()}
 }
-
+\concept{tools}

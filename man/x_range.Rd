@@ -34,6 +34,7 @@ p \%>\%
 }
 }
 \seealso{
-Other ranges: \code{\link{y_range}}
+Other ranges: 
+\code{\link{y_range}()}
 }
-
+\concept{ranges}

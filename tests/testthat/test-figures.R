@@ -106,7 +106,7 @@ test_that("examples", {
     ly_image(volcano, palette = blues9)
   print_model_json(p[[20]], file = fname)
 
-  url <- c("  http://bokeh.pydata.org/en/latest/_static/images/logo.png",
+  url <- c("http://bokeh.pydata.org/en/latest/_static/images/logo.png",
     "http://developer.r-project.org/Logo/Rlogo-4.png")
 
   ss <- seq(0, 2 * pi, length = 13)[-1]
@@ -166,7 +166,6 @@ test_that("examples", {
     width = 600, height = 600,
     map_style = gmap_style("blue_water"))
   print_model_json(p[[27]], file = fname)
-
 
   ## axis
   ##---------------------------------------------------------
@@ -565,7 +564,6 @@ test_that("examples", {
       color = Species)
   print_model_json(p[[90]], file = fname)
 
-  # broken!!
   p[[91]] <- figure() %>%
     ly_bezier(
       x0 = Sepal.Length,
@@ -678,6 +676,7 @@ test_that("examples", {
   #   widget2png(tf)
   # system2("open", tf)
 })
+
 
 # # sapply(p, length)
 # for (i in seq_along(p)) {

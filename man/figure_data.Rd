@@ -12,4 +12,3 @@ figure_data(fig)
 \description{
 Retrieve rbokeh figure data
 }
-

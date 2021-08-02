@@ -4,11 +4,22 @@
 \alias{y_axis}
 \title{Customize x axis of a Bokeh figure}
 \usage{
-y_axis(fig, label, position = "left", log = FALSE, grid = TRUE,
-  desired_num_ticks = NULL, num_minor_ticks = 5, visible = TRUE,
-  number_formatter = c("basic", "numeral", "printf"), power_limit_high = 5,
-  power_limit_low = -3, precision = NULL, use_scientific = TRUE,
-  format = NULL)
+y_axis(
+  fig,
+  label,
+  position = "left",
+  log = FALSE,
+  grid = TRUE,
+  desired_num_ticks = NULL,
+  num_minor_ticks = 5,
+  visible = TRUE,
+  number_formatter = c("basic", "numeral", "printf"),
+  power_limit_high = 5,
+  power_limit_low = -3,
+  precision = NULL,
+  use_scientific = TRUE,
+  format = NULL
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -28,9 +39,9 @@ y_axis(fig, label, position = "left", log = FALSE, grid = TRUE,
 \item{visible}{should axis be shown?}
 
 \item{number_formatter}{Bokeh numeric tick label formatter
-(\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.BasicTickFormatter}{"basic"},
-\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
-or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
+(\href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.BasicTickFormatter}{"basic"},
+\href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
+or \href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
 ignored if \code{log} is TRUE}
 
 \item{power_limit_high}{(int) Limit the use of scientific notation to when log(x) >= value. Only applicable when \code{number_formatter} is "basic".}
@@ -84,6 +95,7 @@ figure() \%>\%
   y_axis(number_formatter = "printf", format = "\%0.1f\%\%")
 }
 \seealso{
-Other axes: \code{\link{x_axis}}
+Other axes: 
+\code{\link{x_axis}()}
 }
-
+\concept{axes}

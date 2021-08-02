@@ -3,7 +3,7 @@
 ## when rendering maybe use something
 ## like this to approximate zoom level
 ## for a given glyph_x_ranges and glyph_y_ranges
-# http://stackoverflow.com/questions/6048975/google-maps-v3-how-to-calculate-the-zoom-level-for-a-given-bounds
+# https://stackoverflow.com/questions/6048975/google-maps-v3-how-to-calculate-the-zoom-level-for-a-given-bounds
 
 #' Initialize a Bokeh Google Map plot
 #'
@@ -91,8 +91,17 @@ gmap <- function(lat = 0, lng = 0, zoom = 0, api_key = NULL,
   fig$x$spec$model$plot$type <- "GMapPlot"
   fig$x$spec$ref$type <- "GMapPlot"
 
-  fig$x$spec$model$plot$attributes$api_key <- api_key
-  fig$x$spec$model$plot$attributes$map_options <- list(
+  # {
+  #   "attributes": {
+  #     "lat": 30.29,
+  #     "lng": -97.73,
+  #     "zoom": 11
+  #   },
+  #   "id": "bec0c1da-f2f9-473c-bb7a-deb7da4c5340",
+  #   "type": "GMapOptions"
+  # },
+
+  mopts <- list(
     lat      = lat,
     lng      = lng,
     zoom     = zoom,
@@ -100,9 +109,17 @@ gmap <- function(lat = 0, lng = 0, zoom = 0, api_key = NULL,
   )
 
   if (!is.null(map_style)) {
-    fig$x$spec$model$plot$attributes$map_options$map_type <- NULL
-    fig$x$spec$model$plot$attributes$map_options$styles <- map_style
+    mopts$map_type <- NULL
+    mopts$styles <- map_style
   }
+
+  mopts_id <- gen_id(fig, "GMapOptions")
+  moptsmod <- base_model_object("GMapOptions", mopts_id)
+  moptsmod$model$attributes <- mopts
+  fig$x$spec$model$gmapoptions <- moptsmod$model
+
+  fig$x$spec$model$plot$attributes$api_key <- api_key
+  fig$x$spec$model$plot$attributes$map_options <- moptsmod$ref
 
   fig$x$spec$glyph_x_ranges[["dummy_map_layer"]] <- c(lng, lat)
   fig$x$spec$glyph_y_ranges[["dummy_map_layer"]] <- c(lng, lat)

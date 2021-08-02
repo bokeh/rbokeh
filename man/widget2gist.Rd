@@ -4,12 +4,20 @@
 \alias{widget2gist}
 \title{Export htmlwidget plot to a gist}
 \usage{
-widget2gist(widget_string, name, created = NULL, description = "",
-  license = c("none", "apache-2.0", "bsd-2-clause", "bsd-3-clause",
-  "cc-by-4.0", "cc-by-nc-4.0", "cc-by-nc-nd-4.0", "cc-by-nc-sa-4.0",
-  "cc-by-nd-4.0", "cc-by-sa-4.0", "cddl-1.0", "epl-1.0", "gpl-2.0", "gpl-3.0",
-  "lgpl-2.1", "lgpl-3.0", "mit", "mpl-2.0"), border = TRUE,
-  scrolling = FALSE, secure = TRUE, view = TRUE)
+widget2gist(
+  widget_string,
+  name,
+  created = NULL,
+  description = "",
+  license = c("none", "apache-2.0", "bsd-2-clause", "bsd-3-clause", "cc-by-4.0",
+    "cc-by-nc-4.0", "cc-by-nc-nd-4.0", "cc-by-nc-sa-4.0", "cc-by-nd-4.0", "cc-by-sa-4.0",
+    "cddl-1.0", "epl-1.0", "gpl-2.0", "gpl-3.0", "lgpl-2.1", "lgpl-3.0", "mit",
+    "mpl-2.0"),
+  border = TRUE,
+  scrolling = FALSE,
+  secure = TRUE,
+  view = TRUE
+)
 }
 \arguments{
 \item{widget_string}{a string containing R code to create an htmlwidget}
@@ -20,7 +28,7 @@ widget2gist(widget_string, name, created = NULL, description = "",
 
 \item{description}{optional text to go in README.md to describe the gist}
 
-\item{license}{license under which gist is released - one of those accepted here: \url{http://bl.ocks.org/licenses.txt}}
+\item{license}{license under which gist is released - one of those accepted here: \url{https://bl.ocks.org/licenses.txt}}
 
 \item{border}{should the bl.ocks.org iframe have a border?}
 
@@ -43,4 +51,3 @@ Also note that this currently can't handle thumbnails but we are looking into wa
 widget2gist("figure() \%>\% ly_points(1:10)", name = "test")
 }
 }
-

@@ -4,9 +4,22 @@
 \alias{ly_abline}
 \title{Add an "abline" layer to a Bokeh figure}
 \usage{
-ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
-  color = "black", alpha = NULL, width = 1, type = 1, legend = NULL,
-  lname = NULL, lgroup = NULL, visible = TRUE, ...)
+ly_abline(
+  fig,
+  a = NULL,
+  b = NULL,
+  v = NULL,
+  h = NULL,
+  coef = NULL,
+  color = "black",
+  alpha = NULL,
+  width = 1,
+  type = 1,
+  legend = NULL,
+  lname = NULL,
+  lgroup = NULL,
+  ...
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -33,8 +46,6 @@ ly_abline(fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
 
 \item{lgroup}{layer group}
 
-\item{visible}{should the layer be visible?}
-
 \item{\ldots}{additional parameters for fine control over line properties (see "Additional parameters" below)}
 }
 \description{
@@ -53,7 +64,16 @@ Draws one or more straight lines.
   \code{line_dash_offset} \tab the distance in pixels into the line_dash that the pattern should start from
  }
 }
+
 \examples{
+\donttest{
+z <- lm(dist ~ speed, data = cars)
+p <- figure() \%>\%
+  ly_points(cars, hover = cars) \%>\%
+  ly_lines(lowess(cars), legend = "lowess") \%>\%
+  ly_abline(z, type = 2, legend = "lm", width = 2)
+p
+}
 # abline with mixed axes for h and v
 figure() \%>\%
   ly_points(1:26, letters) \%>\%
@@ -70,29 +90,35 @@ figure() \%>\%
 figure() \%>\%
   ly_points(0:10) \%>\%
   ly_abline(0, seq(0, 1, by = 0.1))
-\donttest{
-z <- lm(dist ~ speed, data = cars)
-p <- figure() \%>\%
-  ly_points(cars, hover = cars) \%>\%
-  ly_lines(lowess(cars), legend = "lowess") \%>\%
-  ly_abline(z, type = 2, legend = "lm", width = 2)
-p
-}
 }
 \seealso{
-Other layer functions: \code{\link{ly_annular_wedge}},
-  \code{\link{ly_annulus}}, \code{\link{ly_arc}},
-  \code{\link{ly_bar}}, \code{\link{ly_bezier}},
-  \code{\link{ly_boxplot}}, \code{\link{ly_contour}},
-  \code{\link{ly_crect}}, \code{\link{ly_curve}},
-  \code{\link{ly_density}}, \code{\link{ly_hist}},
-  \code{\link{ly_image_url}}, \code{\link{ly_image}},
-  \code{\link{ly_lines}}, \code{\link{ly_map}},
-  \code{\link{ly_multi_line}}, \code{\link{ly_oval}},
-  \code{\link{ly_patch}}, \code{\link{ly_points}},
-  \code{\link{ly_polygons}}, \code{\link{ly_quadratic}},
-  \code{\link{ly_quantile}}, \code{\link{ly_ray}},
-  \code{\link{ly_rect}}, \code{\link{ly_segments}},
-  \code{\link{ly_text}}, \code{\link{ly_wedge}}
+Other layer functions: 
+\code{\link{ly_annular_wedge}()},
+\code{\link{ly_annulus}()},
+\code{\link{ly_arc}()},
+\code{\link{ly_bar}()},
+\code{\link{ly_bezier}()},
+\code{\link{ly_boxplot}()},
+\code{\link{ly_contour}()},
+\code{\link{ly_crect}()},
+\code{\link{ly_curve}()},
+\code{\link{ly_density}()},
+\code{\link{ly_hist}()},
+\code{\link{ly_image_url}()},
+\code{\link{ly_image}()},
+\code{\link{ly_lines}()},
+\code{\link{ly_map}()},
+\code{\link{ly_multi_line}()},
+\code{\link{ly_oval}()},
+\code{\link{ly_patch}()},
+\code{\link{ly_points}()},
+\code{\link{ly_polygons}()},
+\code{\link{ly_quadratic}()},
+\code{\link{ly_quantile}()},
+\code{\link{ly_ray}()},
+\code{\link{ly_rect}()},
+\code{\link{ly_segments}()},
+\code{\link{ly_text}()},
+\code{\link{ly_wedge}()}
 }
-
+\concept{layer functions}

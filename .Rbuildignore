@@ -13,3 +13,17 @@ cran-comments.md
 _gh-pages
 .codecov.yml
 vignettes2/
+^js-scales
+^.vscode
+^docs-dev
+inst/htmlwidgets/lib/bokehjs/notused
+inst/htmlwidgets/lib/bokehjs/prev
+^code-gen
+^revdep$
+rbokeh.code-workspace
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^vignettes/rbokeh\.Rmd$
+^CRAN-RELEASE$
+^\.github$

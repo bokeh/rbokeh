@@ -4,10 +4,18 @@
 \alias{tool_box_select}
 \title{Add "box_select" tool to a Bokeh figure}
 \usage{
-tool_box_select(fig, callback = NULL, ref_layer = NULL,
-  line_color = "black", line_alpha = 1, fill_color = "lightgrey",
-  fill_alpha = 0.5, line_width = 2, line_dash = c(4, 4),
-  level = "overlay")
+tool_box_select(
+  fig,
+  callback = NULL,
+  ref_layer = NULL,
+  line_color = "black",
+  line_alpha = 1,
+  fill_color = "lightgrey",
+  fill_alpha = 0.5,
+  line_width = 2,
+  line_dash = c(4, 4),
+  level = "overlay"
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -31,11 +39,16 @@ figure() \%>\% ly_points(1:10) \%>\%
 }
 }
 \seealso{
-Other tools: \code{\link{tool_box_zoom}},
-  \code{\link{tool_crosshair}}, \code{\link{tool_hover}},
-  \code{\link{tool_lasso_select}}, \code{\link{tool_pan}},
-  \code{\link{tool_reset}}, \code{\link{tool_resize}},
-  \code{\link{tool_save}}, \code{\link{tool_tap}},
-  \code{\link{tool_wheel_zoom}}
+Other tools: 
+\code{\link{tool_box_zoom}()},
+\code{\link{tool_crosshair}()},
+\code{\link{tool_hover}()},
+\code{\link{tool_lasso_select}()},
+\code{\link{tool_pan}()},
+\code{\link{tool_reset}()},
+\code{\link{tool_resize}()},
+\code{\link{tool_save}()},
+\code{\link{tool_tap}()},
+\code{\link{tool_wheel_zoom}()}
 }
-
+\concept{tools}

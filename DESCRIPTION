@@ -1,6 +1,6 @@
 Package: rbokeh
 Title: R Interface for Bokeh
-Version: 0.5.0
+Version: 0.5.1
 Authors@R: c(
     person("Ryan", "Hafen", email = "rhafen@gmail.com", role = c("aut", "cre")),
     person("Kenton", "Russell", email = "kent.russell@timelyportfolio.com", role = "ctb"),
@@ -8,9 +8,9 @@ Authors@R: c(
     person("Barret", "Schloerke", email = "schloerke@gmail.com", role = "ctb"),
     person("Saptasrhi", "Guha", email = "saptarshi.guha@gmail.com", role = "ctb"),
     person("Continuum Analytics, Inc.", role = c("aut", "cph"),
-      comment = "Bokeh library in htmlwidgets/lib, http://bokeh.pydata.org"
+      comment = "Bokeh library in htmlwidgets/lib, https://bokeh.pydata.org"
     ))
-Description: A native R plotting library that provides a flexible declarative interface for creating interactive web-based graphics, backed by the Bokeh visualization library <http://bokeh.pydata.org/>.
+Description: A native R plotting library that provides a flexible declarative interface for creating interactive web-based graphics, backed by the Bokeh visualization library <https://bokeh.pydata.org/>.
 URL: https://hafen.github.io/rbokeh https://github.com/bokeh/rbokeh
 BugReports: https://github.com/bokeh/rbokeh/issues
 License: MIT + file LICENSE
@@ -35,7 +35,10 @@ Suggests:
     lattice,
     lintr,
     roxygen2 (>= 5.0.0),
-    knitr
+    latticeExtra,
+    knitr,
+    rmarkdown
 Enhances: shiny (>= 0.12)
-RoxygenNote: 5.0.1
+RoxygenNote: 7.1.1
+Encoding: UTF-8
 VignetteBuilder: knitr

@@ -4,10 +4,24 @@
 \alias{ly_hexbin}
 \title{Add a "hexbin" layer to a Bokeh figure}
 \usage{
-ly_hexbin(fig, x, y = NULL, data = figure_data(fig), xbins = 30,
-  shape = 1, xbnds = NULL, ybnds = NULL, style = "colorscale",
-  trans = NULL, inv = NULL, lname = NULL, palette = "RdYlGn11",
-  line = FALSE, alpha = 1, hover = TRUE, visible = TRUE)
+ly_hexbin(
+  fig,
+  x,
+  y = NULL,
+  data = figure_data(fig),
+  xbins = 30,
+  shape = 1,
+  xbnds = NULL,
+  ybnds = NULL,
+  style = "colorscale",
+  trans = NULL,
+  inv = NULL,
+  lname = NULL,
+  palette = "RdYlGn11",
+  line = FALSE,
+  alpha = 1,
+  hover = TRUE
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -26,15 +40,13 @@ ly_hexbin(fig, x, y = NULL, data = figure_data(fig), xbins = 30,
 
 \item{lname}{layer name}
 
-\item{palette}{name of color palette to use for color ramp (see \href{http://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
+\item{palette}{name of color palette to use for color ramp (see \href{https://bokeh.pydata.org/en/latest/docs/reference/palettes.html}{here} for acceptable values)}
 
 \item{line}{logical - should hexagons have an outline?}
 
 \item{alpha}{the alpha transparency of the hexagons between 0 (transparent) and 1 (opaque)}
 
 \item{hover}{logical - should a hover tool be added to show the count in each hexagon?}
-
-\item{visible}{should the layer be visible?}
 }
 \description{
 Add a "hexbin" layer to a Bokeh figure
@@ -44,4 +56,3 @@ Add a "hexbin" layer to a Bokeh figure
 figure() \%>\% ly_hexbin(rnorm(10000), rnorm(10000))
 }
 }
-

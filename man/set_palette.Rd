@@ -4,18 +4,33 @@
 \alias{set_palette}
 \title{Set palettes for various plot attributes}
 \usage{
-set_palette(fig, discrete_color = NULL, discrete_alpha = NULL,
-  continuous_color = NULL, continuous_alpha = NULL, discrete_glyph = NULL,
-  discrete_fill_color = NULL, discrete_line_color = NULL,
-  discrete_text_color = NULL, discrete_fill_alpha = NULL,
-  discrete_line_alpha = NULL, discrete_text_alpha = NULL,
-  discrete_line_dash = NULL, discrete_line_width = NULL,
-  discrete_size = NULL, continuous_glyph = NULL,
-  continuous_fill_color = NULL, continuous_line_color = NULL,
-  continuous_text_color = NULL, continuous_fill_alpha = NULL,
-  continuous_line_alpha = NULL, continuous_text_alpha = NULL,
-  continuous_line_dash = NULL, continuous_line_width = NULL,
-  continuous_size = NULL)
+set_palette(
+  fig,
+  discrete_color = NULL,
+  discrete_alpha = NULL,
+  continuous_color = NULL,
+  continuous_alpha = NULL,
+  discrete_glyph = NULL,
+  discrete_fill_color = NULL,
+  discrete_line_color = NULL,
+  discrete_text_color = NULL,
+  discrete_fill_alpha = NULL,
+  discrete_line_alpha = NULL,
+  discrete_text_alpha = NULL,
+  discrete_line_dash = NULL,
+  discrete_line_width = NULL,
+  discrete_size = NULL,
+  continuous_glyph = NULL,
+  continuous_fill_color = NULL,
+  continuous_line_color = NULL,
+  continuous_text_color = NULL,
+  continuous_fill_alpha = NULL,
+  continuous_line_alpha = NULL,
+  continuous_text_alpha = NULL,
+  continuous_line_dash = NULL,
+  continuous_line_width = NULL,
+  continuous_size = NULL
+)
 }
 \arguments{
 \item{fig}{figure to update theme palettes for}
@@ -81,4 +96,3 @@ figure() \%>\%
   set_palette(discrete_color = pal_color(c("red", "blue", "green")))
 
 }
-

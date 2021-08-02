@@ -8,7 +8,7 @@
 nyctaxihex
 }
 \description{
-Counts of NYC taxi pickups by location for January 2013, obtained from \href{http://chriswhong.com/open-data/foil_nyc_taxi/}{here}.
+Counts of NYC taxi pickups by location for January 2013, obtained from \href{https://chriswhong.com/open-data/foil_nyc_taxi/}{here}.
 }
 \examples{
 \dontrun{
@@ -20,4 +20,3 @@ gmap(title = "NYC taxi pickups January 2013",
 }
 }
 \keyword{data}
-

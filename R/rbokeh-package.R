@@ -6,9 +6,9 @@ NULL
 
 #' rbokeh: R interface for Bokeh
 #'
-#' R interface for creating plots in Bokeh.  Bokeh by Continuum Analytics, \url{http://bokeh.pydata.org/en/latest/}
+#' R interface for creating plots in Bokeh.  Bokeh by Continuum Analytics, \url{https://docs.bokeh.org/en/latest/}
 #'
-#' For full documentation on the package, visit \url{http://hafen.github.io/rbokeh}
+#' For full documentation on the package, visit \url{https://hafen.github.io/rbokeh}
 #' @name rbokeh-package
 #' @aliases rbokeh
 #' @docType package
@@ -41,7 +41,7 @@ NULL
 #' @name nyctaxihex
 #' @docType data
 #' @description
-#' Counts of NYC taxi pickups by location for January 2013, obtained from \href{http://chriswhong.com/open-data/foil_nyc_taxi/}{here}.
+#' Counts of NYC taxi pickups by location for January 2013, obtained from \href{https://chriswhong.com/open-data/foil_nyc_taxi/}{here}.
 #' @usage nyctaxihex
 #' @keywords data
 #' @examples

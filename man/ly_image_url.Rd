@@ -4,9 +4,20 @@
 \alias{ly_image_url}
 \title{Add an "image_url" layer to a Bokeh figure}
 \usage{
-ly_image_url(fig, x = 0, y = 0, data = figure_data(fig), w = 10,
-  h = 10, image_url, dilate = TRUE, anchor = "top_left", angle = 0,
-  lname = NULL, lgroup = NULL, visible = TRUE)
+ly_image_url(
+  fig,
+  x = 0,
+  y = 0,
+  data = figure_data(fig),
+  w = 10,
+  h = 10,
+  image_url,
+  dilate = TRUE,
+  anchor = "top_left",
+  angle = 0,
+  lname = NULL,
+  lgroup = NULL
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -30,8 +41,6 @@ ly_image_url(fig, x = 0, y = 0, data = figure_data(fig), w = 10,
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 }
 \description{
 Renders raster images from URLs at provided coordinates
@@ -59,19 +68,33 @@ p
 }
 }
 \seealso{
-Other layer functions: \code{\link{ly_abline}},
-  \code{\link{ly_annular_wedge}}, \code{\link{ly_annulus}},
-  \code{\link{ly_arc}}, \code{\link{ly_bar}},
-  \code{\link{ly_bezier}}, \code{\link{ly_boxplot}},
-  \code{\link{ly_contour}}, \code{\link{ly_crect}},
-  \code{\link{ly_curve}}, \code{\link{ly_density}},
-  \code{\link{ly_hist}}, \code{\link{ly_image}},
-  \code{\link{ly_lines}}, \code{\link{ly_map}},
-  \code{\link{ly_multi_line}}, \code{\link{ly_oval}},
-  \code{\link{ly_patch}}, \code{\link{ly_points}},
-  \code{\link{ly_polygons}}, \code{\link{ly_quadratic}},
-  \code{\link{ly_quantile}}, \code{\link{ly_ray}},
-  \code{\link{ly_rect}}, \code{\link{ly_segments}},
-  \code{\link{ly_text}}, \code{\link{ly_wedge}}
+Other layer functions: 
+\code{\link{ly_abline}()},
+\code{\link{ly_annular_wedge}()},
+\code{\link{ly_annulus}()},
+\code{\link{ly_arc}()},
+\code{\link{ly_bar}()},
+\code{\link{ly_bezier}()},
+\code{\link{ly_boxplot}()},
+\code{\link{ly_contour}()},
+\code{\link{ly_crect}()},
+\code{\link{ly_curve}()},
+\code{\link{ly_density}()},
+\code{\link{ly_hist}()},
+\code{\link{ly_image}()},
+\code{\link{ly_lines}()},
+\code{\link{ly_map}()},
+\code{\link{ly_multi_line}()},
+\code{\link{ly_oval}()},
+\code{\link{ly_patch}()},
+\code{\link{ly_points}()},
+\code{\link{ly_polygons}()},
+\code{\link{ly_quadratic}()},
+\code{\link{ly_quantile}()},
+\code{\link{ly_ray}()},
+\code{\link{ly_rect}()},
+\code{\link{ly_segments}()},
+\code{\link{ly_text}()},
+\code{\link{ly_wedge}()}
 }
-
+\concept{layer functions}

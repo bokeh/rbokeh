@@ -1,0 +1,32 @@
+ver="1.4.0"
+wget http://cdn.pydata.org/bokeh/release/bokeh-$ver.min.css
+wget http://cdn.pydata.org/bokeh/release/bokeh-$ver.min.js
+wget http://cdn.pydata.org/bokeh/release/bokeh-gl-$ver.min.js
+wget http://cdn.pydata.org/bokeh/release/bokeh-tables-$ver.min.css
+wget http://cdn.pydata.org/bokeh/release/bokeh-tables-$ver.min.js
+wget http://cdn.pydata.org/bokeh/release/bokeh-widgets-$ver.min.css
+wget http://cdn.pydata.org/bokeh/release/bokeh-widgets-$ver.min.js
+# http://cdn.pydata.org/bokeh/release/bokeh-api-$ver.min.js
+
+
+mv bokeh-$ver.min.css bokeh.min.css
+mv bokeh-$ver.min.js bokeh.min.js
+mv bokeh-gl-$ver.min.js bokeh-gl.min.js
+mv bokeh-tables-$ver.min.css bokeh-tables.min.css
+mv bokeh-tables-$ver.min.js bokeh-tables.min.js
+mv bokeh-widgets-$ver.min.css bokeh-widgets.min.css
+mv bokeh-widgets-$ver.min.js bokeh-widgets.min.js
+
+
+http://cdn.pydata.org/bokeh/release/bokeh-x.y.z.min.js
+
+# wget http://cdn.pydata.org/bokeh/release/bokeh-$ver.min.css
+# mv bokeh-$ver.min.css bokeh.min.css
+# wget http://cdn.pydata.org/bokeh/release/bokeh-$ver.min.js
+# mv bokeh-$ver.min.js bokeh.min.js
+# wget http://cdn.pydata.org/bokeh/release/bokeh-widgets-$ver.min.css
+# mv bokeh-widgets-$ver.min.css bokeh-widgets.min.css
+# wget http://cdn.pydata.org/bokeh/release/bokeh-widgets-$ver.min.js
+# mv bokeh-widgets-$ver.min.js bokeh-widgets.min.js
+# wget http://cdn.pydata.org/bokeh/release/bokeh-compiler-$ver.min.js
+# mv bokeh-compiler-$ver.min.js bokeh-compiler.min.js

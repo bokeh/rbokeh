@@ -14,7 +14,17 @@ add_legend <- function(fig, legends, extra_pars) {
   leg_id <- gen_id(fig, "legend")
   leg_name <- "legend"
 
-  leg <- legend_model(leg_id, fig$x$spec$ref, legends, extra_pars)
+  items <- list()
+  for (ii in seq_along(legends)) {
+    lg <- legends[[ii]]
+    li_id <- gen_id(fig, paste0("legenditem", ii))
+    li_name <- paste0("legenditem_", ii)
+    lgmod <- legend_item_model(li_id, lg)
+    fig$x$spec$model[[li_name]] <- lgmod$model
+    items[[ii]] <- lgmod$ref
+  }
+
+  leg <- legend_model(leg_id, fig$x$spec$ref, items, extra_pars)
 
   fig$x$spec$model$plot$attributes$renderers[[leg_id]] <- leg$ref
   fig$x$spec$model[[leg_name]] <- leg$model
@@ -22,10 +32,18 @@ add_legend <- function(fig, legends, extra_pars) {
   fig
 }
 
+legend_item_model <- function(id, item) {
+  res <- base_model_object("LegendItem", id)
+  res$model$attributes$label <- list(value = item[[1]])
+  res$model$attributes$renderers <- item[[2]]
+
+  res
+}
+
 legend_model <- function(id, plot_ref, legends, extra_pars) {
   res <- base_model_object("Legend", id)
   res$model$attributes$plot <- plot_ref
-  res$model$attributes$legends <- legends
+  res$model$attributes$items <- legends
 
   res$model$attributes <- c(res$model$attributes, extra_pars)
 

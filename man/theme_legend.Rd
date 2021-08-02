@@ -4,17 +4,33 @@
 \alias{theme_legend}
 \title{Override theme parameters for legend attributes}
 \usage{
-theme_legend(fig, background_fill_alpha = 0.95,
-  background_fill_color = "#fff", border_line_alpha = 0.5,
-  border_line_cap = "butt", border_line_color = "black",
-  border_line_dash = NULL, border_line_dash_offset = 0,
-  border_line_join = "miter", border_line_width = 1, glyph_height = 20,
-  glyph_width = 20, label_height = 20, label_standoff = 15,
-  label_text_align = "left", label_text_alpha = 1,
-  label_text_baseline = "bottom", label_text_color = "#444444",
-  label_text_font = "Helvetica", label_text_font_size = "12pt",
-  label_text_font_style = "normal", label_width = 50, legend_padding = 10,
-  legend_spacing = 3, pars = NULL)
+theme_legend(
+  fig,
+  background_fill_alpha = 0.95,
+  background_fill_color = "#fff",
+  border_line_alpha = 0.5,
+  border_line_cap = "butt",
+  border_line_color = "black",
+  border_line_dash = NULL,
+  border_line_dash_offset = 0,
+  border_line_join = "miter",
+  border_line_width = 1,
+  glyph_height = 20,
+  glyph_width = 20,
+  label_height = 20,
+  label_standoff = 15,
+  label_text_align = "left",
+  label_text_alpha = 1,
+  label_text_baseline = "bottom",
+  label_text_color = "#444444",
+  label_text_font = "Helvetica",
+  label_text_font_size = "12pt",
+  label_text_font_style = "normal",
+  label_width = 50,
+  legend_padding = 10,
+  legend_spacing = 3,
+  pars = NULL
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -75,4 +91,3 @@ figure(legend_location = "top_left") \%>\%
   ly_points(1:10, legend = "a") \%>\%
   theme_legend(border_line_width = 2)
 }
-

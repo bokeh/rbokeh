@@ -4,12 +4,28 @@
 \alias{gmap}
 \title{Initialize a Bokeh Google Map plot}
 \usage{
-gmap(lat = 0, lng = 0, zoom = 0, api_key = NULL, map_type = "hybrid",
-  map_style = NULL, width = 480, height = 480, title = NULL,
-  xlab = NULL, ylab = NULL, xlim = NULL, ylim = NULL,
-  padding_factor = 0.07, xgrid = FALSE, ygrid = FALSE, xaxes = FALSE,
-  yaxes = FALSE, tools = c("pan", "wheel_zoom", "save"),
-  theme = getOption("bokeh_theme"))
+gmap(
+  lat = 0,
+  lng = 0,
+  zoom = 0,
+  api_key = NULL,
+  map_type = "hybrid",
+  map_style = NULL,
+  width = 480,
+  height = 480,
+  title = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  xlim = NULL,
+  ylim = NULL,
+  padding_factor = 0.07,
+  xgrid = FALSE,
+  ygrid = FALSE,
+  xaxes = FALSE,
+  yaxes = FALSE,
+  tools = c("pan", "wheel_zoom", "save"),
+  theme = getOption("bokeh_theme")
+)
 }
 \arguments{
 \item{lat}{latitude where the map should be centered}
@@ -78,4 +94,3 @@ gmap(title = "NYC taxi pickups January 2013",
 \seealso{
 \code{\link{gmap_style}}
 }
-

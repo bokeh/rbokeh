@@ -1,6 +1,11 @@
+
 Version 0.5
 ----------------------------------------------------------------------
 
+- Fix issue with excessive warnings under R 3.4.0 (0.5.1)
+- Update title `align` parameter in `theme_title()` (0.5.1)
+- Fix issue with `gmap()` plots (0.5.1)
+- Update to BokehJS 0.12.5 (0.5.1)
 - Add spinner for long-loading figures
 - Set default height/width if one or the other is specified
 - Remove resize tool as default

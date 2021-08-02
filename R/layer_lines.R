@@ -15,7 +15,7 @@
 ly_lines <- function(
   fig, x, y = NULL, data = figure_data(fig), group = NULL,
   color = "black", type = 1, width = 1, alpha = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  legend = NULL, lname = NULL, lgroup = NULL,
   ...
 ) {
 
@@ -35,7 +35,6 @@ ly_lines <- function(
       legend,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...)
     )
   )
@@ -126,7 +125,7 @@ ly_lines <- function(
 #' @export
 ly_segments <- function(fig, x0, y0, x1, y1, data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE, ...) {
+  legend = NULL, lname = NULL, lgroup = NULL, ...) {
 
   validate_fig(fig, "ly_segments")
 
@@ -143,7 +142,6 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = figure_data(fig),
       legend,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...)
     )
   )
@@ -209,7 +207,7 @@ ly_segments <- function(fig, x0, y0, x1, y1, data = figure_data(fig),
 ly_abline <- function(
   fig, a = NULL, b = NULL, v = NULL, h = NULL, coef = NULL,
   color = "black", alpha = NULL, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  legend = NULL, lname = NULL, lgroup = NULL,
   ...) {
 
   validate_fig(fig, "ly_abline")
@@ -223,7 +221,6 @@ ly_abline <- function(
       legend,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...),
       null_data = TRUE
     )
@@ -375,7 +372,7 @@ ly_abline <- function(
 ly_curve <- function(
   fig, expr, from = NULL, to = NULL, n = 101,
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  legend = NULL, lname = NULL, lgroup = NULL,
   ...
 ) {
 
@@ -411,7 +408,6 @@ ly_curve <- function(
       legend,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...),
       null_data = TRUE
     )
@@ -456,7 +452,7 @@ ly_contour <- function(
   x = seq(0, 1, length.out = nrow(z)), y = seq(0, 1, length.out = ncol(z)),
   nlevels = 10, levels = pretty(range(z, na.rm = TRUE), nlevels),
   color = "black", alpha = 1, width = 1, type = 1,
-  lname = NULL, lgroup = NULL, visible = TRUE,
+  lname = NULL, lgroup = NULL,
   ...
 ) {
 
@@ -471,7 +467,6 @@ ly_contour <- function(
       type,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...),
       null_data = TRUE
     )
@@ -520,7 +515,7 @@ ly_ray <- function(
   fig, x, y = NULL, data = figure_data(fig),
   length = NULL, angle = 0,
   color = "black", type = 1, width = 1, alpha = NULL,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  legend = NULL, lname = NULL, lgroup = NULL,
   ...
 ) {
 
@@ -538,7 +533,6 @@ ly_ray <- function(
       legend,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...)
     )
   )
@@ -591,7 +585,7 @@ ly_bezier <- function(
   x0, y0, x1, y1, cx0, cy0, cx1, cy1,
   data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  legend = NULL, lname = NULL, lgroup = NULL,
   ...
 ) {
 
@@ -607,7 +601,6 @@ ly_bezier <- function(
       legend,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...)
     )
   )
@@ -662,7 +655,7 @@ ly_quadratic <- function(
   x0, y0, x1, y1, cx, cy,
   data = figure_data(fig),
   color = "black", alpha = 1, width = 1, type = 1,
-  legend = NULL, lname = NULL, lgroup = NULL, visible = TRUE,
+  legend = NULL, lname = NULL, lgroup = NULL,
   ...
 ) {
 
@@ -678,7 +671,6 @@ ly_quadratic <- function(
       legend,
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...)
     )
   )
@@ -729,7 +721,7 @@ ly_multi_line <- function(
   fig,
   xs, ys,
   color = "black", alpha = 1, width = 1, type = 1,
-  lname = NULL, lgroup = NULL, visible = TRUE,
+  lname = NULL, lgroup = NULL,
   ...
 ) {
 
@@ -745,7 +737,6 @@ ly_multi_line <- function(
       # no legend?
       lname,
       lgroup,
-      visible,
       dots = lazy_dots(...)
     )
   )

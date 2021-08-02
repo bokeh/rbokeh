@@ -158,7 +158,7 @@ tableau_colors <- list(
     "#F26C64", "#FFDD71", "#9FCD99")
 )
 
-# http://www.w3.org/TR/css3-color/#svg-color
+# https://www.w3.org/TR/css3-color/#svg-color
 css_colors <- c("aliceblue",
   "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black",
   "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue",

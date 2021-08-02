@@ -4,15 +4,34 @@
 \alias{figure}
 \title{Initialize a Bokeh figure}
 \usage{
-figure(data = NULL, width = NULL, height = NULL, title = NULL,
-  xlab = NULL, ylab = NULL, xlim = NULL, ylim = NULL,
-  padding_factor = 0.07, xgrid = TRUE, ygrid = TRUE, xaxes = "below",
-  yaxes = "left", legend_location = "top_right", tools = c("pan",
-  "wheel_zoom", "box_zoom", "reset", "save", "help"),
-  theme = getOption("bokeh_theme"), toolbar_location = "above",
-  h_symmetry = TRUE, v_symmetry = FALSE, logo = NULL, lod_factor = 10,
-  lod_interval = 300, lod_threshold = NULL, lod_timeout = 500,
-  webgl = FALSE, ...)
+figure(
+  data = NULL,
+  width = NULL,
+  height = NULL,
+  title = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  xlim = NULL,
+  ylim = NULL,
+  padding_factor = 0.07,
+  xgrid = TRUE,
+  ygrid = TRUE,
+  xaxes = "below",
+  yaxes = "left",
+  legend_location = "top_right",
+  tools = c("pan", "wheel_zoom", "box_zoom", "reset", "save", "help"),
+  theme = getOption("bokeh_theme"),
+  toolbar_location = "above",
+  h_symmetry = TRUE,
+  v_symmetry = FALSE,
+  logo = NULL,
+  lod_factor = 10,
+  lod_interval = 300,
+  lod_threshold = NULL,
+  lod_timeout = 500,
+  webgl = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{data to be supplied to all layers, if the layer doesn't supply a data value}
@@ -76,6 +95,7 @@ Although the HTML canvas can comfortably display tens or even hundreds of thousa
 
 The basic idea is that during interactive operations (e.g., panning or zooming), the plot only draws some small fraction data points. This hopefully allows the general sense of the interaction to be preserved mid-flight, while maintaining interactive performance. See the \code{lod_} parameters for information on how to control this.
 }
+
 \examples{
 figure() \%>\% ly_points(1:10)
 }
@@ -102,4 +122,3 @@ Tools to add to a figure: \code{\link{tool_box_select}};
   \code{\link{tool_save}}; \code{\link{tool_wheel_zoom}}
 Other figure types: \code{\link{grid_plot}}; \code{\link{gmap}}
 }
-

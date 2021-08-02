@@ -15,4 +15,3 @@ Specify a Shiny callback
 \note{
 Depending on the type of callback you are using (selection, range, hover, tap), the value of \code{input$id} will change.  The best way to get familiar with what to expect as these values is to debug inside your Shiny app and inspect the contents.  You can also use \code{\link{custom_callback}} to write your own custom callbacks that can register other data in your Shiny app.  To see what the callbacks look like for each callback type, see, for example, the contents of \code{rbokeh:::handle_range_callback.shinyCallback}
 }
-

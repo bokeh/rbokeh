@@ -9,4 +9,3 @@ data_name_list()
 \description{
 List of all types of data name structures that could appear
 }
-

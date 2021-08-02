@@ -1,7 +1,7 @@
-# http://bokeh.pydata.org/en/latest/docs/reference/models.html
+# https://bokeh.pydata.org/en/latest/docs/reference/models.html
 
 #' Add "pan" tool to a Bokeh figure
-#' @param dimensions a vector specifying whether the pan tool should pan with respect to the x axis ("width") and the y axis ("height") or both (c("width", "height"))
+#' @param dimensions a vector specifying whether the pan tool should pan with respect to the x axis ("width") and the y axis ("height") or "both"
 #' @template tools
 #' @examples
 #' \donttest{
@@ -10,12 +10,13 @@
 #'  tool_pan(dimensions = "height")
 #' }
 #' @export
-tool_pan <- function(fig, dimensions = c("width", "height")) {
-  update_tool(fig, which = "pan", args = list(dimensions = dimensions, plot_ref = fig$x$spec$ref))
+tool_pan <- function(fig, dimensions = "both") {
+  update_tool(fig, which = "pan", args = list(dimensions = jsonlite::unbox(dimensions),
+    plot_ref = fig$x$spec$ref))
 }
 
 #' Add "wheel_zoom" tool to a Bokeh figure
-#' @param dimensions a vector specifying whether the wheel_zoom tool should zoom with respect to the x axis ("width") and the y axis ("height") or both (c("width", "height"))
+#' @param dimensions a vector specifying whether the wheel_zoom tool should zoom with respect to the x axis ("width") and the y axis ("height") or "both"
 #' @template tools
 #' @examples
 #' \donttest{
@@ -24,9 +25,9 @@ tool_pan <- function(fig, dimensions = c("width", "height")) {
 #'  tool_wheel_zoom(dimensions = "height")
 #' }
 #' @export
-tool_wheel_zoom <- function(fig, dimensions = c("width", "height")) {
+tool_wheel_zoom <- function(fig, dimensions = "both") {
   update_tool(fig, which = "wheel_zoom",
-    args = list(dimensions = dimensions, plot_ref = fig$x$spec$ref))
+    args = list(dimensions = jsonlite::unbox(dimensions), plot_ref = fig$x$spec$ref))
 }
 
 #' Add "save" tool to a Bokeh figure
@@ -229,7 +230,7 @@ tool_box_zoom <- function(fig,
     overlay = ba_model$ref))
 }
 
-tool_help <- function(fig, redirect = "http://hafen.github.io/rbokeh",
+tool_help <- function(fig, redirect = "https://hafen.github.io/rbokeh",
   help_tooltip = "Click to learn more about rbokeh.") {
   update_tool(fig, which = "help",
     args = list(plot_ref = fig$x$spec$ref, redirect = redirect,
@@ -282,7 +283,7 @@ tool_model <- function(id, tool_name, plot_ref, ...) {
 
 tool_events <- function(id) {
   res <- base_model_object("ToolEvents", id)
-  res$model$geometries <- I(NULL)
+  res$model$geometries <- list()
   res
 }
 

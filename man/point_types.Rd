@@ -19,4 +19,3 @@ Display glyph types available for ly_points()
 \examples{
 point_types()
 }
-

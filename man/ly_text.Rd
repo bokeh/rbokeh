@@ -4,11 +4,26 @@
 \alias{ly_text}
 \title{Add a "text" layer to a Bokeh figure}
 \usage{
-ly_text(fig, x, y = NULL, text = NULL, data = figure_data(fig),
-  color = "black", alpha = 1, angle = 0, align = NULL,
-  baseline = NULL, font = NULL, font_size = NULL, font_style = NULL,
-  x_offset = NULL, y_offset = NULL, legend = NULL, lname = NULL,
-  lgroup = NULL, visible = TRUE)
+ly_text(
+  fig,
+  x,
+  y = NULL,
+  text = NULL,
+  data = figure_data(fig),
+  color = "black",
+  alpha = 1,
+  angle = 0,
+  align = NULL,
+  baseline = NULL,
+  font = NULL,
+  font_size = NULL,
+  font_style = NULL,
+  x_offset = NULL,
+  y_offset = NULL,
+  legend = NULL,
+  lname = NULL,
+  lgroup = NULL
+)
 }
 \arguments{
 \item{fig}{figure to modify}
@@ -46,8 +61,6 @@ ly_text(fig, x, y = NULL, text = NULL, data = figure_data(fig),
 \item{lname}{layer name}
 
 \item{lgroup}{layer group}
-
-\item{visible}{should the layer be visible?}
 }
 \description{
 Add a "text" layer to a Bokeh figure
@@ -55,6 +68,7 @@ Add a "text" layer to a Bokeh figure
 \section{Mapped plot attributes and legends}{
  When specifying an input data frame for a layer through the \code{data} argument, columns of \code{data} can be used to specify various plot attributes such as \code{color}, etc. For example, with \code{ly_points(..., data = iris, color = Species)}, the \code{Species} variable is used to determine how to color the points.  Here, \code{Species} is "mapped" to the \code{color} attribute.  Both continuous and categorical variables can be mapped.  In the case of continuous variables, the range is cut into slices and attributes are applied to each interval.  The mapping from the values of the variable to the actual plot attributes is determined based on the theme.
 }
+
 \examples{
 \donttest{
 # prepare data
@@ -109,19 +123,33 @@ p
 }
 }
 \seealso{
-Other layer functions: \code{\link{ly_abline}},
-  \code{\link{ly_annular_wedge}}, \code{\link{ly_annulus}},
-  \code{\link{ly_arc}}, \code{\link{ly_bar}},
-  \code{\link{ly_bezier}}, \code{\link{ly_boxplot}},
-  \code{\link{ly_contour}}, \code{\link{ly_crect}},
-  \code{\link{ly_curve}}, \code{\link{ly_density}},
-  \code{\link{ly_hist}}, \code{\link{ly_image_url}},
-  \code{\link{ly_image}}, \code{\link{ly_lines}},
-  \code{\link{ly_map}}, \code{\link{ly_multi_line}},
-  \code{\link{ly_oval}}, \code{\link{ly_patch}},
-  \code{\link{ly_points}}, \code{\link{ly_polygons}},
-  \code{\link{ly_quadratic}}, \code{\link{ly_quantile}},
-  \code{\link{ly_ray}}, \code{\link{ly_rect}},
-  \code{\link{ly_segments}}, \code{\link{ly_wedge}}
+Other layer functions: 
+\code{\link{ly_abline}()},
+\code{\link{ly_annular_wedge}()},
+\code{\link{ly_annulus}()},
+\code{\link{ly_arc}()},
+\code{\link{ly_bar}()},
+\code{\link{ly_bezier}()},
+\code{\link{ly_boxplot}()},
+\code{\link{ly_contour}()},
+\code{\link{ly_crect}()},
+\code{\link{ly_curve}()},
+\code{\link{ly_density}()},
+\code{\link{ly_hist}()},
+\code{\link{ly_image_url}()},
+\code{\link{ly_image}()},
+\code{\link{ly_lines}()},
+\code{\link{ly_map}()},
+\code{\link{ly_multi_line}()},
+\code{\link{ly_oval}()},
+\code{\link{ly_patch}()},
+\code{\link{ly_points}()},
+\code{\link{ly_polygons}()},
+\code{\link{ly_quadratic}()},
+\code{\link{ly_quantile}()},
+\code{\link{ly_ray}()},
+\code{\link{ly_rect}()},
+\code{\link{ly_segments}()},
+\code{\link{ly_wedge}()}
 }
-
+\concept{layer functions}
