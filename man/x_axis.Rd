@@ -39,9 +39,9 @@ x_axis(
 \item{visible}{should axis be shown?}
 
 \item{number_formatter}{Bokeh numeric tick label formatter
-(\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.BasicTickFormatter}{"basic"},
-\href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
-or \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
+(\href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.BasicTickFormatter}{"basic"},
+\href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{"numeral"},
+or \href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{"printf"});
 ignored if \code{log} is TRUE}
 
 \item{power_limit_high}{(int) Limit the use of scientific notation to when log(x) >= value. Only applicable when \code{number_formatter} is "basic".}
@@ -59,9 +59,9 @@ Customize x axis of a Bokeh figure
 }
 \details{
 \code{format} parameter:
-When \code{number_formatter} is "basic" and the axis type is datetime, \code{format} specifies how to display tick values from a continuous range as formatted datetimes. See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.DatetimeTickFormatter}{DatetimeTickFormatter}
-When \code{number_formatter} is "numeral", \code{format} specifies a human-readable format string. See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{NumeralTickFormatter}.
-When \code{number_formatter} is "printf", \code{format} is a printf-style format string. See \href{http://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{PrintfTickFormatter}.
+When \code{number_formatter} is "basic" and the axis type is datetime, \code{format} specifies how to display tick values from a continuous range as formatted datetimes. See \href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.DatetimeTickFormatter}{DatetimeTickFormatter}
+When \code{number_formatter} is "numeral", \code{format} specifies a human-readable format string. See \href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.NumeralTickFormatter}{NumeralTickFormatter}.
+When \code{number_formatter} is "printf", \code{format} is a printf-style format string. See \href{https://bokeh.pydata.org/en/latest/docs/reference/models.html#bokeh.models.formatters.PrintfTickFormatter}{PrintfTickFormatter}.
 }
 \examples{
 figure() \%>\%
